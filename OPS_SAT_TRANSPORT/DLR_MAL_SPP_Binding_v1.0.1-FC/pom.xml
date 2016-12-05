@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+  
+    <groupId>de.dlr.gsoc</groupId>
+    <artifactId>MO_REACTOR</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>DLR MO SPP Reactor</name>
+    <description>DLR reactor POM for CCSDS MO artifacts</description>
+    <ciManagement>
+        <system>hudson</system>
+        <url>http://jenkins.ocs.office/jenkins/job/MO_Prototype_Linux_x64/</url>
+    </ciManagement>
+    <modules>
+        <module>DLR_MO_POM</module>
+        <module>DLR_MO_MALSPP_ENCODING</module>
+        <module>DLR_MO_MALSPP_ENCODING_OPSSAT</module>
+        <module>DLR_MO_MALSPP_TRANSPORT</module>
+    </modules>
+</project>

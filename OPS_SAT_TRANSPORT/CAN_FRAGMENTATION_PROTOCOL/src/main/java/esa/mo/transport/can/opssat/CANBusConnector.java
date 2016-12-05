@@ -1,0 +1,144 @@
+/* ----------------------------------------------------------------------------
+ * Copyright (C) 2015      European Space Agency
+ *                         European Space Operations Centre
+ *                         Darmstadt
+ *                         Germany
+ * ----------------------------------------------------------------------------
+ * System                : ESA NanoSat MO Framework
+ * ----------------------------------------------------------------------------
+ * Licensed under the European Space Agency Public License, Version 2.0
+ * You may not use this file except in compliance with the License.
+ *
+ * Except as expressly set forth in this License, the Software is provided to
+ * You on an "as is" basis and without warranties of any kind, including without
+ * limitation merchantability, fitness for a particular purpose, absence of
+ * defects or errors, accuracy or non-infringement of intellectual property rights.
+ * 
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
+ * ----------------------------------------------------------------------------
+ */
+package esa.mo.transport.can.opssat;
+
+import com.github.kayak.core.Bus;
+import com.github.kayak.core.BusURL;
+import com.github.kayak.core.Frame;
+import com.github.kayak.core.FrameListener;
+import com.github.kayak.core.Subscription;
+import com.github.kayak.core.TimeSource;
+import java.io.IOException;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * CANBusConnector - Connects to socketcand via a socket (the kayak library
+ * does that) for sending and receiving CAN messages on a bus.
+ *
+ */
+public class CANBusConnector {
+
+    /* Configuration settings */
+    private static final String DEFAULT_BUS = "can0";
+    private static final String DEFAULT_HOST = "localhost";
+    private static final int DEFAULT_PORT = 29536; // Default port number of socketcand
+
+    private static final String PROPERTY_BUS = "esa.mo.transport.can.opssat.bus";
+    private static final String PROPERTY_HOST = "esa.mo.transport.can.opssat.host";
+    private static final String PROPERTY_PORT = "esa.mo.transport.can.opssat.port";
+    private static final String PROPERTY_N_MESSAGES = "esa.mo.transport.can.opssat.nMessages";
+    private static final String PROPERTY_INTERVAL = "esa.mo.transport.can.opssat.interval";
+
+    // The 10 is there to avoid flooding the queue. In multi-threading, this means
+    // that other threads will still be able to send messages in parallel
+    private final LinkedBlockingQueue<Frame> queue = new LinkedBlockingQueue<Frame>(10);
+    private Thread sendingThread = null;
+
+    // The lowest maximum that CAN can support (1M/128 = 7'812 msgs/sec)
+    // N_MESSAGES / N_MILLISECONDS * 1000 < 7812!
+    private int nMessages = 1; // Keep as 1 for now, we can try to speed it up later
+    private int nInterval = 1;
+    
+    private final Bus bus = new Bus();
+
+    public CANBusConnector(final FrameListener receiver) throws IOException {
+
+        String bus_string = (System.getProperty(PROPERTY_BUS) != null) ? System.getProperty(PROPERTY_BUS) : DEFAULT_BUS;
+        String host_string = (System.getProperty(PROPERTY_HOST) != null) ? System.getProperty(PROPERTY_HOST) : DEFAULT_HOST;
+        int port = (System.getProperty(PROPERTY_PORT) != null) ? Integer.parseInt(System.getProperty(PROPERTY_PORT)) : DEFAULT_PORT;
+        nMessages = (System.getProperty(PROPERTY_N_MESSAGES) != null) ? Integer.parseInt(System.getProperty(PROPERTY_N_MESSAGES)) : nMessages;
+        nInterval = (System.getProperty(PROPERTY_INTERVAL) != null) ? Integer.parseInt(System.getProperty(PROPERTY_INTERVAL)) : nInterval;
+
+        final BusURL url = new BusURL(host_string, port, bus_string);
+
+        if (!url.checkConnection()) {
+            throw new IOException();
+        }
+
+        TimeSource ts = new TimeSource();
+        bus.setConnection(url);
+        bus.setTimeSource(ts);
+
+        Logger.getLogger(CANBusConnector.class.getName()).log(Level.INFO,
+                "Connected to socketcand (host: " + host_string + "; port: "
+                + port + "; bus: " + bus_string + ")");
+
+        /* Subscribe to all frames */
+        Subscription s = new Subscription(receiver, bus);
+        s.setSubscribeAll(true);
+        ts.play();
+    }
+    
+    public void init(){
+        sendingThread = new Thread() {
+            @Override
+            public void run() {
+                this.setName("CANBusConnector_startSendingThread");
+                Frame canFrame;
+                int counter = 0;
+                while (true) {
+                    try {
+                        for (int i = 0; i < nMessages; i++) {
+                            canFrame = queue.take();
+
+                            bus.sendFrame(canFrame);
+/*
+                            if (counter < 1000){
+                                bus.sendFrame(canFrame);
+                                counter++;
+                            }else{
+                                counter = 0;
+                            }
+*/
+                        }
+
+                        Thread.sleep(nInterval); // Every N_MESSAGES messages, wait N_SECONDS ms
+                    } catch (InterruptedException e) {
+                        Logger.getLogger(CANBusConnector.class.getName()).log(Level.SEVERE, null, e);
+                    }
+                }
+            }
+        };
+
+        sendingThread.start();
+    }
+
+    /**
+     * Sends a CAN Frame to Kayak. The method includes queueing of messages to
+     * avoid crashing the linux CAN driver with high data rates.
+     *
+     * @param canFrame The CAN Frame
+     */
+    public void sendData2Kayak(final Frame canFrame) {
+        try {
+            queue.put(canFrame);
+        } catch (InterruptedException e) {
+            Logger.getLogger(CANBusConnector.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+
+    public void close() {
+        bus.destroy();
+    }
+
+}

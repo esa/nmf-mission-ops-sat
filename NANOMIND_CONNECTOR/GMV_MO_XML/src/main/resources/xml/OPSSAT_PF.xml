@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<mal:specification xmlns:mal="http://www.ccsds.org/schema/ServiceSchema" xmlns:com="http://www.ccsds.org/schema/COMSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <mal:area name="OPSSAT_PF" number="75" version="1">
+    <mal:service comment="The power service allows the user to control the power state of the on-board devices." name="Power" number="17">
+      <mal:capabilitySet number="1">
+        <mal:submitIP comment="The setPowerState sets the power state of selected devices.&#10;NOTE: Only ground segment has full control on the power state changing (APID filtering is performed)." name="setPowerState" number="5" supportInReplay="false">
+          <mal:messages>
+            <mal:submit>
+              <mal:field comment="The 'devices' field shall contain the list of devices for which the power state change should be applied.&#10;If one or more of the devices is not recognized, then an UNKNOWN error will be raised." name="devices">
+                <mal:type area="OPSSAT_PF" list="true" name="PayloadDevice"/>
+              </mal:field>
+              <mal:field comment="The 'powerStates' field shall contain the list of MAL::Boolean objects that corresponds to the elements in the device list.&#10;If the MAL::Boolean object on the list contains the value of 'TRUE' then the corresponding device should be powered on; otherwise it should be powered off." name="powerStates">
+                <mal:type area="MAL" list="true" name="Boolean"/>
+              </mal:field>
+            </mal:submit>
+          </mal:messages>
+          <mal:errors>
+            <mal:errorRef comment="One or more of the devices specified in the list do not exist.&#10;The indexes of the unrecognized devices shall be contained in the extra information field.">
+              <mal:type area="MAL" list="false" name="UNKNOWN"/>
+              <mal:extraInformation>
+                <mal:type area="MAL" list="true" name="UInteger"/>
+              </mal:extraInformation>
+            </mal:errorRef>
+          </mal:errors>
+        </mal:submitIP>
+      </mal:capabilitySet>
+    </mal:service>
+    <mal:service comment="The experiment watchdog service is provided by the OBC and shall be used by the experiments to signal that they are still running." name="ExperimentWD" number="20">
+      <mal:capabilitySet number="1">
+        <mal:sendIP comment="The alive operation should be called every TBD seconds by an experiment to inform the OBC that it is still running." name="alive" number="1" supportInReplay="false">
+          <mal:messages>
+            <mal:send/>
+          </mal:messages>
+        </mal:sendIP>
+      </mal:capabilitySet>
+    </mal:service>
+    <mal:service comment="The GPS service allows the user to obtain data samples from the GPS device." name="GPS" number="21">
+      <mal:capabilitySet number="1">	
+        <mal:invokeIP comment="The getGPSData operation allows a consumer to receive requested data from the GPS device (for example, GPGSA data frame)." name="getGPSData" number="1" supportInReplay="false">
+          <mal:messages>
+            <mal:invoke>
+              <mal:field comment="The 'command' field shall contain a request encoded as an ASCII string to be sent to the GPS receiver." name="command">
+                <mal:type area="MAL" list="false" name="Blob"/>
+              </mal:field>
+            </mal:invoke>
+            <mal:acknowledgement/>
+            <mal:response>
+              <mal:field comment="The response shall contain the received GPS data frame encoded as a string of ASCII characters." name="data">
+                <mal:type area="MAL" list="false" name="Blob"/>
+              </mal:field>
+            </mal:response>
+          </mal:messages>
+          <mal:errors>
+            <mal:errorRef comment="GPS receiver is offline.">
+              <mal:type area="MAL" list="false" name="DELIVERY_FAILED"/>
+            </mal:errorRef>
+            <mal:errorRef comment="No response was provided from the GPS receiver.">
+              <mal:type area="MAL" list="false" name="DELIVERY_TIMEDOUT"/>
+            </mal:errorRef>
+          </mal:errors>
+        </mal:invokeIP>
+      </mal:capabilitySet>
+    </mal:service>
+    <mal:dataTypes>
+      <mal:enumeration comment="PayloadDevice is an enumeration representing the possible payload devices that could be serviced." name="PayloadDevice" shortFormPart="2">
+        <mal:item comment="CCSDS Engine" nvalue="4" value="CCSDSEngine"/>
+        <mal:item comment="X-Band Transmitter/Receiver" nvalue="11" value="XBandTRX"/>
+        <mal:item comment="S-Band Transmitter/Receiver" nvalue="12" value="SBandTRX"/>
+        <mal:item comment="Fine ADCS" nvalue="13" value="FineADCS"/>
+        <mal:item comment="Software Defined Radio" nvalue="14" value="SDR"/>
+        <mal:item comment="Processing Platform 1" nvalue="15" value="SEPP1"/>
+        <mal:item comment="Processing Platform 2" nvalue="16" value="SEPP2"/>
+        <mal:item comment="HD Camera" nvalue="17" value="HDCamera"/>
+        <mal:item comment="Optical Receiver" nvalue="18" value="OpticalRX"/>
+      </mal:enumeration>
+    </mal:dataTypes>
+  </mal:area>
+</mal:specification>
