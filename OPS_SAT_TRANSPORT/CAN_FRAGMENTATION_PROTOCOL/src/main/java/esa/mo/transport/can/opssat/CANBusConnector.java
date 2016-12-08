@@ -98,6 +98,12 @@ public class CANBusConnector {
                 int counter = 0;
                 while (true) {
                     try {
+                        // This code is absolutely ugly however this is a workaround
+                        // for the problem on the CAN bus. The CAN bus will add a
+                        // couple of zeros randomly in the middle of the body of
+                        // the CAN frame. This code below can be replaced after 
+                        // the problem with the CAN bus has been fixed.
+                        
                         for (int i = 0; i < nMessages; i++) {
                             canFrame = queue.take();
 
@@ -112,7 +118,9 @@ public class CANBusConnector {
 */
                         }
 
-                        Thread.sleep(nInterval); // Every N_MESSAGES messages, wait N_SECONDS ms
+                        if(nInterval != 0){
+                            Thread.sleep(nInterval); // Every N_MESSAGES messages, wait N_SECONDS ms
+                        }
                     } catch (InterruptedException e) {
                         Logger.getLogger(CANBusConnector.class.getName()).log(Level.SEVERE, null, e);
                     }
