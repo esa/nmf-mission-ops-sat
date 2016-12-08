@@ -39,7 +39,6 @@ public class CFPFrameIdentifier {
     private final int transactionId;
     
     private int frameIdentifier;
-
     
     /**
      * Constructor.
@@ -60,7 +59,6 @@ public class CFPFrameIdentifier {
         position += CFP_SIZE_DST;
         this.src = (int) ( ( frameIdentifier >> position ) & CFPFrameIdentifier.generateMask(CFP_SIZE_SRC) );
         position += CFP_SIZE_SRC;
-
     }
     
     /**

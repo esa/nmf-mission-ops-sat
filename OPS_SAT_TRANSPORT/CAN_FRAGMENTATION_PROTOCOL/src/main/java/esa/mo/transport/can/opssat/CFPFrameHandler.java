@@ -56,16 +56,6 @@ public class CFPFrameHandler implements FrameListener {
     private static final boolean DESTRUCTION_ENABLED = false; // Do we want to destroy the buffer after a timeout?
     private static final boolean RETRANSMISSION_ENABLED = true;
 
-    // CAN Nodes DST
-    public static final int CAN_NODE_NR_DST_MITYARM = 8;
-    public static final int CAN_NODE_NR_DST_CCSDS = 16;
-    public static final int CAN_NODE_NR_DST_NANOMIND = 32;
-
-    // CAN Nodes SRC
-    public static final int CAN_NODE_NR_SRC_NODE_ABORT = 0;
-    public static final int CAN_NODE_NR_SRC_CCSDS_ENGINE = 1;
-    public static final int CAN_NODE_NR_SRC_NANOMIND = 2;
-    public static final int CAN_NODE_NR_SRC_MITYARM = 4;
 
     private static final String PROPERTY_VIRTUAL_CHANNEL = "esa.mo.transport.can.opssat.virtualChannel";
     public static final String PROPERTY_NODE_SOURCE = "esa.mo.transport.can.opssat.nodeSource";
@@ -116,8 +106,8 @@ public class CFPFrameHandler implements FrameListener {
         this.queuedForRetransmission = new LinkedBlockingQueue<Short>();
         this.readyQueue = new LinkedBlockingQueue<ReconstructMessage>();
 
-        this.node_source = (System.getProperty(PROPERTY_NODE_SOURCE) != null) ? Integer.parseInt(System.getProperty(PROPERTY_NODE_SOURCE)) : CAN_NODE_NR_SRC_MITYARM;
-        this.node_destination = (System.getProperty(PROPERTY_NODE_DESTINATION) != null) ? Integer.parseInt(System.getProperty(PROPERTY_NODE_DESTINATION)) : CAN_NODE_NR_DST_CCSDS;
+        this.node_source = (System.getProperty(PROPERTY_NODE_SOURCE) != null) ? Integer.parseInt(System.getProperty(PROPERTY_NODE_SOURCE)) : CANBusConnector.CAN_NODE_NR_SRC_MITYARM;
+        this.node_destination = (System.getProperty(PROPERTY_NODE_DESTINATION) != null) ? Integer.parseInt(System.getProperty(PROPERTY_NODE_DESTINATION)) : CANBusConnector.CAN_NODE_NR_DST_CCSDS;
 
         Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO, "Node Destination: " + this.node_destination + "\nProperty: " + (System.getProperty(PROPERTY_NODE_DESTINATION) != null));
 
@@ -523,14 +513,14 @@ public class CFPFrameHandler implements FrameListener {
 
     public static int convertSrcToDestinationNode(final int src) {
         // The CCSDS Engine is the default destination
-        int destinationNode = CFPFrameHandler.CAN_NODE_NR_DST_CCSDS;
+        int destinationNode = CANBusConnector.CAN_NODE_NR_DST_CCSDS;
 
-        if (src == CFPFrameHandler.CAN_NODE_NR_SRC_MITYARM) {
-            destinationNode = CFPFrameHandler.CAN_NODE_NR_DST_MITYARM;
+        if (src == CANBusConnector.CAN_NODE_NR_SRC_MITYARM) {
+            destinationNode = CANBusConnector.CAN_NODE_NR_DST_MITYARM;
         }
 
-        if (src == CFPFrameHandler.CAN_NODE_NR_SRC_NANOMIND) {
-            destinationNode = CFPFrameHandler.CAN_NODE_NR_DST_NANOMIND;
+        if (src == CANBusConnector.CAN_NODE_NR_SRC_NANOMIND) {
+            destinationNode = CANBusConnector.CAN_NODE_NR_DST_NANOMIND;
         }
 
         return destinationNode;

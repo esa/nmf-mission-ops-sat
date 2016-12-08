@@ -37,7 +37,18 @@ import java.util.logging.Logger;
  *
  */
 public class CANBusConnector {
+    
+    // CAN Nodes DST
+    public static final int CAN_NODE_NR_DST_MITYARM = 8;
+    public static final int CAN_NODE_NR_DST_CCSDS = 16;
+    public static final int CAN_NODE_NR_DST_NANOMIND = 32;
 
+    // CAN Nodes SRC
+    public static final int CAN_NODE_NR_SRC_NODE_ABORT = 0;
+    public static final int CAN_NODE_NR_SRC_CCSDS_ENGINE = 1;
+    public static final int CAN_NODE_NR_SRC_NANOMIND = 2;
+    public static final int CAN_NODE_NR_SRC_MITYARM = 4;
+    
     /* Configuration settings */
     private static final String DEFAULT_BUS = "can0";
     private static final String DEFAULT_HOST = "localhost";
