@@ -512,7 +512,7 @@ public abstract class GENTransport<I, O> implements MALTransport
         {
           // data was not sent succesfully, throw an exception for the
           // higher MAL layers
-          throw new MALTransmitErrorException(msg.getHeader(), new MALStandardError(MALHelper.DELIVERY_FAILED_ERROR_NUMBER, null), null);
+          throw new MALTransmitErrorException(msg.getHeader(), new MALStandardError(MALHelper.DELIVERY_FAILED_ERROR_NUMBER, outgoingPacket.getOriginalMessage().toString()), null);
         }
 
         LOGGER.log(Level.FINE, "GEN finished Sending data to {0}", remoteRootURI);

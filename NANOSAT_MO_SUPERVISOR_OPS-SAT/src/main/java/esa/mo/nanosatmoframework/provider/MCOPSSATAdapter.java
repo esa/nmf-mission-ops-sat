@@ -155,6 +155,19 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         gmvServicesConsumer = new GMVServicesConsumer();
         gmvServicesConsumer.init();
 
+/*        
+        ShellCommander shell = new ShellCommander();
+        String output = shell.runCommandAndGetOutputMessage("./led_test.sh");
+        Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Output: " + output);
+*/            
+
+        ShellCommander shell = new ShellCommander();
+        String ttyDevice = "/dev/ttyUSB0";
+        String baudRate = "115200";
+        String output = shell.runCommandAndGetOutputMessage("microcom -s " + baudRate + " " + ttyDevice);
+        Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Output: " + output);
+
+
         /*
         try {
  
