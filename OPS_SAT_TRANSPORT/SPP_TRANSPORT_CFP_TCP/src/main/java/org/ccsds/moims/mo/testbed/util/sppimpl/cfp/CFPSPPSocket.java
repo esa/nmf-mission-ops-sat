@@ -81,7 +81,7 @@ public class CFPSPPSocket implements SPPSocket {
     @Override
     public void send(SpacePacket packet) throws Exception {
         synchronized (MUTEX) {
-            Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.INFO,
+            Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINE,
                     "Sequence count: " + packet.getHeader().getSequenceCount()
                     + " - " + Arrays.toString(packet.getBody()));
             
@@ -93,7 +93,7 @@ public class CFPSPPSocket implements SPPSocket {
             this.destinationNode = (propNodeDest != null) ? Integer.parseInt(propNodeDest) : CANBusConnector.CAN_NODE_NR_DST_CCSDS; // Default is CCSDS Engine
             this.virtualChannel = (propVirtualC != null) ? Integer.parseInt(propVirtualC) : 2; // Default is VC 2
         
-            java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.INFO, 
+            java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINE, 
                 "destinationNode: " + this.destinationNode + " - virtualChannel: " + this.virtualChannel);
 
             writer.send(packet);

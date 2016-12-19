@@ -159,14 +159,15 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Output: " + output);
 */            
 
+/*        
         ShellCommander shell = new ShellCommander();
         String ttyDevice = "/dev/ttyUSB0";
         String baudRate = "115200";
         String output = shell.runCommandAndGetOutputMessage("microcom -s " + baudRate + " " + ttyDevice);
         Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Output: " + output);
+*/            
 
 
-        /*
         try {
  
 //            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData("GPGGALONG", new MCGPSAdapter());
@@ -177,7 +178,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         } catch (MALException ex) {
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
-        */
+
     }
 
     @Override

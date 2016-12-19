@@ -123,7 +123,7 @@ public class CANBusConnector {
                         for (int i = 0; i < nMessages; i++) {
                             canFrame = queue.take();
                             
-                            countDown.await();
+//                            countDown.await();
 
                             bus.sendFrame(canFrame);
 /*

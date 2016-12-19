@@ -97,7 +97,7 @@ public class ClientTCPSPPSocket implements SPPSocket {
         lastSPPSequenceCount = sequenceCount;
 
         if (logger.isLoggable(BasicLevel.DEBUG)) {
-            logger.log(BasicLevel.DEBUG, "Received: " + packet);
+            logger.log(BasicLevel.INFO, "Received: " + packet);
         }
 
         return packet;
@@ -105,7 +105,7 @@ public class ClientTCPSPPSocket implements SPPSocket {
 
     public void send(SpacePacket packet) throws Exception {
         if (logger.isLoggable(BasicLevel.DEBUG)) {
-            logger.log(BasicLevel.DEBUG, "ClientTCPSPPSocket.send(" + packet + ')');
+            logger.log(BasicLevel.INFO, "ClientTCPSPPSocket.send(" + packet + ')');
         }
         channel.send(packet);
     }

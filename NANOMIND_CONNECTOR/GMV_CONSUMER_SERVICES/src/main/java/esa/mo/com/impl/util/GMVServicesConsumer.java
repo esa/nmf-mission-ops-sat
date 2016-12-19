@@ -72,11 +72,10 @@ public class GMVServicesConsumer {
         originalPropVirtualChannel = System.getProperty("esa.mo.transport.can.opssat.virtualChannel");
         
         // CFP Properties
-        System.setProperty("esa.mo.transport.can.opssat.nodeDestination", String.valueOf("32"));  // Nanomind
+        System.setProperty("esa.mo.transport.can.opssat.nodeDestination", String.valueOf("32"));  // Nanomind (from: CANBusConnector)
         System.setProperty("esa.mo.transport.can.opssat.virtualChannel", String.valueOf("0"));
 
         Logger.getLogger(GMVServicesConsumer.class.getName()).log(Level.INFO, "Node Destination: " + System.getProperty("esa.mo.transport.can.opssat.nodeDestination"));
-
 
         SingleConnectionDetails details;
 
