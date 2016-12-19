@@ -27,7 +27,9 @@ import com.github.kayak.core.FrameListener;
 import com.github.kayak.core.Subscription;
 import com.github.kayak.core.TimeSource;
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,15 +41,17 @@ import java.util.logging.Logger;
 public class CANBusConnector {
     
     // CAN Nodes DST
-    public static final int CAN_NODE_NR_DST_MITYARM = 8;
+    public static final int CAN_NODE_NR_DST_SEPP = 8;
     public static final int CAN_NODE_NR_DST_CCSDS = 16;
     public static final int CAN_NODE_NR_DST_NANOMIND = 32;
 
     // CAN Nodes SRC
-    public static final int CAN_NODE_NR_SRC_NODE_ABORT = 0;
-    public static final int CAN_NODE_NR_SRC_CCSDS_ENGINE = 1;
-    public static final int CAN_NODE_NR_SRC_NANOMIND = 2;
-    public static final int CAN_NODE_NR_SRC_MITYARM = 4;
+    public static final int CAN_NODE_NR_SRC_ABORT = 0;
+    public static final int CAN_NODE_NR_SRC_WAIT = 1;
+    public static final int CAN_NODE_NR_SRC_RESUME = 2;
+    public static final int CAN_NODE_NR_SRC_CCSDS_ENGINE = 4;
+    public static final int CAN_NODE_NR_SRC_NANOMIND = 5;
+    public static final int CAN_NODE_NR_SRC_SEPP = 6;
     
     /* Configuration settings */
     private static final String DEFAULT_BUS = "can0";
@@ -64,6 +68,7 @@ public class CANBusConnector {
     // that other threads will still be able to send messages in parallel
     private final LinkedBlockingQueue<Frame> queue = new LinkedBlockingQueue<Frame>(10);
     private Thread sendingThread = null;
+    private CountDownLatch countDown = new CountDownLatch(0);
 
     // The lowest maximum that CAN can support (1M/128 = 7'812 msgs/sec)
     // N_MESSAGES / N_MILLISECONDS * 1000 < 7812!
@@ -117,6 +122,8 @@ public class CANBusConnector {
                         
                         for (int i = 0; i < nMessages; i++) {
                             canFrame = queue.take();
+                            
+                            countDown.await();
 
                             bus.sendFrame(canFrame);
 /*
@@ -160,4 +167,15 @@ public class CANBusConnector {
         bus.destroy();
     }
 
+    public synchronized void continueBusActivity() {
+        countDown.countDown();
+    }
+
+    public synchronized void pauseBusActivity() {
+        // Create a new one only if the counter is down to zero
+        if (countDown.getCount() == 0){ 
+            countDown = new CountDownLatch(1);
+        }
+    }
+    
 }

@@ -50,8 +50,6 @@ import org.ccsds.moims.mo.mc.structures.AttributeValueList;
 import org.ccsds.moims.mo.mc.structures.ConditionalReferenceList;
 import org.ccsds.moims.mo.mc.structures.Severity;
 import org.ccsds.moims.mo.opssat_pf.gps.consumer.GPSAdapter;
-import org.ccsds.moims.mo.opssat_pf.structures.PayloadDevice;
-import org.ccsds.moims.mo.opssat_pf.structures.PayloadDeviceList;
 
 // Specific OPS-SAT Monitoring and Control
 public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {

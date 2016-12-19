@@ -20,6 +20,7 @@
  */
 package org.ccsds.moims.mo.testbed.util.sppimpl.cfp;
 
+import esa.mo.transport.can.opssat.CANBusConnector;
 import esa.mo.transport.can.opssat.CANReceiveInterface;
 import esa.mo.transport.can.opssat.CFPFrameHandler;
 import java.io.IOException;
@@ -89,7 +90,7 @@ public class CFPSPPSocket implements SPPSocket {
             String propVirtualC = (String) (String) packet.getQosProperties().get("esa.mo.transport.can.opssat.virtualChannel");
 
             // Defaults
-            this.destinationNode = (propNodeDest != null) ? Integer.parseInt(propNodeDest) : 16; // Default is CCSDS Engine
+            this.destinationNode = (propNodeDest != null) ? Integer.parseInt(propNodeDest) : CANBusConnector.CAN_NODE_NR_DST_CCSDS; // Default is CCSDS Engine
             this.virtualChannel = (propVirtualC != null) ? Integer.parseInt(propVirtualC) : 2; // Default is VC 2
         
             java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.INFO, 
@@ -140,7 +141,6 @@ public class CFPSPPSocket implements SPPSocket {
         @Override
         public void flush() throws IOException {
             try {
-//                handler.sendData(super.toByteArray());
                 handler.sendData(super.toByteArray(), destinationNode, virtualChannel);
                 super.reset();
             } catch (InterruptedException ex) {

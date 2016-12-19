@@ -106,7 +106,7 @@ public class CFPFrameHandler implements FrameListener {
         this.queuedForRetransmission = new LinkedBlockingQueue<Short>();
         this.readyQueue = new LinkedBlockingQueue<ReconstructMessage>();
 
-        this.node_source = (System.getProperty(PROPERTY_NODE_SOURCE) != null) ? Integer.parseInt(System.getProperty(PROPERTY_NODE_SOURCE)) : CANBusConnector.CAN_NODE_NR_SRC_MITYARM;
+        this.node_source = (System.getProperty(PROPERTY_NODE_SOURCE) != null) ? Integer.parseInt(System.getProperty(PROPERTY_NODE_SOURCE)) : CANBusConnector.CAN_NODE_NR_SRC_SEPP;
         this.node_destination = (System.getProperty(PROPERTY_NODE_DESTINATION) != null) ? Integer.parseInt(System.getProperty(PROPERTY_NODE_DESTINATION)) : CANBusConnector.CAN_NODE_NR_DST_CCSDS;
 
         Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO, "Node Destination: " + this.node_destination + "\nProperty: " + (System.getProperty(PROPERTY_NODE_DESTINATION) != null));
@@ -472,6 +472,16 @@ public class CFPFrameHandler implements FrameListener {
             return;
         }
 
+        // Is it a request to Wait?
+        if (frameIdentifier.getSrc() == CANBusConnector.CAN_NODE_NR_SRC_WAIT) {
+            this.connector.pauseBusActivity();
+        }
+        
+        // Is it a request to Resume?
+        if (frameIdentifier.getSrc() == CANBusConnector.CAN_NODE_NR_SRC_RESUME) {
+            this.connector.continueBusActivity();
+        }
+        
         synchronized (MUTEX) {
             // Try to find the object to be reconstructed...
             ReconstructMessage message = incomingMessages.get(frameIdentifier.getTransactionId());
@@ -515,8 +525,8 @@ public class CFPFrameHandler implements FrameListener {
         // The CCSDS Engine is the default destination
         int destinationNode = CANBusConnector.CAN_NODE_NR_DST_CCSDS;
 
-        if (src == CANBusConnector.CAN_NODE_NR_SRC_MITYARM) {
-            destinationNode = CANBusConnector.CAN_NODE_NR_DST_MITYARM;
+        if (src == CANBusConnector.CAN_NODE_NR_SRC_SEPP) {
+            destinationNode = CANBusConnector.CAN_NODE_NR_DST_SEPP;
         }
 
         if (src == CANBusConnector.CAN_NODE_NR_SRC_NANOMIND) {
