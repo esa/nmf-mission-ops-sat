@@ -56,7 +56,6 @@ public class CFPFrameHandler implements FrameListener {
     private static final boolean DESTRUCTION_ENABLED = false; // Do we want to destroy the buffer after a timeout?
     private static final boolean RETRANSMISSION_ENABLED = true;
 
-
     private static final String PROPERTY_VIRTUAL_CHANNEL = "esa.mo.transport.can.opssat.virtualChannel";
     public static final String PROPERTY_NODE_SOURCE = "esa.mo.transport.can.opssat.nodeSource";
     private static final String PROPERTY_NODE_DESTINATION = "esa.mo.transport.can.opssat.nodeDestination";
@@ -297,7 +296,7 @@ public class CFPFrameHandler implements FrameListener {
             final int virtualChannel) throws IOException, InterruptedException {
         // Generate a transactionId
         final int transactionId = this.generateTransactionId();
-        Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO, "The transactionId is: " + transactionId);
+        Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.FINE, "The transactionId is: " + transactionId);
 
         synchronized (retransmissionBuffers) {
             retransmissionBuffers.put((short) transactionId, new CFPRetransmissionMessageBuffer(data, destinationNode, virtualChannel));
@@ -436,7 +435,7 @@ public class CFPFrameHandler implements FrameListener {
 
         // Check if the destination is our node...  
         if ((frameIdentifier.getDst() & CFPFrameHandler.convertSrcToDestinationNode(this.node_source)) == 0) {
-            Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO,
+            Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.FINE,
                     "Rejecting because it is not for our node! Our Node: " + this.node_source
                     + " (when converted to dst: " + CFPFrameHandler.convertSrcToDestinationNode(this.node_source) + ")"
                     + " - received frame dst: " + frameIdentifier.getDst());

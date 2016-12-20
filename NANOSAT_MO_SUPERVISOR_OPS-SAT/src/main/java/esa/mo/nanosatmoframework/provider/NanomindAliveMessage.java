@@ -72,5 +72,4 @@ public class NanomindAliveMessage {
         this.active = active;
     }
     
-
 }

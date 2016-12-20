@@ -153,21 +153,21 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         gmvServicesConsumer = new GMVServicesConsumer();
         gmvServicesConsumer.init();
 
-/*        
+        /*        
         ShellCommander shell = new ShellCommander();
         String output = shell.runCommandAndGetOutputMessage("./led_test.sh");
         Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Output: " + output);
-*/            
+         */
 
-/*        
+ /*        
         ShellCommander shell = new ShellCommander();
         String ttyDevice = "/dev/ttyUSB0";
         String baudRate = "115200";
         String output = shell.runCommandAndGetOutputMessage("microcom -s " + baudRate + " " + ttyDevice);
         Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Output: " + output);
-*/            
+         */
 
-
+ /*
         try {
  
 //            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData("GPGGALONG", new MCGPSAdapter());
@@ -178,12 +178,11 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         } catch (MALException ex) {
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+         */
     }
 
     @Override
     public Attribute onGetValue(Identifier identifier, Byte rawType) {
-
         if (PARAMETER_CURRENT_PARTITION.equals(identifier.getValue())) {
             String msg = shellCommander.runCommandAndGetOutputMessage(CMD_CURRENT_PARTITION);
             return (Attribute) HelperAttributes.javaType2Attribute(msg);
@@ -201,6 +200,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
 
             return (Attribute) HelperAttributes.javaType2Attribute(handler.getRate());
         }
+
         return null;
     }
 
@@ -211,7 +211,6 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
 
     @Override
     public UInteger actionArrived(Identifier name, AttributeValueList attributeValues, Long actionInstanceObjId, boolean reportProgress, MALInteraction interaction) {
-
         if (ACTION_GPS_SENTENCE.equals(name.getValue())) {
             try {
                 gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData("GPGGALONG", new MCGPSAdapter());
