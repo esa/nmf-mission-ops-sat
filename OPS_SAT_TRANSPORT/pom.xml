@@ -19,7 +19,7 @@
   <parent>
     <groupId>int.esa.ccsds.mo</groupId>
     <artifactId>POM</artifactId>
-    <version>5</version>
+    <version>6</version>
     <relativePath/>
   </parent>
   
@@ -66,7 +66,9 @@
       <module>CAN_FRAGMENTATION_PROTOCOL</module>
       <module>DLR_MAL_SPP_Binding_v1.0.1-FC</module>
       <module>SPP_TRANSPORT_CFP_TCP</module>
+      <!--
       <module>CCSDS_MO_TRANS</module>
+      -->
       <module>MOIMS_TESTBED_MALSPP_TRANSPORT_ESA</module>
       <module>can-test</module>
   </modules>

@@ -18,8 +18,8 @@
   
     <parent>
         <groupId>int.esa.ccsds.mo</groupId>
-        <artifactId>POM</artifactId>
-        <version>5</version>
+        <artifactId>NMF_POM</artifactId>
+        <version>1-SNAPSHOT</version>
         <relativePath/>
     </parent>
   
@@ -63,9 +63,9 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>NANOSAT_MO_CONNECTOR</artifactId>
             <version>${project.version}</version>
-<!--
-            <scope>provided</scope>
--->            
+            <!--
+                        <scope>provided</scope>
+            -->            
         </dependency>
         <dependency>
             <groupId>int.esa.opssat</groupId>

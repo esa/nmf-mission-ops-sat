@@ -22,9 +22,6 @@ package esa.mo.mal.transport.spp;
 
 import esa.mo.mal.transport.gen.sending.GENMessageSender;
 import esa.mo.mal.transport.gen.sending.GENOutgoingMessageHolder;
-import esa.mo.mal.transport.gen.util.GENHelper;
-import esa.mo.mal.transport.spp.SPPMessage;
-import esa.mo.mal.transport.spp.SPPMessageHeader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -74,17 +71,9 @@ public class SPPMessageSender implements GENMessageSender<List<ByteBuffer>>
       SpacePacketHeader hdr = new SpacePacketHeader(0,
               0 == malhdr.getPacketType() ? 0 : 1,
               1, malhdr.getApid(), sequenceFlags, sscGenerator.getNextSourceSequenceCount());
-//              1, malhdr.getApid(), sequenceFlags, ssc + count++);
 
       SpacePacket pkt = new SpacePacket(hdr, malhdr.getApidQualifier(), buf.array(), buf.position() + 6, bodyLength);
       pkt.setQosProperties(packetData.getOriginalMessage().getQoSProperties());
-      
-      /*
-      System.out.println("WRT: " + buf);
-      System.out.println("WRT: " + hdr);
-      System.out.println("WRT: " + pkt);
-      System.out.println("wrt: " + sequenceFlags + " : " + GENHelper.byteArrayToHexString(buf.array(), buf.position(), Math.min(100, bodyLength)));
-      */
       
       try
       {

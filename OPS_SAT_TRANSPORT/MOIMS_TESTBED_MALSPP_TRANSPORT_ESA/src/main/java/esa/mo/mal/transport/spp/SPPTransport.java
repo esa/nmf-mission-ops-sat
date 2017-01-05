@@ -20,15 +20,9 @@
  */
 package esa.mo.mal.transport.spp;
 
-import esa.mo.mal.transport.spp.SPPURIRepresentationSimple;
-import esa.mo.mal.transport.spp.SPPMessageDecoderFactory;
 import esa.mo.mal.transport.gen.GENMessage;
 import esa.mo.mal.transport.gen.sending.GENMessageSender;
-import esa.mo.mal.transport.gen.util.GENHelper;
 import esa.mo.mal.transport.gen.util.GENMessagePoller;
-import esa.mo.mal.transport.spp.SPPBaseTransport;
-import esa.mo.mal.transport.spp.SPPConfiguration;
-import esa.mo.mal.transport.spp.SPPSourceSequenceCounterSimple;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.logging.Level;
