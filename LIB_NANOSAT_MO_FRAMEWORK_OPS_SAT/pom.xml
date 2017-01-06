@@ -82,7 +82,7 @@
         </dependency>
         <dependency>
             <groupId>int.esa.ccsds.mo</groupId>
-            <artifactId>TRANSPORT_SPP_TESTBED</artifactId>
+            <artifactId>TRANSPORT_SPP_OPSSAT</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
