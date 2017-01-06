@@ -88,9 +88,11 @@ public class ClientTCPSPPSocket implements SPPSocket {
     public SpacePacket receive() throws Exception {
         SpacePacket packet = channel.receive();
 
-        int sequenceCount = packet.getHeader().getSequenceCount();
+        final int sequenceCount = packet.getHeader().getSequenceCount();
 
-        if (lastSPPSequenceCount != sequenceCount - 1) {
+        if (lastSPPSequenceCount != sequenceCount - 1
+                && lastSPPSequenceCount != 16383
+                && sequenceCount != 0) { // Exclude also the transition zone
             java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO, "Out-of-order detected! Sequence count: " + sequenceCount + " - Last: " + lastSPPSequenceCount);
         }
 
