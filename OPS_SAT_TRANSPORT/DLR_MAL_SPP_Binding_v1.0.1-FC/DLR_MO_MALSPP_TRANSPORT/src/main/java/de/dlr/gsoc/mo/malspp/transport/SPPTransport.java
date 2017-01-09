@@ -29,6 +29,8 @@ import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -85,7 +87,7 @@ public class SPPTransport implements MALTransport {
 	private final Map<SequenceCounterId, SPPCounter> sequenceCounters = new HashMap<>();
 	private final Map<SequenceCounterId, Queue<Short>> identifiers = new HashMap<>();
 	private final Map<SegmentCounterId, SPPCounter> segmentCounters = new HashMap<>();
-        private final Object MUTEX = new Object();
+        private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
 	public SPPTransport(final String protocol, final Map properties) throws MALException {
 		try {
@@ -464,7 +466,7 @@ public class SPPTransport implements MALTransport {
 				MALStandardError error = new MALStandardError(MALHelper.DELIVERY_FAILED_ERROR_NUMBER, null);
 				sendErrorMessage(targetEndpoint, msg, error, null);
 			} else {
-
+                            /*
                             Thread thread = new Thread() {
 					@Override
 					public void run() {
@@ -473,8 +475,17 @@ public class SPPTransport implements MALTransport {
 					}
 				};
 				thread.start();
-                                
-//                            listener.onMessage(targetEndpoint, msg);
+                              */  
+                            
+                            class OnMessageHandler implements Runnable {
+
+                                    @Override
+                                    public void run() {
+                                            listener.onMessage(targetEndpoint, msg);
+                                    }
+                            }
+
+                            executor.submit(new OnMessageHandler());
                         }
 		} catch (MALException ex) {
 			// TODO: Is there any other way of handling reception exceptions?
