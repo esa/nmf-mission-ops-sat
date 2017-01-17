@@ -62,10 +62,11 @@ public class GMVServicesConsumer {
         System.setProperty("helpertools.configurations.ground.SessionName", "Live");
 
         // Disable some flags
+        System.setProperty("org.ccsds.moims.mo.malspp.authenticationIdFlag", "false");
+        System.setProperty("org.ccsds.moims.mo.malspp.domainFlag", "false");
         System.setProperty("org.ccsds.moims.mo.malspp.networkZoneFlag", "false");
         System.setProperty("org.ccsds.moims.mo.malspp.sessionNameFlag", "false");
-        System.setProperty("org.ccsds.moims.mo.malspp.domainFlag", "false");
-        System.setProperty("org.ccsds.moims.mo.malspp.authenticationIdFlag", "false");
+        System.setProperty("org.ccsds.moims.mo.malspp.timestampFlag", "false");
 
         // Remember previous properties
         originalPropNodeDestination = System.getProperty("esa.mo.transport.can.opssat.nodeDestination");

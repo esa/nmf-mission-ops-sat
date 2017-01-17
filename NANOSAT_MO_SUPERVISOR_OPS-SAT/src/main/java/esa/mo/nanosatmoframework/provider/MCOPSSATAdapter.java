@@ -24,6 +24,7 @@ import esa.mo.com.impl.util.GMVServicesConsumer;
 import esa.mo.helpertools.helpers.HelperAttributes;
 import esa.mo.nanosatmoframework.MCRegistration;
 import esa.mo.nanosatmoframework.MonitorAndControlNMFAdapter;
+import esa.mo.platform.impl.util.CameraSerialPortOPSSAT;
 import esa.mo.sm.impl.util.ShellCommander;
 import esa.mo.transport.can.opssat.CANReceiveInterface;
 import esa.mo.transport.can.opssat.CFPFrameHandler;
@@ -167,18 +168,40 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Output: " + output);
          */
 
- /*
+        CameraSerialPortOPSSAT camera = new CameraSerialPortOPSSAT();
+        camera.init();
+        
+        try {
+            String version = camera.getVersion();
+            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Version: " + version);
+            
+            String status = camera.getStatus();
+            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Status: " + status);
+
+            String temperature = camera.getTemperature();
+            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Temperature: " + temperature);
+
+            camera.takePiture();
+            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "The picture has been taken!");
+            
+        } catch (IOException ex) {
+            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+
+        
         try {
  
 //            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData("GPGGALONG", new MCGPSAdapter());
             gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData("log gpggalonga\n", new MCGPSAdapter());
+//            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().asyncGetGPSData("log gpggalonga\n", new MCGPSAdapter());
 //            gmvServicesConsumer.getPowerNanomindService().getPowerNanomindStub().powerOnSBandTX();
         } catch (MALInteractionException ex) {
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
         } catch (MALException ex) {
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
-         */
+        
     }
 
     @Override
