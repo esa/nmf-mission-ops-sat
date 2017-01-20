@@ -90,7 +90,6 @@ public class CameraSerialPortOPSSAT {
         }
 
         this.initIOStream();
-        
         ready = true;
     }
 
