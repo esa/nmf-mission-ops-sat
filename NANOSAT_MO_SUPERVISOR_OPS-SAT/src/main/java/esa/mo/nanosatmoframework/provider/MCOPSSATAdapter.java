@@ -28,6 +28,7 @@ import esa.mo.platform.impl.util.CameraSerialPortOPSSAT;
 import esa.mo.sm.impl.util.ShellCommander;
 import esa.mo.transport.can.opssat.CANReceiveInterface;
 import esa.mo.transport.can.opssat.CFPFrameHandler;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -66,6 +67,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
     private static final String PARAMETER_CAN_RATE = "CANDataRate";
 
     private static final String ACTION_GPS_SENTENCE = "GPS_Sentence";
+    private static final String ACTION_LEDS_TEST = "LEDs_Test";
 
     private final ShellCommander shellCommander = new ShellCommander();
 
@@ -154,12 +156,6 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         gmvServicesConsumer = new GMVServicesConsumer();
         gmvServicesConsumer.init();
 
-        /*        
-        ShellCommander shell = new ShellCommander();
-        String output = shell.runCommandAndGetOutputMessage("./led_test.sh");
-        Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Output: " + output);
-         */
-
  /*        
         ShellCommander shell = new ShellCommander();
         String ttyDevice = "/dev/ttyUSB0";
@@ -181,8 +177,12 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
             String temperature = camera.getTemperature();
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Temperature: " + temperature);
 
-            camera.takePiture();
+            byte[] raw = camera.takePiture();
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "The picture has been taken!");
+            
+            FileOutputStream fos = new FileOutputStream("myFirstPicture.raw");
+            fos.write(raw);
+            fos.close();
             
         } catch (IOException ex) {
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
@@ -243,7 +243,16 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
                 Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-            return null;
+            return null; // Success!
+        }
+
+        if (ACTION_LEDS_TEST.equals(name.getValue())) {
+            ShellCommander shell = new ShellCommander();
+            String output = shell.runCommandAndGetOutputMessage("./led_test.sh");
+            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Output: " + output);
+
+
+            return null; // Success!
         }
 
         return new UInteger(1);  // Action service not integrated

@@ -70,7 +70,6 @@ public class CameraSerialPortOPSSAT {
 
     public void init() {
         boolean isAvailable = this.checkIfAvailable();
-        Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "1 ");
 
         if (!isAvailable) {
             // Please check if the Camera is turned on!

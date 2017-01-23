@@ -24,6 +24,7 @@ import esa.mo.com.impl.util.COMServicesProvider;
 import esa.mo.com.impl.util.GMVServicesConsumer;
 import esa.mo.platform.impl.provider.gen.CameraProviderServiceImpl;
 import esa.mo.platform.impl.provider.gen.GPSProviderServiceImpl;
+import esa.mo.platform.impl.provider.opssat.CameraOPSSATAdapter;
 import esa.mo.platform.impl.provider.opssat.GPSOPSSATAdapter;
 import org.ccsds.moims.mo.mal.MALException;
 import org.ccsds.moims.mo.platform.autonomousadcs.provider.AutonomousADCSInheritanceSkeleton;
@@ -42,7 +43,7 @@ public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderI
 //    @Override
     public void init(COMServicesProvider comServices, GMVServicesConsumer gmvServicesConsumer) throws MALException {
         gmvServicesConsumer.init();
-//        cameraService.init(comServices, new CameraOPSSATAdapter(gmvServicesConsumer));
+//        cameraService.init(comServices, new CameraOPSSATAdapter());
         gpsService.init(comServices, new GPSOPSSATAdapter(gmvServicesConsumer));
     }
 
