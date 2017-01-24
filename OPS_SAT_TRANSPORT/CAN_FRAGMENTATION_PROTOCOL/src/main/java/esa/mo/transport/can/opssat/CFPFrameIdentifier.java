@@ -124,4 +124,10 @@ public class CFPFrameIdentifier {
         return (this.getType() == 0);
     }
     
+    @Override
+    public String toString(){
+        return "Frame Identifier - src: " + this.src +  " dst: " + this.dst +  
+                " type: " + this.type +  " remain: " + this.remain +  " transactionId: " + this.transactionId;
+    }
+   
 }

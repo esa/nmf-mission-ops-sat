@@ -217,6 +217,9 @@ public class CFPFrameHandler implements FrameListener {
                     try {
                         message = readyQueue.take();
 
+                        Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO,
+                            "New Message with CAN src field: " + message.getSrc());
+
                         short transactionId = message.getTransactionId();
 
                         if (!message.wasPassedUpwards()) {  // To avoid passing it twice or more times
@@ -317,7 +320,8 @@ public class CFPFrameHandler implements FrameListener {
                 + Arrays.toString(data));
 
         if (data.length > CSP_CAN_MTU) {
-            Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.SEVERE, "The length of the data is bigger than 256: " + data.length);
+            Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.SEVERE, 
+                    "The length of the data is bigger than 256: " + data.length);
 
             // ERROR!!! Not possible because CAN has a maximum of 256 bytes
             throw new IOException("The length of data cannot be greater than 256 bytes");
@@ -428,6 +432,7 @@ public class CFPFrameHandler implements FrameListener {
         // Is it just an echo from socketcand ?
         if (frameIdentifier.getSrc() == node_source) {
             Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.FINEST,
+//            Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO,
                     "The chunk was not processed because it is an echo from socketcand!");
 
             return;

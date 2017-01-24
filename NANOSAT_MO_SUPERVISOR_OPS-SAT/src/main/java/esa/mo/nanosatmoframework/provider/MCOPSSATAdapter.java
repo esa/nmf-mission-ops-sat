@@ -28,6 +28,7 @@ import esa.mo.platform.impl.util.CameraSerialPortOPSSAT;
 import esa.mo.sm.impl.util.ShellCommander;
 import esa.mo.transport.can.opssat.CANReceiveInterface;
 import esa.mo.transport.can.opssat.CFPFrameHandler;
+import esa.mo.transport.can.opssat.CFPFrameIdentifier;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -156,40 +157,65 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         gmvServicesConsumer = new GMVServicesConsumer();
         gmvServicesConsumer.init();
 
- /*        
-        ShellCommander shell = new ShellCommander();
-        String ttyDevice = "/dev/ttyUSB0";
-        String baudRate = "115200";
-        String output = shell.runCommandAndGetOutputMessage("microcom -s " + baudRate + " " + ttyDevice);
-        Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Output: " + output);
-         */
-
+        long startTime = System.currentTimeMillis();
         CameraSerialPortOPSSAT camera = new CameraSerialPortOPSSAT();
+        long delta1 = System.currentTimeMillis() - startTime;
+        Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 1: " + delta1);
         camera.init();
+        long delta2 = System.currentTimeMillis() - startTime - delta1;
+        Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 2: " + delta2);
         
         try {
             String version = camera.getVersion();
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Version: " + version);
             
+        long delta3 = System.currentTimeMillis() - startTime - delta2;
+        Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 3: " + delta3);
+
             String status = camera.getStatus();
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Status: " + status);
+
+        long delta4 = System.currentTimeMillis() - startTime - delta3;
+        Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 4: " + delta4);
 
             String temperature = camera.getTemperature();
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Temperature: " + temperature);
 
+        long delta5 = System.currentTimeMillis() - startTime - delta4;
+        Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 5: " + delta5);
+            
+            
             byte[] raw = camera.takePiture();
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "The picture has been taken!");
+
+        long delta6 = System.currentTimeMillis() - startTime - delta5;
+        Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 6: " + delta6);
             
             FileOutputStream fos = new FileOutputStream("myFirstPicture.raw");
             fos.write(raw);
+            fos.flush();
             fos.close();
+
+        long delta7 = System.currentTimeMillis() - startTime - delta6;
+        Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 7: " + delta7);
             
         } catch (IOException ex) {
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-
         
+/*
+        int value1 = 0x150483DF;
+        int value2 = 0x150C63DF;
+        int value3 = 0x150803DF;
+        
+        CFPFrameIdentifier aaaa1 = new CFPFrameIdentifier(value1);
+        CFPFrameIdentifier aaaa2 = new CFPFrameIdentifier(value2);
+        CFPFrameIdentifier aaaa3 = new CFPFrameIdentifier(value3);
+        Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Check 1: " + aaaa1.toString());
+        Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Check 2: " + aaaa2.toString());
+        Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Check 3: " + aaaa3.toString());
+*/
+
         try {
  
 //            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData("GPGGALONG", new MCGPSAdapter());

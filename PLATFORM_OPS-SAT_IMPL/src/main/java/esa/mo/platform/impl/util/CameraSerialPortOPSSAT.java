@@ -25,13 +25,17 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import purejavacomm.CommPort;
@@ -56,6 +60,7 @@ public class CameraSerialPortOPSSAT {
     private BufferedReader reader = null;
     private BufferedWriter writer = null;
 
+    private static final int SINGLE_IMAGE_ID = 1;
     private static final String CMD_SHOW_VERSION = "show version";
     private static final String CMD_SHOW_TEMPERATURE = "show temperature";
     private static final String CMD_SHOW_STATUS = "show status";
@@ -230,8 +235,8 @@ public class CameraSerialPortOPSSAT {
     public String shoot() throws IOException {
         this.checkIfReady();
 
-        int id = 5;
-        int n_img = 5;
+        int id = SINGLE_IMAGE_ID;
+        int n_img = 1;
 
         this.writeData(CMD_IMAGE_SHOOT
                 + " " + String.valueOf(id)
@@ -251,50 +256,78 @@ public class CameraSerialPortOPSSAT {
         return this.readData();
     }
 
-    private byte[] copyImage() {
+    private long getImageOffset() throws IOException {
+        this.checkIfReady();
+        this.writeData(CMD_IMAGE_LIST);
+        String output = this.readData();
+        
+        final Scanner scanner = new Scanner(output);
+        
+        long off = 0;
+        
+        while (scanner.hasNextLine()) {
+          String line = scanner.nextLine();
+          
+          // process the line
+          String[] fields = line.split("offset");
+          
+          if(fields.length == 2){
+              String[] remainings = fields[0].split(" ");
+              
+              if(remainings.length > 4 && Integer.parseInt(remainings[1], 16) == SINGLE_IMAGE_ID){
+                  String pos_hex_value = remainings[4];
+                  off = Long.parseLong(pos_hex_value, 16);
+                  break;
+              }
+          }
+        }
+        
+        scanner.close();
+        
+        return off;
+    }
 
-        File file = new File("/dev/sda");
-        FileInputStream fis = null;
-
+    
+    private byte[] copyImage(long off) {
         try {
-            fis = new FileInputStream(file);
-            BufferedInputStream bis = new BufferedInputStream(fis);
-            
-            int bs = 4096;
-            int off = 69632*bs;
-            int len = 1944*bs;
+            RandomAccessFile file = new RandomAccessFile("/dev/sda", "r");
 
+            try {
+                file.seek(off*4096);
+            } catch (IOException ex) {
+                Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            int bytesPerPixel = 2;
+            int len = 2048*1944*bytesPerPixel;
             byte[] data = new byte[len];
             
-            bis.skip(off);
-            bis.read(data, 0, len);
+            int readNBytes = file.read(data, 0, len);
+            
+            /*
+            for (int i = 0; i < 30; i++) {
+                int intData = (int)data[i];
+                System.out.print("Image raw pixel values are: " + intData + " "); // Use for debug only
+            }
+            */
+            
+            if(readNBytes != len){
+                throw new IOException("Didn't fully read the image!");
+            }
+            
+            file.close();
             
             return data;
-
-/*                    
-            int content;
-            while ((content = fis.read()) != -1) {
-                // convert to char and display it
-                System.out.print((char) content);
-            }
-*/
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (fis != null) {
-                    fis.close();
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         return null;
     }
 
     public byte[] takePiture() throws IOException {
-
         try {
             String out1 = this.clearAllImages();
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Out1: " + out1);
@@ -324,9 +357,12 @@ public class CameraSerialPortOPSSAT {
             String out6 = this.listImages();
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Out6: " + out6);
             
+            long offset = this.getImageOffset();
+            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Offset: " + offset);
+            
             Thread.sleep(6000);
 
-            return this.copyImage();
+            return this.copyImage(offset);
         } catch (InterruptedException ex) {
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.SEVERE, null, ex);
         }
