@@ -80,6 +80,11 @@
             <artifactId>purejavacomm</artifactId>
             <version>1.0.1.RELEASE</version>
         </dependency>
+        <dependency>
+            <groupId>int.esa.opssat</groupId>
+            <artifactId>OPSSAT_IMAGE_DEBAYER</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
   
     <build>
