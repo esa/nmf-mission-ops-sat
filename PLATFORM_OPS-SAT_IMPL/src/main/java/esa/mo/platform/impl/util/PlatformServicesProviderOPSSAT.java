@@ -43,7 +43,7 @@ public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderI
 //    @Override
     public void init(COMServicesProvider comServices, GMVServicesConsumer gmvServicesConsumer) throws MALException {
         gmvServicesConsumer.init();
-//        cameraService.init(comServices, new CameraOPSSATAdapter());
+        cameraService.init(comServices, new CameraOPSSATAdapter());
         gpsService.init(comServices, new GPSOPSSATAdapter(gmvServicesConsumer));
     }
 

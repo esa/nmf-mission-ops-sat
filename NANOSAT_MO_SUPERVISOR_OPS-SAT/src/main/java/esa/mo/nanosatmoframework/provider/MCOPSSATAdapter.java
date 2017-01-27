@@ -157,6 +157,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         gmvServicesConsumer = new GMVServicesConsumer();
         gmvServicesConsumer.init();
 
+        /*
         long startTime = System.currentTimeMillis();
         CameraSerialPortOPSSAT camera = new CameraSerialPortOPSSAT();
         long delta1 = System.currentTimeMillis() - startTime;
@@ -203,6 +204,9 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+        */
+        
+        
 /*
         int value1 = 0x150483DF;
         int value2 = 0x150C63DF;
@@ -215,9 +219,8 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Check 2: " + aaaa2.toString());
         Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Check 3: " + aaaa3.toString());
 */
-
+/*
         try {
- 
 //            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData("GPGGALONG", new MCGPSAdapter());
             gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData("log gpggalonga\n", new MCGPSAdapter());
 //            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().asyncGetGPSData("log gpggalonga\n", new MCGPSAdapter());
@@ -227,7 +230,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         } catch (MALException ex) {
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+  */      
     }
 
     @Override
