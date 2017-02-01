@@ -41,11 +41,13 @@ public class CFPSPPSocket implements SPPSocket {
 
     private final LinkedBlockingQueue<SpacePacket> input;
     private final String BUS_NAME = "can0";
+    private static final String PROPERTY_APID = "org.ccsds.moims.mo.malspp.apid";
     private CFPFrameHandler handler;
     private final SPPWriter writer = new SPPWriter(new SenderImpl());
     private final Object MUTEX = new Object();
     private int destinationNode;
     private int virtualChannel;
+    private int apid = -1;
 
     public CFPSPPSocket() {
         super();
@@ -53,6 +55,12 @@ public class CFPSPPSocket implements SPPSocket {
     }
 
     public void init(Map properties) throws Exception {
+        if(System.getProperty(PROPERTY_APID) != null){
+            apid = Integer.parseInt(System.getProperty(PROPERTY_APID));
+        }else{
+            throw new MALException("Please set the APID on the property: " + PROPERTY_APID);
+        }
+        
         try {
             handler = new CFPFrameHandler(new ReceiverImpl());
         } catch (IOException ex) {
@@ -80,18 +88,27 @@ public class CFPSPPSocket implements SPPSocket {
 
     @Override
     public void send(SpacePacket packet) throws Exception {
+        if(packet == null){
+            throw new IOException("The packet is null!");
+        }
+        
         synchronized (MUTEX) {
             Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINE,
                     "Sequence count: " + packet.getHeader().getSequenceCount()
                     + " - " + Arrays.toString(packet.getBody()));
             
+            String propNodeDest = null;
+            String propVirtualC = null;
+            
             // Change the destination node and virtual channel based on the selected location
-            String propNodeDest = (String) packet.getQosProperties().get("esa.mo.transport.can.opssat.nodeDestination");
-            String propVirtualC = (String) (String) packet.getQosProperties().get("esa.mo.transport.can.opssat.virtualChannel");
+            if(packet.getQosProperties() != null){
+                propNodeDest = (String) packet.getQosProperties().get("esa.mo.transport.can.opssat.nodeDestination");
+                propVirtualC = (String) (String) packet.getQosProperties().get("esa.mo.transport.can.opssat.virtualChannel");
+            }
 
-            // Defaults
-            this.destinationNode = (propNodeDest != null) ? Integer.parseInt(propNodeDest) : CANBusConnector.CAN_NODE_NR_DST_CCSDS; // Default is CCSDS Engine
-            this.virtualChannel = (propVirtualC != null) ? Integer.parseInt(propVirtualC) : 2; // Default is VC 2
+            // Defaults (dst node: CCSDS Engine; VC: 2)
+            this.destinationNode = (propNodeDest != null) ? Integer.parseInt(propNodeDest) : CANBusConnector.CAN_NODE_NR_DST_CCSDS;
+            this.virtualChannel = (propVirtualC != null) ? Integer.parseInt(propVirtualC) : 2;
         
             java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINE, 
                 "destinationNode: " + this.destinationNode + " - virtualChannel: " + this.virtualChannel);
@@ -116,7 +133,6 @@ public class CFPSPPSocket implements SPPSocket {
 
         @Override
         public void receive(final byte[] array) {
-
             java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINEST,
                     "Data Received on the glue code..."
                     + "\ndata: " + Arrays.toString(array));
@@ -125,7 +141,12 @@ public class CFPSPPSocket implements SPPSocket {
 
             try {
                 SpacePacket packet = reader.receive();
-                input.offer(packet);
+                
+                if(apid == packet.getHeader().getApid()){
+                    input.offer(packet);
+                }else{
+                    java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINER, "The message is not for us!");
+                }
             } catch (Exception ex) {
                 java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.SEVERE, null, ex);
             }

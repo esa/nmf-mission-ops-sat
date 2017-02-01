@@ -34,6 +34,7 @@ import com.nothome.delta.GDiffPatcher;
 import com.nothome.delta.GDiffWriter;
 import esa.mo.nanosatmoframework.MCRegistration;
 import esa.mo.nanosatmoframework.MonitorAndControlNMFAdapter;
+import esa.mo.nanosatmoframework.NMFException;
 import esa.mo.nanosatmoframework.NanoSatMOFrameworkInterface;
 import esa.mo.nanosatmoframework.nanosatmoconnector.NanoSatMOConnectorImpl;
 import java.io.BufferedReader;
@@ -204,7 +205,7 @@ public class LinuxImagesManager {
                 boolean valid = runCommand(cmd);
                 try {
                     nanoSatMOFramework.reportActionExecutionProgress(valid, 0, 1, 1, actionInstanceObjId);
-                } catch (IOException ex) {
+                } catch (NMFException ex) {
                     Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
@@ -217,7 +218,7 @@ public class LinuxImagesManager {
                 boolean valid = runCommand(cmd);
                 try {
                     nanoSatMOFramework.reportActionExecutionProgress(valid, 0, 1, 1, actionInstanceObjId);
-                } catch (IOException ex) {
+                } catch (NMFException ex) {
                     Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
@@ -280,7 +281,7 @@ public class LinuxImagesManager {
                 Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.INFO, "(4) Diff completed!");
                 try {
                     nanoSatMOFramework.reportActionExecutionProgress(true, 0, 1, 3, actionInstanceObjId);
-                } catch (IOException ex) {
+                } catch (NMFException ex) {
                     Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
@@ -288,7 +289,7 @@ public class LinuxImagesManager {
                 boolean valid = runCommand("tar -zcvf " + patch_temp_folder + "Slot_A-Slot_B.tar.gz " + patch_temp_folder.substring(0, patch_temp_folder.length()-1));
                 try {
                     nanoSatMOFramework.reportActionExecutionProgress(valid, 0, 2, 3, actionInstanceObjId);
-                } catch (IOException ex) {
+                } catch (NMFException ex) {
                     Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.INFO, "(5) Compression completed!");
@@ -296,7 +297,7 @@ public class LinuxImagesManager {
                 boolean valid2 = runCommand("rm -r " + patch_temp_folder);
                 try {
                     nanoSatMOFramework.reportActionExecutionProgress(valid2, 0, 3, 3, actionInstanceObjId);
-                } catch (IOException ex) {
+                } catch (NMFException ex) {
                     Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.INFO, "(6) Folder Deleted!");
@@ -309,7 +310,7 @@ public class LinuxImagesManager {
                 boolean valid = runCommand("tar -xzvf " + patch_temp_folder + "Slot_A-Slot_B.tar.gz" + " " + patch_temp_folder + DirectCopyFolderName + "a");
                 try {
                     nanoSatMOFramework.reportActionExecutionProgress(valid, 0, 1, 3, actionInstanceObjId);
-                } catch (IOException ex) {
+                } catch (NMFException ex) {
                     Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.INFO, "(5) Compression completed!");

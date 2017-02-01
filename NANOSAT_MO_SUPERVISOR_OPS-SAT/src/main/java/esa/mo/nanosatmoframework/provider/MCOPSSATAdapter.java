@@ -154,8 +154,8 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         LongList actionObjIds = registration.registerActions(actionDefs);
 
         // Start the GMV consumer
-        gmvServicesConsumer = new GMVServicesConsumer();
-        gmvServicesConsumer.init();
+//        gmvServicesConsumer = new GMVServicesConsumer();
+//        gmvServicesConsumer.init();
 
         /*
         long startTime = System.currentTimeMillis();

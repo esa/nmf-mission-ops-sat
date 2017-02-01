@@ -35,14 +35,13 @@ import org.ccsds.moims.mo.platform.softwaredefinedradio.provider.SoftwareDefined
  *
  *
  */
-public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderInterface{
+public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderInterface {
 
     private final CameraProviderServiceImpl cameraService = new CameraProviderServiceImpl();
     private final GPSProviderServiceImpl gpsService = new GPSProviderServiceImpl();
 
 //    @Override
     public void init(COMServicesProvider comServices, GMVServicesConsumer gmvServicesConsumer) throws MALException {
-        gmvServicesConsumer.init();
         cameraService.init(comServices, new CameraOPSSATAdapter());
         gpsService.init(comServices, new GPSOPSSATAdapter(gmvServicesConsumer));
     }
