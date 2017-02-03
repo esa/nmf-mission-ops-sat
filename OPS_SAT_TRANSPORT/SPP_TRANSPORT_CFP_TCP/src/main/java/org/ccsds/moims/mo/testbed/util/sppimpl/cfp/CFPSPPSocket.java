@@ -134,21 +134,28 @@ public class CFPSPPSocket implements SPPSocket {
         @Override
         public void receive(final byte[] array) {
             java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINEST,
+                    "Data Received on the glue code...");
+            
+            /* The Arrays.toString would make it go slower even if the level is just set to FINEST
+            java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINEST,
                     "Data Received on the glue code..."
                     + "\ndata: " + Arrays.toString(array));
+            */
 
             SPPReader reader = new SPPReader(new ByteArrayInputStream(array));
+            SpacePacket packet;
 
             try {
-                SpacePacket packet = reader.receive();
-                
-                if(apid == packet.getHeader().getApid()){
-                    input.offer(packet);
-                }else{
-                    java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINER, "The message is not for us!");
-                }
+                packet = reader.receive();
             } catch (Exception ex) {
-                java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.SEVERE, null, ex);
+                java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.SEVERE, "The packet is not valid!", ex);
+                packet = reader.getPacket();
+            }
+
+            if(apid == packet.getHeader().getApid()){
+                input.offer(packet);
+            }else{
+                java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINER, "The message is not for us!");
             }
         }
     }

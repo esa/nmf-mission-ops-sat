@@ -26,6 +26,9 @@ import esa.mo.platform.impl.provider.gen.CameraProviderServiceImpl;
 import esa.mo.platform.impl.provider.gen.GPSProviderServiceImpl;
 import esa.mo.platform.impl.provider.opssat.CameraOPSSATAdapter;
 import esa.mo.platform.impl.provider.opssat.GPSOPSSATAdapter;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.MALException;
 import org.ccsds.moims.mo.platform.autonomousadcs.provider.AutonomousADCSInheritanceSkeleton;
 import org.ccsds.moims.mo.platform.opticaldatareceiver.provider.OpticalDataReceiverInheritanceSkeleton;
@@ -42,7 +45,12 @@ public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderI
 
 //    @Override
     public void init(COMServicesProvider comServices, GMVServicesConsumer gmvServicesConsumer) throws MALException {
-        cameraService.init(comServices, new CameraOPSSATAdapter());
+        try {
+            cameraService.init(comServices, new CameraOPSSATAdapter());
+        } catch (IOException ex) {
+            Logger.getLogger(PlatformServicesProviderOPSSAT.class.getName()).log(Level.SEVERE, "The Camera service was not initialized!", ex);
+        }
+        
         gpsService.init(comServices, new GPSOPSSATAdapter(gmvServicesConsumer));
     }
 

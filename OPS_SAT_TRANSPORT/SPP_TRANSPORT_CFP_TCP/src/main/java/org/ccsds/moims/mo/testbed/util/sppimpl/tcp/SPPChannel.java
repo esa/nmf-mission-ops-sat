@@ -40,6 +40,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.logging.Level;
+import org.ccsds.moims.mo.mal.MALException;
 
 import org.ccsds.moims.mo.testbed.util.spp.SpacePacket;
 import org.ccsds.moims.mo.testbed.util.sppimpl.util.SPPReader;
@@ -57,6 +59,9 @@ public class SPPChannel {
   
   private SPPWriter writer;
   
+  private static final String PROPERTY_APID = "org.ccsds.moims.mo.malspp.apid";
+  private int apid = -1;
+    
   /*
   public OutputStream SPPChannel(byte[] in) throws Exception {
     is = new ByteArrayInputStream(in);
@@ -72,10 +77,23 @@ public class SPPChannel {
     os = new BufferedOutputStream(socket.getOutputStream());
     reader = new SPPReader(is);
     writer = new SPPWriter(os);
+    
+    if(System.getProperty(PROPERTY_APID) != null){
+      apid = Integer.parseInt(System.getProperty(PROPERTY_APID));
+    }else{
+      throw new MALException("Please set the APID on the property: " + PROPERTY_APID);
+    }
   }
 
   public SpacePacket receive() throws Exception {
-    return reader.receive();
+    SpacePacket packet = reader.receive();
+         
+    // Filter out packets that are not for us
+//    while(apid != packet.getHeader().getApid()){
+//      packet = reader.receive();
+//    }
+
+    return packet;
   }
 
   public void send(SpacePacket packet) throws Exception {

@@ -69,24 +69,20 @@ public class CameraSerialPortOPSSAT {
 
     private static final String CMD_RECONFIGURE = "reconfigure";
 
-    public void init() {
+    public void init() throws IOException {
         boolean isAvailable = this.checkIfAvailable();
 
         if (!isAvailable) {
             // Please check if the Camera is turned on!
-            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.SEVERE,
-                    "The port " + PORT_NAME + " is not available! Please check if the Camera is turned on.");
-            return;
+            throw new IOException("The port " + PORT_NAME + " is not available! Please check if the Camera is turned on.");
         }
 
         try {
             this.connect();
         } catch (PortInUseException ex) {
-            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.SEVERE, "The Port is already in use!", ex);
-            return;
+            throw new IOException("The Port is already in use!");
         } catch (NoSuchPortException ex) {
-            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.SEVERE, "The Port does not exist!", ex);
-            return;
+            throw new IOException("The Port does not exist!");
         }
 
         this.initIOStream();
@@ -94,20 +90,22 @@ public class CameraSerialPortOPSSAT {
     }
 
     public boolean checkIfAvailable() {
-        Enumeration portIdentifiers = CommPortIdentifier.getPortIdentifiers();
+        final Enumeration portIdentifiers = CommPortIdentifier.getPortIdentifiers();
 
-        CommPortIdentifier portId = null;  // will be set if port found
+//        CommPortIdentifier portId = null;  // will be set if port found
         while (portIdentifiers.hasMoreElements()) {
             CommPortIdentifier pid = (CommPortIdentifier) portIdentifiers.nextElement();
 
             if (pid.getPortType() == CommPortIdentifier.PORT_SERIAL
                     && pid.getName().equals(PORT_NAME)) {
-                portId = pid;
-                break;
+//                portId = pid; // Found!
+//                break;
+                return true;
             }
         }
-
-        return portId != null;
+        
+        return false;
+//        return portId != null;
     }
 
     public ArrayList<String> getSerialPortNamesAvailable() {
@@ -168,14 +166,14 @@ public class CameraSerialPortOPSSAT {
     private synchronized String readData() {
         try {
             String str = reader.readLine();
-            while(true){
-                if (reader.ready()){
+            while (true) {
+                if (reader.ready()) {
                     str += "\n" + reader.readLine();
-                }else{
+                } else {
                     break;
                 }
             }
-            
+
             return str;
         } catch (IOException ex) {
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.SEVERE, null, ex);
@@ -256,70 +254,68 @@ public class CameraSerialPortOPSSAT {
         this.checkIfReady();
         this.writeData(CMD_IMAGE_LIST);
         String output = this.readData();
-        
+
         final Scanner scanner = new Scanner(output);
-        
+
         long off = 0;
-        
+
         while (scanner.hasNextLine()) {
-          String line = scanner.nextLine();
-          
-          // process the line
-          String[] fields = line.split("offset");
-          
-          if(fields.length == 2){
-              String[] remainings = fields[0].split(" ");
-              
-              if(remainings.length > 4 && Integer.parseInt(remainings[1], 16) == SINGLE_IMAGE_ID){
-                  String pos_hex_value = remainings[4];
-                  off = Long.parseLong(pos_hex_value, 16);
-                  break;
-              }
-          }
+            String line = scanner.nextLine();
+
+            // process the line
+            String[] fields = line.split("offset");
+
+            if (fields.length == 2) {
+                String[] remainings = fields[0].split(" ");
+
+                if (remainings.length > 4 && Integer.parseInt(remainings[1], 16) == SINGLE_IMAGE_ID) {
+                    String pos_hex_value = remainings[4];
+                    off = Long.parseLong(pos_hex_value, 16);
+                    break;
+                }
+            }
         }
-        
+
         scanner.close();
-        
+
         return off;
     }
 
-    
     private byte[] copyImage(long off) {
         try {
             RandomAccessFile file = new RandomAccessFile("/dev/sda", "r");
 
             try {
-                file.seek(off*4096);
+                file.seek(off * 4096);
             } catch (IOException ex) {
                 Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
+
             int bytesPerPixel = 2;
-            int len = 2048*1944*bytesPerPixel;
+            int len = 2048 * 1944 * bytesPerPixel;
             byte[] data = new byte[len];
-            
+
             int readNBytes = file.read(data, 0, len);
-            
+
             /*
             for (int i = 0; i < 30; i++) {
                 int intData = (int)data[i];
                 System.out.print("Image raw pixel values are: " + intData + " "); // Use for debug only
             }
-            */
-            
-            if(readNBytes != len){
+             */
+            if (readNBytes != len) {
                 throw new IOException("Didn't fully read the image!");
             }
-            
+
             file.close();
-            
+
             return data;
         } catch (FileNotFoundException ex) {
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         return null;
     }
 
@@ -327,42 +323,42 @@ public class CameraSerialPortOPSSAT {
         try {
             String out1 = this.clearAllImages();
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Out1: " + out1);
-            
+
             Thread.sleep(3000);
-            
+
             String out2 = this.setExposureTime(1);
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Out2: " + out2);
-            
+
             Thread.sleep(3000);
 
             String out3 = this.reconfigure();
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Out3: " + out3);
-            
+
             Thread.sleep(3000);
 
             String out4 = this.shoot();
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Out4: " + out4);
-            
+
             Thread.sleep(3000);
 
             String out5 = this.startShooting();
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Out5: " + out5);
-            
+
             Thread.sleep(5000);
 
             String out6 = this.listImages();
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Out6: " + out6);
-            
+
             long offset = this.getImageOffset();
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Offset: " + offset);
-            
+
             Thread.sleep(6000);
 
             return this.copyImage(offset);
         } catch (InterruptedException ex) {
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         return null;
     }
 
