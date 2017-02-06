@@ -21,8 +21,8 @@
 package esa.mo.nanosatmoframework.apps;
 
 import esa.mo.helpertools.helpers.HelperMisc;
-import esa.mo.nanosatmoframework.MCRegistration;
-import esa.mo.nanosatmoframework.MonitorAndControlNMFAdapter;
+import esa.mo.nmf.MCRegistration;
+import esa.mo.nmf.MonitorAndControlNMFAdapter;
 import esa.mo.transport.can.opssat.CANReceiveInterface;
 import esa.mo.transport.can.opssat.CFPFrameHandler;
 import java.io.IOException;

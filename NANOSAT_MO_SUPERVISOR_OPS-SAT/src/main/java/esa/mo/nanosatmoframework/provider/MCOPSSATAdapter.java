@@ -22,8 +22,8 @@ package esa.mo.nanosatmoframework.provider;
 
 import esa.mo.com.impl.util.GMVServicesConsumer;
 import esa.mo.helpertools.helpers.HelperAttributes;
-import esa.mo.nanosatmoframework.MCRegistration;
-import esa.mo.nanosatmoframework.MonitorAndControlNMFAdapter;
+import esa.mo.nmf.MCRegistration;
+import esa.mo.nmf.MonitorAndControlNMFAdapter;
 import esa.mo.sm.impl.util.ShellCommander;
 import esa.mo.transport.can.opssat.CANReceiveInterface;
 import esa.mo.transport.can.opssat.CFPFrameHandler;
