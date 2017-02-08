@@ -18,7 +18,7 @@
  * limitations under the License. 
  * ----------------------------------------------------------------------------
  */
-package esa.mo.nanosatmoframework.apps;
+package esa.mo.nmf.apps;
 
 import esa.mo.helpertools.helpers.HelperMisc;
 import esa.mo.nmf.MCRegistration;

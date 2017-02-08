@@ -37,7 +37,7 @@
     </organization>
 
     <properties>
-        <assembly.mainClass>esa.mo.nanosatmoframework.provider.NanoSatMOSupervisorOPSSATImpl</assembly.mainClass>
+        <assembly.mainClass>esa.mo.nmf.provider.NanoSatMOSupervisorOPSSATImpl</assembly.mainClass>
     </properties>
 
     <licenses>
