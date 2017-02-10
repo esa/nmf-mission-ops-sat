@@ -65,6 +65,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
     private static final String PARAMETER_CAN_RATE = "CANDataRate";
 
     private static final String ACTION_GPS_SENTENCE = "GPS_Sentence";
+    private static final String ACTION_CLOCK_SET_TIME = "Clock.setTimeUsingDeltaMilliseconds";
     private static final String ACTION_LEDS_TEST = "LEDs_Test";
 
     private final ShellCommander shellCommander = new ShellCommander();
@@ -147,7 +148,30 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
                 null
         );
 
+        ArgumentDefinitionDetailsList arguments2 = new ArgumentDefinitionDetailsList();
+        {
+            Byte rawType = Attribute._LONG_TYPE_SHORT_FORM;
+            String rawUnit = "milliseconds";
+            ConditionalReferenceList conversionCondition = null;
+            Byte convertedType = null;
+            String convertedUnit = null;
+
+            arguments2.add(new ArgumentDefinitionDetails(rawType, rawUnit, conversionCondition, convertedType, convertedUnit));
+        }
+
+        ActionDefinitionDetails actionDef2 = new ActionDefinitionDetails(
+                new Identifier(ACTION_CLOCK_SET_TIME),
+                "Sets the clock using a diff between the on-board time and the real time.",
+                Severity.INFORMATIONAL,
+                new UShort(0),
+                arguments2,
+                null
+        );
+
         actionDefs.add(actionDef1);
+        actionDefs.add(actionDef2);
+
+        
         LongList actionObjIds = registration.registerActions(actionDefs);
 
         // Start the GMV consumer
