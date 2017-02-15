@@ -37,6 +37,7 @@ package org.ccsds.moims.mo.testbed.util.sppimpl.tcp;
 import java.net.Socket;
 import java.util.Map;
 import java.util.logging.Level;
+import org.ccsds.moims.mo.mal.MALException;
 import org.ccsds.moims.mo.testbed.util.spp.SPPSocket;
 import org.ccsds.moims.mo.testbed.util.spp.SpacePacket;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -48,22 +49,27 @@ public class ClientTCPSPPSocket implements SPPSocket {
             .getLogger(ClientTCPSPPSocket.class.getName());
 
     public static final String HOSTNAME = "org.ccsds.moims.mo.malspp.test.sppimpl.tcp.hostname";
-
     public static final String PORT = "org.ccsds.moims.mo.malspp.test.sppimpl.tcp.port";
+    private static final String PROPERTY_APID = "org.ccsds.moims.mo.malspp.apid";
 
     private String host;
-
     private int port;
-
     private SPPChannel channel;
 
     private int lastSPPSequenceCount = -1;
+    private int apid = -1;
 
     public ClientTCPSPPSocket() {
         super();
     }
 
     public void init(Map properties) throws Exception {
+        if (System.getProperty(PROPERTY_APID) != null) {
+            apid = Integer.parseInt(System.getProperty(PROPERTY_APID));
+        } else {
+            throw new MALException("Please set the APID on the property: " + PROPERTY_APID);
+        }
+
         if (logger.isLoggable(BasicLevel.DEBUG)) {
             logger.log(BasicLevel.DEBUG, "ClientTCPSPPSocket.init(" + properties + ')');
         }
@@ -87,13 +93,18 @@ public class ClientTCPSPPSocket implements SPPSocket {
 
     public SpacePacket receive() throws Exception {
         SpacePacket packet = channel.receive();
+        
+        while(packet.getHeader().getApid() != apid){
+            packet = channel.receive();
+        }
 
         final int sequenceCount = packet.getHeader().getSequenceCount();
 
         if (lastSPPSequenceCount != sequenceCount - 1
                 && lastSPPSequenceCount != 16383
                 && sequenceCount != 0) { // Exclude also the transition zone
-            java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO, "Out-of-order detected! Sequence count: " + sequenceCount + " - Last: " + lastSPPSequenceCount);
+            java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO, 
+                    "Out-of-order detected! Sequence count: " + sequenceCount + " - Last: " + lastSPPSequenceCount);
         }
 
         lastSPPSequenceCount = sequenceCount;

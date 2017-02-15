@@ -218,7 +218,7 @@ public class CFPFrameHandler implements FrameListener {
                         message = readyQueue.take();
 
                         Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO,
-                            "New Message with CAN src field: " + message.getSrc());
+                                "New Message with CAN src field: " + message.getSrc());
 
                         short transactionId = message.getTransactionId();
 
@@ -320,7 +320,7 @@ public class CFPFrameHandler implements FrameListener {
                 + Arrays.toString(data));
 
         if (data.length > CSP_CAN_MTU) {
-            Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.SEVERE, 
+            Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.SEVERE,
                     "The length of the data is bigger than 256: " + data.length);
 
             // ERROR!!! Not possible because CAN has a maximum of 256 bytes
@@ -345,7 +345,7 @@ public class CFPFrameHandler implements FrameListener {
             final Frame canFrame = new Frame(frameIdentifier.getFrameIdentifier(), true, dataChunk);
 
             Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.FINEST,
-//                                Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO,
+                    //                                Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO,
                     "Outgoing\nFrameIdentifier: "
                     + Integer.toHexString(frameIdentifier.getFrameIdentifier())
                     + " (" + Integer.toBinaryString(frameIdentifier.getFrameIdentifier())
@@ -418,13 +418,14 @@ public class CFPFrameHandler implements FrameListener {
         messagesCounterDinamic.incrementAndGet();
 
         // New Frame received! :)
-        Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.FINEST,
-                //                        Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO,
+        /*
+        Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO,
                 "Incoming\nFrameIdentifier: "
                 + Integer.toHexString(frame.getIdentifier())
                 + " (" + Integer.toBinaryString(frame.getIdentifier())
                 + ")\n"
                 + "dataChunk: " + Arrays.toString(frame.getData()));
+        */
 
         // Translate the Frame Identifier to CFP Frame Identifier
         CFPFrameIdentifier frameIdentifier = new CFPFrameIdentifier(frame.getIdentifier());
@@ -432,7 +433,6 @@ public class CFPFrameHandler implements FrameListener {
         // Is it just an echo from socketcand ?
         if (frameIdentifier.getSrc() == node_source) {
             Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.FINEST,
-//            Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO,
                     "The chunk was not processed because it is an echo from socketcand!");
 
             return;
@@ -451,7 +451,7 @@ public class CFPFrameHandler implements FrameListener {
         if (frame.getIdentifier() == 0 && frame.getLength() == 0) {
             Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.WARNING,
                     "The frame identifier is 0 and the frame data length is 0! Most likely the CAN interface is down.\n");
-            
+
             return;
         }
 
@@ -480,12 +480,12 @@ public class CFPFrameHandler implements FrameListener {
         if (frameIdentifier.getSrc() == CANBusConnector.CAN_NODE_NR_SRC_WAIT) {
             this.connector.pauseBusActivity();
         }
-        
+
         // Is it a request to Resume?
         if (frameIdentifier.getSrc() == CANBusConnector.CAN_NODE_NR_SRC_RESUME) {
             this.connector.continueBusActivity();
         }
-        
+
         synchronized (MUTEX) {
             // Try to find the object to be reconstructed...
             ReconstructMessage message = incomingMessages.get(frameIdentifier.getTransactionId());
@@ -518,8 +518,8 @@ public class CFPFrameHandler implements FrameListener {
                 this.readyQueue.offer(message);
                 if (this.queuedForRetransmission.remove(message.getTransactionId())) {
                     Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO,
-                            "The message was successfully recovered! For transactionId: " + frameIdentifier.getTransactionId() + "! :)");
-
+                            "The message was successfully recovered! For transactionId: "
+                            + frameIdentifier.getTransactionId() + "! :)");
                 }
             }
         }

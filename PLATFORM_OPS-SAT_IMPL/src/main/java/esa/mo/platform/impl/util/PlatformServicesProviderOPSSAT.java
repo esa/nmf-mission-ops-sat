@@ -48,7 +48,8 @@ public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderI
         try {
             cameraService.init(comServices, new CameraOPSSATAdapter());
         } catch (IOException ex) {
-            Logger.getLogger(PlatformServicesProviderOPSSAT.class.getName()).log(Level.SEVERE, "The Camera service was not initialized!", ex);
+            Logger.getLogger(PlatformServicesProviderOPSSAT.class.getName()).log(Level.SEVERE, 
+                    "The Camera service was not initialized!", ex);
         }
         
         gpsService.init(comServices, new GPSOPSSATAdapter(gmvServicesConsumer));

@@ -55,18 +55,18 @@ public class CFPSPPSocket implements SPPSocket {
     }
 
     public void init(Map properties) throws Exception {
-        if(System.getProperty(PROPERTY_APID) != null){
+        if (System.getProperty(PROPERTY_APID) != null) {
             apid = Integer.parseInt(System.getProperty(PROPERTY_APID));
-        }else{
+        } else {
             throw new MALException("Please set the APID on the property: " + PROPERTY_APID);
         }
-        
+
         try {
             handler = new CFPFrameHandler(new ReceiverImpl());
         } catch (IOException ex) {
             throw new MALException("Error initializing connection to socketcand!", ex);
         }
-                    
+
         handler.init();
     }
 
@@ -80,28 +80,27 @@ public class CFPSPPSocket implements SPPSocket {
         SpacePacket packet = input.take();
 
         java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINE,
-                "A Space Packet was received"
-                + "\ndata: " + packet.toString());
+                "A Space Packet was received" + "\ndata: " + packet.toString());
 
         return packet;
     }
 
     @Override
     public void send(SpacePacket packet) throws Exception {
-        if(packet == null){
+        if (packet == null) {
             throw new IOException("The packet is null!");
         }
-        
+
         synchronized (MUTEX) {
             Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINE,
                     "Sequence count: " + packet.getHeader().getSequenceCount()
                     + " - " + Arrays.toString(packet.getBody()));
-            
+
             String propNodeDest = null;
             String propVirtualC = null;
-            
+
             // Change the destination node and virtual channel based on the selected location
-            if(packet.getQosProperties() != null){
+            if (packet.getQosProperties() != null) {
                 propNodeDest = (String) packet.getQosProperties().get("esa.mo.transport.can.opssat.nodeDestination");
                 propVirtualC = (String) (String) packet.getQosProperties().get("esa.mo.transport.can.opssat.virtualChannel");
             }
@@ -109,9 +108,9 @@ public class CFPSPPSocket implements SPPSocket {
             // Defaults (dst node: CCSDS Engine; VC: 2)
             this.destinationNode = (propNodeDest != null) ? Integer.parseInt(propNodeDest) : CANBusConnector.CAN_NODE_NR_DST_CCSDS;
             this.virtualChannel = (propVirtualC != null) ? Integer.parseInt(propVirtualC) : 2;
-        
-            java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINE, 
-                "destinationNode: " + this.destinationNode + " - virtualChannel: " + this.virtualChannel);
+
+            java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINE,
+                    "destinationNode: " + this.destinationNode + " - virtualChannel: " + this.virtualChannel);
 
             writer.send(packet);
         }
@@ -133,15 +132,14 @@ public class CFPSPPSocket implements SPPSocket {
 
         @Override
         public void receive(final byte[] array) {
-            java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINEST,
+            java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINE,
                     "Data Received on the glue code...");
-            
+
             /* The Arrays.toString would make it go slower even if the level is just set to FINEST
             java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINEST,
                     "Data Received on the glue code..."
                     + "\ndata: " + Arrays.toString(array));
-            */
-
+             */
             SPPReader reader = new SPPReader(new ByteArrayInputStream(array));
             SpacePacket packet;
 
@@ -152,10 +150,12 @@ public class CFPSPPSocket implements SPPSocket {
                 packet = reader.getPacket();
             }
 
-            if(apid == packet.getHeader().getApid()){
+            if (apid == packet.getHeader().getApid()) {
                 input.offer(packet);
-            }else{
-                java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINER, "The message is not for us!");
+            } else {
+                java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINE,
+                        "The message is not for us! We are apid=" + apid
+                        + " and the message is apip=" + packet.getHeader().getApid());
             }
         }
     }

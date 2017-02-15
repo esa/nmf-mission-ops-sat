@@ -28,6 +28,9 @@ import esa.mo.sm.impl.util.ShellCommander;
 import esa.mo.transport.can.opssat.CANReceiveInterface;
 import esa.mo.transport.can.opssat.CFPFrameHandler;
 import java.io.IOException;
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.MALException;
@@ -46,6 +49,7 @@ import org.ccsds.moims.mo.mc.parameter.structures.ParameterDefinitionDetails;
 import org.ccsds.moims.mo.mc.parameter.structures.ParameterDefinitionDetailsList;
 import org.ccsds.moims.mo.mc.structures.ArgumentDefinitionDetails;
 import org.ccsds.moims.mo.mc.structures.ArgumentDefinitionDetailsList;
+import org.ccsds.moims.mo.mc.structures.AttributeValue;
 import org.ccsds.moims.mo.mc.structures.AttributeValueList;
 import org.ccsds.moims.mo.mc.structures.ConditionalReferenceList;
 import org.ccsds.moims.mo.mc.structures.Severity;
@@ -55,6 +59,8 @@ import org.ccsds.moims.mo.opssat_pf.gps.consumer.GPSAdapter;
 public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
 
     private CFPFrameHandler handler;
+
+    private final static String DATE_PATTERN = "dd MMM yyyy HH:mm:ss.SSS";
 
     private static final String PARAMETER_CURRENT_PARTITION = "CurrentPartition";
     private static final String CMD_CURRENT_PARTITION = "mount -l | grep \"on / \" | grep -o 'mmc.*[0-9]p[0-9]'";
@@ -161,7 +167,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
 
         ActionDefinitionDetails actionDef2 = new ActionDefinitionDetails(
                 new Identifier(ACTION_CLOCK_SET_TIME),
-                "Sets the clock using a diff between the on-board time and the real time.",
+                "Sets the clock using a diff between the on-board time and the desired time.",
                 Severity.INFORMATIONAL,
                 new UShort(0),
                 arguments2,
@@ -301,6 +307,22 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
             String output = shell.runCommandAndGetOutputMessage("./led_test.sh");
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Output: " + output);
 
+            return null; // Success!
+        }
+
+        if (ACTION_CLOCK_SET_TIME.equals(name.getValue())) {
+            if(attributeValues.isEmpty()){
+                return new UInteger(0); // Error!
+            }
+            
+            AttributeValue aVal = attributeValues.get(0); // Extract the delta!
+            long delta = (Long) HelperAttributes.attribute2JavaType(aVal.getValue());
+
+            String str = (new SimpleDateFormat(DATE_PATTERN)).format(new Date(System.currentTimeMillis() + delta));
+            
+            ShellCommander shell = new ShellCommander();
+            Process output = shell.runCommand("date -s \""+ str + " UTC\" | hwclock --systohc");
+            output.destroy();
 
             return null; // Success!
         }
