@@ -321,8 +321,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
             String str = (new SimpleDateFormat(DATE_PATTERN)).format(new Date(System.currentTimeMillis() + delta));
             
             ShellCommander shell = new ShellCommander();
-            Process output = shell.runCommand("date -s \""+ str + " UTC\" | hwclock --systohc");
-            output.destroy();
+            shell.runCommand("date -s \""+ str + " UTC\" | hwclock --systohc");
 
             return null; // Success!
         }
