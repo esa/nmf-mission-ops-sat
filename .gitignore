@@ -12,3 +12,17 @@
 /GROUND_MO_PROXY_OPS-SAT/target/
 /LIB_NANOSAT_MO_FRAMEWORK_OPS_SAT/target/
 /linux-images-manager/target/
+
+
+**/**/target/
+**/**/libs/
+**/**/.svn/
+**/comArchive.db
+**/comArchive.db-journal
+**/target/
+**/libs/
+**/.svn/
+**/providerURIs.properties
+**/providerURIsSecondary.properties
+
+
