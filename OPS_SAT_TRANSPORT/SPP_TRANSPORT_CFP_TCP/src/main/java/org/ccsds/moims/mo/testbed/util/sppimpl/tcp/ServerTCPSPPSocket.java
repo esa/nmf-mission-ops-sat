@@ -88,14 +88,14 @@ public class ServerTCPSPPSocket implements SPPSocket {
 
   public SpacePacket receive() throws Exception {
     SpacePacket packet = input.take();
-    if (logger.isLoggable(BasicLevel.DEBUG))
+//    if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Received: " + packet);
     return packet;
   }
 
   public void send(SpacePacket packet) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "ServerTCPSPPSocket.send(" + packet + ')');
+      logger.log(BasicLevel.INFO, "ServerTCPSPPSocket.send(" + packet + ')');
     
     channel.send(packet);
   }

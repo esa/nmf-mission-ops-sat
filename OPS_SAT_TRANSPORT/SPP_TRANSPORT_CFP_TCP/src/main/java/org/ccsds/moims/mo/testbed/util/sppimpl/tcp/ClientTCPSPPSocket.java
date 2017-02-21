@@ -93,8 +93,13 @@ public class ClientTCPSPPSocket implements SPPSocket {
 
     public SpacePacket receive() throws Exception {
         SpacePacket packet = channel.receive();
-        
-        while(packet.getHeader().getApid() != apid){
+
+        // Reject all messages coming from the Nanomind (apid==10)
+        while(packet.getHeader().getApid() == 10){
+            if (logger.isLoggable(BasicLevel.DEBUG)) {
+                logger.log(BasicLevel.DEBUG, "Rejecting: " + packet);
+            }
+            
             packet = channel.receive();
         }
 
