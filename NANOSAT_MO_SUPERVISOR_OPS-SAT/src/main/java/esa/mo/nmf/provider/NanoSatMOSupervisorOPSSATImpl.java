@@ -57,29 +57,6 @@ public class NanoSatMOSupervisorOPSSATImpl extends NanoSatMOSupervisor {
         super(new MCOPSSATAdapter(),
                 new PlatformServicesConsumer(),
                 new PackageManagementBackendNMFPackage());
-
-            /*
-        DataReceivedAdapter adapter = new DataReceivedAdapter(new Long(0));
-        PixelResolution resolution = new PixelResolution(new UInteger(IMAGE_LENGTH), new UInteger(IMAGE_WIDTH));
-        try {
-            super.getPlatformServices().getCameraService().takePicture(resolution, PictureFormat.RAW, new Duration(), adapter);
-
-            // Set the transport layer
-            // To be done...
-        } catch (MALInteractionException ex) {
-            Logger.getLogger(NanoSatMOSupervisorOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (MALException ex) {
-            Logger.getLogger(NanoSatMOSupervisorOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
-        }
-             */
-
-
-            /*
-            Logger rootLog = Logger.getLogger("");
-            rootLog.setLevel( Level.FINEST );
-            rootLog.getHandlers()[0].setLevel( Level.FINEST ); // Default console handler
-             */
-
     }
 
     @Override

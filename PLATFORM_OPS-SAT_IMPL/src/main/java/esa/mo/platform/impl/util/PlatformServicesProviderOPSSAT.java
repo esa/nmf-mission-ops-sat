@@ -45,13 +45,7 @@ public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderI
 
 //    @Override
     public void init(COMServicesProvider comServices, GMVServicesConsumer gmvServicesConsumer) throws MALException {
-        try {
-            cameraService.init(comServices, new CameraOPSSATAdapter());
-        } catch (IOException ex) {
-            Logger.getLogger(PlatformServicesProviderOPSSAT.class.getName()).log(Level.SEVERE, 
-                    "The Camera service was not initialized!", ex);
-        }
-        
+        cameraService.init(comServices, new CameraOPSSATAdapter());
         gpsService.init(comServices, new GPSOPSSATAdapter(gmvServicesConsumer));
     }
 

@@ -27,8 +27,8 @@ import esa.mo.nmf.MonitorAndControlNMFAdapter;
 import esa.mo.sm.impl.util.ShellCommander;
 import esa.mo.transport.can.opssat.CANReceiveInterface;
 import esa.mo.transport.can.opssat.CFPFrameHandler;
+import esa.mo.transport.can.opssat.CFPFrameIdentifier;
 import java.io.IOException;
-import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
@@ -181,8 +181,8 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         LongList actionObjIds = registration.registerActions(actionDefs);
 
         // Start the GMV consumer
-//        gmvServicesConsumer = new GMVServicesConsumer();
-//        gmvServicesConsumer.init();
+        gmvServicesConsumer = new GMVServicesConsumer();
+        gmvServicesConsumer.init();
 
         /*
         long startTime = System.currentTimeMillis();
@@ -234,9 +234,9 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         */
         
         
-/*
-        int value1 = 0x150483DF;
-        int value2 = 0x150C63DF;
+        /*
+        int value1 = 0x1504972B;
+        int value2 = 0x1A04CD79;
         int value3 = 0x150803DF;
         
         CFPFrameIdentifier aaaa1 = new CFPFrameIdentifier(value1);
@@ -245,7 +245,9 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Check 1: " + aaaa1.toString());
         Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Check 2: " + aaaa2.toString());
         Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Check 3: " + aaaa3.toString());
-*/
+        */
+        
+        
 /*
         try {
 //            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData("GPGGALONG", new MCGPSAdapter());
@@ -257,7 +259,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         } catch (MALException ex) {
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
-  */      
+*/
     }
 
     @Override
@@ -321,7 +323,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
             String str = (new SimpleDateFormat(DATE_PATTERN)).format(new Date(System.currentTimeMillis() + delta));
             
             ShellCommander shell = new ShellCommander();
-            shell.runCommand("date -s \""+ str + " UTC\" | hwclock --systohc");
+            shell.runCommand("date -s \"" + str + " UTC\" | hwclock --systohc");
 
             return null; // Success!
         }

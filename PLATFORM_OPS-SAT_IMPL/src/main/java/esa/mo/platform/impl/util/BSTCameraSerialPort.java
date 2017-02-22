@@ -44,7 +44,7 @@ import purejavacomm.SerialPort;
  *
  *
  */
-public class CameraSerialPortOPSSAT {
+public class BSTCameraSerialPort {
 
     private final static int TIMEOUT = 500; // milliseconds
 
@@ -159,7 +159,7 @@ public class CameraSerialPortOPSSAT {
             writer.newLine();
             writer.flush();
         } catch (IOException ex) {
-            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BSTCameraSerialPort.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -176,7 +176,7 @@ public class CameraSerialPortOPSSAT {
 
             return str;
         } catch (IOException ex) {
-            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BSTCameraSerialPort.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return null;
@@ -288,7 +288,7 @@ public class CameraSerialPortOPSSAT {
             try {
                 file.seek(off * 4096);
             } catch (IOException ex) {
-                Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(BSTCameraSerialPort.class.getName()).log(Level.SEVERE, null, ex);
             }
 
             int bytesPerPixel = 2;
@@ -311,9 +311,9 @@ public class CameraSerialPortOPSSAT {
 
             return data;
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BSTCameraSerialPort.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BSTCameraSerialPort.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return null;
@@ -322,41 +322,41 @@ public class CameraSerialPortOPSSAT {
     public byte[] takePiture() throws IOException {
         try {
             String out1 = this.clearAllImages();
-            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Out1: " + out1);
+            Logger.getLogger(BSTCameraSerialPort.class.getName()).log(Level.INFO, "Out1: " + out1);
 
             Thread.sleep(3000);
 
             String out2 = this.setExposureTime(1);
-            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Out2: " + out2);
+            Logger.getLogger(BSTCameraSerialPort.class.getName()).log(Level.INFO, "Out2: " + out2);
 
             Thread.sleep(3000);
 
             String out3 = this.reconfigure();
-            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Out3: " + out3);
+            Logger.getLogger(BSTCameraSerialPort.class.getName()).log(Level.INFO, "Out3: " + out3);
 
             Thread.sleep(3000);
 
             String out4 = this.shoot();
-            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Out4: " + out4);
+            Logger.getLogger(BSTCameraSerialPort.class.getName()).log(Level.INFO, "Out4: " + out4);
 
             Thread.sleep(3000);
 
             String out5 = this.startShooting();
-            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Out5: " + out5);
+            Logger.getLogger(BSTCameraSerialPort.class.getName()).log(Level.INFO, "Out5: " + out5);
 
             Thread.sleep(5000);
 
             String out6 = this.listImages();
-            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Out6: " + out6);
+            Logger.getLogger(BSTCameraSerialPort.class.getName()).log(Level.INFO, "Out6: " + out6);
 
             long offset = this.getImageOffset();
-            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Offset: " + offset);
+            Logger.getLogger(BSTCameraSerialPort.class.getName()).log(Level.INFO, "Offset: " + offset);
 
             Thread.sleep(6000);
 
             return this.copyImage(offset);
         } catch (InterruptedException ex) {
-            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BSTCameraSerialPort.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return null;

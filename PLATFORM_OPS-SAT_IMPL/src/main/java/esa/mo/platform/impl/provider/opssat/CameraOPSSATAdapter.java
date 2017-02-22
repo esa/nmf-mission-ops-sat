@@ -22,7 +22,7 @@ package esa.mo.platform.impl.provider.opssat;
 
 import esa.mo.helpertools.helpers.HelperTime;
 import esa.mo.platform.impl.provider.gen.CameraAdapterInterface;
-import esa.mo.platform.impl.util.CameraSerialPortOPSSAT;
+import esa.mo.platform.impl.util.BSTCameraSerialPort;
 import esa.opssat.camera.processing.OPSSATCameraDebayering;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -45,10 +45,20 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface {
     private final static Duration MINIMUM_DURATION = new Duration(10); // 10 seconds for now...
     private final static int IMAGE_LENGTH = 2048;
     private final static int IMAGE_WIDTH = 1944;
-    private final CameraSerialPortOPSSAT bstCamera;
+    private final BSTCameraSerialPort bstCamera;
 
-    public CameraOPSSATAdapter() throws IOException {
-        bstCamera = new CameraSerialPortOPSSAT();
+    public CameraOPSSATAdapter() {
+        bstCamera = new BSTCameraSerialPort();
+
+        try {
+            this.initBSTCamera();
+        } catch (IOException ex) {
+            Logger.getLogger(CameraOPSSATAdapter.class.getName()).log(Level.SEVERE,
+                    "BST Camera adapter could not be initialized!", ex);
+        }
+    }
+
+    public final void initBSTCamera() throws IOException {
         bstCamera.init();
     }
 

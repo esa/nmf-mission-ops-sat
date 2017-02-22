@@ -49,7 +49,7 @@ public class SPPReader {
 
     private byte[] inCrcBuffer;
     private InputStream is;
-    
+
     private SpacePacket packet;
 
     public SPPReader(InputStream is) {
@@ -74,13 +74,13 @@ public class SPPReader {
     public SpacePacket receive() throws Exception {
 
         int apidQualifier;
-        
-        if (SPPHelper.isAPIDqualifierInMessage){
+
+        if (SPPHelper.isAPIDqualifierInMessage) {
             // 1- Read the APID qualifier
             read(apidQualifierBuffer, 0, 2);
             // Logger.getLogger(this.getClass().getName()).log(Level.INFO, "APID Qualifier: {0}",bytesToHex(apidQualifierBuffer));
             apidQualifier = (((apidQualifierBuffer[0] & 0xFF) << 8) | (apidQualifierBuffer[1] & 0xFF));
-        }else{
+        } else {
             apidQualifier = SPPHelper.defaultAPIDqualifier;
         }
 
@@ -108,7 +108,7 @@ public class SPPReader {
         int pkt_length_value = inHeaderBuffer[4] & 0xFF;
         pkt_length_value = ((pkt_length_value << 8) | (inHeaderBuffer[5] & 0xFF)) + 1;
 
-        if(SPPHelper.isCRCEnabled){
+        if (SPPHelper.isCRCEnabled) {
             pkt_length_value = pkt_length_value - 2;
         }
         SpacePacketHeader sph = outPacket.getHeader();
@@ -119,7 +119,7 @@ public class SPPReader {
         sph.setSequenceCount(seq_count);
         sph.setSequenceFlags(segt_flag);
 
-    // Don't read the CRC (last two bytes)
+        // Don't read the CRC (last two bytes)
 //        int dataLength = pkt_length_value - 2;
         int dataLength = pkt_length_value;
         byte[] data = outPacket.getBody();
@@ -133,26 +133,27 @@ public class SPPReader {
         outPacket.setBody(trimmedBody);
 
         // Read CRC
-        if(SPPHelper.isCRCEnabled){
+        if (SPPHelper.isCRCEnabled) {
             int CRC = SPPHelper.computeCRC(inHeaderBuffer, data, outPacket.getOffset(), dataLength);
 
-             is.read(inCrcBuffer);
-             int readCRC = inCrcBuffer[0] & 0xFF;
-             readCRC = (readCRC<<8) | (inCrcBuffer[1] & 0xFF);
-             this.packet = outPacket;
+            is.read(inCrcBuffer);
+            int readCRC = inCrcBuffer[0] & 0xFF;
+            readCRC = (readCRC << 8) | (inCrcBuffer[1] & 0xFF);
+            this.packet = outPacket;
 
-             if (CRC != readCRC) throw new Exception("CRC Error: expected=" + CRC + " , read=" + readCRC);
-            
+            if (CRC != readCRC) {
+                throw new Exception("CRC Error: expected=" + CRC + " , read=" + readCRC);
+            }
         }
 
         return outPacket;
     }
-    
-    public SpacePacket getPacket(){
+
+    public SpacePacket getPacket() {
         return packet;
     }
-    
-/*
+
+    /*
     public static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
         for (int j = 0; j < bytes.length; j++) {
@@ -162,6 +163,5 @@ public class SPPReader {
         }
         return new String(hexChars);
     }
-*/
-
+     */
 }
