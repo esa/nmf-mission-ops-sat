@@ -20,6 +20,10 @@
  */
 package esa.mo.nmf.groundmoproxy;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.ccsds.moims.mo.mal.structures.URI;
+
 
 /**
  * The Ground MO Proxy for OPS-SAT
@@ -28,6 +32,8 @@ package esa.mo.nmf.groundmoproxy;
  */
 public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
 
+    private final ProtocolBridge protocolBridge = new ProtocolBridge(); 
+    
     /**
      * Ground MO Proxy for OPS-SAT
      *
@@ -35,9 +41,25 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
     public GroundMOProxyOPSSATImpl() {
         super();
         
-        super.init();
-    }
+        try {
+            // Initialize the protocol bridge services and expose them using TCP/IP !
 
+            // Initialize the Protocol Bridge
+            protocolBridge.init("maltcp", "rmi");
+            final URI routedURI = protocolBridge.getRoutingProtocolA();
+
+//            final URI routedURI = new URI("aaaa");
+            
+            // Initialize the pure protocol bridge for the services without extension
+            final URI centralDirectoryServiceURI = new URI("rmi://131.176.83.10:1024/1024-NanoSat_MO_Supervisor-Directory");
+            super.init(centralDirectoryServiceURI, routedURI);
+            
+            
+        } catch (Exception ex) {
+            Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
 
     /**
      * Main command line entry point.
