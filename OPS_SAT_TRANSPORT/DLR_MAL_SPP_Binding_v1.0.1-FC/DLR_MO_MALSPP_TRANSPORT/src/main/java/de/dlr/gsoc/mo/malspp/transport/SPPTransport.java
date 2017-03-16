@@ -392,7 +392,7 @@ public class SPPTransport implements MALTransport {
 			byte[] trimmedBody = new byte[spacePacket.getLength()];
 			System.arraycopy(spacePacket.getBody(), 0, trimmedBody, 0, spacePacket.getLength());
 			spacePacket.setBody(trimmedBody);
-*/
+                        */
 
                         // retrieve effective QoS properties resolving per-application parameters
 			Configuration config = new Configuration(qosProperties);
@@ -424,7 +424,7 @@ public class SPPTransport implements MALTransport {
 			LOGGER.log(Level.SEVERE, SOCKET_ERROR, ex);
 			currentThread.interrupt();
 		} catch (InterruptedException ex) {
-			LOGGER.log(Level.INFO, THREAD_INTERRUPTED, ex);
+			LOGGER.log(Level.INFO, THREAD_INTERRUPTED);
 			currentThread.interrupt();
 		} catch (MALException ex) {
 			// TODO: Is there any other way of handling reception exceptions?
@@ -477,15 +477,12 @@ public class SPPTransport implements MALTransport {
 				thread.start();
                               */  
                             
-                            class OnMessageHandler implements Runnable {
-
+                            executor.submit(new Runnable(){
                                     @Override
                                     public void run() {
                                             listener.onMessage(targetEndpoint, msg);
                                     }
-                            }
-
-                            executor.submit(new OnMessageHandler());
+                            });
                         }
 		} catch (MALException ex) {
 			// TODO: Is there any other way of handling reception exceptions?
@@ -572,7 +569,7 @@ public class SPPTransport implements MALTransport {
 						MALMessage msg = receivedMessages.take();
 						handleReceivedMessage(msg, qosProperties);
 					} catch (InterruptedException ex) {
-						LOGGER.log(Level.INFO, THREAD_INTERRUPTED, ex);
+						LOGGER.log(Level.INFO, THREAD_INTERRUPTED);
 						break;
 					}
 				}

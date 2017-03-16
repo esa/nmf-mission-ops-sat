@@ -35,6 +35,7 @@
 package org.ccsds.moims.mo.testbed.util.sppimpl.tcp;
 
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import org.ccsds.moims.mo.mal.MALException;
@@ -56,7 +57,8 @@ public class ClientTCPSPPSocket implements SPPSocket {
     private int port;
     private SPPChannel channel;
 
-    private int lastSPPSequenceCount = -1;
+//    private int lastSPPSequenceCount = -1;
+    private final HashMap<Integer, Integer> lastSPPsMap = new HashMap<Integer, Integer>();
     private int apid = -1;
 
     public ClientTCPSPPSocket() {
@@ -95,24 +97,27 @@ public class ClientTCPSPPSocket implements SPPSocket {
         SpacePacket packet = channel.receive();
 
         // Reject all messages coming from the Nanomind (apid==10)
-        while(packet.getHeader().getApid() == 10){
+        while (packet.getHeader().getApid() == 10) {
             if (logger.isLoggable(BasicLevel.DEBUG)) {
                 logger.log(BasicLevel.DEBUG, "Rejecting: " + packet);
             }
-            
+
             packet = channel.receive();
         }
 
+        int packetAPID = packet.getHeader().getApid();
         final int sequenceCount = packet.getHeader().getSequenceCount();
+        final int previous = (lastSPPsMap.get(packetAPID) != null) ? lastSPPsMap.get(packetAPID) : -1;
 
-        if (lastSPPSequenceCount != sequenceCount - 1
-                && lastSPPSequenceCount != 16383
+        if (previous != sequenceCount - 1
+                && previous != 16383
                 && sequenceCount != 0) { // Exclude also the transition zone
-            java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO, 
-                    "Out-of-order detected! Sequence count: " + sequenceCount + " - Last: " + lastSPPSequenceCount);
+            java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO,
+                    "Out-of-order detected! Sequence count: " + sequenceCount + " - Last: " + previous
+                    + " (For APID:" + packetAPID + ")");
         }
 
-        lastSPPSequenceCount = sequenceCount;
+        lastSPPsMap.put(packetAPID, sequenceCount);
 
         if (logger.isLoggable(BasicLevel.DEBUG)) {
             logger.log(BasicLevel.INFO, "Received: " + packet);

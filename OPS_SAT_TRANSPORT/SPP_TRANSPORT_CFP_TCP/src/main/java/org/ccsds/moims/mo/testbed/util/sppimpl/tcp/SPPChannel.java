@@ -84,12 +84,6 @@ public class SPPChannel {
 
   public SpacePacket receive() throws Exception {
     SpacePacket packet = reader.receive();
-         
-    // Filter out packets that are not for us
-//    while(apid != packet.getHeader().getApid()){
-//      packet = reader.receive();
-//    }
-
     return packet;
   }
 

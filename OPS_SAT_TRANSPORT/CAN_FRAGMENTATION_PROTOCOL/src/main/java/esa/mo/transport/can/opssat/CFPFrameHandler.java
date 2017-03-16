@@ -42,7 +42,7 @@ public class CFPFrameHandler implements FrameListener {
      * Maximum Transmission Unit for CSP over CAN 8 (size of CAN data) * 32
      * (number of "REMAINING"s) = 256
      */
-    private static final int CSP_CAN_MTU = 256;
+    public static final int CSP_CAN_MTU = 256;
 
     // Max number of retransmissions
     private static final int MAX_NUMBER_OF_RETRANSMISSIONS = 3; // 3 Strikes and you're out!
@@ -54,7 +54,7 @@ public class CFPFrameHandler implements FrameListener {
     // The DESTRUCTION_ENABLED flag set as true was throwing a: java.lang.OutOfMemoryError: unable to create new native thread
     // There is a tradeoff between memory used vs. processing power. False will always use around 2 MB to store the buffers
     private static final boolean DESTRUCTION_ENABLED = false; // Do we want to destroy the buffer after a timeout?
-    private static final boolean RETRANSMISSION_ENABLED = true;
+    private static final boolean RETRANSMISSION_ENABLED = false;
 
     private static final String PROPERTY_VIRTUAL_CHANNEL = "esa.mo.transport.can.opssat.virtualChannel";
     public static final String PROPERTY_NODE_SOURCE = "esa.mo.transport.can.opssat.nodeSource";

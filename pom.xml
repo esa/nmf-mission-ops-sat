@@ -23,10 +23,10 @@
         <relativePath/>
     </parent>
   
-    <artifactId>PLATFORM_OPS-SAT</artifactId>
+    <artifactId>NMF_MISSION_OPS-SAT</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>NMF Platform: OPS-SAT</name>
+    <name>NMF Mission: OPS-SAT</name>
 
     <organization>
         <name>ESA</name>

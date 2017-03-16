@@ -75,6 +75,7 @@ public class CANBusConnector {
     private int nInterval = 1;
     
     private final Bus bus = new Bus();
+    private boolean running = false;
 
     public CANBusConnector(final FrameListener receiver) throws IOException {
 
@@ -105,13 +106,14 @@ public class CANBusConnector {
     }
     
     public void init(){
+        running = true;
         sendingThread = new Thread() {
             @Override
             public void run() {
                 this.setName("CANBusConnector_startSendingThread");
                 Frame canFrame;
                 int counter = 0;
-                while (true) {
+                while (running) {
                     try {
                         // This code is absolutely ugly however this is a workaround
                         // for the problem on the CAN bus. The CAN bus will add a
@@ -163,6 +165,7 @@ public class CANBusConnector {
     }
 
     public void close() {
+        running = false;
         bus.destroy();
     }
 

@@ -155,7 +155,7 @@ public class CFPSPPSocket implements SPPSocket {
             } else {
                 java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINE,
                         "The message is not for us! We are apid=" + apid
-                        + " and the message is apip=" + packet.getHeader().getApid());
+                        + " and the message is apid=" + packet.getHeader().getApid());
             }
         }
     }
@@ -163,7 +163,7 @@ public class CFPSPPSocket implements SPPSocket {
     public class SenderImpl extends ByteArrayOutputStream {
 
         public SenderImpl() {
-            super(256);
+            super(CFPFrameHandler.CSP_CAN_MTU);
         }
 
         @Override

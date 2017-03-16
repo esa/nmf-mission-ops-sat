@@ -107,7 +107,8 @@ public class SPPEndpoint implements MALEndpoint {
 	@Override
 	public void stopMessageDelivery() throws MALException {
 		if (isClosed) {
-			throw new MALException(ENDPOINT_CLOSED);
+                        return;
+//			throw new MALException(ENDPOINT_CLOSED);
 		}
 		isDeliveryStopped = true;
 	}
@@ -479,9 +480,15 @@ public class SPPEndpoint implements MALEndpoint {
 
 		try {
 			if (isLocalDestination) {
-				((SPPMessageBody) msg.getBody()).prepareInProcessBody();
-				transport.injectReceivedMessage(msg);
-				return;
+                		try {
+                        		((SPPMessageBody) msg.getBody()).prepareInProcessBody();
+                                	transport.injectReceivedMessage(msg);
+                                        return;
+                                } catch (Exception ex) {
+                                        Logger.getLogger(SPPEndpoint.class.getName()).log(Level.SEVERE, "Maybe the configuration file is not being read!", ex);
+                                        MALStandardError error = new MALStandardError(MALHelper.INTERNAL_ERROR_NUMBER, ex.getMessage());
+                                        throw new MALTransmitErrorException(msg.getHeader(), error, msg.getQoSProperties());
+                                }
 			}
 
 			Configuration config = new Configuration(msg.getQoSProperties());

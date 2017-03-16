@@ -25,6 +25,8 @@ import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -262,6 +264,15 @@ public class Configuration {
 		// Mix it in this order so it is possible to dynamically reconfigure the mapping
 		// configuration parameters.
 		AppId appId = new AppId(primaryQualifier, primaryApid);
+                
+                if(mappingConfs.get(appId) == null){
+                    /* Logger.getLogger(Configuration.class.getName()).log(Level.INFO,
+                    "The apid:" + primaryApid + " is not defined in the mcp file. Taking the values for apid=-1"); */
+                    
+                    // Take default configuration (The file must have APID=-1)
+                    appId = new AppId(primaryQualifier, (short) -1);
+                }
+                
 		return mix(mappingConfs.get(appId), properties);
 	}
 
