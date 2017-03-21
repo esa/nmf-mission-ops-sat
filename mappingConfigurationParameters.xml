@@ -43,6 +43,7 @@
 			<format unit="second">00011100</format>
 		</duration>
 		<authenticationId>000000</authenticationId>
+		<domain>esa.OPS-SAT.CTT_OPS-SAT</domain>
 		<networkZone>esa.OPS-SAT.ground.CTT</networkZone>
 		<sessionName>LIVE</sessionName>
 		<priority>4294967295</priority>
@@ -67,11 +68,11 @@
 		<duration>
 			<format unit="second">00101111</format>
 		</duration>
+		<domain>esa.OPS-SAT.Nanomind</domain>
 		<networkZone>esa.OPS-SAT.space.Nanomind</networkZone>
 		<sessionName>LIVE</sessionName>
 		<!--
 		<authenticationId>0A0B0C</authenticationId>
-		<domain>malspp.test.domain</domain>
 		<priority>4294967295</priority>
 		-->
 	</app>

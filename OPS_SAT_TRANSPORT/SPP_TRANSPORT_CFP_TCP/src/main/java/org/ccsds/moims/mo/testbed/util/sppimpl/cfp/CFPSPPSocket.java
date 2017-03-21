@@ -79,7 +79,7 @@ public class CFPSPPSocket implements SPPSocket {
     public SpacePacket receive() throws Exception {
         SpacePacket packet = input.take();
 
-        java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINE,
+        java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINER,
                 "A Space Packet was received" + "\ndata: " + packet.toString());
 
         return packet;
@@ -132,7 +132,7 @@ public class CFPSPPSocket implements SPPSocket {
 
         @Override
         public void receive(final byte[] array) {
-            java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINE,
+            java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINER,
                     "Data Received on the glue code...");
 
             /* The Arrays.toString would make it go slower even if the level is just set to FINEST
@@ -150,13 +150,17 @@ public class CFPSPPSocket implements SPPSocket {
                 packet = reader.getPacket();
             }
 
+            input.offer(packet);
+
+            /* The filtering cannot happen here because we also need to check the uri in the secondary header
             if (apid == packet.getHeader().getApid()) {
                 input.offer(packet);
             } else {
-                java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINE,
+                java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.INFO,
                         "The message is not for us! We are apid=" + apid
                         + " and the message is apid=" + packet.getHeader().getApid());
             }
+            */
         }
     }
 

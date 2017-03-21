@@ -177,7 +177,6 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         actionDefs.add(actionDef1);
         actionDefs.add(actionDef2);
 
-        
         LongList actionObjIds = registration.registerActions(actionDefs);
 
         // Start the GMV consumer
@@ -231,14 +230,13 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        */
-        
+         */
         
         /*
-        int value1 = 0x1504972B;
-        int value2 = 0x1A04CD79;
+        int value1 = 0x1A04CFB8;
+        int value2 = 0x15049065;
         int value3 = 0x150803DF;
-        
+
         CFPFrameIdentifier aaaa1 = new CFPFrameIdentifier(value1);
         CFPFrameIdentifier aaaa2 = new CFPFrameIdentifier(value2);
         CFPFrameIdentifier aaaa3 = new CFPFrameIdentifier(value3);
@@ -246,20 +244,17 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Check 2: " + aaaa2.toString());
         Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Check 3: " + aaaa3.toString());
         */
-        
-        
-/*
+
         try {
 //            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData("GPGGALONG", new MCGPSAdapter());
-            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData("log gpggalonga\n", new MCGPSAdapter());
-//            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().asyncGetGPSData("log gpggalonga\n", new MCGPSAdapter());
+//            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData("log gpggalonga\n", new MCGPSAdapter());
+            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().asyncGetGPSData("log gpggalonga\n", new MCGPSAdapter());
 //            gmvServicesConsumer.getPowerNanomindService().getPowerNanomindStub().powerOnSBandTX();
         } catch (MALInteractionException ex) {
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
         } catch (MALException ex) {
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
-*/
     }
 
     @Override
@@ -313,15 +308,15 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         }
 
         if (ACTION_CLOCK_SET_TIME.equals(name.getValue())) {
-            if(attributeValues.isEmpty()){
+            if (attributeValues.isEmpty()) {
                 return new UInteger(0); // Error!
             }
-            
+
             AttributeValue aVal = attributeValues.get(0); // Extract the delta!
             long delta = (Long) HelperAttributes.attribute2JavaType(aVal.getValue());
 
             String str = (new SimpleDateFormat(DATE_PATTERN)).format(new Date(System.currentTimeMillis() + delta));
-            
+
             ShellCommander shell = new ShellCommander();
             shell.runCommand("date -s \"" + str + " UTC\" | hwclock --systohc");
 
@@ -334,14 +329,35 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
     private class MCGPSAdapter extends GPSAdapter {
 
         @Override
-        public void getGPSDataResponseReceived(org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader, String data, java.util.Map qosProperties) {
-            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "1. Data: " + data);
+        public void getGPSDataAckReceived(org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader, java.util.Map qosProperties) {
+            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "1. ACK Received!");
         }
 
         @Override
         public void getGPSDataUpdateReceived(org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader, String data, java.util.Map qosProperties) {
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "2. Data: " + data);
         }
+
+        @Override
+        public void getGPSDataResponseReceived(org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader, String data, java.util.Map qosProperties) {
+            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "3. Data: " + data);
+        }
+
+        @Override
+        public void getGPSDataAckErrorReceived(org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader, org.ccsds.moims.mo.mal.MALStandardError error, java.util.Map qosProperties) {
+            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "4.");
+        }
+
+        @Override
+        public void getGPSDataUpdateErrorReceived(org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader, org.ccsds.moims.mo.mal.MALStandardError error, java.util.Map qosProperties) {
+            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "5.");
+        }
+
+        @Override
+        public void getGPSDataResponseErrorReceived(org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader, org.ccsds.moims.mo.mal.MALStandardError error, java.util.Map qosProperties) {
+            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "6.");
+        }
+
     }
 
 }

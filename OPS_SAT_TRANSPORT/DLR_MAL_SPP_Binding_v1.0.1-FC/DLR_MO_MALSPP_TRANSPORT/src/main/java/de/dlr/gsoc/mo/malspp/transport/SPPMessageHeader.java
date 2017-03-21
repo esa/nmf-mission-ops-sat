@@ -70,6 +70,9 @@ public class SPPMessageHeader implements MALMessageHeader {
 	private Boolean isErrorMessage;
 	private final Integer offset; // only used when constructing header from Space Packet; denotes body data offset
 
+        private SPPURI sppURIFrom;
+	private SPPURI sppURITo;
+
 	public SPPMessageHeader(
 			final URI uriFrom,
 			final Blob authenticationId,
@@ -199,8 +202,6 @@ public class SPPMessageHeader implements MALMessageHeader {
 				? ((UOctet) eis.readElement(new UOctet(), null)).getValue()
 				: null;
 
-		SPPURI sppURIFrom;
-		SPPURI sppURITo;
 		if (isTCpacket) {
 			sppURIFrom = new SPPURI(secondaryApidQualifier, secondaryApid, sourceIdentifier);
 			sppURITo = new SPPURI(primaryApidQualifier, primaryApid, destinationIdentifier);
@@ -279,6 +280,14 @@ public class SPPMessageHeader implements MALMessageHeader {
 		}
 		throw new MALException();
 	}
+        
+        public SPPURI getSPPURIFrom(){
+            return sppURIFrom;
+        }
+
+        public SPPURI getSPPURITo(){
+            return sppURITo;
+        }
 
 	// Array for mapping SDU type to interaction stages.
 	private static final UOctet[] SDU_STAGES = new UOctet[]{

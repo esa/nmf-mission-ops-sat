@@ -383,7 +383,7 @@ public class SPPTransport implements MALTransport {
 		try {
 			SpacePacket spacePacket = sppSocket.receive(); // blocks until a space packet has been received
 
-			// PENDING: SPP TCP implementation allocates a new Space Packet with a body size of
+                        // PENDING: SPP TCP implementation allocates a new Space Packet with a body size of
 			// 65536 bytes. If the received Space Packet is smaller, the body byte array is not
 			// trimmed to fit. Here: Create new byte array of right size, copy contents, and set
 			// array as new body of the Space Packet.
@@ -396,6 +396,8 @@ public class SPPTransport implements MALTransport {
 
                         // retrieve effective QoS properties resolving per-application parameters
 			Configuration config = new Configuration(qosProperties);
+                        short apid = config.apid();
+                        
 			Map effectiveProperties = config.getEffectiveProperties(
 					spacePacket.getApidQualifier(),
 					(short) spacePacket.getHeader().getApid()
@@ -404,6 +406,10 @@ public class SPPTransport implements MALTransport {
 			MALElementStreamFactory esf = MALElementStreamFactory.newFactory(protocol, effectiveProperties);
 			SPPMessageHeader messageHeader = new SPPMessageHeader(spacePacket, esf, effectiveProperties);
 
+                        if(messageHeader.getSPPURIFrom().getAPID() != apid && messageHeader.getSPPURITo().getAPID() != apid){
+                            return null;
+                        }
+        
 			SegmentCounterId segmentCounterId = new SegmentCounterId(messageHeader);
                         SPPSegmenter segmenter;
                         
@@ -467,6 +473,18 @@ public class SPPTransport implements MALTransport {
 				sendErrorMessage(targetEndpoint, msg, error, null);
 			} else {
                             /*
+                                LOGGER.log(Level.INFO, "Local Name: " + targetEndpoint.getLocalName()
+                                + "  URI: " + targetEndpoint.getURI());
+                                
+                                LOGGER.log(Level.INFO, "\nInteractionType: " + msg.getHeader().getInteractionType().toString()
+                                + "\nDomain: " + msg.getHeader().getDomain()
+                                + "\nInteractionStage: " + msg.getHeader().getInteractionStage().toString()
+                                + "\nIsErrorMessage: " + msg.getHeader().getIsErrorMessage()
+                                + "\nNetworkZone: " + msg.getHeader().getNetworkZone()
+                                + "\nTransactionId: " + msg.getHeader().getTransactionId()
+                                + "\n");
+                              */  
+                                /*
                             Thread thread = new Thread() {
 					@Override
 					public void run() {

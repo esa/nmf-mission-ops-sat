@@ -105,12 +105,20 @@ public class CFPFrameHandler implements FrameListener {
         this.queuedForRetransmission = new LinkedBlockingQueue<Short>();
         this.readyQueue = new LinkedBlockingQueue<ReconstructMessage>();
 
-        this.node_source = (System.getProperty(PROPERTY_NODE_SOURCE) != null) ? Integer.parseInt(System.getProperty(PROPERTY_NODE_SOURCE)) : CANBusConnector.CAN_NODE_NR_SRC_SEPP;
-        this.node_destination = (System.getProperty(PROPERTY_NODE_DESTINATION) != null) ? Integer.parseInt(System.getProperty(PROPERTY_NODE_DESTINATION)) : CANBusConnector.CAN_NODE_NR_DST_CCSDS;
+        this.node_source = (System.getProperty(PROPERTY_NODE_SOURCE) != null)
+                ? Integer.parseInt(System.getProperty(PROPERTY_NODE_SOURCE))
+                : CANBusConnector.CAN_NODE_NR_SRC_SEPP;
 
-        Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO, "Node Destination: " + this.node_destination + "\nProperty: " + (System.getProperty(PROPERTY_NODE_DESTINATION) != null));
+        this.node_destination = (System.getProperty(PROPERTY_NODE_DESTINATION) != null)
+                ? Integer.parseInt(System.getProperty(PROPERTY_NODE_DESTINATION))
+                : CANBusConnector.CAN_NODE_NR_DST_CCSDS;
 
-        this.virtualChannel = (System.getProperty(PROPERTY_VIRTUAL_CHANNEL) != null) ? Integer.parseInt(System.getProperty(PROPERTY_VIRTUAL_CHANNEL)) : DEFAULT_VIRTUAL_CHANNEL;
+        Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.FINE, "Node Destination: " + this.node_destination
+                + "\nProperty: " + (System.getProperty(PROPERTY_NODE_DESTINATION) != null));
+
+        this.virtualChannel = (System.getProperty(PROPERTY_VIRTUAL_CHANNEL) != null)
+                ? Integer.parseInt(System.getProperty(PROPERTY_VIRTUAL_CHANNEL))
+                : DEFAULT_VIRTUAL_CHANNEL;
     }
 
     public void init() {
@@ -217,8 +225,8 @@ public class CFPFrameHandler implements FrameListener {
                     try {
                         message = readyQueue.take();
 
-                        Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO,
-                                "New Message with CAN src field: " + message.getSrc());
+                        Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.FINEST,
+                                "New CAN Message with src : " + message.getSrc());
 
                         short transactionId = message.getTransactionId();
 
@@ -314,10 +322,12 @@ public class CFPFrameHandler implements FrameListener {
 
     private void sendData(final byte[] data, int startingChunk, final int transactionId,
             final boolean isRetransmissionRequest, final int destinationNode, final int virtualChannel) throws IOException {
+        /*
         Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.FINE,
                 //        Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO,
                 "Send Data Request received\ndata: "
                 + Arrays.toString(data));
+        */
 
         if (data.length > CSP_CAN_MTU) {
             Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.SEVERE,
@@ -340,12 +350,14 @@ public class CFPFrameHandler implements FrameListener {
             final int length = (i + 1 - nChunks != 0) ? 8 + i * 8 : data.length;
 
             // Split the data variable into data chunks
-            final byte[] dataChunk = Arrays.copyOfRange(data, i * 8, length);
+            final Frame canFrame = new Frame(
+                    frameIdentifier.getFrameIdentifier(),
+                    true,
+                    Arrays.copyOfRange(data, i * 8, length)
+            );
 
-            final Frame canFrame = new Frame(frameIdentifier.getFrameIdentifier(), true, dataChunk);
-
+            /*
             Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.FINEST,
-                    //                                Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO,
                     "Outgoing\nFrameIdentifier: "
                     + Integer.toHexString(frameIdentifier.getFrameIdentifier())
                     + " (" + Integer.toBinaryString(frameIdentifier.getFrameIdentifier())
@@ -354,7 +366,7 @@ public class CFPFrameHandler implements FrameListener {
                     + " - nChunks: " + nChunks
                     + ")\n"
                     + "dataChunk: " + Arrays.toString(dataChunk));
-
+             */
             // Send chunk to the CAN bus
             this.connector.sendData2Kayak(canFrame);
         }
@@ -425,8 +437,7 @@ public class CFPFrameHandler implements FrameListener {
                 + " (" + Integer.toBinaryString(frame.getIdentifier())
                 + ")\n"
                 + "dataChunk: " + Arrays.toString(frame.getData()));
-        */
-
+         */
         // Translate the Frame Identifier to CFP Frame Identifier
         CFPFrameIdentifier frameIdentifier = new CFPFrameIdentifier(frame.getIdentifier());
 
