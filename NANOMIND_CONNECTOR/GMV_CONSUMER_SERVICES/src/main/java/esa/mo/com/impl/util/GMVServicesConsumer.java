@@ -59,7 +59,6 @@ public class GMVServicesConsumer {
         System.setProperty("org.ccsds.moims.mo.mal.encoding.protocol.malspp", "de.dlr.gsoc.mo.malspp.encoding.SPPElementStreamFactory");
         System.setProperty("org.ccsds.moims.mo.malspp.test.spp.factory.class", "org.ccsds.moims.mo.testbed.util.sppimpl.cfp.CFPSPPSocketFactory");  // It is not being taken!!
         System.setProperty("helpertools.configurations.ground.Network", "SEPP");
-        System.setProperty("helpertools.configurations.ground.SessionName", "Live");
 
         // Disable some flags
         System.setProperty("org.ccsds.moims.mo.malspp.authenticationIdFlag", "false");
