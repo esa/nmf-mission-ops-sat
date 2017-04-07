@@ -83,6 +83,10 @@ public class SPPTransport implements MALTransport {
 	private boolean isClosed;
 	private Thread receiveThread = null; // is assigned on first endpoint creation
 	private Thread messageHandlerThread = null; // is assigned on first endpoint creation
+        
+        // We need to set the initial capacity to have the MAL mixing messages from different sources.
+        // For example, if I do a heavy query, I don't want to have the queue full of those messages, 
+        // but instead, a mix of those combined with other messages. This let's them work in parallel.
 	private BlockingQueue<MALMessage> receivedMessages = new LinkedBlockingQueue<>();
 	private final Map<SequenceCounterId, SPPCounter> sequenceCounters = new HashMap<>();
 	private final Map<SequenceCounterId, Queue<Short>> identifiers = new HashMap<>();

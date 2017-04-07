@@ -34,7 +34,9 @@ import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.provider.MALInteraction;
 import org.ccsds.moims.mo.mal.structures.Attribute;
 import org.ccsds.moims.mo.mal.structures.Identifier;
+import org.ccsds.moims.mo.mal.structures.IdentifierList;
 import org.ccsds.moims.mo.mal.structures.UInteger;
+import org.ccsds.moims.mo.mc.parameter.structures.ParameterRawValueList;
 import org.ccsds.moims.mo.mc.structures.AttributeValueList;
 
 /**
@@ -44,7 +46,7 @@ public class CanTestApp {
 
 //    private final NanoSatMOFrameworkInterface nanoSatMOFramework = new NanoSatMOFrameworkMonolithicImpl(new MCAdapter());
     private static final boolean SEND_DATA_BOOL = true;
-    private String parameterX = "";
+    private final String parameterX = "";
     private final CFPFrameHandler handler;
     private final Timer timer;
     private int counter = 0;
@@ -115,11 +117,10 @@ public class CanTestApp {
         }
 
         @Override
-        public Boolean onSetValue(Identifier identifier, Attribute value) {
-            
-            if ("sendValue".equals(identifier.toString())){ try {
+        public Boolean onSetValue(IdentifierList identifiers, ParameterRawValueList values) {
+            if ("sendValue".equals(identifiers.get(0).toString())){ try {
                 // parameterX was called?
-                handler.sendData(value.toString().getBytes());
+                handler.sendData(values.get(0).getRawValue().toString().getBytes());
                 } catch (IOException ex) {
                     Logger.getLogger(CanTestApp.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (InterruptedException ex) {

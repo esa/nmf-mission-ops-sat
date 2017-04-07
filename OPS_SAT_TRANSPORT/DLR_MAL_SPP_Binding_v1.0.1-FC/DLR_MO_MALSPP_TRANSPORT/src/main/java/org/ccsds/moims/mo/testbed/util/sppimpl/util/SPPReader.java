@@ -85,9 +85,11 @@ public class SPPReader {
         }
 
         SpacePacketHeader header = new SpacePacketHeader();
-        byte[] body = new byte[65536];
-        SpacePacket outPacket = new SpacePacket(header, body, 0, body.length);
+//        byte[] body = new byte[65536];
+//        SpacePacket outPacket = new SpacePacket(header, body, 0, body.length);
 
+        SpacePacket outPacket = new SpacePacket(header, null, 0, 0);
+        
         outPacket.setApidQualifier(apidQualifier);
 
         // 2- Read the Space Packet
@@ -122,15 +124,23 @@ public class SPPReader {
         // Don't read the CRC (last two bytes)
 //        int dataLength = pkt_length_value - 2;
         int dataLength = pkt_length_value;
-        byte[] data = outPacket.getBody();
+        
+        if(dataLength > 65536){
+            throw new Exception("The data length cannot be higher than 65536!");
+        }
+
+//        byte[] data = outPacket.getBody();
         outPacket.setLength(dataLength);
+        byte[] data = new byte[outPacket.getLength()];
         read(data, outPacket.getOffset(), dataLength);
+        outPacket.setBody(data);
+
 //        read(data, packet.getOffset(), dataLength - 2);  // -2 to remove the CRC part
 //        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Data: {0}",bytesToHex(data));
 
-        byte[] trimmedBody = new byte[outPacket.getLength()];
-        System.arraycopy(outPacket.getBody(), 0, trimmedBody, 0, outPacket.getLength());
-        outPacket.setBody(trimmedBody);
+//        byte[] trimmedBody = new byte[outPacket.getLength()];
+//        System.arraycopy(outPacket.getBody(), 0, trimmedBody, 0, outPacket.getLength());
+//        outPacket.setBody(trimmedBody);
 
         // Read CRC
         if (SPPHelper.isCRCEnabled) {

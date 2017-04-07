@@ -146,7 +146,8 @@ public class CFPSPPSocket implements SPPSocket {
             try {
                 packet = reader.receive();
             } catch (Exception ex) {
-                java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.SEVERE, "The packet is not valid!", ex);
+                java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.SEVERE, 
+                        "The packet is not valid!", ex);
                 packet = reader.getPacket();
             }
 

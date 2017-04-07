@@ -45,14 +45,15 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.ccsds.moims.mo.mal.provider.MALInteraction;
 import org.ccsds.moims.mo.mal.structures.Attribute;
 import org.ccsds.moims.mo.mal.structures.Identifier;
+import org.ccsds.moims.mo.mal.structures.IdentifierList;
 import org.ccsds.moims.mo.mal.structures.UInteger;
+import org.ccsds.moims.mo.mc.parameter.structures.ParameterRawValueList;
 import org.ccsds.moims.mo.mc.structures.AttributeValueList;
 
 /**
@@ -183,7 +184,7 @@ public class LinuxImagesManager {
         }
 
         @Override
-        public Boolean onSetValue(Identifier identifier, Attribute value) {
+        public Boolean onSetValue(IdentifierList identifiers, ParameterRawValueList values) {
             return false;  // to confirm that the variable was set
         }
 

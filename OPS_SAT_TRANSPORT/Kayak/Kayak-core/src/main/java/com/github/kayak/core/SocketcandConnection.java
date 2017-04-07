@@ -33,8 +33,7 @@ import java.util.logging.Logger;
  */
 public abstract class SocketcandConnection {
 
-//    private static final int BUFFER_SIZE = 4096;
-    private static final int BUFFER_SIZE = 32;
+    private static final int BUFFER_SIZE = 4096;
     private static final int ELEMENT_SIZE = 512;
 
     private static final Logger logger = Logger.getLogger(SocketcandConnection.class.getCanonicalName());
@@ -86,27 +85,14 @@ public abstract class SocketcandConnection {
         int pos = 0;
         boolean inElement = false;
 
-        final char[] localElementBuffer = new char[ELEMENT_SIZE];
-        
         while (true) {
             char c = (char) reader.read();
-
-/*
-            char[] chars = new char[1];
-            int num = reader.read(chars, 0, 1);
-            char c = chars[0];
-            
-            while(num == 0){
-                num = reader.read(chars, 0, 1);
-                c = chars[0];
-            }
-*/
 
             /* Find opening < */
             if (!inElement) {
                 if (c == '<') {
                     inElement = true;
-                    localElementBuffer[pos] = c;
+                    elementBuffer[pos] = c;
                     pos++;
                 }
             } else {
@@ -116,16 +102,16 @@ public abstract class SocketcandConnection {
                     inElement = false;
 
                 } else if (c == '>') { /* Find closing > */
-                    localElementBuffer[pos] = c;
+                    elementBuffer[pos] = c;
                     pos++;
                     break;
                 } else { /* Element content */
-                    localElementBuffer[pos] = c;
+                    elementBuffer[pos] = c;
                     pos++;
                 }
             }
         }
 
-        return String.valueOf(localElementBuffer, 0, pos);
+        return String.valueOf(elementBuffer, 0, pos);
     }
 }

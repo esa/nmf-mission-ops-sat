@@ -88,7 +88,7 @@ public class CANBusConnector {
         final BusURL url = new BusURL(host_string, port, bus_string);
 
         if (!url.checkConnection()) {
-            throw new IOException();
+            throw new IOException("The connection is not available.");
         }
 
         TimeSource ts = new TimeSource();

@@ -39,20 +39,22 @@ import org.ccsds.moims.mo.mal.provider.MALInteraction;
 import org.ccsds.moims.mo.mal.structures.Attribute;
 import org.ccsds.moims.mo.mal.structures.Duration;
 import org.ccsds.moims.mo.mal.structures.Identifier;
+import org.ccsds.moims.mo.mal.structures.IdentifierList;
 import org.ccsds.moims.mo.mal.structures.LongList;
 import org.ccsds.moims.mo.mal.structures.UInteger;
+import org.ccsds.moims.mo.mal.structures.UOctet;
 import org.ccsds.moims.mo.mal.structures.UShort;
 import org.ccsds.moims.mo.mal.structures.Union;
 import org.ccsds.moims.mo.mc.action.structures.ActionDefinitionDetails;
 import org.ccsds.moims.mo.mc.action.structures.ActionDefinitionDetailsList;
 import org.ccsds.moims.mo.mc.parameter.structures.ParameterDefinitionDetails;
 import org.ccsds.moims.mo.mc.parameter.structures.ParameterDefinitionDetailsList;
+import org.ccsds.moims.mo.mc.parameter.structures.ParameterRawValueList;
 import org.ccsds.moims.mo.mc.structures.ArgumentDefinitionDetails;
 import org.ccsds.moims.mo.mc.structures.ArgumentDefinitionDetailsList;
 import org.ccsds.moims.mo.mc.structures.AttributeValue;
 import org.ccsds.moims.mo.mc.structures.AttributeValueList;
-import org.ccsds.moims.mo.mc.structures.ConditionalReferenceList;
-import org.ccsds.moims.mo.mc.structures.Severity;
+import org.ccsds.moims.mo.mc.structures.ConditionalConversionList;
 import org.ccsds.moims.mo.opssat_pf.gps.consumer.GPSAdapter;
 
 // Specific OPS-SAT Monitoring and Control
@@ -84,8 +86,9 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
 
         // ------------------ Parameters ------------------
         ParameterDefinitionDetailsList defs = new ParameterDefinitionDetailsList();
+        IdentifierList paramIdentifiers = new IdentifierList();
+        
         defs.add(new ParameterDefinitionDetails(
-                new Identifier(PARAMETER_CURRENT_PARTITION),
                 "The Current partition where the OS is running.",
                 Union.STRING_SHORT_FORM.byteValue(),
                 "",
@@ -94,9 +97,9 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
                 null,
                 null
         ));
+        paramIdentifiers.add(new Identifier(PARAMETER_CURRENT_PARTITION));
 
         defs.add(new ParameterDefinitionDetails(
-                new Identifier(PARAMETER_LINUX_VERSION),
                 "The version of the software.",
                 Union.STRING_SHORT_FORM.byteValue(),
                 "",
@@ -105,9 +108,9 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
                 null,
                 null
         ));
+        paramIdentifiers.add(new Identifier(PARAMETER_LINUX_VERSION));
 
         defs.add(new ParameterDefinitionDetails(
-                new Identifier(PARAMETER_CAN_RATE),
                 "The data rate on the can bus.",
                 Union.DOUBLE_SHORT_FORM.byteValue(),
                 "Messages/sec",
@@ -116,6 +119,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
                 null,
                 null
         ));
+        paramIdentifiers.add(new Identifier(PARAMETER_CAN_RATE));
 
         try {
             handler = new CFPFrameHandler(new CANReceiveInterface() {
@@ -130,25 +134,25 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        registration.registerParameters(defs);
+        registration.registerParameters(paramIdentifiers, defs);
 
         ActionDefinitionDetailsList actionDefs = new ActionDefinitionDetailsList();
+        IdentifierList actionIdentifiers = new IdentifierList();
 
         ArgumentDefinitionDetailsList arguments1 = new ArgumentDefinitionDetailsList();
         {
             Byte rawType = Attribute._STRING_TYPE_SHORT_FORM;
             String rawUnit = "NMEA sentence identifier";
-            ConditionalReferenceList conversionCondition = null;
+            ConditionalConversionList conditionalConversions = null;
             Byte convertedType = null;
             String convertedUnit = null;
 
-            arguments1.add(new ArgumentDefinitionDetails(rawType, rawUnit, conversionCondition, convertedType, convertedUnit));
+            arguments1.add(new ArgumentDefinitionDetails(rawType, rawUnit, conditionalConversions, convertedType, convertedUnit));
         }
 
         ActionDefinitionDetails actionDef1 = new ActionDefinitionDetails(
-                new Identifier(ACTION_GPS_SENTENCE),
                 "Injects the NMEA sentence identifier into the CAN bus.",
-                Severity.INFORMATIONAL,
+                new UOctet((short) 0),
                 new UShort(0),
                 arguments1,
                 null
@@ -158,17 +162,16 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         {
             Byte rawType = Attribute._LONG_TYPE_SHORT_FORM;
             String rawUnit = "milliseconds";
-            ConditionalReferenceList conversionCondition = null;
+            ConditionalConversionList conditionalConversions = null;
             Byte convertedType = null;
             String convertedUnit = null;
 
-            arguments2.add(new ArgumentDefinitionDetails(rawType, rawUnit, conversionCondition, convertedType, convertedUnit));
+            arguments2.add(new ArgumentDefinitionDetails(rawType, rawUnit, conditionalConversions, convertedType, convertedUnit));
         }
 
         ActionDefinitionDetails actionDef2 = new ActionDefinitionDetails(
-                new Identifier(ACTION_CLOCK_SET_TIME),
                 "Sets the clock using a diff between the on-board time and the desired time.",
-                Severity.INFORMATIONAL,
+                new UOctet((short) 0),
                 new UShort(0),
                 arguments2,
                 null
@@ -176,8 +179,10 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
 
         actionDefs.add(actionDef1);
         actionDefs.add(actionDef2);
+        actionIdentifiers.add(new Identifier(ACTION_GPS_SENTENCE));
+        actionIdentifiers.add(new Identifier(ACTION_CLOCK_SET_TIME));
 
-        LongList actionObjIds = registration.registerActions(actionDefs);
+        LongList actionObjIds = registration.registerActions(actionIdentifiers, actionDefs);
 
         // Start the GMV consumer
         gmvServicesConsumer = new GMVServicesConsumer();
@@ -281,7 +286,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
     }
 
     @Override
-    public Boolean onSetValue(Identifier identifier, Attribute value) {
+    public Boolean onSetValue(IdentifierList identifiers, ParameterRawValueList values) {
         return false;  // to confirm that no variable was set
     }
 

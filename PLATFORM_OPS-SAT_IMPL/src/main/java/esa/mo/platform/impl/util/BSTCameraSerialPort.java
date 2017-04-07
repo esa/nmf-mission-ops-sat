@@ -74,7 +74,8 @@ public class BSTCameraSerialPort {
 
         if (!isAvailable) {
             // Please check if the Camera is turned on!
-            throw new IOException("The port " + PORT_NAME + " is not available! Please check if the Camera is turned on.");
+            throw new IOException("The port " + PORT_NAME + " is not available! "
+                    + "Please check if the Camera is connected and turned on.");
         }
 
         try {

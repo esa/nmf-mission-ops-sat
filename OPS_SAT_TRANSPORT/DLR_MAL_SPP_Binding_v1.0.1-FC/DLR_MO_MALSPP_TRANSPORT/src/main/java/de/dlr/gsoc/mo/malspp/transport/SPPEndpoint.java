@@ -504,9 +504,9 @@ public class SPPEndpoint implements MALEndpoint {
 			SpacePacket[] spacePackets = ((SPPMessage) msg).createSpacePackets(sequenceCounter, segmentCounter, packetDataFieldSizeLimit);
 
                         for (SpacePacket sp : spacePackets) {
-				synchronized (sppSocket) {
+//				synchronized (sppSocket) {
 					sppSocket.send(sp);
-				}
+//				}
 			}
 		} catch (Exception ex) {
 			MALStandardError error = new MALStandardError(MALHelper.INTERNAL_ERROR_NUMBER, ex.getMessage());

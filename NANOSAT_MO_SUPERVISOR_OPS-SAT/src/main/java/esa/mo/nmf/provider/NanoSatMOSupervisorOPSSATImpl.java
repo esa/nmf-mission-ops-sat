@@ -46,9 +46,6 @@ public class NanoSatMOSupervisorOPSSATImpl extends NanoSatMOSupervisor {
     private PlatformServicesProviderOPSSAT platformServicesOPSSAT;
     private GMVServicesConsumer gmvServicesConsumer;
 
-    private final static int IMAGE_LENGTH = 2048;
-    private final static int IMAGE_WIDTH = 1944;
-
     /**
      * NanoSat MO Supervisor for OPS-SAT
      *
