@@ -22,6 +22,8 @@ package de.dlr.gsoc.mo.malspp.transport;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.MALContextFactory;
@@ -73,6 +75,7 @@ public class SPPEndpoint implements MALEndpoint {
 	private MALMessageListener listener;
 	private boolean isClosed;
 	private boolean isDeliveryStopped;
+        private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
 	public SPPEndpoint(
 			final String protocol,
@@ -411,7 +414,20 @@ public class SPPEndpoint implements MALEndpoint {
 		}
 		return new SPPMessageBody(encodedBody, esf, ctx);
 	}
-
+        
+        /*
+        public void shipMessage(final MALMessage msg){
+            final SPPEndpoint endpoint = this;
+            
+                    executor.submit(new Runnable(){
+                            @Override
+                            public void run() {
+                                    listener.onMessage(endpoint, msg);
+                            }
+                    });
+        }
+        */
+        
 	/**
 	 * Creates a specialized message body according to some header information.
 	 */
@@ -504,10 +520,10 @@ public class SPPEndpoint implements MALEndpoint {
 			SpacePacket[] spacePackets = ((SPPMessage) msg).createSpacePackets(sequenceCounter, segmentCounter, packetDataFieldSizeLimit);
 
                         for (SpacePacket sp : spacePackets) {
-//				synchronized (sppSocket) {
+//				synchronized (sppSocket) {  // Might be blocking the mix of messages
 					sppSocket.send(sp);
-//				}
-			}
+				}
+//			}
 		} catch (Exception ex) {
 			MALStandardError error = new MALStandardError(MALHelper.INTERNAL_ERROR_NUMBER, ex.getMessage());
 			throw new MALTransmitErrorException(msg.getHeader(), error, msg.getQoSProperties());

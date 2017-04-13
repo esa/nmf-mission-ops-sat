@@ -87,11 +87,17 @@ public class SPPTransport implements MALTransport {
         // We need to set the initial capacity to have the MAL mixing messages from different sources.
         // For example, if I do a heavy query, I don't want to have the queue full of those messages, 
         // but instead, a mix of those combined with other messages. This let's them work in parallel.
-	private BlockingQueue<MALMessage> receivedMessages = new LinkedBlockingQueue<>();
-	private final Map<SequenceCounterId, SPPCounter> sequenceCounters = new HashMap<>();
+//	private BlockingQueue<MALMessage> receivedMessages = new LinkedBlockingQueue<>(15);
+	private LinkedBlockingQueue<MALMessage> receivedMessages = new LinkedBlockingQueue<>();
+
+	private HashMap<Long, LinkedBlockingQueue<MALMessage>> transMap = new HashMap<Long, LinkedBlockingQueue<MALMessage>>();
+        
+        private final Map<SequenceCounterId, SPPCounter> sequenceCounters = new HashMap<>();
 	private final Map<SequenceCounterId, Queue<Short>> identifiers = new HashMap<>();
 	private final Map<SegmentCounterId, SPPCounter> segmentCounters = new HashMap<>();
-        private final ExecutorService executor = Executors.newSingleThreadExecutor();
+//        private final ExecutorService executor = Executors.newSingleThreadExecutor();
+        private final ExecutorService executor = Executors.newFixedThreadPool(6);
+        private final Object MUTEX = new Object();
 
 	public SPPTransport(final String protocol, final Map properties) throws MALException {
 		try {
@@ -476,8 +482,9 @@ public class SPPTransport implements MALTransport {
 				MALStandardError error = new MALStandardError(MALHelper.DELIVERY_FAILED_ERROR_NUMBER, null);
 				sendErrorMessage(targetEndpoint, msg, error, null);
 			} else {
-                            /*
-                                LOGGER.log(Level.INFO, "Local Name: " + targetEndpoint.getLocalName()
+                                /*
+                                LOGGER.log(Level.INFO, 
+                                "  Local Name: " + targetEndpoint.getLocalName()
                                 + "  URI: " + targetEndpoint.getURI());
                                 
                                 LOGGER.log(Level.INFO, "\nInteractionType: " + msg.getHeader().getInteractionType().toString()
@@ -487,7 +494,8 @@ public class SPPTransport implements MALTransport {
                                 + "\nNetworkZone: " + msg.getHeader().getNetworkZone()
                                 + "\nTransactionId: " + msg.getHeader().getTransactionId()
                                 + "\n");
-                              */  
+                                */
+    
                                 /*
                             Thread thread = new Thread() {
 					@Override
@@ -497,14 +505,18 @@ public class SPPTransport implements MALTransport {
 					}
 				};
 				thread.start();
-                              */  
-                            
+                              */
+
+//                            targetEndpoint.shipMessage(msg);
+                            listener.onMessage(targetEndpoint, msg);
+/*                            
                             executor.submit(new Runnable(){
                                     @Override
                                     public void run() {
-                                            listener.onMessage(targetEndpoint, msg);
+                                        targetEndpoint.shipMessage(msg);
                                     }
                             });
+*/
                         }
 		} catch (MALException ex) {
 			// TODO: Is there any other way of handling reception exceptions?
@@ -589,7 +601,45 @@ public class SPPTransport implements MALTransport {
 				while (!isInterrupted()) {
 					try {
 						MALMessage msg = receivedMessages.take();
-						handleReceivedMessage(msg, qosProperties);
+                                                
+                                                final Long transId = msg.getHeader().getTransactionId();
+                                                
+                                                LinkedBlockingQueue<MALMessage> msgs = null;
+
+                                                synchronized(MUTEX){
+                                                    msgs = transMap.get(transId);
+                                                    
+                                                    if(msgs != null){
+                                                        msgs.add(msg);
+                                                        continue;
+                                                    }
+                                                }
+                                                
+                                                    msgs = new LinkedBlockingQueue<MALMessage>();
+                                                    msgs.add(msg);
+                                                    transMap.put(transId, msgs);
+                                                    
+                                                    executor.submit(new Runnable(){
+                                                            @Override
+                                                            public void run() {
+                                                                LinkedBlockingQueue<MALMessage> msgsIn = transMap.get(transId);
+                                                                
+                                                                MALMessage msg = msgsIn.poll();
+                                                                while(msg != null){
+                                                                    handleReceivedMessage(msg, qosProperties);
+                                                                    
+                                                                    synchronized(MUTEX){
+                                                                        msg = msgsIn.poll();
+    
+                                                                        if(msg == null){
+                                                                            transMap.remove(transId);
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                    });
+                                                
+                                                
 					} catch (InterruptedException ex) {
 						LOGGER.log(Level.INFO, THREAD_INTERRUPTED);
 						break;

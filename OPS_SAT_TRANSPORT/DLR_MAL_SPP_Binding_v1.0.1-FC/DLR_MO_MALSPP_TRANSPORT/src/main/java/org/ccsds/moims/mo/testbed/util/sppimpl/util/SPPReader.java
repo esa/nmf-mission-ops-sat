@@ -71,7 +71,7 @@ public class SPPReader {
         return len;
     }
 
-    public SpacePacket receive() throws Exception {
+    public synchronized SpacePacket receive() throws Exception {
 
         int apidQualifier;
 

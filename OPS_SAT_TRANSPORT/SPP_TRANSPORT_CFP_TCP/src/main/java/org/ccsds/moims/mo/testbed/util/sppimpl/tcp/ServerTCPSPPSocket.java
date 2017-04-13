@@ -121,7 +121,7 @@ public class ServerTCPSPPSocket implements SPPSocket {
         socket = listen.accept();
         socket.setTcpNoDelay(tcpNoDelay);
         socket.setSoLinger(true, 1000);
-        channel = new SPPChannel(socket); 
+        channel = new SPPChannel(socket);
         
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG,

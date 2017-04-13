@@ -266,8 +266,8 @@ public class Configuration {
 		AppId appId = new AppId(primaryQualifier, primaryApid);
                 
                 if(mappingConfs.get(appId) == null){
-                    /* Logger.getLogger(Configuration.class.getName()).log(Level.INFO,
-                    "The apid:" + primaryApid + " is not defined in the mcp file. Taking the values for apid=-1"); */
+//                    Logger.getLogger(Configuration.class.getName()).log(Level.INFO,
+//                    "The apid:" + primaryApid + " is not defined in the mcp file. Taking the values for apid=-1"); 
                     
                     // Take default configuration (The file must have APID=-1)
                     appId = new AppId(primaryQualifier, (short) -1);
