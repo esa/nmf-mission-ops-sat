@@ -59,7 +59,7 @@ public class CFPFrameHandler implements FrameListener {
     private static final String PROPERTY_VIRTUAL_CHANNEL = "esa.mo.transport.can.opssat.virtualChannel";
     public static final String PROPERTY_NODE_SOURCE = "esa.mo.transport.can.opssat.nodeSource";
     private static final String PROPERTY_NODE_DESTINATION = "esa.mo.transport.can.opssat.nodeDestination";
-    private static final int DEFAULT_VIRTUAL_CHANNEL = 2;
+    private static final int DEFAULT_VIRTUAL_CHANNEL = 4;
 
     private final int node_source;
     private int node_destination;
