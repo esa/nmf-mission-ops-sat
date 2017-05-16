@@ -68,7 +68,7 @@ public class SPPURI {
 	public SPPURI(final String uri) {
 		Matcher m = URI_PATTERN.matcher(uri);
 		if (!m.matches()) {
-			throw new IllegalArgumentException(INVALID_URI);
+			throw new IllegalArgumentException(INVALID_URI + "URI: " + uri);
 		}
 		init(Integer.valueOf(m.group(1)), Short.valueOf(m.group(2)), m.group(3) == null ? null : Short.valueOf(m.group(3)));
 	}

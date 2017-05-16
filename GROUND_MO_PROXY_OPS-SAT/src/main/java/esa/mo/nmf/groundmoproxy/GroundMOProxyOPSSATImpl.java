@@ -32,7 +32,7 @@ import org.ccsds.moims.mo.mal.structures.URI;
  */
 public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
 
-    private final ProtocolBridge protocolBridge = new ProtocolBridge();
+    private final ProtocolBridgeSPP protocolBridge = new ProtocolBridgeSPP();
 
     /**
      * Ground MO Proxy for OPS-SAT
@@ -42,16 +42,13 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
         super();
 
         try {
-            // Initialize the protocol bridge services and expose them using TCP/IP !
-
-//            Map properties = null;
+            // Initialize the protocol bridge services and expose them using TCP/IP!
             Map properties = System.getProperties();
 
             // Initialize the Protocol Bridge
-            protocolBridge.init("rmi", "malspp", properties);
-            final URI routedURI = protocolBridge.getRoutingProtocolA();
+            protocolBridge.init("rmi", properties);
+            final URI routedURI = protocolBridge.getRoutingProtocol();
 
-//            final URI routedURI = new URI("aaaa");
             // Initialize the pure protocol bridge for the services without extension
             final URI centralDirectoryServiceURI = new URI("malspp:247/100/5");
             super.init(centralDirectoryServiceURI, routedURI);
@@ -59,7 +56,6 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
             final URI uri = super.getDirectoryServiceURI();
             Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.INFO,
                     "Groud MO Proxy initialized! URI: " + uri + "\n");
-
         } catch (Exception ex) {
             Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
         }

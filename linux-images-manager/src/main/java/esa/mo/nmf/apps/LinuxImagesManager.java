@@ -35,7 +35,7 @@ import com.nothome.delta.GDiffWriter;
 import esa.mo.nmf.MCRegistration;
 import esa.mo.nmf.MonitorAndControlNMFAdapter;
 import esa.mo.nmf.NMFException;
-import esa.mo.nmf.NanoSatMOFrameworkInterface;
+import esa.mo.nmf.NMFInterface;
 import esa.mo.nmf.nanosatmoconnector.NanoSatMOConnectorImpl;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -62,7 +62,7 @@ import org.ccsds.moims.mo.mc.structures.AttributeValueList;
  */
 public class LinuxImagesManager {
 
-    private final NanoSatMOFrameworkInterface nanoSatMOFramework = new NanoSatMOConnectorImpl(new MCAdapter());
+    private final NMFInterface nanoSatMOFramework = new NanoSatMOConnectorImpl(new MCAdapter());
 
     public LinuxImagesManager() {
         //        boolean valid = runCommand("bgfbf");

@@ -68,7 +68,6 @@ public class NanoSatMOSupervisorOPSSATImpl extends NanoSatMOSupervisor {
         } catch (MALException ex) {
             Logger.getLogger(NanoSatMOSupervisorOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
     }
 
     /**

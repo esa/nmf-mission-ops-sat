@@ -52,7 +52,6 @@ public final class ReconstructMessage {
     private boolean isReconstructed = false;
 
     public ReconstructMessage(Frame newFrame, CFPFrameHandler handler) {
-
         this.handler = handler;
         this.segments = new HashMap<Integer, byte[]>(MAX_NUMBER_OF_SEGMENTS);
         this.remainings = new HashMap<Integer, Boolean>(MAX_NUMBER_OF_SEGMENTS);

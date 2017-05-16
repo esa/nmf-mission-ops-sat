@@ -95,7 +95,6 @@ public class SPPTransport implements MALTransport {
         private final Map<SequenceCounterId, SPPCounter> sequenceCounters = new HashMap<>();
 	private final Map<SequenceCounterId, Queue<Short>> identifiers = new HashMap<>();
 	private final Map<SegmentCounterId, SPPCounter> segmentCounters = new HashMap<>();
-//        private final ExecutorService executor = Executors.newSingleThreadExecutor();
         private final ExecutorService executor = Executors.newFixedThreadPool(6);
         private final Object MUTEX = new Object();
 
@@ -138,7 +137,22 @@ public class SPPTransport implements MALTransport {
 		Short identifier = config.appendIdToUri()
 				? claimIdentifier(config.qualifier(), config.apid(), config.numIdentifiers(), config.startIdentifier())
 				: null;
-		SPPURI uri = new SPPURI(config.qualifier(), config.apid(), identifier);
+                
+                SPPURI uri = null;
+                
+                if(localName != null){
+                    try{
+                        uri = new SPPURI(new URI(localName));
+                    }catch(java.lang.IllegalArgumentException ex){
+                        // Do nothing!
+                    }
+                }
+                
+                if(uri == null){
+                    uri = new SPPURI(config.qualifier(), config.apid(), identifier); 
+                }
+                
+//		SPPURI uri = new SPPURI(config.qualifier(), config.apid(), identifier);
 
 		SPPEndpoint endpoint = new SPPEndpoint(protocol, this, localName, uri.getURI(), qosProperties, sppSocket);
 		if (localName != null) {

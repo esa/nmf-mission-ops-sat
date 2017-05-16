@@ -75,7 +75,6 @@ public class SPPEndpoint implements MALEndpoint {
 	private MALMessageListener listener;
 	private boolean isClosed;
 	private boolean isDeliveryStopped;
-        private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
 	public SPPEndpoint(
 			final String protocol,
