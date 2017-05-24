@@ -100,7 +100,11 @@ public class SPPMessageBody implements MALMessageBody {
 						e = elementFactoryRegistry.lookupElementFactory(shortForm).createElement();
 					}
 					ctx.setBodyElementIndex(i);
-					bodyElements.add(is.readElement(e, ctx));
+                                        try{
+        					bodyElements.add(is.readElement(e, ctx));
+                                        }catch(org.ccsds.moims.mo.mal.MALException ex){
+                                                throw new MALException("Unable to decode element with index: " + i, ex);
+                                        }
 				}
 			}
 			isDecoded = true;

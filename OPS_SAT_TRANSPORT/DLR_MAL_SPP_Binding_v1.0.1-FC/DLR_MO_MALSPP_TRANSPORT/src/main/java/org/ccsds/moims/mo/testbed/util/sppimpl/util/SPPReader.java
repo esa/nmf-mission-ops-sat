@@ -72,7 +72,6 @@ public class SPPReader {
     }
 
     public synchronized SpacePacket receive() throws Exception {
-
         int apidQualifier;
 
         if (SPPHelper.isAPIDqualifierInMessage) {
@@ -85,9 +84,6 @@ public class SPPReader {
         }
 
         SpacePacketHeader header = new SpacePacketHeader();
-//        byte[] body = new byte[65536];
-//        SpacePacket outPacket = new SpacePacket(header, body, 0, body.length);
-
         SpacePacket outPacket = new SpacePacket(header, null, 0, 0);
         
         outPacket.setApidQualifier(apidQualifier);
@@ -126,7 +122,7 @@ public class SPPReader {
         int dataLength = pkt_length_value;
         
         if(dataLength > 65536){
-            throw new Exception("The data length cannot be higher than 65536!");
+            throw new Exception("The data length cannot be bigger than 65536!");
         }
 
 //        byte[] data = outPacket.getBody();

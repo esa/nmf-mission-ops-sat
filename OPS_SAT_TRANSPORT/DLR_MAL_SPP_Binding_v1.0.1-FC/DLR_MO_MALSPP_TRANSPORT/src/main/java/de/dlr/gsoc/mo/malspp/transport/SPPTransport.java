@@ -495,20 +495,20 @@ public class SPPTransport implements MALTransport {
 				MALStandardError error = new MALStandardError(MALHelper.DELIVERY_FAILED_ERROR_NUMBER, null);
 				sendErrorMessage(targetEndpoint, msg, error, null);
 			} else {
-                                /*
-                                LOGGER.log(Level.INFO, 
-                                "  Local Name: " + targetEndpoint.getLocalName()
-                                + "  URI: " + targetEndpoint.getURI());
-                                
-                                LOGGER.log(Level.INFO, "\nInteractionType: " + msg.getHeader().getInteractionType().toString()
+                            /*
+                                LOGGER.log(Level.INFO, "\n"
+                                + "Local Name: " + targetEndpoint.getLocalName()
+                                + "\nURI: " + targetEndpoint.getURI()
+                                + "\n\nInteractionType: " + msg.getHeader().getInteractionType().toString()
                                 + "\nDomain: " + msg.getHeader().getDomain()
                                 + "\nInteractionStage: " + msg.getHeader().getInteractionStage().toString()
                                 + "\nIsErrorMessage: " + msg.getHeader().getIsErrorMessage()
                                 + "\nNetworkZone: " + msg.getHeader().getNetworkZone()
                                 + "\nTransactionId: " + msg.getHeader().getTransactionId()
+                                + "\nTimestamp: " + msg.getHeader().getTimestamp()
                                 + "\n");
-                                */
-    
+                            */
+
                                 /*
                             Thread thread = new Thread() {
 					@Override
@@ -519,7 +519,13 @@ public class SPPTransport implements MALTransport {
 				};
 				thread.start();
                               */
-
+                                
+                            /*
+                            Logger.getLogger(SPPTransport.class.getName()).log(Level.INFO,
+                                    "Body:\n"
+                                    + Arrays.toString(msg.getBody().getEncodedBody().getEncodedBody().getValue()));
+                            */                              
+                                
 //                            targetEndpoint.shipMessage(msg);
                             listener.onMessage(targetEndpoint, msg);
 /*                            

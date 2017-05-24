@@ -148,7 +148,6 @@ public final class ReconstructMessage {
     }
 
     public synchronized byte[] reconstructData() throws IOException {
-
         if (!this.isRecontructed()) {
             throw new IOException("Unable to reconstruct the message because there are still missing parts!");
         }
@@ -161,18 +160,16 @@ public final class ReconstructMessage {
         // Recreate the output
         for (int i = 0; i < this.totalNumberOfSegments; i++) {
             final byte[] data = this.segments.get(i);
-            Logger.getLogger(ReconstructMessage.class.getName()).log(Level.FINEST, "Segment(" + i + "/" + lastSegmentIndex + "): " + Arrays.toString(data));
-//            Logger.getLogger(ReconstructMessage.class.getName()).log(Level.INFO, "Segment(" + i + "/" + lastSegmentIndex +"): " + Arrays.toString(data));
+//            Logger.getLogger(ReconstructMessage.class.getName()).log(Level.FINEST, "Segment(" + i + "/" + lastSegmentIndex + "): " + Arrays.toString(data));
             System.arraycopy(data, 0, concatenated, (lastSegmentIndex - i) * 8, data.length);
         }
 
-        Logger.getLogger(ReconstructMessage.class.getName()).log(Level.FINER, "Reconstructed data: " + Arrays.toString(concatenated));
+//        Logger.getLogger(ReconstructMessage.class.getName()).log(Level.FINER, "Reconstructed data: " + Arrays.toString(concatenated));
 
         return concatenated;
     }
 
     private synchronized int findMissingSegment() throws IOException {
-
         // Do we have the total number of segments? If not, we have to sum +1 to the number of the highest returned remain
         if (totalNumberOfSegments != -1) {
             for (int i = totalNumberOfSegments - 1; i >= 0; i--) {

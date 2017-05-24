@@ -110,7 +110,7 @@ public class SPPElementInputStream implements MALElementInputStream {
 		return encElemList;
 	}
 
-	private Object readElementStandard(final Object element, final ServiceInfo service) throws MALException {
+	 private Object readElementStandard(final Object element, final ServiceInfo service) throws MALException {
 		if (service.isDeclaredAttribute()) {
 			return decoder.decodeAttribute();
 		}
