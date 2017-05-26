@@ -103,6 +103,7 @@ public class SPPMessageBody implements MALMessageBody {
                                         try{
         					bodyElements.add(is.readElement(e, ctx));
                                         }catch(org.ccsds.moims.mo.mal.MALException ex){
+//                                                Logger.getLogger(SPPMessageBody.class.getName()).log(Level.INFO, "Unable to decode element with index: " + i, ex);
                                                 throw new MALException("Unable to decode element with index: " + i, ex);
                                         }
 				}

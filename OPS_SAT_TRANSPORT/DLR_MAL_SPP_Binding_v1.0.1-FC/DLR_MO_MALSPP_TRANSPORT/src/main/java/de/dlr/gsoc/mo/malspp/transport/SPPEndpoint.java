@@ -511,18 +511,19 @@ public class SPPEndpoint implements MALEndpoint {
 			final int primaryQualifier = isTCpacket ? sppURITo.getQualifier() : sppURIFrom.getQualifier();
 			final short primaryApid = isTCpacket ? sppURITo.getAPID() : sppURIFrom.getAPID();
 
-			final SPPCounter sequenceCounter = transport.getSequenceCounter(primaryQualifier, primaryApid);
-			final SPPCounter segmentCounter = transport.getSegmentCounter(header);
-			final int packetDataFieldSizeLimit = config.packetDataFieldSizeLimit();
+                        // Needs to be synchronized to avoid getting packets out of order
+                	synchronized (sppSocket) {
+        			final SPPCounter sequenceCounter = transport.getSequenceCounter(primaryQualifier, primaryApid);
+                		final SPPCounter segmentCounter = transport.getSegmentCounter(header);
+                        	final int packetDataFieldSizeLimit = config.packetDataFieldSizeLimit();
                         
                                 // Line hitting the exception is below!!
-			SpacePacket[] spacePackets = ((SPPMessage) msg).createSpacePackets(sequenceCounter, segmentCounter, packetDataFieldSizeLimit);
+        			SpacePacket[] spacePackets = ((SPPMessage) msg).createSpacePackets(sequenceCounter, segmentCounter, packetDataFieldSizeLimit);
 
-                        for (SpacePacket sp : spacePackets) {
-//				synchronized (sppSocket) {  // Might be blocking the mix of messages
+                                for (SpacePacket sp : spacePackets) {
 					sppSocket.send(sp);
 				}
-//			}
+			}
 		} catch (Exception ex) {
 			MALStandardError error = new MALStandardError(MALHelper.INTERNAL_ERROR_NUMBER, ex.getMessage());
 			throw new MALTransmitErrorException(msg.getHeader(), error, msg.getQoSProperties());
