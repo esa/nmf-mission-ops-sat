@@ -71,6 +71,7 @@ public final class ReconstructMessage {
         if (frameIdentifier.getType() == 1) { // Starting Frame... perfect case
             this.totalNumberOfSegments = frameIdentifier.getRemain() + 1;
         } else {
+            Logger.getLogger(ReconstructMessage.class.getName()).log(Level.WARNING, "Not perfect case!");
             this.totalNumberOfSegments = -1; // Something else
         }
 

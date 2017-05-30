@@ -73,14 +73,6 @@
             <artifactId>TRANSPORT_SPP_OPSSAT</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-
-        <!--
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>javacv</artifactId>
-            <version>1.2</version>
-        </dependency>        
-        -->
     </dependencies>
     
     <build>
@@ -89,6 +81,12 @@
                 <directory>${basedir}/..</directory>
                 <includes>
                     <include>LICENCE.md</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${basedir}/..</directory>
+                <includes>
+                    <include>mappingConfigurationParameters.xml</include>
                 </includes>
             </resource>
         </resources>
