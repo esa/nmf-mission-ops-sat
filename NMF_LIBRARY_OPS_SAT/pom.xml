@@ -23,11 +23,11 @@
         <relativePath/>
     </parent>
   
-    <artifactId>LIB_NANOSAT_MO_FRAMEWORK_OPS_SAT</artifactId>
+    <artifactId>NMF_LIBRARY_OPS_SAT</artifactId>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
 
-    <name>NanoSat MO Framework: Library for OPS-SAT</name>
+    <name>NMF Library: OPS-SAT</name>
     <description>Library for OPS-SAT</description>
     <url>http://www.esa.int</url>
 

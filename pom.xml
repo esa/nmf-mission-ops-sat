@@ -67,7 +67,7 @@
         <module>PLATFORM_OPS-SAT_IMPL</module>
         <module>NANOSAT_MO_SUPERVISOR_OPS-SAT</module>
         <module>GROUND_MO_PROXY_OPS-SAT</module>
-        <module>LIB_NANOSAT_MO_FRAMEWORK_OPS_SAT</module>
+        <module>NMF_LIBRARY_OPS_SAT</module>
         <module>linux-images-manager</module>
         <module>demo-obsw-push-clock</module>
     </modules>
