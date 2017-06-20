@@ -22,7 +22,6 @@ package esa.mo.transport.can.opssat;
 
 import com.github.kayak.core.Frame;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -32,7 +31,7 @@ import java.util.logging.Logger;
  *
  * @author Cesar Coelho
  */
-public final class ReconstructMessage {
+public final class ReconstructMessage_OLD {
 
     // Max number of retransmissions
     private static final int MAX_NUMBER_OF_SEGMENTS = 32;
@@ -51,7 +50,7 @@ public final class ReconstructMessage {
     private long timestamp;
     private boolean isReconstructed = false;
 
-    public ReconstructMessage(Frame newFrame, CFPFrameHandler handler) {
+    public ReconstructMessage_OLD(Frame newFrame, CFPFrameHandler handler) {
         this.handler = handler;
         this.segments = new HashMap<Integer, byte[]>(MAX_NUMBER_OF_SEGMENTS);
         this.remainings = new HashMap<Integer, Boolean>(MAX_NUMBER_OF_SEGMENTS);
@@ -71,7 +70,7 @@ public final class ReconstructMessage {
         if (frameIdentifier.getType() == 1) { // Starting Frame... perfect case
             this.totalNumberOfSegments = frameIdentifier.getRemain() + 1;
         } else {
-            Logger.getLogger(ReconstructMessage.class.getName()).log(Level.WARNING, "Not perfect case!");
+            Logger.getLogger(ReconstructMessage_OLD.class.getName()).log(Level.WARNING, "Not perfect case!");
             this.totalNumberOfSegments = -1; // Something else
         }
 
@@ -200,13 +199,13 @@ public final class ReconstructMessage {
 
             // Ask for a retransmission
             int missingSegment = findMissingSegment();
-            Logger.getLogger(ReconstructMessage.class.getName()).log(Level.WARNING,
+            Logger.getLogger(ReconstructMessage_OLD.class.getName()).log(Level.WARNING,
                     "Requesting a retransmission for the missingSegment '" + missingSegment
                     + "' out of a total of '" + totalNumberOfSegments + "' segments (transactionId: " + transactionId + ")");
             handler.requestRetransmission(transactionId, missingSegment, CFPFrameHandler.convertSrcToDestinationNode(this.src));
             this.timestamp = System.currentTimeMillis();
         } catch (IOException ex) {
-            Logger.getLogger(ReconstructMessage.class.getName()).log(Level.SEVERE, "Retransmission request failed! Maybe this is the wrong handler...", ex);
+            Logger.getLogger(ReconstructMessage_OLD.class.getName()).log(Level.SEVERE, "Retransmission request failed! Maybe this is the wrong handler...", ex);
         }
     }
 

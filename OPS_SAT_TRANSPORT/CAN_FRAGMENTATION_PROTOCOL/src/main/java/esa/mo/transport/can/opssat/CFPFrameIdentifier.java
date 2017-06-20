@@ -26,12 +26,6 @@ package esa.mo.transport.can.opssat;
  */
 public class CFPFrameIdentifier {
 
-    private static final int CFP_SIZE_SRC = 3;
-    private static final int CFP_SIZE_DST = 6;
-    private static final int CFP_SIZE_TYPE = 2;
-    private static final int CFP_SIZE_REMAIN = 5;
-    public static final int CFP_SIZE_TRANSACTION_ID = 13;
-
     private final int src;
     private final int dst;
     private final int type;
@@ -49,16 +43,16 @@ public class CFPFrameIdentifier {
         this.frameIdentifier = frameIdentifier;
         
         int position = 0;
-        this.transactionId = (int) ( ( frameIdentifier >> position ) & CFPFrameIdentifier.generateMask(CFP_SIZE_TRANSACTION_ID) );
-        position += CFP_SIZE_TRANSACTION_ID;
-        this.remain = (int) ( ( frameIdentifier >> position ) & CFPFrameIdentifier.generateMask(CFP_SIZE_REMAIN) );
-        position += CFP_SIZE_REMAIN;
-        this.type = (int) ( ( frameIdentifier >> position ) & CFPFrameIdentifier.generateMask(CFP_SIZE_TYPE) );
-        position += CFP_SIZE_TYPE;
-        this.dst = (int) ( ( frameIdentifier >> position ) & CFPFrameIdentifier.generateMask(CFP_SIZE_DST) );
-        position += CFP_SIZE_DST;
-        this.src = (int) ( ( frameIdentifier >> position ) & CFPFrameIdentifier.generateMask(CFP_SIZE_SRC) );
-        position += CFP_SIZE_SRC;
+        this.transactionId = (int) ( ( frameIdentifier >> position ) & CFPFrameIdentifier.generateMask(CFPFrameHandler.CFP_SIZE_TRANSACTION_ID) );
+        position += CFPFrameHandler.CFP_SIZE_TRANSACTION_ID;
+        this.remain = (int) ( ( frameIdentifier >> position ) & CFPFrameIdentifier.generateMask(CFPFrameHandler.CFP_SIZE_REMAIN) );
+        position += CFPFrameHandler.CFP_SIZE_REMAIN;
+        this.type = (int) ( ( frameIdentifier >> position ) & CFPFrameIdentifier.generateMask(CFPFrameHandler.CFP_SIZE_TYPE) );
+        position += CFPFrameHandler.CFP_SIZE_TYPE;
+        this.dst = (int) ( ( frameIdentifier >> position ) & CFPFrameIdentifier.generateMask(CFPFrameHandler.CFP_SIZE_DST) );
+        position += CFPFrameHandler.CFP_SIZE_DST;
+        this.src = (int) ( ( frameIdentifier >> position ) & CFPFrameIdentifier.generateMask(CFPFrameHandler.CFP_SIZE_SRC) );
+        position += CFPFrameHandler.CFP_SIZE_SRC;
     }
     
     /**
@@ -81,13 +75,13 @@ public class CFPFrameIdentifier {
         int position = 0;
         this.frameIdentifier = 0;
         this.frameIdentifier |= ((new Long(this.transactionId)) << position);
-        position += CFP_SIZE_TRANSACTION_ID;
+        position += CFPFrameHandler.CFP_SIZE_TRANSACTION_ID;
         this.frameIdentifier |= ((new Long(this.remain)) << position);
-        position += CFP_SIZE_REMAIN;
+        position += CFPFrameHandler.CFP_SIZE_REMAIN;
         this.frameIdentifier |= ((new Long(this.type)) << position);
-        position += CFP_SIZE_TYPE;
+        position += CFPFrameHandler.CFP_SIZE_TYPE;
         this.frameIdentifier |= ((new Long(this.dst)) << position);
-        position += CFP_SIZE_DST;
+        position += CFPFrameHandler.CFP_SIZE_DST;
         this.frameIdentifier |= ((new Long(this.src)) << position);
 
     }
@@ -116,6 +110,18 @@ public class CFPFrameIdentifier {
         return this.type;
     }
 
+    public boolean isSTART(){
+        return (this.type == 1);
+    }
+
+    public boolean isEND(){
+        return (this.type == 2);
+    }
+
+    public boolean isCONTINUE(){
+        return (this.type == 3);
+    }
+    
     private static long generateMask(int size){
         return ((1 << size) - 1);
     }

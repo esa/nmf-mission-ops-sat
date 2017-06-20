@@ -44,12 +44,18 @@ public class CFPFrameHandler implements FrameListener {
      */
     public static final int CSP_CAN_MTU = 256;
 
+    public static final int CFP_SIZE_SRC = 3;
+    public static final int CFP_SIZE_DST = 6;
+    public static final int CFP_SIZE_TYPE = 2;
+    public static final int CFP_SIZE_REMAIN = 5;
+    public static final int CFP_SIZE_TRANSACTION_ID = 13;
+
     // Max number of retransmissions
     private static final int MAX_NUMBER_OF_RETRANSMISSIONS = 3; // 3 Strikes and you're out!
     private static final int RETRANSMISSION_REQUEST_ID = 0;
 
     // TEMPORARY BUFFER LIFETIME (in case retransmission is necessary)
-    private static final int DESTRUCTION_BUFFER_LIFETIME = 900; // milliseconds
+    private static final int MESSAGE_EXPIRATION_TIME = 5000; // milliseconds
 
     // The DESTRUCTION_ENABLED flag set as true was throwing a: java.lang.OutOfMemoryError: unable to create new native thread
     // There is a tradeoff between memory used vs. processing power. False will always use around 2 MB to store the buffers
@@ -67,13 +73,14 @@ public class CFPFrameHandler implements FrameListener {
 
     private final HashMap<Short, CFPRetransmissionMessageBuffer> retransmissionBuffers; // Retransmission Buffers
     private final HashMap<Short, Long> passedUpwardsTimestamp;
-    private final LinkedBlockingQueue<Short> queuedForDestruction;
+//    private final LinkedBlockingQueue<Short> queuedForDestruction;
     private final LinkedBlockingQueue<Short> queuedForRetransmission;
 
-    private final LinkedBlockingQueue<ReconstructMessage> readyQueue;
+    private final LinkedBlockingQueue<CANFramesAssembler> readyQueue;
 
     // Reconstruct the received messages
-    private final HashMap<Short, ReconstructMessage> incomingMessages;
+//    private final HashMap<Short, CANFramesAssembler> incomingMessages;
+    private final HashMap<Integer, HashMap<Short, CANFramesAssembler>> incomingMessages;
 
     private final CANBusConnector connector;
     private final CANReceiveInterface upperLayerReceiver;
@@ -86,6 +93,9 @@ public class CFPFrameHandler implements FrameListener {
     private final AtomicInteger messagesCounterDinamic = new AtomicInteger(0);
     private final int MESSAGES_COUNTER_INTERVAL = 4000; //  second
 
+//    private short debugFirstTransactionEver = -1;
+//    private long timeFirstTrans;
+
     /**
      * Constructor.
      *
@@ -94,16 +104,17 @@ public class CFPFrameHandler implements FrameListener {
      */
     public CFPFrameHandler(final CANReceiveInterface upperLayerReceiver) throws IOException {
         Random rand = new Random();
-        cfpUniqueId = new AtomicInteger(rand.nextInt() & ((1 << CFPFrameIdentifier.CFP_SIZE_TRANSACTION_ID) - 1));
+        cfpUniqueId = new AtomicInteger(rand.nextInt() & ((1 << CFP_SIZE_TRANSACTION_ID) - 1));
 
         this.upperLayerReceiver = upperLayerReceiver;
         this.connector = new CANBusConnector(this);
         this.retransmissionBuffers = new HashMap<Short, CFPRetransmissionMessageBuffer>();
         this.passedUpwardsTimestamp = new HashMap<Short, Long>();
-        this.incomingMessages = new HashMap<Short, ReconstructMessage>();
-        this.queuedForDestruction = new LinkedBlockingQueue<Short>();
+//        this.incomingMessages = new HashMap<Short, CANFramesAssembler>();
+        this.incomingMessages = new HashMap<Integer, HashMap<Short, CANFramesAssembler>>();
+//        this.queuedForDestruction = new LinkedBlockingQueue<Short>();
         this.queuedForRetransmission = new LinkedBlockingQueue<Short>();
-        this.readyQueue = new LinkedBlockingQueue<ReconstructMessage>();
+        this.readyQueue = new LinkedBlockingQueue<CANFramesAssembler>();
 
         this.node_source = (System.getProperty(PROPERTY_NODE_SOURCE) != null)
                 ? Integer.parseInt(System.getProperty(PROPERTY_NODE_SOURCE))
@@ -189,8 +200,7 @@ public class CFPFrameHandler implements FrameListener {
                             Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.WARNING,
                                     "Requesting retransmission for transactionId: " + transactionId);
 
-                            requestRetransmission(transactionId, 0, CFPFrameHandler.convertSrcToDestinationNode(incomingMessages.get(transactionId).getSrc()));
-
+//                            requestRetransmission(transactionId, 0, CFPFrameHandler.convertSrcToDestinationNode(incomingMessages.get(transactionId).getSrc()));
                         } catch (InterruptedException ex) {
                             Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -205,7 +215,7 @@ public class CFPFrameHandler implements FrameListener {
         Thread passUpwardsThread = new Thread() {
             short counter;
 
-            public void passUpwards(ReconstructMessage message) {
+            public void passUpwards(CANFramesAssembler message) {
                 try {
                     upperLayerReceiver.receive(message.reconstructData()); // Pass it upwards
                     short transactionId = message.getTransactionId();
@@ -220,13 +230,14 @@ public class CFPFrameHandler implements FrameListener {
             public void run() {
                 this.setName("CFPFrameHandler_passUpwardsThread");
 
-                ReconstructMessage message = null;
+                CANFramesAssembler message = null;
+
                 while (true) {
                     try {
                         message = readyQueue.take();
 
                         Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.FINEST,
-                                "New CAN Message with src : " + message.getSrc());
+                                "New CAN Message with src : {0}", message.getSrc());
 
                         short transactionId = message.getTransactionId();
 
@@ -327,7 +338,7 @@ public class CFPFrameHandler implements FrameListener {
                 //        Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO,
                 "Send Data Request received\ndata: "
                 + Arrays.toString(data));
-        */
+         */
 
         if (data.length > CSP_CAN_MTU) {
             Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.SEVERE,
@@ -411,7 +422,7 @@ public class CFPFrameHandler implements FrameListener {
     }
 
     private synchronized int generateTransactionId() throws InterruptedException {
-        int id = cfpUniqueId.incrementAndGet() & ((1 << CFPFrameIdentifier.CFP_SIZE_TRANSACTION_ID) - 1);
+        int id = cfpUniqueId.incrementAndGet() & ((1 << CFP_SIZE_TRANSACTION_ID) - 1);
 
         if (cfpUniqueId.get() != id) {
             cfpUniqueId.set(id);
@@ -497,9 +508,28 @@ public class CFPFrameHandler implements FrameListener {
             this.connector.continueBusActivity();
         }
 
+        /*
+        if (debugFirstTransactionEver == frameIdentifier.getTransactionId()) {
+            Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO,
+                    "First transactionId is repeating in " + (System.currentTimeMillis() - timeFirstTrans)
+                    + "msecs... transactionId: " + frameIdentifier.getTransactionId());
+            timeFirstTrans = System.currentTimeMillis();
+        }
+
+        if (debugFirstTransactionEver == -1) {
+            debugFirstTransactionEver = frameIdentifier.getTransactionId();
+            timeFirstTrans = System.currentTimeMillis();
+        }
+        */
+
         synchronized (MUTEX) {
             // Try to find the object to be reconstructed...
-            ReconstructMessage message = incomingMessages.get(frameIdentifier.getTransactionId());
+//            CANFramesAssembler message = incomingMessages.get(frameIdentifier.getTransactionId());
+            CANFramesAssembler message = this.getCANFramesAssembler(frameIdentifier);
+
+            if (CFPFrameHandler.isMessageExpired(message)) {
+                message = null;  // Reset if expired!
+            }
 
             if (message == null) {
                 // Was this transactionId passed upwards on the last second?
@@ -515,8 +545,9 @@ public class CFPFrameHandler implements FrameListener {
                 }
 
                 // if it does not exist... then create new one
-                message = new ReconstructMessage(frame, this);
-                incomingMessages.put(frameIdentifier.getTransactionId(), message);
+                message = new CANFramesAssembler(frame);
+//                incomingMessages.put(frameIdentifier.getTransactionId(), message);
+                this.putCANFramesAssembler(frameIdentifier, message);
             } else {
                 try {
                     message.addFrame(frame);
@@ -525,7 +556,7 @@ public class CFPFrameHandler implements FrameListener {
                 }
             }
 
-            if (message.isRecontructed()) {
+            if (message.isReady()) {
                 this.readyQueue.offer(message);
                 if (this.queuedForRetransmission.remove(message.getTransactionId())) {
                     Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO,
@@ -549,6 +580,42 @@ public class CFPFrameHandler implements FrameListener {
         }
 
         return destinationNode;
+    }
+
+    private static boolean isMessageExpired(final CANFramesAssembler message) {
+        if (message != null) {
+            long timestamp = message.getCreationTimestamp();
+
+            if (System.currentTimeMillis() - timestamp > MESSAGE_EXPIRATION_TIME) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private CANFramesAssembler getCANFramesAssembler(final CFPFrameIdentifier frameIdentifier) {
+        // Assemblers for a certain node
+        HashMap<Short, CANFramesAssembler> assemblers = incomingMessages.get(frameIdentifier.getSrc());
+
+        if (assemblers == null) {
+            assemblers = new HashMap<Short, CANFramesAssembler>();
+            incomingMessages.put(frameIdentifier.getSrc(), assemblers);
+        }
+
+        return assemblers.get(frameIdentifier.getTransactionId());
+    }
+
+    private void putCANFramesAssembler(final CFPFrameIdentifier frameIdentifier, final CANFramesAssembler message) {
+        // Assemblers for a certain node
+        HashMap<Short, CANFramesAssembler> assemblers = incomingMessages.get(frameIdentifier.getSrc());
+
+        if (assemblers == null) {
+            assemblers = new HashMap<Short, CANFramesAssembler>();
+            incomingMessages.put(frameIdentifier.getSrc(), assemblers);
+        }
+
+        assemblers.put(frameIdentifier.getTransactionId(), message);
     }
 
 }
