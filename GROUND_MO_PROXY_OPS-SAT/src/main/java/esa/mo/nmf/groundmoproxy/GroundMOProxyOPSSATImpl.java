@@ -44,6 +44,11 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
         try {
             // Initialize the protocol bridge services and expose them using TCP/IP!
             Map properties = System.getProperties();
+            
+            // The range of APIDs below were formally requested 
+            // And are uniquely assigned for the Ground MO Proxy of OPS-SAT
+            properties.put(ProtocolBridgeSPP.PROPERTY_APID_RANGE_START, "21");
+            properties.put(ProtocolBridgeSPP.PROPERTY_APID_RANGE_END, "59");
 
             // Initialize the Protocol Bridge
             protocolBridge.init("rmi", properties);
@@ -55,7 +60,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
 
             final URI uri = super.getDirectoryServiceURI();
             Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.INFO,
-                    "Groud MO Proxy initialized! URI: " + uri + "\n");
+                    "Ground MO Proxy initialized! URI: " + uri + "\n");
         } catch (Exception ex) {
             Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
         }

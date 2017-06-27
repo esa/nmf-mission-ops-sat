@@ -132,21 +132,47 @@ public class CFPSPPSocket implements SPPSocket {
 
         @Override
         public void receive(final byte[] array) {
+            /* The Arrays.toString would make it go slower even if the level is just set to FINEST
+
             java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINER,
                     "Data Received on the glue code...");
 
-            /* The Arrays.toString would make it go slower even if the level is just set to FINEST
+
             java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.FINEST,
                     "Data Received on the glue code..."
                     + "\ndata: " + Arrays.toString(array));
              */
+
+            if (array == null) {
+                java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.INFO, 
+                        "Discarding SPP! The received array is null!");
+                return;
+            }
+
+            if (array.length < 4) {
+                java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.INFO, 
+                        "Discarding SPP! The size is less than 4!");
+                return;
+            }
+
+            int pkt_length_value = array[4] & 0xFF;
+            pkt_length_value = ((pkt_length_value << 8) | (array[5] & 0xFF)) + 1;
+
+            if (array.length != (pkt_length_value + 6)) {
+                java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.INFO,
+                        "Discarding SPP! The size of the array does not match the value of the SPP!"
+                        + " Size of the array: " + array.length + " declared size: "
+                        + String.valueOf(pkt_length_value + 6));
+                return;
+            }
+
             SPPReader reader = new SPPReader(new ByteArrayInputStream(array));
             SpacePacket packet;
 
             try {
                 packet = reader.receive();
             } catch (Exception ex) {
-                java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.SEVERE, 
+                java.util.logging.Logger.getLogger(CFPSPPSocket.class.getName()).log(Level.SEVERE,
                         "The packet is not valid!", ex);
                 packet = reader.getPacket();
             }
@@ -161,7 +187,7 @@ public class CFPSPPSocket implements SPPSocket {
                         "The message is not for us! We are apid=" + apid
                         + " and the message is apid=" + packet.getHeader().getApid());
             }
-            */
+             */
         }
     }
 

@@ -22,8 +22,7 @@ package de.dlr.gsoc.mo.malspp.transport;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.MALContextFactory;
@@ -75,6 +74,9 @@ public class SPPEndpoint implements MALEndpoint {
 	private MALMessageListener listener;
 	private boolean isClosed;
 	private boolean isDeliveryStopped;
+//        private final LinkedBlockingQueue<SpacePacket[]> outgoingQueue;
+//        private final Thread outgoingThread;
+        
 
 	public SPPEndpoint(
 			final String protocol,
@@ -96,6 +98,9 @@ public class SPPEndpoint implements MALEndpoint {
 		this.uri = uri;
 		this.isClosed = false;
 		this.isDeliveryStopped = true;
+//                this.outgoingQueue = new LinkedBlockingQueue<SpacePacket[]>(5);
+//                this.outgoingThread = this.constructOutgoingThread();
+//                this.outgoingThread.start();
 	}
 
 	@Override
@@ -115,6 +120,37 @@ public class SPPEndpoint implements MALEndpoint {
 		isDeliveryStopped = true;
 	}
 
+        /*
+	private Thread constructOutgoingThread() {
+		return new Thread() {
+			@Override
+			public void run() {
+				this.setName("OutgoingThread_malspp");
+                                
+				while (!isInterrupted()) {
+					final SpacePacket[] spacePackets;
+                                        
+                                        try {
+                                                spacePackets = outgoingQueue.take();
+                                                
+                                                if (null != spacePackets) {
+                                                        for (SpacePacket sp : spacePackets) {
+                                                                try {
+                                                                    sppSocket.send(sp);
+                                                                } catch (Exception ex) {
+                                                                    Logger.getLogger(SPPEndpoint.class.getName()).log(Level.SEVERE, null, ex);
+                                                                }
+                                                        }
+                                                }
+                                        } catch (InterruptedException ex) {
+                                                Logger.getLogger(SPPEndpoint.class.getName()).log(Level.SEVERE, null, ex);
+                                        }
+                                }
+			}
+		};
+	}
+        */
+        
 	//<editor-fold defaultstate="collapsed" desc="public MALMessage createMessage(...) - 4x + 2x">
 	@Override
 	public MALMessage createMessage(
@@ -414,19 +450,6 @@ public class SPPEndpoint implements MALEndpoint {
 		return new SPPMessageBody(encodedBody, esf, ctx);
 	}
         
-        /*
-        public void shipMessage(final MALMessage msg){
-            final SPPEndpoint endpoint = this;
-            
-                    executor.submit(new Runnable(){
-                            @Override
-                            public void run() {
-                                    listener.onMessage(endpoint, msg);
-                            }
-                    });
-        }
-        */
-        
 	/**
 	 * Creates a specialized message body according to some header information.
 	 */
@@ -520,9 +543,12 @@ public class SPPEndpoint implements MALEndpoint {
                                 // Line hitting the exception is below!!
         			SpacePacket[] spacePackets = ((SPPMessage) msg).createSpacePackets(sequenceCounter, segmentCounter, packetDataFieldSizeLimit);
 
+//                                this.outgoingQueue.put(spacePackets);
+                                
                                 for (SpacePacket sp : spacePackets) {
 					sppSocket.send(sp);
 				}
+                                
 			}
 		} catch (Exception ex) {
 			MALStandardError error = new MALStandardError(MALHelper.INTERNAL_ERROR_NUMBER, ex.getMessage());

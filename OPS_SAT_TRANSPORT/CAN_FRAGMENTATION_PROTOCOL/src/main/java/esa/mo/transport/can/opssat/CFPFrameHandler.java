@@ -219,7 +219,7 @@ public class CFPFrameHandler implements FrameListener {
                 try {
                     upperLayerReceiver.receive(message.reconstructData()); // Pass it upwards
                     short transactionId = message.getTransactionId();
-                    incomingMessages.remove(transactionId);  // No need to keep it
+//                    incomingMessages.remove(transactionId);  // No need to keep it
                     passedUpwardsTimestamp.put(transactionId, System.currentTimeMillis());
                 } catch (IOException ex) {
                     Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.SEVERE, null, ex);
@@ -558,11 +558,14 @@ public class CFPFrameHandler implements FrameListener {
 
             if (message.isReady()) {
                 this.readyQueue.offer(message);
+                
                 if (this.queuedForRetransmission.remove(message.getTransactionId())) {
                     Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO,
                             "The message was successfully recovered! For transactionId: "
                             + frameIdentifier.getTransactionId() + "! :)");
                 }
+                
+                this.removeFromCANFramesAssembler(frameIdentifier);
             }
         }
     }
@@ -616,6 +619,18 @@ public class CFPFrameHandler implements FrameListener {
         }
 
         assemblers.put(frameIdentifier.getTransactionId(), message);
+    }
+
+    private void removeFromCANFramesAssembler(final CFPFrameIdentifier frameIdentifier) {
+        // Assemblers for a certain node
+        HashMap<Short, CANFramesAssembler> assemblers = incomingMessages.get(frameIdentifier.getSrc());
+
+        if (assemblers == null) {
+            assemblers = new HashMap<Short, CANFramesAssembler>();
+            incomingMessages.put(frameIdentifier.getSrc(), assemblers);
+        }
+
+        assemblers.remove(frameIdentifier.getTransactionId());
     }
 
 }

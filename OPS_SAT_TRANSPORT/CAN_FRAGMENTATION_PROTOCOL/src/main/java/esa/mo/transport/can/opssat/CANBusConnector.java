@@ -71,14 +71,13 @@ public class CANBusConnector {
 
     // The lowest maximum that CAN can support (1M/128 = 7'812 msgs/sec)
     // N_MESSAGES / N_MILLISECONDS * 1000 < 7812!
-    private int nMessages = 1; // Keep as 1 for now, we can try to speed it up later
+    private int nMessages = 4; // Conservative values
     private int nInterval = 1;
     
     private final Bus bus = new Bus();
     private boolean running = false;
 
     public CANBusConnector(final FrameListener receiver) throws IOException {
-
         String bus_string = (System.getProperty(PROPERTY_BUS) != null) ? System.getProperty(PROPERTY_BUS) : DEFAULT_BUS;
         String host_string = (System.getProperty(PROPERTY_HOST) != null) ? System.getProperty(PROPERTY_HOST) : DEFAULT_HOST;
         int port = (System.getProperty(PROPERTY_PORT) != null) ? Integer.parseInt(System.getProperty(PROPERTY_PORT)) : DEFAULT_PORT;

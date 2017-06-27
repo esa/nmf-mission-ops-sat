@@ -44,6 +44,7 @@ import org.ccsds.moims.mo.mal.structures.IdentifierList;
 import org.ccsds.moims.mo.mal.structures.InteractionType;
 import org.ccsds.moims.mo.mal.structures.QoSLevel;
 import org.ccsds.moims.mo.mal.structures.SessionType;
+import org.ccsds.moims.mo.mal.structures.ShortList;
 import org.ccsds.moims.mo.mal.structures.UInteger;
 import org.ccsds.moims.mo.mal.structures.URI;
 import org.ccsds.moims.mo.mal.structures.UShort;
@@ -79,6 +80,7 @@ public class SPPTransport implements MALTransport {
 	private final SPPSocket sppSocket;
 	private final Map<String, SPPEndpoint> endpointsByName = new HashMap<>();
 	private final Map<URI, SPPEndpoint> endpointsByURI = new HashMap<>();
+        private final ShortList apids = new ShortList();
 	private boolean isClosed;
 	private Thread receiveThread = null; // is assigned on first endpoint creation
 	private Thread messageHandlerThread = null; // is assigned on first endpoint creation
@@ -86,8 +88,8 @@ public class SPPTransport implements MALTransport {
         // We need to set the initial capacity to have the MAL mixing messages from different sources.
         // For example, if I do a heavy query, I don't want to have the queue full of those messages, 
         // but instead, a mix of those combined with other messages. This let's them work in parallel.
-//	private BlockingQueue<MALMessage> receivedMessages = new LinkedBlockingQueue<>(15);
-	private LinkedBlockingQueue<MALMessage> receivedMessages = new LinkedBlockingQueue<>();
+	private LinkedBlockingQueue<MALMessage> receivedMessages = new LinkedBlockingQueue<>(15);
+//	private LinkedBlockingQueue<MALMessage> receivedMessages = new LinkedBlockingQueue<>();
 
 	private HashMap<Long, LinkedBlockingQueue<MALMessage>> transMap = new HashMap<Long, LinkedBlockingQueue<MALMessage>>();
         
@@ -148,8 +150,10 @@ public class SPPTransport implements MALTransport {
                 }
                 
                 if(uri == null){
-                    uri = new SPPURI(config.qualifier(), config.apid(), identifier); 
+                    uri = new SPPURI(config.qualifier(), config.apid(), identifier);
                 }
+                
+                apids.add(config.apid());
                 
 //		SPPURI uri = new SPPURI(config.qualifier(), config.apid(), identifier);
 
@@ -418,9 +422,12 @@ public class SPPTransport implements MALTransport {
                         */
 
                         // retrieve effective QoS properties resolving per-application parameters
-			Configuration config = new Configuration(qosProperties);
-                        short apid = config.apid();
+			Configuration config = new Configuration(qosProperties);                        
+//                        short apid = config.apid();
                         
+                        short apid;
+
+        
 			Map effectiveProperties = config.getEffectiveProperties(
 					spacePacket.getApidQualifier(),
 					(short) spacePacket.getHeader().getApid()
@@ -429,10 +436,49 @@ public class SPPTransport implements MALTransport {
 			MALElementStreamFactory esf = MALElementStreamFactory.newFactory(protocol, effectiveProperties);
 			SPPMessageHeader messageHeader = new SPPMessageHeader(spacePacket, esf, effectiveProperties);
 
-                        if(messageHeader.getSPPURIFrom().getAPID() != apid && messageHeader.getSPPURITo().getAPID() != apid){
-                            return null;
+                        // We need to iterate between all the available endpoints before discarding it...
+                        boolean discard = true;
+                        
+                        short from = messageHeader.getSPPURIFrom().getAPID();
+                        short to = messageHeader.getSPPURITo().getAPID();
+                        
+                        // Iterate through all the endpoints
+                        /*
+                        for (Map.Entry<URI, SPPEndpoint> entry : endpointsByURI.entrySet()) {
+                                URI key = entry.getKey();
+//                                SPPEndpoint value = entry.getValue();
+                                
+                                // Get the APID from the key:
+                                String[] strs = key.getValue().split("/");
+                                apid = Short.parseShort(strs[1]);
+                                
+                                 // Don't discard if one of the enpoint apidsd is the from or to apid
+                                if(from == apid || to == apid){
+                                        discard = false;
+                                        break;
+                                }
                         }
-        
+                        */
+                        // Iterate through all the apids
+                        for (int i = 0; i < apids.size(); i++) {
+                                apid = apids.get(i);
+                                
+                                 // Don't discard if one of the enpoint apidsd is the from or to apid
+                                if(from == apid || to == apid){
+                                        discard = false;
+                                        break;
+                                }
+                        }
+                        
+                        
+
+                        if(discard){
+                                LOGGER.log(Level.INFO, "Discarding message...");
+                                return null;
+                        }
+                                
+                        
+                        
 			SegmentCounterId segmentCounterId = new SegmentCounterId(messageHeader);
                         SPPSegmenter segmenter;
                         
