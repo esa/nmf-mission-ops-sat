@@ -23,7 +23,7 @@ package esa.mo.nmf.provider;
 import esa.mo.com.impl.util.COMServicesProvider;
 import esa.mo.com.impl.util.GMVServicesConsumer;
 import esa.mo.nmf.nanosatmosupervisor.NanoSatMOSupervisor;
-import esa.mo.nmf.packager.NMFPackagePMBackend;
+import esa.mo.nmf.nmfpackage.NMFPackagePMBackend;
 import esa.mo.platform.impl.util.PlatformServicesConsumer;
 import esa.mo.platform.impl.util.PlatformServicesProviderOPSSAT;
 import java.util.logging.Level;

@@ -378,6 +378,10 @@ public class CFPFrameHandler implements FrameListener {
                     + ")\n"
                     + "dataChunk: " + Arrays.toString(dataChunk));
              */
+            
+            // Prepare it beforehand
+            canFrame.prepareString();
+            
             // Send chunk to the CAN bus
             this.connector.sendData2Kayak(canFrame);
         }

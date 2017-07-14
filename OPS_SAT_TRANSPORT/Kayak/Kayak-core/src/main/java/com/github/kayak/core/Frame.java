@@ -36,8 +36,35 @@ public class Frame {
     private long timestamp;
     private Bus bus;
     private boolean extended;
+    private boolean prepared = false;
+    private String preparedString = "";
 
     public static final Pattern LogFileNotationPattern = Pattern.compile("\\([0-9]+\\.[0-9]{6}\\)[\\s]+[a-zA-Z0-9]{1,16}[\\s]+[A-Za-z0-9]{3,8}#[A-Fa-f0-9rR]+");
+
+    public boolean isPrepared() {
+        return prepared;
+    }
+
+    public String getPreparedString() {
+        return preparedString;
+    }
+
+    public void prepareString() {
+        StringBuilder sb = new StringBuilder(50);
+        sb.append("< send ");
+        if(this.isExtended()) {
+            sb.append(String.format("%08x", this.getIdentifier()));
+        } else {
+            sb.append(String.format("%03x", this.getIdentifier()));
+        }
+        sb.append(' ');
+        sb.append(Integer.toString(this.getLength()));
+        sb.append(' ');
+        sb.append(Util.byteArrayToHexString(this.getData(), true));
+        sb.append(" >");
+        preparedString = sb.toString();
+        prepared = true;
+    }
 
     public static class IdentifierComparator implements Comparator<Frame> {
 

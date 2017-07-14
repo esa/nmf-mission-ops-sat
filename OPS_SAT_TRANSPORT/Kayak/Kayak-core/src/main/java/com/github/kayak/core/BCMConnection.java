@@ -17,8 +17,10 @@
  */
 package com.github.kayak.core;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -38,6 +40,8 @@ public class BCMConnection extends SocketcandConnection {
 
     private Socket socket;
     private OutputStreamWriter output;
+//    private DataOutputStream output;
+//    private OutputStream fastOut;
     private Thread thread;
     private InputStreamReader input;
     private Boolean connected = false;
@@ -126,6 +130,9 @@ public class BCMConnection extends SocketcandConnection {
             input = new InputStreamReader(socket.getInputStream(), "ASCII");
             setInput(input);
             output = new OutputStreamWriter(socket.getOutputStream(), "ASCII");
+//            output = new DataOutputStream(socket.getOutputStream());
+             
+//            fastOut = socket.getOutputStream();
 
             String ret = getElement();
             if (!ret.equals("< hi >")) {
@@ -175,6 +182,7 @@ public class BCMConnection extends SocketcandConnection {
     private synchronized void send(String s) {
         try {
             output.write(s);
+//            output.writeBytes(s);
             output.flush();
         } catch(IOException ex) {
             logger.log(Level.WARNING,"IOException while sending data.", ex);
@@ -242,20 +250,102 @@ public class BCMConnection extends SocketcandConnection {
     }
 
     public void sendFrame(Frame f) {
-        StringBuilder sb = new StringBuilder(50);
-        sb.append("< send ");
-        if(f.isExtended()) {
+        
+        // We can prepare the whole string!
+        // Include a prepare method in the Frame class that does that
+        // Here, we would just need to have a if condition to check if it was prepared
+        // if so, then use the prepared 
+        
+        if(!f.isPrepared()){
+            StringBuilder sb = new StringBuilder(50);
+            sb.append("< send ");
+            if(f.isExtended()) {
             sb.append(String.format("%08x", f.getIdentifier()));
-        } else {
+            } else {
             sb.append(String.format("%03x", f.getIdentifier()));
+            }
+            sb.append(' ');
+            sb.append(Integer.toString(f.getLength()));
+            sb.append(' ');
+            sb.append(Util.byteArrayToHexString(f.getData(), true));
+            sb.append(" >");
+            send(sb.toString());
+        }else{
+            send(f.getPreparedString());
         }
-        sb.append(' ');
-        sb.append(Integer.toString(f.getLength()));
-        sb.append(' ');
-        sb.append(Util.byteArrayToHexString(f.getData(), true));
-        sb.append(" >");
-//        logger.log(Level.INFO, sb.toString());
-        send(sb.toString());
+        
+        
+/*        
+//        long start = System.nanoTime();
+            StringBuilder sb = new StringBuilder(50);
+//        long partial1 = System.nanoTime();
+            sb.append("< send ");
+//        long partial2 = System.nanoTime();
+            if(f.isExtended()) {
+            sb.append(String.format("%08x", f.getIdentifier()));
+            } else {
+            sb.append(String.format("%03x", f.getIdentifier()));
+            }
+//        long partial3 = System.nanoTime();
+            sb.append(' ');
+//        long partial4 = System.nanoTime();
+            sb.append(Integer.toString(f.getLength()));
+//        long partial5 = System.nanoTime();
+            sb.append(' ');
+            // Maybe we can delegate this part to the Frame class
+            // This would force it to happen before and not during the send
+            // of the Frame
+//        long partial6 = System.nanoTime();
+            sb.append(Util.byteArrayToHexString(f.getData(), true));
+//        long partial7 = System.nanoTime();
+            sb.append(" >");
+            //        logger.log(Level.INFO, sb.toString());
+//        long partial8 = System.nanoTime();
+            send(sb.toString());
+//        long partial9 = System.nanoTime();
+   */         
+/*
+            logger.log(Level.INFO,
+                    "Times:\n" + 
+                    "1: " + (partial1-start) + "\n" +
+                    "2: " + (partial2-start) + "\n" +
+                    "3: " + (partial3-start) + "\n" +
+                    "4: " + (partial4-start) + "\n" +
+                    "5: " + (partial5-start) + "\n" +
+                    "6: " + (partial6-start) + "\n" +
+                    "7: " + (partial7-start) + "\n" +
+                    "8: " + (partial8-start) + "\n" +
+                    "9: " + (partial9-start) + "\n");
+  */      
+        
+            /*
+        try {
+            output.writeBytes("< send ");
+            if(f.isExtended()) {
+                output.writeBytes(String.format("%08x", f.getIdentifier()));
+            } else {
+                output.writeBytes(String.format("%03x", f.getIdentifier()));
+            }
+            output.writeBytes(" ");
+//            output.writeChar(' ');
+            output.writeBytes(Integer.toString(f.getLength()));
+            output.writeBytes(" ");
+//            output.writeChar(' ');
+//            output.flush();
+//            fastOut.write(f.getData());
+//            fastOut.flush();
+
+            output.writeBytes(Util.byteArrayToHexString(f.getData(), true));
+            output.writeBytes(" >");
+            //        logger.log(Level.INFO, sb.toString());
+//            send(sb.toString());
+
+            output.flush();
+        } catch (IOException ex) {
+            Logger.getLogger(BCMConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+            */
+        
     }
 
 }
