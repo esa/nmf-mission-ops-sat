@@ -69,10 +69,12 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
 
     private static final String PARAMETER_LINUX_VERSION = "LinuxVersion";
     private static final String CMD_LINUX_VERSION = "uname -a";
+    private static final String CMD_LINUX_REBOOT = "reboot";
 
     private static final String PARAMETER_CAN_RATE = "CANDataRate";
 
     private static final String ACTION_GPS_SENTENCE = "GPS_Sentence";
+    private static final String ACTION_REBOOT = "Reboot_MityArm";
     private static final String ACTION_CLOCK_SET_TIME = "Clock.setTimeUsingDeltaMilliseconds";
     private static final String ACTION_LEDS_TEST = "LEDs_Test";
 
@@ -177,10 +179,20 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
                 null
         );
 
+        ActionDefinitionDetails actionDef3 = new ActionDefinitionDetails(
+                "Reboots the mityArm.",
+                new UOctet((short) 0),
+                new UShort(0),
+                new ArgumentDefinitionDetailsList(),
+                null
+        );
+
         actionDefs.add(actionDef1);
         actionDefs.add(actionDef2);
+        actionDefs.add(actionDef3);
         actionIdentifiers.add(new Identifier(ACTION_GPS_SENTENCE));
         actionIdentifiers.add(new Identifier(ACTION_CLOCK_SET_TIME));
+        actionIdentifiers.add(new Identifier(ACTION_REBOOT));
 
         LongList actionObjIds = registration.registerActions(actionIdentifiers, actionDefs);
 
@@ -309,6 +321,14 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         if (ACTION_LEDS_TEST.equals(name.getValue())) {
             ShellCommander shell = new ShellCommander();
             String output = shell.runCommandAndGetOutputMessage("./led_test.sh");
+            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Output: " + output);
+
+            return null; // Success!
+        }
+
+        if (ACTION_REBOOT.equals(name.getValue())) {
+            ShellCommander shell = new ShellCommander();
+            String output = shell.runCommandAndGetOutputMessage(CMD_LINUX_REBOOT);
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Output: " + output);
 
             return null; // Success!
