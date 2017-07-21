@@ -357,25 +357,25 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
 
         @Override
         public void getGPSDataAckReceived(org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader, java.util.Map qosProperties) {
-            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "1. ACK Received!");
+            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "1. getGPSDataAckReceived()");
         }
 
         @Override
         public void getGPSDataResponseReceived(org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader,
                 org.ccsds.moims.mo.mal.structures.Blob data, java.util.Map qosProperties) {
-            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "2. Data: " + data.toString());
+            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "2. getGPSDataResponseReceived() Data: " + data.toString());
         }
 
         @Override
         public void getGPSDataAckErrorReceived(org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader,
                 org.ccsds.moims.mo.mal.MALStandardError error, java.util.Map qosProperties) {
-            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "3.");
+            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "3. getGPSDataAckErrorReceived()");
         }
 
         @Override
         public void getGPSDataResponseErrorReceived(org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader,
                 org.ccsds.moims.mo.mal.MALStandardError error, java.util.Map qosProperties) {
-            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "5.");
+            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "4. getGPSDataResponseErrorReceived()");
         }
 
     }
