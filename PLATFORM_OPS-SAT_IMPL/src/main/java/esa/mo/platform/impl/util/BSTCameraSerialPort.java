@@ -93,20 +93,16 @@ public class BSTCameraSerialPort {
     public boolean checkIfAvailable() {
         final Enumeration portIdentifiers = CommPortIdentifier.getPortIdentifiers();
 
-//        CommPortIdentifier portId = null;  // will be set if port found
         while (portIdentifiers.hasMoreElements()) {
             CommPortIdentifier pid = (CommPortIdentifier) portIdentifiers.nextElement();
 
             if (pid.getPortType() == CommPortIdentifier.PORT_SERIAL
                     && pid.getName().equals(PORT_NAME)) {
-//                portId = pid; // Found!
-//                break;
                 return true;
             }
         }
         
         return false;
-//        return portId != null;
     }
 
     public ArrayList<String> getSerialPortNamesAvailable() {
