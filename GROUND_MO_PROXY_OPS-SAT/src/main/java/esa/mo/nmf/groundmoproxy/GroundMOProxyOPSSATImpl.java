@@ -32,7 +32,7 @@ import org.ccsds.moims.mo.mal.structures.URI;
  */
 public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
 
-    private final ProtocolBridgeSPP protocolBridge = new ProtocolBridgeSPP();
+    private final ProtocolBridgeSPP protocolBridgeSPP = new ProtocolBridgeSPP();
 
     /**
      * Ground MO Proxy for OPS-SAT
@@ -41,18 +41,19 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
     public GroundMOProxyOPSSATImpl() {
         super();
 
-        try {
-            // Initialize the protocol bridge services and expose them using TCP/IP!
-            Map properties = System.getProperties();
-            
-            // The range of APIDs below were formally requested 
-            // And are uniquely assigned for the Ground MO Proxy of OPS-SAT
-            properties.put(ProtocolBridgeSPP.PROPERTY_APID_RANGE_START, "21");
-            properties.put(ProtocolBridgeSPP.PROPERTY_APID_RANGE_END, "59");
+        // Initialize the protocol bridge services and expose them using TCP/IP!
+        final Map properties = System.getProperties();
 
-            // Initialize the Protocol Bridge
-            protocolBridge.init("rmi", properties);
-            final URI routedURI = protocolBridge.getRoutingProtocol();
+        // The range of APIDs below were formally requested 
+        // And are uniquely assigned for the Ground MO Proxy of OPS-SAT
+        properties.put(ProtocolBridgeSPP.PROPERTY_APID_RANGE_START, "21");
+        properties.put(ProtocolBridgeSPP.PROPERTY_APID_RANGE_END, "59");
+
+        // Initialize the SPP Protocol Bridge
+        try {
+            // TCP/IP is the selected transport binding for the bridge with SPP
+            protocolBridgeSPP.init("maltcp", properties);
+            final URI routedURI = protocolBridgeSPP.getRoutingProtocol();
 
             // Initialize the pure protocol bridge for the services without extension
             final URI centralDirectoryServiceURI = new URI("malspp:247/100/5");
@@ -62,7 +63,8 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
             Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.INFO,
                     "Ground MO Proxy initialized! URI: " + uri + "\n");
         } catch (Exception ex) {
-            Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE,
+                    "The SPP Protocol Bridge could not be initialized!", ex);
         }
     }
 
