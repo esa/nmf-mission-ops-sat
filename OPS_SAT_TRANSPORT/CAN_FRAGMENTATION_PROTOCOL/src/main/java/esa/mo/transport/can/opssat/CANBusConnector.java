@@ -71,8 +71,8 @@ public class CANBusConnector {
 
     // The lowest maximum that CAN can support (1M/128 = 7'812 msgs/sec)
     // N_MESSAGES / N_MILLISECONDS * 1000 < 7812!
-    private int nMessages = 4; // Conservative values
-    private int nInterval = 1;
+    private int nMessages = 640;
+    private int nInterval = 100;
     
     private final Bus bus = new Bus();
     private boolean running = false;
