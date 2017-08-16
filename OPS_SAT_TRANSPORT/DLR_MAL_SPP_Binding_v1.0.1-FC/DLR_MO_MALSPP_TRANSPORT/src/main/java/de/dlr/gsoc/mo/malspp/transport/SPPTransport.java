@@ -473,7 +473,7 @@ public class SPPTransport implements MALTransport {
                         
 
                         if(discard){
-                                LOGGER.log(Level.INFO, "Discarding message...");
+                                LOGGER.log(Level.FINE, "Discarding message...");
                                 return null;
                         }
                                 
