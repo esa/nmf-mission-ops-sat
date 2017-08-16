@@ -308,8 +308,8 @@ public class LinuxImagesManager {
                 // Extract the files into a temporary folder
                 boolean valid = runCommand("tar -xzvf " + patch_temp_folder + "Slot_A-Slot_B.tar.gz" + " " + patch_temp_folder + DirectCopyFolderName + "a");
                 try {
-                    nanoSatMOFramework.reportActionExecutionProgress(valid, 0, 1, 3, actionInstanceObjId);
-                } catch (connector ex) {
+                    connector.reportActionExecutionProgress(valid, 0, 1, 3, actionInstanceObjId);
+                } catch (NMFException ex) {
                     Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.INFO, "(5) Compression completed!");
