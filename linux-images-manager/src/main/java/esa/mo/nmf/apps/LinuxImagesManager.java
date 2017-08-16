@@ -35,7 +35,6 @@ import com.nothome.delta.GDiffWriter;
 import esa.mo.nmf.MCRegistration;
 import esa.mo.nmf.MonitorAndControlNMFAdapter;
 import esa.mo.nmf.NMFException;
-import esa.mo.nmf.NMFInterface;
 import esa.mo.nmf.nanosatmoconnector.NanoSatMOConnectorImpl;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -57,14 +56,15 @@ import org.ccsds.moims.mo.mc.parameter.structures.ParameterRawValueList;
 import org.ccsds.moims.mo.mc.structures.AttributeValueList;
 
 /**
- * This class provides a simple Hello World demo cli provider
- *
+ * An NMF App to manage Linux Images
  */
 public class LinuxImagesManager {
 
-    private final NMFInterface nanoSatMOFramework = new NanoSatMOConnectorImpl(new MCAdapter());
+    private final NanoSatMOConnectorImpl connector = new NanoSatMOConnectorImpl();
 
     public LinuxImagesManager() {
+        connector.init(new MCAdapter());
+
         //        boolean valid = runCommand("bgfbf");
         //        boolean valid = runCommand("ping google.pt");
 /*
@@ -74,7 +74,6 @@ public class LinuxImagesManager {
 
         dirDeltaCreator(oldDirectory, newDirectory, patchFile);
          */
-
     }
 
     private void create_iso_image() {
@@ -124,7 +123,8 @@ public class LinuxImagesManager {
         }
 
     }
-/*
+
+    /*
     private void nothome_delta() {
         File test1File = new File("/home/root/repository/Full_Images/mmcblk05_clone.img");
         File test2File = new File("/home/root/repository/Full_Images/mmcblk05_clone3.img");
@@ -135,8 +135,8 @@ public class LinuxImagesManager {
             Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-*/
-    /*
+     */
+ /*
     private void jbsdiff_diff() {
 
         File oldFile = new File("/home/root/repository/Full_Images/mmcblk05_clone.img");
@@ -160,7 +160,7 @@ public class LinuxImagesManager {
             System.exit(1);
         }
     }
-*/
+     */
     /**
      * Main command line entry point.
      *
@@ -192,11 +192,10 @@ public class LinuxImagesManager {
         public UInteger actionArrived(Identifier name, AttributeValueList attributeValues, Long actionInstanceObjId, boolean reportProgress, MALInteraction interaction) {
 
             String mount_point_dir = "/home/root/Software_Management/Mount_Points/";
-                String old_dir = "/home/root/Software_Management/Mount_Points/Slot_A/";
-                String new_dir = "/home/root/Software_Management/Mount_Points/Slot_B/";
-                String patch_temp_folder = "/home/root/Software_Management/Mount_Points/Repository/Patches/temp/";
-                String DirectCopyFolderName = "DirectCopyFolder_dfhsifuh34t8hg9pw4ghp49ghp49";
-
+            String old_dir = "/home/root/Software_Management/Mount_Points/Slot_A/";
+            String new_dir = "/home/root/Software_Management/Mount_Points/Slot_B/";
+            String patch_temp_folder = "/home/root/Software_Management/Mount_Points/Repository/Patches/temp/";
+            String DirectCopyFolderName = "DirectCopyFolder_dfhsifuh34t8hg9pw4ghp49ghp49";
 
             if ("clonePartition".equals(name.getValue())) {
                 String partition = attributeValues.get(0).getValue().toString();  // mmcblk0p5
@@ -205,7 +204,7 @@ public class LinuxImagesManager {
                 String cmd = "dd if=/dev/" + partition + " of=/home/root/Software_Management/Mount_Points/Repository/Images/" + filename + " bs=4096 conv=noerror";
                 boolean valid = runCommand(cmd);
                 try {
-                    nanoSatMOFramework.reportActionExecutionProgress(valid, 0, 1, 1, actionInstanceObjId);
+                    connector.reportActionExecutionProgress(valid, 0, 1, 1, actionInstanceObjId);
                 } catch (NMFException ex) {
                     Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -218,14 +217,14 @@ public class LinuxImagesManager {
                 String cmd = "dd if=/home/root/Software_Management/Mount_Points/Repository/Images/" + filename + " of=/dev/" + partition + " bs=4096 conv=noerror";
                 boolean valid = runCommand(cmd);
                 try {
-                    nanoSatMOFramework.reportActionExecutionProgress(valid, 0, 1, 1, actionInstanceObjId);
+                    connector.reportActionExecutionProgress(valid, 0, 1, 1, actionInstanceObjId);
                 } catch (NMFException ex) {
                     Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
             if ("generateDiff".equals(name.getValue())) {
-                
+
                 // List all folders in the partition
                 // get all the files from a directory
                 File oldDirectory = new File(old_dir);  // Location of the folder
@@ -242,17 +241,17 @@ public class LinuxImagesManager {
                 // Cycle all the folders and content and check if there are new folders
                 for (File new_folder : (new File(new_dir)).listFiles()) {
                     File old_folder = new File(new_dir + new_folder.getName());
-                 
-                    if (!old_folder.exists()){
+
+                    if (!old_folder.exists()) {
                         try {
                             // If it does not exist, then copy the files/folders directly
-                            FileUtils.copyDirectory(new_folder, new File(directCopyDirString + File.pathSeparator + new_folder.getName()) );
+                            FileUtils.copyDirectory(new_folder, new File(directCopyDirString + File.pathSeparator + new_folder.getName()));
                         } catch (IOException ex) {
                             Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
                 }
-                
+
                 // Cycle one by one and exclude some...
                 for (File old_folder : fList) {
                     if (old_folder.isDirectory()) {
@@ -260,10 +259,9 @@ public class LinuxImagesManager {
                         // Store the diffs in a temporary folder
                         File patchFile = new File(patch_temp_folder + old_folder.getName());
 
-                        if (    "var".equals(old_folder.getName()) || 
-                                "lib".equals(old_folder.getName()) || 
-                                "dev".equals(old_folder.getName())
-                                ) {
+                        if ("var".equals(old_folder.getName())
+                                || "lib".equals(old_folder.getName())
+                                || "dev".equals(old_folder.getName())) {
                             Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.INFO, "(3) Skipping directory: " + old_folder.getName());
                             continue;
                         }
@@ -278,18 +276,18 @@ public class LinuxImagesManager {
 
                     }
                 }
-                
+
                 Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.INFO, "(4) Diff completed!");
                 try {
-                    nanoSatMOFramework.reportActionExecutionProgress(true, 0, 1, 3, actionInstanceObjId);
+                    connector.reportActionExecutionProgress(true, 0, 1, 3, actionInstanceObjId);
                 } catch (NMFException ex) {
                     Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 // Compress the temporary folder in a new file and delete the folder
-                boolean valid = runCommand("tar -zcvf " + patch_temp_folder + "Slot_A-Slot_B.tar.gz " + patch_temp_folder.substring(0, patch_temp_folder.length()-1));
+                boolean valid = runCommand("tar -zcvf " + patch_temp_folder + "Slot_A-Slot_B.tar.gz " + patch_temp_folder.substring(0, patch_temp_folder.length() - 1));
                 try {
-                    nanoSatMOFramework.reportActionExecutionProgress(valid, 0, 2, 3, actionInstanceObjId);
+                    connector.reportActionExecutionProgress(valid, 0, 2, 3, actionInstanceObjId);
                 } catch (NMFException ex) {
                     Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -297,12 +295,12 @@ public class LinuxImagesManager {
 
                 boolean valid2 = runCommand("rm -r " + patch_temp_folder);
                 try {
-                    nanoSatMOFramework.reportActionExecutionProgress(valid2, 0, 3, 3, actionInstanceObjId);
+                    connector.reportActionExecutionProgress(valid2, 0, 3, 3, actionInstanceObjId);
                 } catch (NMFException ex) {
                     Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.INFO, "(6) Folder Deleted!");
-                
+
             }
 
             if ("patchPartition".equals(name.getValue())) {
@@ -311,12 +309,11 @@ public class LinuxImagesManager {
                 boolean valid = runCommand("tar -xzvf " + patch_temp_folder + "Slot_A-Slot_B.tar.gz" + " " + patch_temp_folder + DirectCopyFolderName + "a");
                 try {
                     nanoSatMOFramework.reportActionExecutionProgress(valid, 0, 1, 3, actionInstanceObjId);
-                } catch (NMFException ex) {
+                } catch (connector ex) {
                     Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 Logger.getLogger(LinuxImagesManager.class.getName()).log(Level.INFO, "(5) Compression completed!");
-                
-                
+
                 // Cycle them all and patch the folders
                 // Delete the temporary folder
                 boolean valid2 = runCommand("aaa");
@@ -398,7 +395,8 @@ public class LinuxImagesManager {
             }
         }
     }
-/*
+
+    /*
     private void doTest(File test1File, File test2File, int chunkSize) throws IOException {
         File patchedFile = new File("/home/root/repository/Full_Images/patchedFile.img");
         File delta = new File("/home/root/repository/Full_Images/delta");
@@ -427,7 +425,7 @@ public class LinuxImagesManager {
 
 //        assertEquals(new String(buf), read(test2File).toString());
     }
-*/
+     */
     static ByteArrayOutputStream read(File f) throws IOException {
         FileInputStream fis = new FileInputStream(f);
         try {

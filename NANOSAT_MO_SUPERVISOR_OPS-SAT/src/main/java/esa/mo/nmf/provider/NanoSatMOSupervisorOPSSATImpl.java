@@ -22,6 +22,7 @@ package esa.mo.nmf.provider;
 
 import esa.mo.com.impl.util.COMServicesProvider;
 import esa.mo.com.impl.util.GMVServicesConsumer;
+import esa.mo.nmf.MonitorAndControlNMFAdapter;
 import esa.mo.nmf.nanosatmosupervisor.NanoSatMOSupervisor;
 import esa.mo.nmf.nmfpackage.NMFPackagePMBackend;
 import esa.mo.platform.impl.util.PlatformServicesConsumer;
@@ -31,29 +32,18 @@ import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.MALException;
 
 /**
- * A Provider of MO services composed by COM, M&C and Platform services. Selects
- * the transport layer based on the selected values of the properties file and
- * initializes all services automatically. Provides configuration persistence,
- * therefore the last state of the configuration of the MO services will be kept
- * upon restart. Additionally, the NanoSat MO Framework implements an
- * abstraction layer over the Back-End of some MO services to facilitate the
- * monitoring of the business logic of the app using the NanoSat MO Framework.
+ * The implementation of the NanoSat MO Supervisor for the OPS-SAT mission.
  *
  * @author Cesar Coelho
  */
-public class NanoSatMOSupervisorOPSSATImpl extends NanoSatMOSupervisor {
+public final class NanoSatMOSupervisorOPSSATImpl extends NanoSatMOSupervisor {
 
     private PlatformServicesProviderOPSSAT platformServicesOPSSAT;
     private GMVServicesConsumer gmvServicesConsumer;
 
-    /**
-     * NanoSat MO Supervisor for OPS-SAT
-     *
-     */
-    public NanoSatMOSupervisorOPSSATImpl() {
-        super(new MCOPSSATAdapter(),
-                new PlatformServicesConsumer(),
-                new NMFPackagePMBackend());
+    @Override
+    public void init(final MonitorAndControlNMFAdapter mcAdapter) {
+        init(mcAdapter, new PlatformServicesConsumer(), new NMFPackagePMBackend());
     }
 
     @Override
@@ -78,6 +68,7 @@ public class NanoSatMOSupervisorOPSSATImpl extends NanoSatMOSupervisor {
      */
     public static void main(final String args[]) throws Exception {
         NanoSatMOSupervisorOPSSATImpl supervisor = new NanoSatMOSupervisorOPSSATImpl();
+        supervisor.init(new MCOPSSATAdapter());
     }
 
 }

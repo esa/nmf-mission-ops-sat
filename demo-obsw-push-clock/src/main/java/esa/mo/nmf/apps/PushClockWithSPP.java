@@ -21,8 +21,7 @@
 package esa.mo.nmf.apps;
 
 /**
- * This app is a simple clock. It pushes the day of the week, the hours, the
- * minutes and the seconds.
+ * The PushClock NMF App with the SPP transport binding.
  *
  */
 public class PushClockWithSPP extends PushClock {
@@ -41,5 +40,4 @@ public class PushClockWithSPP extends PushClock {
         PushClockWithSPP demo = new PushClockWithSPP();
     }
 
-    
 }
