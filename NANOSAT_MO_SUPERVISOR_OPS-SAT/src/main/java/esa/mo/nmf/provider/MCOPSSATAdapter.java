@@ -199,6 +199,8 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         // Start the GMV consumer
         gmvServicesConsumer = new GMVServicesConsumer();
         gmvServicesConsumer.init();
+        
+//        gmvServicesConsumer.getAggregationNanomindService().getAggregationNanomindStub()
 
         /*
         long startTime = System.currentTimeMillis();

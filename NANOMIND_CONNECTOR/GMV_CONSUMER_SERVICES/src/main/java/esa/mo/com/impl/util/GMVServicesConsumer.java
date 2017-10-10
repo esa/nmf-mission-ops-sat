@@ -20,6 +20,7 @@
  */
 package esa.mo.com.impl.util;
 
+import esa.mo.com.impl.consumer.AggregationNanomindConsumerServiceImpl;
 import esa.mo.com.impl.consumer.ExperimentWDNanomindConsumerServiceImpl;
 import esa.mo.com.impl.consumer.GPSNanomindConsumerServiceImpl;
 import esa.mo.com.impl.consumer.PowerNanomindConsumerServiceImpl;
@@ -41,10 +42,11 @@ public class GMVServicesConsumer {
     private GPSNanomindConsumerServiceImpl gpsNanomindService;
     private PowerNanomindConsumerServiceImpl powerNanomindService;
     private ExperimentWDNanomindConsumerServiceImpl experimentWDNanomindService;
+    private AggregationNanomindConsumerServiceImpl aggregationService;
 
     private static final String NANOMIND_APID = "10";  // Default Nanomind APID (on 13 June 2016)
     private static final String MAL_SPP_BINDINDING = "malspp"; // Use the SPP Implementation
-    private static final String SOURCE_ID = "0"; // OBSW supporst any value. By default it is set to 0
+    private static final String SOURCE_ID = "0"; // OBSW supports any value. By default it is set to 0
     
     private String originalPropNodeDestination;
     private String originalPropVirtualChannel;
@@ -93,6 +95,7 @@ public class GMVServicesConsumer {
             gpsNanomindService = new GPSNanomindConsumerServiceImpl(details);
             powerNanomindService = new PowerNanomindConsumerServiceImpl(details);
             experimentWDNanomindService = new ExperimentWDNanomindConsumerServiceImpl(details);
+            aggregationService = new AggregationNanomindConsumerServiceImpl(details);
 
             // Add the other services!!
             
@@ -127,6 +130,10 @@ public class GMVServicesConsumer {
 
     public ExperimentWDNanomindConsumerServiceImpl getExperimentWDNanomindService() {
         return this.experimentWDNanomindService;
+    }
+
+    public AggregationNanomindConsumerServiceImpl getAggregationNanomindService() {
+        return this.aggregationService;
     }
 
     public void setServices(

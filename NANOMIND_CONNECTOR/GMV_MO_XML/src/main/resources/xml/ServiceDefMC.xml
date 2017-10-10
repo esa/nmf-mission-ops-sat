@@ -1,29 +1,34 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><mal:specification xmlns:mal="http://www.ccsds.org/schema/ServiceSchema" xmlns:com="http://www.ccsds.org/schema/COMSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <mal:area comment="This section details the M&amp;C services; the structures used by the services are detailed in section 4. Both the services and structures are defined in terms of the MO MAL, which is defined in [2], so it is possible to deploy them over any supported protocol and message transport.&#10;The services defined here are also specified in terms of the COM, which is defined in [3].&#10;To aid comprehension, several tables are included for each service and operation definition. The table formats are briefly described in section 1.6.3.2 and are the same as those used for the specification of the MO COM services in [3]. &#10;All service specifications in this document are part of the M&amp;C area, which has a short form number of '4'.&#10;" name="MC" number="4" version="1">
-    <mal:service comment="The action service allows consumers to submit an action for execution and to subsequently monitor the execution progress of these actions via the COM activity tracking pattern. The progress of the action is split into two parts, firstly transfer from the consumer to the provider, and secondly execution in the provider. An action is submitted to the provider using the submitAction operation, the progress of which can be monitored using the COM activity tracking pattern, which completes when the action has been delivered to the provider. The action is then executed in the provider which can be also be monitored using the activity tracking pattern. The nominal sequence of action submission and execution monitoring are shown in Figure 3-1:&#10;&lt; insert sequence diag here &gt;&#10;&#10;The service also includes an operation, preCheckAction, which checks that an action would be accepted for execution without actually submitting it for execution. It is expected to be provided by local action proxies, rather than the remote system, to allow for localised checking of things such as link state, argument values, action safety, before sending the action over long and slow space links.&#10;The action service defines two types of objects, the first type is the action definition object that holds the description of an action with the list of required/optional arguments. The second type is the action object that holds details of a specific action instance namely a value for each of the arguments of the action.&#10;&#10;" name="Action" number="1" xsi:type="com:ExtendedServiceType">
+  <mal:area comment="This section details the M&amp;C services; the structures used by the services are detailed in section 4. Both the services and structures are defined in terms of the MO MAL, which is defined in [2], so it is possible to deploy them over any supported protocol and message transport.&#10;The services defined here are also specified in terms of the COM, which is defined in [3].&#10;To aid comprehension, several tables are included for each service and operation definition. The table formats are briefly described in section 1.6.3.2 and are the same as those used for the specification of the MO COM services in [3]. &#10;All service specifications in this document are part of the M&amp;C area, which has a short form number of '4'.&#10;" name="MC" number="4" version="129">
+    <mal:service comment="The action service allows consumers to submit an action for execution and to subsequently monitor the execution progress of these actions via the COM activity tracking pattern. The progress of the action is split into two parts, firstly transfer from the consumer to the provider, and secondly execution in the provider. An action is submitted to the provider using the submitAction operation, the progress of which can be monitored using the COM activity tracking pattern, which completes when the action has been delivered to the provider. The action is then executed in the provider which can be also be monitored using the activity tracking pattern. The nominal sequence of action submission and execution monitoring are shown in Figure 3-1:&#10;&lt; insert sequence diag here &gt;&#10;&#10;The service also includes an operation, preCheckAction, which checks that an action would be accepted for execution without actually submitting it for execution. It is expected to be provided by local action proxies, rather than the remote system, to allow for localised checking of things such as link state, argument values, action safety, before sending the action over long and slow space links.&#10;The action service defines two types of objects, the first type is the action definition object that holds the description of an action with the list of required/optional arguments. The second type is the action object that holds details of a specific action instance namely a value for each of the arguments of the action.&#10;" name="Action" number="1" xsi:type="com:ExtendedServiceType">
       <mal:capabilitySet number="1">
         <mal:submitIP comment="The submitAction operation allows a consumer to submit an action to a provider for remote execution.&#10;" name="submitAction" number="1" supportInReplay="false">
           <mal:messages>
-            <mal:submit comment="The first part of the submission shall contain a MAL long that is the object instance identifier of the action definition to be used.&#10;The second part of the submission shall contain the argument values and related information of the action to be executed.&#10;The operation shall return once the action has been accepted for execution but before execution starts.&#10;">
-              <mal:type area="MAL" list="false" name="Long"/>
-              <mal:type area="MC" list="false" name="Action" service="Action"/>
+            <mal:submit comment="The actionInstId field of the submission shall contain the object instance identifier of the ActionInstance to be used for activity tracking events.&#10;The actionDetails part of the submission shall contain the argument values and related information of the action instance to be executed.&#10;If the defInstId of the supplied actionDetails field does not match a known ActionDefinition object then an UNKNOWN error shall be returned.&#10;The size of the argumentValues list of the ActionInstanceDetails structure shall be compared to the size of the argument list in the matched ActionDefinition object and an INVALID error shall be returned if they are not the same.&#10;If the ActionInstanceDetails structure contains an argumentIds field value then this shall be compared to the same field in the matched ActionDefinition object and must be the same size and contain the same values, an INVALID error shall be returned if this is not the case.&#10;If the ActionInstanceDetails structure contains an isRawValue field value then the size of this list shall be compared to the size of the argument list in the matched ActionDefinition object and an INVALID error shall be returned if they are not the same.&#10;If the supplied argument values do not match the attribute type specified in the action definition then an INVALID error shall be returned.&#10;A service provider may apply some deployment specific checks to the action instance and can return an INVALID error if they fail.&#10;If an error is raised then no action shall be executed.&#10;The SUBMIT acknowledgement shall be returned once the action has been accepted for execution but before execution starts.&#10;">
+              <mal:field comment="" name="actionInstId">
+                <mal:type area="MAL" list="false" name="Long"/>
+              </mal:field>
+              <mal:field comment="" name="actionDetails">
+                <mal:type area="MC" list="false" name="ActionInstanceDetails" service="Action"/>
+              </mal:field>
             </mal:submit>
           </mal:messages>
           <mal:errors>
             <mal:errorRef comment="The argument list contains one or more invalid arguments.&#10;">
               <mal:type area="COM" list="false" name="INVALID"/>
-              <mal:extraInformation comment="The extra information field contains the indexes of the erroneous values from the originating list supplied.&#10;">
+              <mal:extraInformation comment="The extra information field contains a list of the indexes of the erroneous values from the originating list supplied.&#10;">
                 <mal:type area="MAL" list="true" name="UInteger"/>
               </mal:extraInformation>
             </mal:errorRef>
-            <mal:errorRef comment="Submitted action is unknown.&#10;">
+            <mal:errorRef comment="Submitted action definition is unknown.&#10;">
               <mal:type area="MAL" list="false" name="UNKNOWN"/>
             </mal:errorRef>
           </mal:errors>
         </mal:submitIP>
       </mal:capabilitySet>
+      
       <mal:dataTypes>
-        <mal:composite comment="The ActionDefinition structure holds the definition information of an action.&#10;" name="ActionDefinition" shortFormPart="1">
+        <mal:composite comment="The ActionDefinitionDetails structure holds the definition information of an action.&#10;" name="ActionDefinitionDetails" shortFormPart="1">
           <mal:extends>
             <mal:type area="MAL" list="false" name="Composite"/>
           </mal:extends>
@@ -33,23 +38,27 @@
           <mal:field canBeNull="false" comment="The description of the action.&#10;" name="description">
             <mal:type area="MAL" list="false" name="String"/>
           </mal:field>
-          <mal:field canBeNull="false" comment="Severity of the action. It is implementation specific what the meaning of the severity values are in a particular context.&#10;" name="severity">
+          <mal:field canBeNull="false" comment="Category of the action. Value taken from ActionCategory enumeration, although the use of an UOctet allows deployment specific extension. Extensions must use values greater than 127.&#10;" name="category">
             <mal:type area="MC" list="false" name="Severity"/>
           </mal:field>
           <mal:field canBeNull="false" comment="Total number of steps that will be reported if PROGRESS reporting is selected in the sent Action. 0 if PROGRESS reporting is not used.&#10;" name="progressStepCount">
             <mal:type area="MAL" list="false" name="UShort"/>
           </mal:field>
-          <mal:field canBeNull="false" comment="The list of argument definitions." name="arguments">
+          <mal:field canBeNull="true" comment="The list of argument definitions. If no arguments are defined, then the complete list is replaced with a NULL.&#10;" name="arguments">
+            <!--<mal:type area="MC" list="true" name="ArgumentDefinitionDetails"/>-->
             <mal:type area="MC" list="true" name="ArgumentDefinition"/>
           </mal:field>
           <mal:field canBeNull="true" comment="Optional list of argument definition identifiers. Allows the provider to verify that the correct arguments are being supplied when using the same field in the action instance.&#10;" name="argumentIds">
             <mal:type area="MAL" list="true" name="Identifier"/>
           </mal:field>
         </mal:composite>
-        <mal:composite comment="The Action structure holds the information required for an instance of an Action such as the argument values to use.&#10;" name="Action" shortFormPart="2">
+        <mal:composite comment="The ActionInstanceDetails structure holds the information required for an instance of an Action such as the argument values to use.&#10;" name="ActionInstanceDetails" shortFormPart="2">
           <mal:extends>
             <mal:type area="MAL" list="false" name="Composite"/>
           </mal:extends>
+          <mal:field canBeNull="false" comment="The object instance identifier of the ActionDefinition to be used.&#10;" name="defInstId">
+            <mal:type area="MAL" list="false" name="Long"/>
+          </mal:field>
           <mal:field canBeNull="false" comment="If TRUE, then an activity event of type Execution is required for the STARTED stage.&#10;" name="stageStartedRequired">
             <mal:type area="MAL" list="false" name="Boolean"/>
           </mal:field>
@@ -65,25 +74,45 @@
           <mal:field canBeNull="true" comment="Optional list of argument definition identifiers. Allows the provider to verify that the correct arguments are being supplied. The ordering of the list matches that of the argument list of the action definition.&#10;" name="argumentIds">
             <mal:type area="MAL" list="true" name="Identifier"/>
           </mal:field>
-          <mal:field canBeNull="true" comment="Optional list of Booleans that determine whether the supplied argument values are raw or converted. If the Boolean for a particular value is TRUE or null then that value is assumed to be raw. If the complete isConvertedValue list is null then all arguments are assumed to be raw values.&#10;The ordering of the list matches that of the argument list of the action definition.&#10;" name="isConvertedValue">
+          <mal:field canBeNull="true" comment="Optional list of Booleans that determine whether the supplied argument values are raw or converted. If the Boolean for a particular value is TRUE or NULL then that value is assumed to be raw. If the complete isRawValue list is null then all arguments are assumed to be raw values. The ordering of the list matches that of the argument list of the action definition.&#10;" name="isRawValue">
             <mal:type area="MAL" list="true" name="Boolean"/>
           </mal:field>
         </mal:composite>
+        <mal:composite comment="The ActionCreationRequest contains all the fields required when creating a new action in a provider.&#10;" name="ActionCreationRequest" shortFormPart="3">
+          <mal:extends>
+            <mal:type area="MAL" list="false" name="Composite"/>
+          </mal:extends>
+          <mal:field canBeNull="false" comment="The name of the action. Must not be empty or the wildcard value.&#10;" name="name">
+            <mal:type area="MAL" list="false" name="Identifier"/>
+          </mal:field>
+          <mal:field canBeNull="false" comment="The action definition details.&#10;" name="actionDefDetails">
+            <mal:type area="MC" service="Action" list="false" name="ActionDefinitionDetails"/>
+          </mal:field>
+        </mal:composite>
+        <mal:enumeration comment="Contains the default Action category values. It is implementation specific what the meaning of the values are in a particular context.&#10;" name="ActionCategory" shortFormPart="4">
+          <mal:item comment="Default category.&#10;" nvalue="1" value="DEFAULT"/>
+          <mal:item comment="Category for high priority actions.&#10;" nvalue="2" value="HIPRIORITY"/>
+          <mal:item comment="Category for critical actions.&#10;" nvalue="3" value="CRITICAL"/>
+        </mal:enumeration>
       </mal:dataTypes>
+      
       <com:features>
         <com:objects comment="The definitions of the actions shall be represented as ActionDefinition COM objects.&#10;Instances of an action that are submitted to a provider using the submitAction operation shall be represented as ActionInstance COM object.&#10;The object instance identifier for an ActionInstance object shall be populated by the consumer.&#10;The ActionInstance object shall use the related link to indicate which action definition object it uses.&#10;The source link of the ActionDefinition object should be the object that caused it to be created, most likely a COM OperationActivity object.&#10;Instances of an action that are submitted to a provider using the submitAction operation shall link to the submitAction OperationActivity object using the source link.&#10;&#10;">
-          <com:object name="ActionDefinition" number="1">
+          <com:object name="ActionDefinitionDetails" number="1">
             <com:objectType>
-              <mal:type area="MC" list="false" name="ActionDefinition" service="Action"/>
+              <mal:type area="MC" list="false" name="ActionDefinitionDetails" service="Action"/>
             </com:objectType>
+                        <com:relatedObject comment=""/>
+                        <com:sourceObject comment=""/>
           </com:object>
           <com:object name="ActionInstance" number="2">
             <com:objectType>
-              <mal:type area="MC" list="false" name="Action" service="Action"/>
+              <mal:type area="MC" list="false" name="ActionInstanceDetails" service="Action"/>
             </com:objectType>
             <com:relatedObject>
               <com:objectType area="MC" number="1" service="Action"/>
             </com:relatedObject>
+                        <com:sourceObject comment=""/>
           </com:object>
         </com:objects>
         <com:archiveUsage comment="ActionDefinition objects should be stored in the COM archive.&#10;When an action is sent with the submitAction operation, the ActionInstance object should be stored in the COM archive by the consumer.&#10;"/>
@@ -185,7 +214,7 @@
           <mal:messages>
             <mal:submit comment="The first part of the request shall be a Boolean indicating whether the supplied object instance identifiers are group objects or alert objects.&#10;If the initial Boolean is TRUE then the object instance identifiers are group identifiers, otherwise they shall be alert identifiers.&#10;The request shall include a list of object instance identifiers and Boolean value pairs.&#10;The wildcard value of '0' in the list of object instance identifiers shall be supported and matches all alerts of the provider.&#10;For the Boolean value in the InstanceBooleanPair a value of TRUE requests that updates of the alert shall be generated, a value of FALSE requests that updates will not be generated.&#10;If a requested alert or group is unknown then an UNKNOWN error shall be returned.&#10;If a requested group does not contain alert objects then an INVALID error shall be returned.&#10;The provider should update the alert in the COM archive if the generation enabled value is changed.&#10;">
               <mal:type area="MAL" list="false" name="Boolean"/>
-              <mal:type area="COM" list="false" name="InstanceBooleanPair"/>
+              <mal:type area="COM" list="true" name="InstanceBooleanPair"/>
             </mal:submit>
           </mal:messages>
           <mal:errors>
@@ -543,9 +572,15 @@
         <com:archiveUsage comment="CheckDefinition objects should be stored in the COM archive.&#10;The COM objects that hold the actual check definition details (such as ConstantCheck, ReferenceCheck, DeltaCheck, LimitCheck) should be stored in the COM archive.&#10;CheckLink objects should be stored in the COM archive.&#10;When a check transition event is published, the event should be stored in the COM archive.&#10;"/>
       </com:features>
     </mal:service>
-    <mal:service comment="The aggregation service allows the user to acquire several parameters in a single request.&#10;Aggregations can be generated by one of two mechanisms, either periodic or ad-hoc. Periodic is where they are generated at a specific generation interval; in this case the periodicity is an aspect of the aggregation rather than the contained parameters. Ad-hoc is when the aggregation generation is triggered by some other deployment-specific mechanism.&#10;Secondary to the generation mode is filtering. Filtering is where an aggregation is only generated when the change in the value of the filtered parameters exceeds a specified threshold or a timeout is passed. Filtering can be applied to both periodic and ad-hoc aggregations.&#10;As there may be a large amount of time between updates of an aggregation when filtering is applied, the filtering concept also has a maximum reporting interval. If an update to the aggregation has not passed the filter in the maximum reporting interval an update is generated regardless. This allows there to be regular updates of an aggregation sent regardless of filtering.&#10;The COM archive is used to hold the definitions of the aggregations.&#10;" name="Aggregation" number="6" xsi:type="com:ExtendedServiceType">
+    
+    
+    
+    
+    
+    
+    <mal:service comment="The aggregation service allows the user to acquire several parameters in a single request.&#10;Aggregations can be generated by one of two mechanisms, either periodic or ad-hoc. Periodic is where they are generated at a specific generation interval; in this case the periodicity is an aspect of the aggregation rather than the contained parameters. Ad-hoc is when the aggregation generation is triggered by some other deployment-specific mechanism.&#10;Secondary to the generation mode is filtering. Filtering is where an aggregation is only generated when the change in the value of the filtered parameters exceeds a specified threshold or a timeout is passed. Filtering can be applied to both periodic and ad-hoc aggregations.&#10;As there may be a large amount of time between updates of an aggregation when filtering is applied, the filtering concept also has a maximum reporting interval. If an update to the aggregation has not passed the filter in the maximum reporting interval an update is generated regardless. This allows there to be regular updates of an aggregation sent regardless of filtering.&#10;The MO Database is used to hold the definitions of the aggregation." name="Aggregation" number="6" xsi:type="com:ExtendedServiceType">
       <mal:capabilitySet number="1">
-        <mal:pubsubIP comment="The monitorValue operation allows a consumer to subscribe for aggregation value updates.&#10;" name="monitorValue" number="1" supportInReplay="true">
+        <mal:pubsubIP comment="The monitorValue operation allows a consumer to subscribe for aggregation value updates.&#10;NOTE: This operation has limited support in the OBSW. The MC::Aggregation service sends all the notification messages to the Ground Segment by default (only one subscriber), and there is no option to add/remove other subscribers." name="monitorValue" number="1" supportInReplay="true">
           <mal:messages>
             <mal:publishNotify comment="The MAL EntityKey.firstSubKey shall contain the aggregation name.&#10;The MAL EntityKey.secondSubKey shall contain the aggregation definition object instance identifier.&#10;The MAL EntityKey.thirdSubKey shall contain the aggregation value object instance identifier.&#10;The MAL EntityKey.fourthSubKey shall be NULL.&#10;The timestamp of the aggregation value update shall be taken from the publish message.&#10;The publish message shall include the ObjectId of the source link of the update.&#10;If no source link is needed then it shall be replaced with a NULL.&#10;The second part of the publish message shall be the aggregation update value.&#10;">
               <mal:type area="COM" list="false" name="ObjectId"/>
@@ -553,6 +588,27 @@
             </mal:publishNotify>
           </mal:messages>
         </mal:pubsubIP>
+      </mal:capabilitySet>
+      <mal:capabilitySet number="2">
+        <mal:requestIP comment="The getValue operation returns the latest value for a requested aggregation." name="getValue" number="2" supportInReplay="true">
+          <mal:messages>
+            <mal:request comment="The request shall include a list of aggregation definition object instance identifiers.&#10;The wildcard value of ‘0’ shall be supported and matches all aggregations of the provider.&#10;If a request aggregation is unknown then an UNKNOWN error shall be returned.">
+              <mal:type area="MAL" list="true" name="Long"/>
+            </mal:request>
+            <mal:response comment="The response shall contain a list of returned aggregation definition object instance identifiers and a matching list of aggregation values.">
+              <mal:type area="MAL" list="true" name="Long"/>
+              <mal:type area="MC" list="true" name="AggregationValue" service="Aggregation"/>
+            </mal:response>
+          </mal:messages>
+          <mal:errors>
+            <mal:errorRef comment="One or more of the requested aggregations is unknown.">
+              <mal:type area="MAL" list="false" name="UNKNOWN"/>
+              <mal:extraInformation comment="The indexes of the error values shall be contained in the extra information field.">
+                <mal:type area="MAL" list="true" name="UInteger"/>
+              </mal:extraInformation>
+            </mal:errorRef>
+          </mal:errors>
+        </mal:requestIP>
       </mal:capabilitySet>
       <mal:capabilitySet number="3">
         <mal:submitIP comment="The enableGeneration operation allows a consumer to control whether updates for specific aggregations are generated or not. It allows the consumer to select the aggregations directly or indirectly using groups. This affects all types of aggregations, periodic, filtered and ad-hoc." name="enableGeneration" number="3" supportInReplay="false">
@@ -754,8 +810,8 @@
             <com:objectType>
               <mal:type area="MC" list="false" name="AggregationDefinition" service="Aggregation"/>
             </com:objectType>
-						<com:relatedObject comment=""/>
-						<com:sourceObject comment=""/>
+                        <com:relatedObject comment=""/>
+                        <com:sourceObject comment=""/>
           </com:object>
           <com:object name="AggregationValue" number="2">
             <com:objectType>
@@ -764,7 +820,7 @@
             <com:relatedObject>
               <com:objectType area="MC" number="1" service="Aggregation"/>
             </com:relatedObject>
-						<com:sourceObject comment=""/>
+                        <com:sourceObject comment=""/>
           </com:object>
         </com:objects>
         <com:archiveUsage comment="AggregationDefinition objects should be stored in the COM archive.&#10;When an aggregation value update is published, the AggregationValue object should be stored in the COM archive.&#10;"/>
