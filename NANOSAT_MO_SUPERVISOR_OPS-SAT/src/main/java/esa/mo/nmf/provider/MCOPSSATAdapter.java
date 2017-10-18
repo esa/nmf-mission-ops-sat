@@ -56,6 +56,8 @@ import org.ccsds.moims.mo.mc.structures.AttributeValue;
 import org.ccsds.moims.mo.mc.structures.AttributeValueList;
 import org.ccsds.moims.mo.mc.structures.ConditionalConversionList;
 import org.ccsds.moims.mo.opssat_pf.gps.consumer.GPSAdapter;
+import org.ccsds.opssat.gmv.mc.aggregation.body.GetValueResponse;
+import org.ccsds.opssat.gmv.mc.aggregation.structures.AggregationValueList;
 
 // Specific OPS-SAT Monitoring and Control
 public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
@@ -76,7 +78,6 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
     private static final String ACTION_GPS_SENTENCE = "GPS_Sentence";
     private static final String ACTION_REBOOT = "Reboot_MityArm";
     private static final String ACTION_CLOCK_SET_TIME = "Clock.setTimeUsingDeltaMilliseconds";
-    private static final String ACTION_LEDS_TEST = "LEDs_Test";
 
     private final ShellCommander shellCommander = new ShellCommander();
 
@@ -131,7 +132,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
                 }
 
             });
-//            handler.init();
+            handler.init();
         } catch (IOException ex) {
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -200,70 +201,80 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         gmvServicesConsumer = new GMVServicesConsumer();
         gmvServicesConsumer.init();
         
-//        gmvServicesConsumer.getAggregationNanomindService().getAggregationNanomindStub()
-
-        /*
-        long startTime = System.currentTimeMillis();
-        CameraSerialPortOPSSAT camera = new CameraSerialPortOPSSAT();
-        long delta1 = System.currentTimeMillis() - startTime;
-        Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 1: " + delta1);
-        camera.init();
-        long delta2 = System.currentTimeMillis() - startTime - delta1;
-        Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 2: " + delta2);
-        
+        LongList ids = new LongList();
+        ids.add((long) 1);
         try {
+            GetValueResponse values = gmvServicesConsumer.getAggregationNanomindService().getAggregationNanomindStub().getValue(ids);
+            AggregationValueList agValues = values.getBodyElement1();
+            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Values: " + agValues.toString());
+        } catch (MALInteractionException ex) {
+            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (MALException ex) {
+            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+            /*
+            long startTime = System.currentTimeMillis();
+            CameraSerialPortOPSSAT camera = new CameraSerialPortOPSSAT();
+            long delta1 = System.currentTimeMillis() - startTime;
+            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 1: " + delta1);
+            camera.init();
+            long delta2 = System.currentTimeMillis() - startTime - delta1;
+            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 2: " + delta2);
+            
+            try {
             String version = camera.getVersion();
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Version: " + version);
             
-        long delta3 = System.currentTimeMillis() - startTime - delta2;
-        Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 3: " + delta3);
-
+            long delta3 = System.currentTimeMillis() - startTime - delta2;
+            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 3: " + delta3);
+            
             String status = camera.getStatus();
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Status: " + status);
-
-        long delta4 = System.currentTimeMillis() - startTime - delta3;
-        Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 4: " + delta4);
-
+            
+            long delta4 = System.currentTimeMillis() - startTime - delta3;
+            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 4: " + delta4);
+            
             String temperature = camera.getTemperature();
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Temperature: " + temperature);
-
-        long delta5 = System.currentTimeMillis() - startTime - delta4;
-        Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 5: " + delta5);
+            
+            long delta5 = System.currentTimeMillis() - startTime - delta4;
+            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 5: " + delta5);
             
             
             byte[] raw = camera.takePiture();
             Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "The picture has been taken!");
-
-        long delta6 = System.currentTimeMillis() - startTime - delta5;
-        Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 6: " + delta6);
+            
+            long delta6 = System.currentTimeMillis() - startTime - delta5;
+            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 6: " + delta6);
             
             FileOutputStream fos = new FileOutputStream("myFirstPicture.raw");
             fos.write(raw);
             fos.flush();
             fos.close();
-
-        long delta7 = System.currentTimeMillis() - startTime - delta6;
-        Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 7: " + delta7);
             
-        } catch (IOException ex) {
+            long delta7 = System.currentTimeMillis() - startTime - delta6;
+            Logger.getLogger(CameraSerialPortOPSSAT.class.getName()).log(Level.INFO, "Time 7: " + delta7);
+            
+            } catch (IOException ex) {
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-         */
- /*
-        int value1 = 0x1A04CFB8;
-        int value2 = 0x15049065;
-        int value3 = 0x150803DF;
-
-        CFPFrameIdentifier aaaa1 = new CFPFrameIdentifier(value1);
-        CFPFrameIdentifier aaaa2 = new CFPFrameIdentifier(value2);
-        CFPFrameIdentifier aaaa3 = new CFPFrameIdentifier(value3);
-        Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Check 1: " + aaaa1.toString());
-        Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Check 2: " + aaaa2.toString());
-        Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Check 3: " + aaaa3.toString());
-         */
+            }
+            
+            */
+            /*
+            int value1 = 0x1A04CFB8;
+            int value2 = 0x15049065;
+            int value3 = 0x150803DF;
+            
+            CFPFrameIdentifier aaaa1 = new CFPFrameIdentifier(value1);
+            CFPFrameIdentifier aaaa2 = new CFPFrameIdentifier(value2);
+            CFPFrameIdentifier aaaa3 = new CFPFrameIdentifier(value3);
+            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Check 1: " + aaaa1.toString());
+            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Check 2: " + aaaa2.toString());
+            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Check 3: " + aaaa3.toString());
+            */
  
-
+/*
         try {
 //            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData("GPGGALONG", new MCGPSAdapter());
 //            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData("log gpggalonga\n", new MCGPSAdapter());
@@ -274,6 +285,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         } catch (MALException ex) {
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
+*/
 
     }
 
@@ -316,14 +328,6 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
             } catch (MALException ex) {
                 Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
             }
-
-            return null; // Success!
-        }
-
-        if (ACTION_LEDS_TEST.equals(name.getValue())) {
-            ShellCommander shell = new ShellCommander();
-            String output = shell.runCommandAndGetOutputMessage("./led_test.sh");
-            Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "Output: " + output);
 
             return null; // Success!
         }
