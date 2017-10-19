@@ -23,7 +23,6 @@ package esa.mo.nmf.groundmoproxy;
 import esa.mo.com.impl.consumer.ArchiveSyncConsumerServiceImpl;
 import esa.mo.com.impl.util.COMObjectStructure;
 import esa.mo.helpertools.connections.SingleConnectionDetails;
-import esa.mo.helpertools.helpers.HelperTime;
 import esa.mo.sm.impl.provider.AppsLauncherManager;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -31,9 +30,11 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.ccsds.moims.mo.com.COMHelper;
 import org.ccsds.moims.mo.com.COMService;
 import org.ccsds.moims.mo.com.archive.structures.ArchiveDetailsList;
 import org.ccsds.moims.mo.com.archivesync.ArchiveSyncHelper;
+import org.ccsds.moims.mo.com.archivesync.body.GetTimeResponse;
 import org.ccsds.moims.mo.com.structures.ObjectType;
 import org.ccsds.moims.mo.com.structures.ObjectTypeList;
 import org.ccsds.moims.mo.common.directory.structures.ProviderSummaryList;
@@ -91,7 +92,10 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
             Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE,
                     "The SPP Protocol Bridge could not be initialized!", ex);
         }
+    }
 
+    @Override
+    public void additionalHandling() {
         IdentifierList domain = new IdentifierList();
         domain.add(new Identifier("*"));
         COMService serviceType = ArchiveSyncHelper.ARCHIVESYNC_SERVICE;
@@ -103,45 +107,61 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
                 serviceKey, new UIntegerList());
 
         try {
-            final ProviderSummaryList archiveSyncsCD = this.getLocalDirectoryService().lookupProvider(sf, null);
+            final ProviderSummaryList archiveSyncsCD = localDirectoryService.lookupProvider(sf, null);
 
             // Cycle through the NMF Apps and sync them!
             for (int i = 0; i < archiveSyncsCD.size(); i++) {
                 ProviderSummaryList psl = new ProviderSummaryList();
                 psl.add(archiveSyncsCD.get(i));
 
-                final SingleConnectionDetails connectionDetails = AppsLauncherManager.getSingleConnectionDetailsFromProviderSummaryList(psl);
-
                 try {
-                    ArchiveSyncConsumerServiceImpl archSync = new ArchiveSyncConsumerServiceImpl(connectionDetails);
-                    archiveSyncs.add(archSync);
-                } catch (MalformedURLException ex) {
-                    Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
+                    final SingleConnectionDetails connectionDetails = AppsLauncherManager.getSingleConnectionDetailsFromProviderSummaryList(psl);
+                    try {
+                        ArchiveSyncConsumerServiceImpl archSync = new ArchiveSyncConsumerServiceImpl(connectionDetails);
+                        archiveSyncs.add(archSync);
+                    } catch (MalformedURLException ex) {
+                        Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                } catch (IOException ex) {
+                    // The ArchiveSync service does not exist on this provider...
+                    // Do nothing!
                 }
             }
+
+            this.syncRemoteArchiveWithLocalArchive();
         } catch (MALInteractionException ex) {
             Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
         } catch (MALException ex) {
             Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
-
     }
 
-    public void syncRemoteArchiveWithLocalArchive() {
-        FineTime from = new FineTime(0); // Should be the time of the last sync
-        FineTime until = HelperTime.getTimestamp();
-
+    public final void syncRemoteArchiveWithLocalArchive() throws MALInteractionException, MALException {
         // Select Parameter Definitions by default
         ObjectTypeList objTypes = new ObjectTypeList();
         UShort shorty = new UShort((short) 0);
         objTypes.add(new ObjectType(shorty, shorty, new UOctet((short) 0), shorty));
 
         for (int i = 0; i < archiveSyncs.size(); i++) {
-            ArrayList<COMObjectStructure> comObjects = archiveSyncs.get(i).retrieveCOMObjects(from, until, objTypes);
-            
-            for (COMObjectStructure comObject : comObjects){
+            ArchiveSyncConsumerServiceImpl archiveSync = archiveSyncs.get(i);
+            Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(
+                    Level.INFO,
+                    "Synchronizing provider: "
+                    + archiveSync.getArchiveSyncStub().getConsumer().getURI());
+
+            GetTimeResponse response = archiveSync.getArchiveSyncStub().getTime();
+            FineTime from = response.getBodyElement1();
+
+            if (from.getValue() == 0) {
+                from = latestTimestampForProvider(archiveSync);
+            }
+
+            FineTime until = response.getBodyElement0();
+
+            // This value should be obtained from the getCurrent timestamp!
+            ArrayList<COMObjectStructure> comObjects = archiveSync.retrieveCOMObjects(from, until, objTypes);
+
+            for (COMObjectStructure comObject : comObjects) {
                 ArchiveDetailsList detailsList = new ArchiveDetailsList();
                 detailsList.add(comObject.getArchiveDetails());
 
@@ -155,10 +175,24 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
                             null
                     );
                 } catch (MALException ex) {
-                    Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(
+                            Level.SEVERE, null, ex);
                 } catch (MALInteractionException ex) {
-                    Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
+                    if (COMHelper.DUPLICATE_ERROR_NUMBER.equals(ex.getStandardError().getErrorNumber())) {
+                        Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(
+                                Level.SEVERE, "The object already exists!");
+                    } else {
+                        Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(
+                                Level.SEVERE, "Error!", ex);
+                    }
                 }
+
+                // Change the Archive URI to be the one of the local COM Archive service
+                IdentifierList providerDomain = archiveSync.getConnectionDetails().getDomain();
+                URI localCOMArchiveURI = super.getCOMArchiveServiceURI();
+                super.localDirectoryService.rerouteCOMArchiveURI(providerDomain, localCOMArchiveURI);
+//                URI newURI = super.localCOMServices.getArchiveService();
+//                this.getLocalDirectoryService().changeArchiveURI(newURI);
             }
         }
 
@@ -172,6 +206,13 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
      */
     public static void main(final String args[]) throws Exception {
         GroundMOProxyOPSSATImpl proxy = new GroundMOProxyOPSSATImpl();
+    }
+
+    private FineTime latestTimestampForProvider(ArchiveSyncConsumerServiceImpl archiveSync) {
+        // Should be the time of the last sync!!!
+        // We have to set this value as the most recent COM Object timestamp!
+
+        return new FineTime(0);
     }
 
 }

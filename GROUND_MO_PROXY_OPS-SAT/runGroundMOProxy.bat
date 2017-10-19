@@ -1,0 +1,1 @@
+java -classpath "target\GROUND_MO_PROXY_OPS-SAT-jar-with-dependencies.jar" esa.mo.nmf.groundmoproxy.GroundMOProxyOPSSATImpl
