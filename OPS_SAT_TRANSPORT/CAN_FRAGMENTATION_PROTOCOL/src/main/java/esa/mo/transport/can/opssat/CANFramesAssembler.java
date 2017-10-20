@@ -76,7 +76,9 @@ public final class CANFramesAssembler {
             this.totalNumberOfSegments = frameIdentifier.getRemain() + 1;
             receivedFirst = true;
         } else {
-            Logger.getLogger(CANFramesAssembler.class.getName()).log(Level.WARNING, "Not starting with Type 1! " + frameIdentifier.toString());
+            String info = frameIdentifier.toString();
+            Logger.getLogger(CANFramesAssembler.class.getName()).log(Level.WARNING, 
+                    "Not starting with Type 1! " + info);
             this.totalNumberOfSegments = -1; // Something else
         }
     }
@@ -185,11 +187,12 @@ public final class CANFramesAssembler {
 
         // Index 0 is actually the last segment...
         int bufferSize = (this.totalNumberOfSegments - 1) * 8 + this.segments.get(0).length;
-        byte[] concatenated = new byte[bufferSize];
+        final byte[] concatenated = new byte[bufferSize];
+        byte[] data;
 
         // Recreate the output
         for (int i = 0; i < this.totalNumberOfSegments; i++) {
-            final byte[] data = this.segments.get(i);
+            data = this.segments.get(i);
 //            Logger.getLogger(ReconstructMessage.class.getName()).log(Level.FINEST, "Segment(" + i + "/" + lastSegmentIndex + "): " + Arrays.toString(data));
             System.arraycopy(data, 0, concatenated, (lastSegmentIndex - i) * 8, data.length);
         }
