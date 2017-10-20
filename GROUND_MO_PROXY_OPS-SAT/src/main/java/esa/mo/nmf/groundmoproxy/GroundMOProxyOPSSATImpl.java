@@ -70,6 +70,11 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
         // Initialize the protocol bridge services and expose them using TCP/IP!
         final Map properties = System.getProperties();
 
+        String protocol = System.getProperty("org.ccsds.moims.mo.mal.transport.default.protocol");
+
+        // Default it to tcp if the property is not defined
+        protocol = (protocol != null) ? protocol.split(":")[0] : "maltcp";
+
         // The range of APIDs below were formally requested 
         // And are uniquely assigned for the Ground MO Proxy of OPS-SAT
         properties.put(ProtocolBridgeSPP.PROPERTY_APID_RANGE_START, "21");
@@ -78,7 +83,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
         // Initialize the SPP Protocol Bridge
         try {
             // TCP/IP is the selected transport binding for the bridge with SPP
-            protocolBridgeSPP.init("maltcp", properties);
+            protocolBridgeSPP.init(protocol, properties);
             final URI routedURI = protocolBridgeSPP.getRoutingProtocol();
 
             // Initialize the pure protocol bridge for the services without extension
