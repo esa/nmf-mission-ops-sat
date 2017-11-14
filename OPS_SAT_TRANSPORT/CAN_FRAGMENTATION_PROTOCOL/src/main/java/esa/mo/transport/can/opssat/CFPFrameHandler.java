@@ -93,9 +93,6 @@ public class CFPFrameHandler implements FrameListener {
     private final AtomicInteger messagesCounterDinamic = new AtomicInteger(0);
     private final int MESSAGES_COUNTER_INTERVAL = 4000; //  second
 
-//    private short debugFirstTransactionEver = -1;
-//    private long timeFirstTrans;
-
     /**
      * Constructor.
      *
@@ -229,7 +226,6 @@ public class CFPFrameHandler implements FrameListener {
             @Override
             public void run() {
                 this.setName("CFPFrameHandler_passUpwardsThread");
-
                 CANFramesAssembler message = null;
 
                 while (true) {
@@ -267,15 +263,11 @@ public class CFPFrameHandler implements FrameListener {
                             // Thread.sleep(10);
                             passUpwards(message);
                         }
-
                     } catch (InterruptedException ex) {
                         Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.SEVERE, null, ex);
                     }
-
                 }
-
             }
-
         };
         passUpwardsThread.start();
 
@@ -378,10 +370,9 @@ public class CFPFrameHandler implements FrameListener {
                     + ")\n"
                     + "dataChunk: " + Arrays.toString(dataChunk));
              */
-            
             // Prepare it beforehand
             canFrame.prepareString();
-            
+
             // Send chunk to the CAN bus
             this.connector.sendData2Kayak(canFrame);
         }
@@ -524,8 +515,7 @@ public class CFPFrameHandler implements FrameListener {
             debugFirstTransactionEver = frameIdentifier.getTransactionId();
             timeFirstTrans = System.currentTimeMillis();
         }
-        */
-
+         */
         synchronized (MUTEX) {
             // Try to find the object to be reconstructed...
 //            CANFramesAssembler message = incomingMessages.get(frameIdentifier.getTransactionId());
@@ -562,13 +552,13 @@ public class CFPFrameHandler implements FrameListener {
 
             if (message.isReady()) {
                 this.readyQueue.offer(message);
-                
+
                 if (this.queuedForRetransmission.remove(message.getTransactionId())) {
                     Logger.getLogger(CFPFrameHandler.class.getName()).log(Level.INFO,
                             "The message was successfully recovered! For transactionId: "
                             + frameIdentifier.getTransactionId() + "! :)");
                 }
-                
+
                 this.removeFromCANFramesAssembler(frameIdentifier);
             }
         }
