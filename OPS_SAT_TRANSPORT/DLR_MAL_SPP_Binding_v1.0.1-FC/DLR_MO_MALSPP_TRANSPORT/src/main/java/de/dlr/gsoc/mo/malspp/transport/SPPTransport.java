@@ -153,7 +153,9 @@ public class SPPTransport implements MALTransport {
                     uri = new SPPURI(config.qualifier(), config.apid(), identifier);
                 }
                 
-                apids.add(config.apid());
+                synchronized(apids){
+                        apids.add(config.apid());
+                }
                 
 //		SPPURI uri = new SPPURI(config.qualifier(), config.apid(), identifier);
 
@@ -452,7 +454,7 @@ public class SPPTransport implements MALTransport {
                                 String[] strs = key.getValue().split("/");
                                 apid = Short.parseShort(strs[1]);
                                 
-                                 // Don't discard if one of the enpoint apidsd is the from or to apid
+                                 // Don't discard if one of the enpoint apids is the from or to apid
                                 if(from == apid || to == apid){
                                         discard = false;
                                         break;
@@ -460,13 +462,15 @@ public class SPPTransport implements MALTransport {
                         }
                         */
                         // Iterate through all the apids
-                        for (int i = 0; i < apids.size(); i++) {
-                                apid = apids.get(i);
+                        synchronized(apids){
+                                for (int i = 0; i < apids.size(); i++) {
+                                        apid = apids.get(i);
                                 
-                                 // Don't discard if one of the enpoint apidsd is the from or to apid
-                                if(from == apid || to == apid){
-                                        discard = false;
-                                        break;
+                                        // Don't discard if one of the enpoint apids is the from or to apid
+                                        if(from == apid || to == apid){
+                                                discard = false;
+                                                break;
+                                        }
                                 }
                         }
                         
