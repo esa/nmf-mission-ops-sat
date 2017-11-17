@@ -41,13 +41,8 @@ import java.util.logging.Level;
 import org.ccsds.moims.mo.mal.MALException;
 import org.ccsds.moims.mo.testbed.util.spp.SPPSocket;
 import org.ccsds.moims.mo.testbed.util.spp.SpacePacket;
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 public class ClientTCPSPPSocket implements SPPSocket {
-
-    public final static Logger logger = fr.dyade.aaa.common.Debug
-            .getLogger(ClientTCPSPPSocket.class.getName());
 
     public static final String HOSTNAME = "org.ccsds.moims.mo.malspp.test.sppimpl.tcp.hostname";
     public static final String PORT = "org.ccsds.moims.mo.malspp.test.sppimpl.tcp.port";
@@ -72,9 +67,10 @@ public class ClientTCPSPPSocket implements SPPSocket {
             throw new MALException("Please set the APID on the property: " + PROPERTY_APID);
         }
 
-        if (logger.isLoggable(BasicLevel.DEBUG)) {
-            logger.log(BasicLevel.DEBUG, "ClientTCPSPPSocket.init(" + properties + ')');
-        }
+        /*
+        java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO,
+                "ClientTCPSPPSocket.init(" + properties + ')');
+         */
         host = (String) properties.get(HOSTNAME);
         String portS = (String) properties.get(PORT);
         port = Integer.parseInt(portS);
@@ -82,9 +78,10 @@ public class ClientTCPSPPSocket implements SPPSocket {
     }
 
     public void connect(String host, int port) throws Exception {
-        if (logger.isLoggable(BasicLevel.DEBUG)) {
-            logger.log(BasicLevel.DEBUG, "ClientTCPSPPSocket.connect(" + host + ',' + port + ')');
-        }
+        /*
+        java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO,
+                "ClientTCPSPPSocket.connect(" + host + ',' + port + ')');
+         */
         Socket socket = new Socket(host, port);
         channel = new SPPChannel(socket);
     }
@@ -98,10 +95,11 @@ public class ClientTCPSPPSocket implements SPPSocket {
 
         // Reject all messages coming from the Nanomind (apid==10)
         while (packet.getHeader().getApid() == 10) {
-            if (logger.isLoggable(BasicLevel.DEBUG)) {
-                logger.log(BasicLevel.DEBUG, "Rejecting: " + packet);
+            /*
+            java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO,
+                "Rejecting: " + packet);
             }
-
+             */
             packet = channel.receive();
         }
 
@@ -119,17 +117,19 @@ public class ClientTCPSPPSocket implements SPPSocket {
 
         lastSPPsMap.put(packetAPID, sequenceCount);
 
-        if (logger.isLoggable(BasicLevel.DEBUG)) {
-            logger.log(BasicLevel.INFO, "Received: " + packet);
-        }
-
+        /*
+        java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO,
+                "Received: " + packet);
+         */
         return packet;
     }
 
     public void send(SpacePacket packet) throws Exception {
-        if (logger.isLoggable(BasicLevel.DEBUG)) {
-            logger.log(BasicLevel.INFO, "ClientTCPSPPSocket.send(" + packet + ')');
-        }
+        /*
+        java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO,
+                "ClientTCPSPPSocket.send(" + packet + ')');
+         */
+
         channel.send(packet);
     }
 
