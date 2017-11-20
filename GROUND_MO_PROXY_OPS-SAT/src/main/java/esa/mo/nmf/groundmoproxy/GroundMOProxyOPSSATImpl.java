@@ -133,7 +133,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
                 ProviderSummaryList psl = new ProviderSummaryList();
                 psl.add(actionsCD.get(i));
                 // Needs some work!
-/*
+
                 try {
                     final SingleConnectionDetails connectionDetails = AppsLauncherManager.getSingleConnectionDetailsFromProviderSummaryList(psl);
                     try {
@@ -158,7 +158,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
                     // The ArchiveSync service does not exist on this provider...
                     // Do nothing!
                 }
-*/
+
             }
         } catch (MALInteractionException ex) {
             Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
