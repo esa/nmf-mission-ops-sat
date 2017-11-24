@@ -1,0 +1,5 @@
+This project depends on the purejavacomm project.
+
+purejavacomm has a BSD 3-clause "Revised" license.
+purejavacomm is available online here:
+https://github.com/nyholku/purejavacomm
