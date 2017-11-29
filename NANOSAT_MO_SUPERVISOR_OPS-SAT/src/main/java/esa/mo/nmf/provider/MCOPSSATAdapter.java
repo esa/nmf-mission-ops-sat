@@ -151,15 +151,15 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
             Byte convertedType = null;
             String convertedUnit = null;
 
-            arguments1.add(new ArgumentDefinitionDetails(rawType, rawUnit, conditionalConversions, convertedType, convertedUnit));
+            arguments1.add(new ArgumentDefinitionDetails(new Identifier("0"), null,
+                    rawType, rawUnit, conditionalConversions, convertedType, convertedUnit));
         }
 
         ActionDefinitionDetails actionDef1 = new ActionDefinitionDetails(
                 "Injects the NMEA sentence identifier into the CAN bus.",
                 new UOctet((short) 0),
                 new UShort(0),
-                arguments1,
-                null
+                arguments1
         );
 
         ArgumentDefinitionDetailsList arguments2 = new ArgumentDefinitionDetailsList();
@@ -170,23 +170,22 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
             Byte convertedType = null;
             String convertedUnit = null;
 
-            arguments2.add(new ArgumentDefinitionDetails(rawType, rawUnit, conditionalConversions, convertedType, convertedUnit));
+            arguments2.add(new ArgumentDefinitionDetails(new Identifier("0"), null,
+                    rawType, rawUnit, conditionalConversions, convertedType, convertedUnit));
         }
 
         ActionDefinitionDetails actionDef2 = new ActionDefinitionDetails(
                 "Sets the clock using a diff between the on-board time and the desired time.",
                 new UOctet((short) 0),
                 new UShort(0),
-                arguments2,
-                null
+                arguments2
         );
 
         ActionDefinitionDetails actionDef3 = new ActionDefinitionDetails(
                 "Reboots the mityArm.",
                 new UOctet((short) 0),
                 new UShort(0),
-                new ArgumentDefinitionDetailsList(),
-                null
+                new ArgumentDefinitionDetailsList()
         );
 
         actionDefs.add(actionDef1);
@@ -293,6 +292,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         }
 */
 
+/*
         Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.INFO, "log timea\n");
         
         try {
@@ -350,6 +350,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         } catch (MALException ex) {
             Logger.getLogger(MCOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
+*/
         
     }
 

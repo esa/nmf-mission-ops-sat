@@ -313,7 +313,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
         } catch (MALInteractionException ex) {
             Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         try {
             semaphore.acquire();
             return arch.getTimestamp();
@@ -354,7 +354,11 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
         public MALMessage sendResponse(ObjectType objType, IdentifierList domain,
                 ArchiveDetailsList objDetails, ElementList objBodies)
                 throws MALInteractionException, MALException {
-            arch.setTimestamp(objDetails.get(0).getTimestamp());
+            if (objDetails != null && !objDetails.isEmpty()) {
+                arch.setTimestamp(objDetails.get(0).getTimestamp());
+            } else {
+                arch.setTimestamp(new FineTime(0));
+            }
             semaphore.release();
             return null;
         }
