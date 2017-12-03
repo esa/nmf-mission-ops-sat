@@ -1,0 +1,10 @@
+This project depends on the Kayak project.
+
+Website: http://kayak.2codeornot2code.org/
+
+Kayak has a GNU Lesser General Public License v3.0.
+
+Kayak source code is available online here:
+https://github.com/dschanoeh/Kayak
+
+

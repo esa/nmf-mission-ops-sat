@@ -1,0 +1,9 @@
+This project depends on the Joram project.
+
+Website: http://joram.ow2.org/
+
+Joram has a GNU LGPL license.
+
+Joram source code is available online here:
+http://websvn.ow2.org/listing.php?repname=joram
+

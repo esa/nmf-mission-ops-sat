@@ -1,0 +1,11 @@
+This project depends on the ObjectWeb toolbox project.
+
+ObjectWeb toolbox project is available here: http://openccm.ow2.org/
+
+ObjectWeb toolbox has a GNU LGPL license.
+
+ObjectWeb toolbox source code is available online here:
+http://forge.ow2.org/projects/openccm/
+
+
+
