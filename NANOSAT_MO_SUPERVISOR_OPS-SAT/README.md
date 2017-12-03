@@ -3,7 +3,7 @@ NanoSat MO Supervisor: OPS-SAT
 
 The NanoSat MO Supervisor application acts as a supervisor to be deployed on the NanoSat segment of OPS-SAT. It extends the generic NanoSat MO Supervisor of the Java implementation presented in chapter 3 and therefore most of the default behavior of the component is already present.
 
-It includes the Platform services implementation presented in chapter 3 with the additional adapters for the OPS-SAT platform devices. The integration of these adapters is further explained in section 2.4.
+It includes the Platform services implementation from the NMF Core implementation with the additional adapters for the OPS-SAT platform devices.
 
 The Platform services can be consumed from both the MAL-SPP transport binding and the MAL-TCP/IP transport binding. The former is intended to be used between the NanoSat and the Ground segments, while the latter is intended to be used by IPC between NMF Apps and the NanoSat MO Supervisor.
 
