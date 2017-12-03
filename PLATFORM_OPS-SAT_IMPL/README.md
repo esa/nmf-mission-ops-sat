@@ -1,13 +1,11 @@
-Platform services adaapters for OPS-SAT
+Platform services adapters for OPS-SAT
 ============
 
 ESA’s OPS-SAT mission uses the NMF Core implementation which includes the implementation of all the Platform services. The Platform services take advantage of the adapter pattern in order to support different units.
 
 There are 5 platform peripherals in OPS-SAT that can be used by the experimenters: Camera, Optical Data Receiver, SDR, FineADCS, and GPS.
 
-============
 
-============
 Camera service adapter
 ============
 
@@ -17,7 +15,6 @@ Upon initialization, the adapter checks if there is a serial port device camera 
 
 When the camera is functional and a consumer takes a picture, the adapter will double-check if the device is connected and then, send the instructions to configure it and take the picture. Finally, it copies the content of the image that is stored as an external memory device into a Picture object and sends it back to the consumer.
 
-============
 GPS service adapter
 ============
 
@@ -27,16 +24,14 @@ The Nanomind is connected to the GPS Unit via a UART connection that allows requ
 
 Although the GPS service from the Nanomind has the same name as the GPS service from the Platform services, they are completely different.
 
-============
-GPS service adapter
+AutonomousADCS service adapter
 ============
 
 The Autonomous ADCS service adapter for OPS-SAT is connected to the ADCS payload device via I²C. OPS-SAT’s ADCS is an iADCS-100 from Berlin Space Technologies and consists of a star tracker, gyro module, reaction wheels, and magnetorquers, with the possibility to integrate external sensors such as sun sensors.
 
 It incorporates the ADCS algorithms from the LEOS platform and allows full ADCS functionality including nadir pointing as well as autonomous target acquisition and tracking.
 
-============
-GPS service adapter
+Other service adapters
 ============
 
 The Software-defined Radio service adapter and the Optical Data Receiver service adapter were not implemented because the units were not available during this research.
