@@ -28,7 +28,7 @@
         <dependency>
             <groupId>fr.cnes.ccsds.mo</groupId>
             <artifactId>TESTBED_UTIL_SPP</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0</version>
             <type>jar</type>
         </dependency>
 -->

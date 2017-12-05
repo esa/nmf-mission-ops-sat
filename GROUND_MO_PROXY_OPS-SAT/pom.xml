@@ -19,13 +19,13 @@
     <parent>
         <groupId>int.esa.ccsds.mo</groupId>
         <artifactId>NMF_POM</artifactId>
-        <version>0.5-SNAPSHOT</version>
+        <version>1</version>
         <relativePath/>
     </parent>
   
     <artifactId>GROUND_MO_PROXY_OPS-SAT</artifactId>
     <packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
 
     <name>Ground MO Proxy: OPS-SAT</name>
     <description>Ground MO Proxy for OPS-SAT</description>

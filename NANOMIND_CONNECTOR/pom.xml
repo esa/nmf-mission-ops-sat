@@ -24,7 +24,7 @@
     </parent>
   
     <artifactId>GMV_NANOMIND_CONNECTOR</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>pom</packaging>
     <name>OPS-SAT Nanomind Connector</name>
 

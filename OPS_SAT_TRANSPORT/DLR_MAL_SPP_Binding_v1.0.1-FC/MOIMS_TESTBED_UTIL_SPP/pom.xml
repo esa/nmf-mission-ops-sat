@@ -47,7 +47,7 @@
   <groupId>fr.cnes.ccsds.mo</groupId>
   <artifactId>TESTBED_UTIL_SPP</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   <name>CCSDS MOIMS MO Testbed utilities for the Space Packet Protocol</name>
 
   <organization>

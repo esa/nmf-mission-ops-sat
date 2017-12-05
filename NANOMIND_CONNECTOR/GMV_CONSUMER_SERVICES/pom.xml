@@ -19,13 +19,13 @@
     <parent>
         <groupId>int.esa.ccsds.mo</groupId>
         <artifactId>NMF_POM</artifactId>
-        <version>0.5-SNAPSHOT</version>
+        <version>1</version>
         <relativePath/>
     </parent>
   
     <artifactId>GMV_CONSUMER_SERVICES</artifactId>
     <packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
 
     <name>GMV service consumers Implementation</name>
     <description>GMV service consumers Implementation</description>
@@ -72,23 +72,23 @@
         <dependency>
             <groupId>int.esa.ccsds.mo</groupId>
             <artifactId>GMV_API_COM</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>int.esa.ccsds.mo</groupId>
             <artifactId>GMV_API_MC</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>int.esa.ccsds.mo</groupId>
             <artifactId>GMV_API_PF</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0</version>
         </dependency>
         <!--
         <dependency>
             <groupId>int.esa.ccsds.mo</groupId>
             <artifactId>GMV_API_STD</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0</version>
         </dependency>
         -->
     </dependencies>
