@@ -17,17 +17,16 @@
   <modelVersion>4.0.0</modelVersion>
   
   <parent>
-    <groupId>int.esa.ccsds.mo</groupId>
-    <artifactId>POM</artifactId>
-    <version>7</version>
-    <relativePath/>
+    <groupId>int.esa.nmf.opssat</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.1.0-SNAPSHOT</version>
+    <relativePath>../../../parent/pom.xml</relativePath>
   </parent>
 
   <artifactId>GMV_API_COM</artifactId>
-  <version>1.0</version>
   <packaging>jar</packaging>
 
-  <name>GMV COM Java API</name>
+  <name>ESA NMF Mission OPS-SAT Nanomind MO API - COM Services</name>
   <description>GMV's COM API for Java</description>
   <url>http://www.esa.int</url>
   
@@ -65,7 +64,8 @@
   </developers>
 
   <properties>
-    <ccsds.specification.version>1.1-nanomind-SNAPSHOT</ccsds.specification.version>
+    <ccsds.specification.download.group>int.esa.nmf.opssat</ccsds.specification.download.group>
+    <ccsds.specification.version>${esa.nmf.mission.opssat.version}</ccsds.specification.version>
     <ccsds.specification.download.skip>false</ccsds.specification.download.skip>
     <ccsds.specification.download.directory>${project.build.directory}</ccsds.specification.download.directory>
     <ccsds.specification.download.filter>**/ServiceDefCOM.xml</ccsds.specification.download.filter>
@@ -78,9 +78,13 @@
       <groupId>int.esa.ccsds.mo</groupId>
       <artifactId>API_MAL</artifactId>
     </dependency>
+    <!--
+      FIXME: Hack-around for some classes not being produced due to old XML.
+      Including standardised API fixes it.
+    -->
     <dependency>
-      <groupId>int.esa.ccsds.mo</groupId>
-      <artifactId>API_COM</artifactId>
+      <groupId>int.esa.nmf</groupId>
+      <artifactId>NMF_API_COM</artifactId>
     </dependency>
   </dependencies>
 

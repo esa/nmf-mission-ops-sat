@@ -17,17 +17,16 @@
   <modelVersion>4.0.0</modelVersion>
   
   <parent>
-    <groupId>int.esa.ccsds.mo</groupId>
-    <artifactId>POM</artifactId>
-    <version>7</version>
-    <relativePath/>
+    <groupId>int.esa.nmf.opssat</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.1.0-SNAPSHOT</version>
+    <relativePath>../../parent/pom.xml</relativePath>
   </parent>
   
   <artifactId>TRANSPORT_SPP_OPSSAT</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
 
-  <name>ESA SPP transport for OPS-SAT</name>
+  <name>ESA NMF Mission OPS-SAT Transport - SPP for Space-Ground</name>
   <description>A Java SPP transport for CCSDS SPP</description>
   <url>http://www.esa.int</url>
   

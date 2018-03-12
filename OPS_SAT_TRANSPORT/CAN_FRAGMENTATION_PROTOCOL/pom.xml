@@ -21,8 +21,8 @@
     <packaging>jar</packaging>
     <version>1.0</version>
 
-    <name>OPS-SAT CFP: CAN Fragmentation Protocol</name>
-    <description>A Java CAN Fragmentation Protocol implementation</description>
+    <name>ESA NMF Mission OPS-SAT Transport - CAN Fragmentation Protocol</name>
+    <description>OPS-SAT CAN Fragmentation Protocol implementation</description>
     <url>http://www.esa.int</url>
   
     <organization>

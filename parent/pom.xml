@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+  <!--
+    Licensed under the European Space Agency Public License, Version 2.0
+    You may not use this file except in compliance with the License.
+
+    Except as expressly set forth in this License, the Software is provided to
+    You on an "as is" basis and without warranties of any kind, including without
+    limitation merchantability, fitness for a particular purpose, absence of
+    defects or errors, accuracy or non-infringement of intellectual property rights.
+ 
+    See the License for the specific language governing permissions and limitations under the License.
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  
+  <parent>
+    <groupId>int.esa.nmf</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.1.0-SNAPSHOT</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>int.esa.nmf.opssat</groupId>
+  <artifactId>parent</artifactId>
+  <!--
+    OPS-SAT Mission is versioned independently from NMF Core,
+    although it can be expected that the version will follow the Core.
+  -->
+  <version>1.1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>ESA NMF Mission OPS-SAT - The Parent POM</name>
+  <description>Parent POM for NMF OPS-SAT mission</description>
+
+  <organization>
+    <name>ESA</name>
+    <url>http://www.esa.int</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <name>The European Space Agency Public License, Version 2.0</name>
+      <url>https://raw.github.com/esa/NMF_MISSION_OPS-SAT/master/LICENCE</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:git@github.com:esa/NMF_MISSION_OPS-SAT.git</connection>
+    <developerConnection>scm:git:git@github.com:esa/NMF_MISSION_OPS-SAT.git</developerConnection>
+    <url>https://github.com/esa/NMF_MISSION_OPS-SAT</url>
+  </scm>
+  
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/esa/NMF_CORE/issues</url>
+  </issueManagement>
+  
+  <developers>
+    <developer>
+      <id>CesarCoelho</id>
+      <name>César Coelho</name>
+      <url>https://github.com/CesarCoelho</url>
+    </developer>
+    <developer>
+      <name>Dominik Marszk</name>
+      <email>Dominik.Marszk@esa.int</email>
+      <organization>European Space Agency</organization>
+      <organizationUrl>http://www.esa.int</organizationUrl>
+    </developer>
+  </developers>
+
+  <properties>
+    <esa.nmf.mission.opssat.version>1.1.0-SNAPSHOT</esa.nmf.mission.opssat.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- Nanomind OBSW APIs -->
+      <dependency>
+        <groupId>int.esa.nmf.opssat</groupId>
+        <artifactId>GMV_API_MC</artifactId>
+        <version>${esa.nmf.mission.opssat.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>int.esa.nmf.opssat</groupId>
+        <artifactId>GMV_API_COM</artifactId>
+        <version>${esa.nmf.mission.opssat.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>int.esa.nmf.opssat</groupId>
+        <artifactId>GMV_API_PF</artifactId>
+        <version>${esa.nmf.mission.opssat.version}</version>
+      </dependency>
+
+      <!-- Nanomind OBSW services consumer implementation -->
+      <dependency>
+        <groupId>int.esa.nmf.opssat</groupId>
+        <artifactId>GMV_CONSUMER_SERVICES</artifactId>
+        <version>${esa.nmf.mission.opssat.version}</version>
+      </dependency>
+
+      <!-- SPP transport (and binding) -->
+      <dependency>
+        <groupId>int.esa.nmf.opssat</groupId>
+        <artifactId>TRANSPORT_SPP_OPSSAT</artifactId>
+        <version>${esa.nmf.mission.opssat.version}</version>
+      </dependency>
+
+      <!-- SPP to satellite CAN bus mapping through CFP -->
+      <dependency>
+        <groupId>int.esa.nmf.opssat</groupId>
+        <artifactId>SPP_TRANSPORT_CFP_TCP</artifactId>
+        <version>${esa.nmf.mission.opssat.version}</version>
+      </dependency>
+
+      <!-- NMF Platform services implementation -->
+      <dependency>
+        <groupId>int.esa.nmf.opssat</groupId>
+        <artifactId>PLATFORM_OPS-SAT_IMPL</artifactId>
+        <version>${esa.nmf.mission.opssat.version}</version>
+      </dependency>
+
+      <!-- NMF Supervisor -->
+      <dependency>
+        <groupId>int.esa.nmf.opssat</groupId>
+        <artifactId>NANOSAT_MO_SUPERVISOR_OPS-SAT</artifactId>
+        <version>${esa.nmf.mission.opssat.version}</version>
+      </dependency>
+
+      <!-- Standalone modules -->
+      <dependency>
+        <groupId>int.esa.opssat</groupId>
+        <artifactId>CAN_FRAGMENTATION_PROTOCOL</artifactId>
+        <version>1.0</version>
+      </dependency>
+      <dependency>
+        <groupId>int.esa.opssat</groupId>
+        <artifactId>OPSSAT_IMAGE_DEBAYER</artifactId>
+        <version>0.1.0</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+</project>

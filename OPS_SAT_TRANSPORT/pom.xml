@@ -17,16 +17,15 @@
   <modelVersion>4.0.0</modelVersion>
   
   <parent>
-    <groupId>int.esa.ccsds.mo</groupId>
-    <artifactId>POM</artifactId>
-    <version>7</version>
-    <relativePath/>
+    <groupId>int.esa.nmf.opssat</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.1.0-SNAPSHOT</version>
+    <relativePath>../parent/pom.xml</relativePath>
   </parent>
   
   <artifactId>OPS_SAT_SPP_TRANSPORT</artifactId>
-  <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>OPS-SAT SPP Transport</name>
+  <name>ESA NMF Mission OPS-SAT Reactor - Transports</name>
 
   <organization>
     <name>ESA</name>
@@ -60,6 +59,10 @@
             <url>https://github.com/CesarCoelho</url>
         </developer>
   </developers>
+
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
 
   <modules>
       <module>Kayak</module>

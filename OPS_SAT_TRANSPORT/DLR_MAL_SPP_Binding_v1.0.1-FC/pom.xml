@@ -12,6 +12,11 @@
         <system>hudson</system>
         <url>http://jenkins.ocs.office/jenkins/job/MO_Prototype_Linux_x64/</url>
     </ciManagement>
+
+    <properties>
+      <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
     <modules>
         <module>DLR_MO_POM</module>
         <module>DLR_MO_MALSPP_ENCODING</module>

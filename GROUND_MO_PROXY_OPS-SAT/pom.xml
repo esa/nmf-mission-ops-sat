@@ -17,17 +17,16 @@
     <modelVersion>4.0.0</modelVersion>
   
     <parent>
-        <groupId>int.esa.ccsds.mo</groupId>
-        <artifactId>NMF_POM</artifactId>
-        <version>1</version>
-        <relativePath/>
+        <groupId>int.esa.nmf.opssat</groupId>
+        <artifactId>parent</artifactId>
+        <version>1.1.0-SNAPSHOT</version>
+        <relativePath>../parent/pom.xml</relativePath>
     </parent>
   
     <artifactId>GROUND_MO_PROXY_OPS-SAT</artifactId>
     <packaging>jar</packaging>
-    <version>1.0</version>
 
-    <name>Ground MO Proxy: OPS-SAT</name>
+    <name>ESA NMF Mission OPS-SAT - Ground MO Proxy</name>
     <description>Ground MO Proxy for OPS-SAT</description>
     <url>http://www.esa.int</url>
   
@@ -70,20 +69,18 @@
 
     <dependencies>
         <dependency>
-            <groupId>int.esa.ccsds.mo</groupId>
+            <groupId>int.esa.nmf</groupId>
             <artifactId>GROUND_MO_PROXY</artifactId>
         </dependency>
 
         <!-- SPP Transports -->
         <dependency>
-            <groupId>int.esa.ccsds.mo</groupId>
+            <groupId>int.esa.nmf.opssat</groupId>
             <artifactId>SPP_TRANSPORT_CFP_TCP</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>int.esa.ccsds.mo</groupId>
+            <groupId>int.esa.nmf.opssat</groupId>
             <artifactId>TRANSPORT_SPP_OPSSAT</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
     

@@ -17,16 +17,15 @@
   <modelVersion>4.0.0</modelVersion>
   
   <parent>
-    <groupId>int.esa.ccsds.mo</groupId>
-    <artifactId>POM</artifactId>
-    <version>7</version>
-    <relativePath/>
+    <groupId>int.esa.nmf.opssat</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.1.0-SNAPSHOT</version>
+    <relativePath>../../parent/pom.xml</relativePath>
   </parent>
   
   <artifactId>GMV_MO_APIS</artifactId>
-  <version>1.0</version>
   <packaging>pom</packaging>
-  <name>GMV Specific APIs</name>
+  <name>ESA NMF Mission OPS-SAT Reactor - Nanomind OBSW APIs</name>
 
   <organization>
     <name>ESA</name>
@@ -55,9 +54,13 @@
     </developer>
   </developers>
 
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
+
   <modules>  
-    <module>GMV_COM_API</module>
-    <module>GMV_MC_API</module>
-    <module>GMV_PF_API</module>
+    <module>GMV_API_COM</module>
+    <module>GMV_API_MC</module>
+    <module>GMV_API_PF</module>
   </modules>
 </project>

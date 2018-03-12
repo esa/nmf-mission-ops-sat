@@ -17,15 +17,14 @@
     <modelVersion>4.0.0</modelVersion>
   
     <parent>
-        <groupId>int.esa.ccsds.mo</groupId>
-        <artifactId>POM</artifactId>
-        <version>7</version>
-        <relativePath/>
+        <groupId>int.esa.nmf.opssat</groupId>
+        <artifactId>parent</artifactId>
+        <version>1.1.0-SNAPSHOT</version>
+        <relativePath>../../parent/pom.xml</relativePath>
     </parent>
   
     <artifactId>SPP_TRANSPORT_CFP_TCP</artifactId>
     <packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
 
     <name>DLR MAL/SPP over CFP and TCP Java transport</name>
     <description>A Java SPP over CFP and TCP transport for CCSDS MAL</description>
@@ -79,7 +78,6 @@
         <dependency>
             <groupId>int.esa.opssat</groupId>
             <artifactId>CAN_FRAGMENTATION_PROTOCOL</artifactId>
-            <version>1.0</version>
         </dependency>
 
         <dependency>

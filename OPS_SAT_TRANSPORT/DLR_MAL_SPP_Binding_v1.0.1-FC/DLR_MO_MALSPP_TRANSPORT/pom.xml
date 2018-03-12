@@ -14,7 +14,7 @@
     <version>1.0.1-FC</version>
     <packaging>jar</packaging>
 
-    <name>MO MAL/SPP Transport Layer</name>
+    <name>ESA NMF Mission OPS-SAT Transport - DLR MO MAL/SPP Transport Layer</name>
     <url>http://www.dlr.de</url>
 
     <dependencies>

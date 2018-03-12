@@ -38,7 +38,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>int.esa.ccsds.mo</groupId>
+    <groupId>int.esa.nmf.opssat</groupId>
     <artifactId>TESTBED_POM</artifactId>
     <version>1.0.3</version>
     <relativePath/>
