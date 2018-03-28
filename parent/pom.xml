@@ -19,17 +19,17 @@
   <parent>
     <groupId>int.esa.nmf</groupId>
     <artifactId>parent</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.2.0-SNAPSHOT</version>
     <relativePath/>
   </parent>
 
-  <groupId>int.esa.nmf.opssat</groupId>
+  <groupId>int.esa.nmf.mission.opssat</groupId>
   <artifactId>parent</artifactId>
   <!--
     OPS-SAT Mission is versioned independently from NMF Core,
     although it can be expected that the version will follow the Core.
   -->
-  <version>1.1.0-SNAPSHOT</version>
+  <version>1.2.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>ESA NMF Mission OPS-SAT - The Parent POM</name>
   <description>Parent POM for NMF OPS-SAT mission</description>
@@ -73,7 +73,7 @@
   </developers>
 
   <properties>
-    <esa.nmf.opssat.version>1.1.0-SNAPSHOT</esa.nmf.opssat.version>
+    <esa.nmf.opssat.version>1.2.0-SNAPSHOT</esa.nmf.opssat.version>
     <esa.nmf.opssat.next-version>1.2.0</esa.nmf.opssat.next-version>
     <!-- Automatically use the latest patch of each component for the current major.minor version -->
     <esa.nmf.opssat.version-qualifier>[${esa.nmf.opssat.version},${esa.nmf.opssat.next-version})</esa.nmf.opssat.version-qualifier>
@@ -81,68 +81,70 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- Nanomind OBSW MO interface XMLs -->
+      <dependency>
+        <groupId>int.esa.nmf.mission.opssat.nanomind</groupId>
+        <artifactId>xml</artifactId>
+        <version>${esa.nmf.opssat.version-qualifier}</version>
+      </dependency>
+
       <!-- Nanomind OBSW APIs -->
       <dependency>
-        <groupId>int.esa.nmf.opssat</groupId>
-        <artifactId>GMV_API_MC</artifactId>
+        <groupId>int.esa.nmf.mission.opssat.nanomind.api</groupId>
+        <artifactId>mc</artifactId>
         <version>${esa.nmf.opssat.version-qualifier}</version>
       </dependency>
       <dependency>
-        <groupId>int.esa.nmf.opssat</groupId>
-        <artifactId>GMV_API_COM</artifactId>
+        <groupId>int.esa.nmf.mission.opssat.nanomind.api</groupId>
+        <artifactId>com</artifactId>
         <version>${esa.nmf.opssat.version-qualifier}</version>
       </dependency>
       <dependency>
-        <groupId>int.esa.nmf.opssat</groupId>
-        <artifactId>GMV_API_PF</artifactId>
+        <groupId>int.esa.nmf.mission.opssat.nanomind.api</groupId>
+        <artifactId>pf</artifactId>
         <version>${esa.nmf.opssat.version-qualifier}</version>
       </dependency>
 
       <!-- Nanomind OBSW services consumer implementation -->
       <dependency>
-        <groupId>int.esa.nmf.opssat</groupId>
-        <artifactId>GMV_CONSUMER_SERVICES</artifactId>
+        <groupId>int.esa.nmf.mission.opssat.nanomind</groupId>
+        <artifactId>consumers</artifactId>
         <version>${esa.nmf.opssat.version-qualifier}</version>
       </dependency>
 
-      <!-- SPP transport (and binding) -->
+      <!-- ESA MAL/SPP transport binding wrapper allowing transporting SPP packets over CFP or TCP -->
       <dependency>
-        <groupId>int.esa.nmf.opssat</groupId>
-        <artifactId>TRANSPORT_SPP_OPSSAT</artifactId>
+        <groupId>int.esa.opssat.transport</groupId>
+        <artifactId>esa-malspp-wrapper</artifactId>
         <version>${esa.nmf.opssat.version-qualifier}</version>
       </dependency>
 
-      <!-- SPP to satellite CAN bus mapping through CFP -->
+      <!-- SPP over TCP or satellite CAN bus through CFP -->
       <dependency>
-        <groupId>int.esa.nmf.opssat</groupId>
-        <artifactId>SPP_TRANSPORT_CFP_TCP</artifactId>
+        <groupId>int.esa.opssat.transport</groupId>
+        <artifactId>malspp-over-cfp-tcp</artifactId>
         <version>${esa.nmf.opssat.version-qualifier}</version>
       </dependency>
 
       <!-- NMF Platform services implementation -->
       <dependency>
-        <groupId>int.esa.nmf.opssat</groupId>
-        <artifactId>PLATFORM_OPS-SAT_IMPL</artifactId>
+        <groupId>int.esa.nmf.mission.opssat.moservices.impl</groupId>
+        <artifactId>nmf-platform</artifactId>
         <version>${esa.nmf.opssat.version-qualifier}</version>
       </dependency>
 
       <!-- NMF Supervisor -->
       <dependency>
-        <groupId>int.esa.nmf.opssat</groupId>
-        <artifactId>NANOSAT_MO_SUPERVISOR_OPS-SAT</artifactId>
+        <groupId>int.esa.nmf.mission.opssat</groupId>
+        <artifactId>nanosat-mo-supervisor</artifactId>
         <version>${esa.nmf.opssat.version-qualifier}</version>
       </dependency>
 
       <!-- Standalone modules -->
       <dependency>
         <groupId>int.esa.opssat</groupId>
-        <artifactId>CAN_FRAGMENTATION_PROTOCOL</artifactId>
-        <version>1.0</version>
-      </dependency>
-      <dependency>
-        <groupId>int.esa.opssat</groupId>
-        <artifactId>OPSSAT_IMAGE_DEBAYER</artifactId>
-        <version>0.1.0</version>
+        <artifactId>image-debayer</artifactId>
+        <version>${esa.nmf.version-qualifier}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

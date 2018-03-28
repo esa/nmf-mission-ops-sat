@@ -1,0 +1,37 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>int.esa.opssat.transport.dlr</groupId>
+        <artifactId>parent</artifactId>
+        <version>1.0.1</version>
+        <relativePath>../parent/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>malspp-transport</artifactId>
+    <version>1.0.1-FC</version>
+    <packaging>jar</packaging>
+
+    <name>DLR MO MAL/SPP Transport Layer</name>
+    <description>DLR implementation of CCSDS MO MAL/SPP Binding, transport part</description>
+    <url>http://www.dlr.de</url>
+
+    <dependencies>
+        <dependency>
+            <groupId>int.esa.ccsds.mo</groupId>
+            <artifactId>API_MAL</artifactId>
+            <version>1.2</version>
+        </dependency>
+
+<!--
+        <dependency>
+            <groupId>fr.cnes.ccsds.mo</groupId>
+            <artifactId>TESTBED_UTIL_SPP</artifactId>
+            <version>1.0</version>
+            <type>jar</type>
+        </dependency>
+-->
+
+    </dependencies>
+</project>

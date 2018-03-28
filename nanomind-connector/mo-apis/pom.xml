@@ -20,59 +20,48 @@
     <groupId>int.esa.nmf.mission.opssat</groupId>
     <artifactId>parent</artifactId>
     <version>1.2.0-SNAPSHOT</version>
-    <relativePath>parent/pom.xml</relativePath>
+    <relativePath>../../parent/pom.xml</relativePath>
   </parent>
-
-  <artifactId>NMF_MISSION_OPS-SAT</artifactId>
+  
+  <groupId>int.esa.nmf.mission.opssat.nanomind.api</groupId>
+  <artifactId>reactor</artifactId>
   <packaging>pom</packaging>
-  <name>ESA NMF Mission OPS-SAT Reactor</name>
-  <description>Reactor POM for NMF OPS-SAT mission</description>
+  <name>ESA NMF Mission OPS-SAT Reactor - Nanomind MO APIs</name>
 
   <organization>
     <name>ESA</name>
     <url>http://www.esa.int</url>
   </organization>
-
+  
   <licenses>
     <license>
       <name>The European Space Agency Public License, Version 2.0</name>
-      <url>https://raw.github.com/esa/NMF_MISSION_OPS-SAT/master/LICENCE</url>
+      <url>https://raw.github.com/esa/CCSDS_MO_APIS/master/LICENCE.md</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
 
-  <scm>
-    <connection>scm:git:git@github.com:esa/NMF_MISSION_OPS-SAT.git</connection>
-    <developerConnection>scm:git:git@github.com:esa/NMF_MISSION_OPS-SAT.git</developerConnection>
-    <url>https://github.com/esa/NMF_MISSION_OPS-SAT</url>
-  </scm>
-
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/esa/NMF_CORE/issues</url>
+    <url>https://github.com/esa/CCSDS_MO_APIS/issues</url>
   </issueManagement>
-
+  
   <developers>
     <developer>
       <id>CesarCoelho</id>
-      <name>César Coelho</name>
+      <name>Cesar Coelho</name>
+      <email>cesar.coelho@esa.int</email>
       <url>https://github.com/CesarCoelho</url>
-    </developer>
-    <developer>
-      <name>Dominik Marszk</name>
-      <email>Dominik.Marszk@esa.int</email>
     </developer>
   </developers>
 
-  <modules>
-    <module>parent</module>
-    <module>transport</module>
-    <module>nanomind-connector</module>
-    <module>platform-service-impl</module>
-    <module>nanosat-mo-supervisor</module>
-    <module>ground-mo-proxy</module>
-    <module>nmf-library</module>
-    <module>example-push-clock</module>
-  </modules>
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
 
+  <modules>  
+    <module>com</module>
+    <module>mc</module>
+    <module>pf</module>
+  </modules>
 </project>

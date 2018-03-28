@@ -1,0 +1,39 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+  
+    <parent>
+        <groupId>int.esa.opssat.transport.dlr</groupId>
+        <artifactId>parent</artifactId>
+        <version>1.0.1</version>
+        <relativePath>../parent/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>malspp-encoding-opssat</artifactId>
+    <version>1.0.1-FC</version>
+    <packaging>jar</packaging>
+
+    <name>DLR MO MAL/SPP Encoding for OPS-SAT</name>
+    <description>DLR implementation of CCSDS MO MAL/SPP Binding, encoding part, adapted for OPS-SAT Space-Space link</description>
+    <url>http://www.dlr.de</url>
+    <dependencies>
+        <dependency>
+            <groupId>int.esa.ccsds.mo</groupId>
+            <artifactId>API_MAL</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.orekit</groupId>
+            <artifactId>orekit</artifactId>
+            <version>6.1</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>1.9.5</version>
+            <type>jar</type>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
