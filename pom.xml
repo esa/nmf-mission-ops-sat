@@ -72,7 +72,6 @@
     <module>nanosat-mo-supervisor</module>
     <module>ground-mo-proxy</module>
     <module>nmf-library</module>
-    <module>example-push-clock</module>
   </modules>
 
 </project>
