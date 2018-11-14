@@ -22,24 +22,35 @@ package esa.mo.platform.impl.provider.opssat;
 
 import esa.mo.com.impl.util.GMVServicesConsumer;
 import esa.mo.platform.impl.provider.gen.GPSNMEAonlyAdapter;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.ccsds.moims.mo.mal.MALException;
+import org.ccsds.moims.mo.opssat_pf.gps.consumer.GPSAdapter;
+import org.ccsds.moims.mo.mal.structures.Blob;
 
-/** 
+/**
  *
  * @author Cesar Coelho
  */
 public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
-    
+
     private final GMVServicesConsumer gmvServicesConsumer;
-    
-    public GPSOPSSATAdapter(GMVServicesConsumer gmvServicesConsumer){
+
+    public GPSOPSSATAdapter(GMVServicesConsumer gmvServicesConsumer) {
         this.gmvServicesConsumer = gmvServicesConsumer;
     }
 
     @Override
-    public String getNMEASentence(String identifier) {
-        
-//        gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData(identifier, adapter);
-        throw new UnsupportedOperationException("Not supported yet.");
+    public String getNMEASentence(String identifier) throws IOException {
+        GPSHandler gpsHandler = new GPSHandler();
+        try {
+            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData(new Blob(identifier.getBytes()), gpsHandler);
+        } catch (Exception e) {
+            throw new IOException("Error when retrieving GPS NMEA response from Nanomind", e);
+        }
+        return gpsHandler.response;
     }
 
     @Override
@@ -47,4 +58,16 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
         return false;
     }
 
+    private class GPSHandler extends GPSAdapter {
+        String response = "";
+        @Override
+        public void getGPSDataResponseReceived(org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader,
+                org.ccsds.moims.mo.mal.structures.Blob data, java.util.Map qosProperties) {
+            try {
+                response = Arrays.toString(data.getValue());
+            } catch (MALException ex) {
+                Logger.getLogger(GPSHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
 }

@@ -22,14 +22,16 @@ package esa.mo.platform.impl.util;
 
 import esa.mo.com.impl.util.COMServicesProvider;
 import esa.mo.com.impl.util.GMVServicesConsumer;
+import esa.mo.platform.impl.provider.gen.PowerControlProviderServiceImpl;
 import esa.mo.platform.impl.provider.gen.CameraProviderServiceImpl;
 import esa.mo.platform.impl.provider.gen.GPSProviderServiceImpl;
+import esa.mo.platform.impl.provider.gen.AutonomousADCSProviderServiceImpl;
+import esa.mo.platform.impl.provider.gen.OpticalDataReceiverProviderServiceImpl;
+import esa.mo.platform.impl.provider.gen.SoftwareDefinedRadioProviderServiceImpl;
 import esa.mo.platform.impl.provider.opssat.CameraOPSSATAdapter;
 import esa.mo.platform.impl.provider.opssat.GPSOPSSATAdapter;
+import esa.mo.platform.impl.provider.opssat.AutonomousADCSOPSSATAdapter;
 import org.ccsds.moims.mo.mal.MALException;
-import org.ccsds.moims.mo.platform.autonomousadcs.provider.AutonomousADCSInheritanceSkeleton;
-import org.ccsds.moims.mo.platform.opticaldatareceiver.provider.OpticalDataReceiverInheritanceSkeleton;
-import org.ccsds.moims.mo.platform.softwaredefinedradio.provider.SoftwareDefinedRadioInheritanceSkeleton;
 
 /**
  *
@@ -37,18 +39,21 @@ import org.ccsds.moims.mo.platform.softwaredefinedradio.provider.SoftwareDefined
  */
 public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderInterface {
 
+    private final AutonomousADCSProviderServiceImpl adcsService = new AutonomousADCSProviderServiceImpl();
     private final CameraProviderServiceImpl cameraService = new CameraProviderServiceImpl();
     private final GPSProviderServiceImpl gpsService = new GPSProviderServiceImpl();
+    private final OpticalDataReceiverProviderServiceImpl optrxService = new OpticalDataReceiverProviderServiceImpl();
+    private final PowerControlProviderServiceImpl powerService = new PowerControlProviderServiceImpl();
+    private final SoftwareDefinedRadioProviderServiceImpl sdrService = new SoftwareDefinedRadioProviderServiceImpl();
 
-//    @Override
     public void init(COMServicesProvider comServices, GMVServicesConsumer gmvServicesConsumer) throws MALException {
+        AutonomousADCSOPSSATAdapter adcsAdapter = new AutonomousADCSOPSSATAdapter();
+        adcsService.init(comServices, adcsAdapter);
         cameraService.init(comServices, new CameraOPSSATAdapter());
         gpsService.init(comServices, new GPSOPSSATAdapter(gmvServicesConsumer));
-    }
-
-    @Override
-    public CameraProviderServiceImpl getCameraService() {
-        return this.cameraService;
+        optrxService.init(new esa.mo.platform.impl.provider.opssat.OpticalRxOPSSATAdapter());
+        powerService.init(new esa.mo.platform.impl.provider.opssat.PowerControlOPSSATAdapter());
+        sdrService.init(new esa.mo.platform.impl.provider.opssat.SDROPSSATAdapter());
     }
 
     @Override
@@ -57,18 +62,23 @@ public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderI
     }
 
     @Override
-    public AutonomousADCSInheritanceSkeleton getAutonomousADCSService() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public CameraProviderServiceImpl getCameraService() {
+        return this.cameraService;
     }
 
     @Override
-    public OpticalDataReceiverInheritanceSkeleton getOpticalDataReceiverService() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public AutonomousADCSProviderServiceImpl getAutonomousADCSService() {
+        return this.adcsService;
     }
 
     @Override
-    public SoftwareDefinedRadioInheritanceSkeleton getSoftwareDefinedRadioService() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public OpticalDataReceiverProviderServiceImpl getOpticalDataReceiverService() {
+        return this.optrxService;
+    }
+
+    @Override
+    public SoftwareDefinedRadioProviderServiceImpl getSoftwareDefinedRadioService() {
+        return this.sdrService;
     }
 
 }

@@ -76,6 +76,41 @@
             <groupId>int.esa.opssat</groupId>
             <artifactId>image-debayer</artifactId>
         </dependency>
+        <dependency>
+            <groupId>at.tugraz.ihf.opssat</groupId>
+            <artifactId>iadcs</artifactId>
+            <version>0.1</version>
+            <systemPath>${basedir}/src/main/resources/iadcs_api.jar</systemPath>
+            <scope>system</scope>
+        </dependency>
+        <dependency>
+            <groupId>at.tugraz.ihf.opssat</groupId>
+            <artifactId>ims100</artifactId>
+            <version>0.1</version>
+            <systemPath>${basedir}/src/main/resources/ims100_api.jar</systemPath>
+            <scope>system</scope>
+        </dependency>
+        <dependency>
+            <groupId>at.tugraz.ihf.opssat</groupId>
+            <artifactId>mainboard</artifactId>
+            <version>0.1</version>
+            <systemPath>${basedir}/src/main/resources/mainboard_api.jar</systemPath>
+            <scope>system</scope>
+        </dependency>
+        <dependency>
+            <groupId>at.tugraz.ihf.opssat</groupId>
+            <artifactId>opt_rx</artifactId>
+            <version>0.1</version>
+            <systemPath>${basedir}/src/main/resources/opt_rx_api.jar</systemPath>
+            <scope>system</scope>
+        </dependency>
+        <dependency>
+            <groupId>at.tugraz.ihf.opssat</groupId>
+            <artifactId>sdr</artifactId>
+            <version>0.1</version>
+            <systemPath>${basedir}/src/main/resources/sdr_api.jar</systemPath>
+            <scope>system</scope>
+        </dependency>
     </dependencies>
   
     <build>
