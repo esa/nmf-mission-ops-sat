@@ -90,8 +90,8 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
 
         // The range of APIDs below were formally requested 
         // And are uniquely assigned for the Ground MO Proxy of OPS-SAT
-        properties.put(ProtocolBridgeSPP.PROPERTY_APID_RANGE_START, "21");
-        properties.put(ProtocolBridgeSPP.PROPERTY_APID_RANGE_END, "59");
+        properties.put(ProtocolBridgeSPP.PROPERTY_APID_RANGE_START, "1450");
+        properties.put(ProtocolBridgeSPP.PROPERTY_APID_RANGE_END, "1499");
 
         // Initialize the SPP Protocol Bridge
         try {
