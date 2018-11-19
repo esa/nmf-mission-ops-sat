@@ -311,6 +311,11 @@
         <directory>${basedir}/src/main/resources/common-transport</directory>
       </resource>
       <resource>
+        <!-- Workaround for transport.properties pointing at ../mappingConfigurationParameters.xml -->
+        <targetPath>${esa.nmf.mission.opssat.assembly.outputdir}/bin/space/apps</targetPath>
+        <directory>${basedir}/src/main/resources/common-transport</directory>
+      </resource>
+      <resource>
         <targetPath>${esa.nmf.mission.opssat.assembly.outputdir}/bin/space/nanosat-mo-supervisor-sim</targetPath>
         <directory>${basedir}/src/main/resources/space-supervisor-sim-root</directory>
       </resource>
