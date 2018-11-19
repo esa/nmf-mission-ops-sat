@@ -45,119 +45,169 @@ import fr.dyade.aaa.common.Daemon;
 import java.util.logging.Level;
 import org.objectweb.util.monolog.api.Logger;
 
-public class ServerTCPSPPSocket implements SPPSocket {
+public class ServerTCPSPPSocket implements SPPSocket
+{
 
-    public final static Logger logger = fr.dyade.aaa.common.Debug
-            .getLogger(ServerTCPSPPSocket.class.getName());
+  private static final java.util.logging.Logger LOGGER
+      = java.util.logging.Logger.getLogger(ServerTCPSPPSocket.class.getName());
 
-    public final static String PORT_PROP = "org.ccsds.moims.mo.malspp.test.sppimpl.tcp.port";
+  private static final int MAX_ERROR_COUNT = 10;
 
-    private int port;
+  public final static String PORT_PROP = "org.ccsds.moims.mo.malspp.test.sppimpl.tcp.port";
+  private int port;
+  private ServerSocket listenerSocket;
+  private boolean tcpNoDelay;
+  private SPPChannel channel;
+  private ReaderDaemon readerDaemon;
 
-    private ServerSocket listen;
+  private final LinkedBlockingQueue<SpacePacket> input = new LinkedBlockingQueue<>();
 
-    private boolean tcpNoDelay;
+  public ServerTCPSPPSocket()
+  {
+    super();
+  }
 
-    private SPPChannel channel;
+  public void init(Map properties) throws Exception
+  {
+    String portS = (String) properties.get(PORT_PROP);
+    port = Integer.parseInt(portS);
+    listen(port);
+  }
 
-    private ReaderDaemon readerDaemon;
+  private void listen(int port) throws Exception
+  {
+    LOGGER.log(Level.FINE, "listen({0})", new Object[]{port});
+    listenerSocket = new ServerSocket(port);
+    readerDaemon = new ReaderDaemon();
+    readerDaemon.start();
+  }
 
-    private LinkedBlockingQueue<SpacePacket> input;
+  @Override
+  public void close() throws Exception
+  {
+    if (channel != null) {
+      channel.close();
+    }
+    if (readerDaemon != null) {
+      readerDaemon.stop();
+    }
+  }
 
-    public ServerTCPSPPSocket() {
-        super();
-        input = new LinkedBlockingQueue<SpacePacket>();
+  @Override
+  public SpacePacket receive() throws Exception
+  {
+    SpacePacket packet = input.take();
+    LOGGER.log(Level.FINE, "Received: {0}", packet);
+    return packet;
+  }
+
+  @Override
+  public void send(SpacePacket packet) throws IOException
+  {
+    LOGGER.log(Level.FINE, "send({0})", packet);
+    if (channel != null) {
+      channel.send(packet);
+    } else {
+      throw new IOException("SPP send called, but no connection established!");
+    }
+  }
+
+  @Override
+  public String getDescription()
+  {
+    return "-" + port;
+  }
+
+  class ReaderDaemon extends Daemon
+  {
+
+    private Socket connSocket;
+
+    private SpacePacket packet;
+
+    protected ReaderDaemon()
+    {
+      super("ReaderDaemon", null);
     }
 
-    public void init(Map properties) throws Exception {
-        String portS = (String) properties.get(PORT_PROP);
-        port = Integer.parseInt(portS);
-        listen(port);
+    @Override
+    public final void run()
+    {
+      int errorCount = 0;
+      while (running) {
+        if (errorCount >= MAX_ERROR_COUNT) {
+          LOGGER.log(Level.SEVERE, "errorCount >= {0}. Stopping the server.", MAX_ERROR_COUNT);
+          break;
+        }
+        try {
+          LOGGER.log(Level.INFO, "Listening for a client connection on {0}",
+              listenerSocket.getLocalSocketAddress());
+          connSocket = listenerSocket.accept();
+        } catch (IOException ex) {
+          LOGGER.log(Level.SEVERE, "Error when accepting the client connection", ex);
+          if (channel != null) {
+            channel.close();
+            channel = null;
+          }
+          errorCount++;
+          continue;
+        }
+        try {
+          connSocket.setTcpNoDelay(tcpNoDelay);
+          connSocket.setSoLinger(true, 1000);
+          channel = new SPPChannel(connSocket);
+        } catch (IOException ex) {
+          LOGGER.log(Level.SEVERE, "Error when configuring the client connection", ex);
+          if (channel != null) {
+            channel.close();
+            channel = null;
+          }
+          errorCount++;
+          continue;
+        }
+        errorCount = 0;
+        LOGGER.log(Level.INFO, "Accepted connection from: {0}", connSocket.getRemoteSocketAddress());
+        try {
+          while (running) {
+            canStop = true;
+            packet = channel.receive();
+            input.offer(packet);
+          }
+        } catch (IOException ex) {
+          LOGGER.log(Level.WARNING,
+              this.getName() + ", error during packet receive. Closing the client connection.", ex);
+
+        } finally {
+          if (channel != null) {
+            channel.close();
+            channel = null;
+          }
+        }
+      }
+      shutdown();
+      finish();
     }
 
-    public void listen(int port) throws Exception {
-        listen = new ServerSocket(port);
-        readerDaemon = new ReaderDaemon();
-        readerDaemon.start();
-    }
-
-    public void close() throws Exception {
+    @Override
+    protected void close()
+    {
+      if (listenerSocket != null) {
+        try {
+          listenerSocket.close();
+        } catch (IOException e) {
+        }
+      }
+      if (channel != null) {
         channel.close();
-        readerDaemon.stop();
+        channel = null;
+      }
     }
 
-    public SpacePacket receive() throws Exception {
-        SpacePacket packet = input.take();
-        /*
-      java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO,
-                "Received: " + packet);
-         */
-        return packet;
+    @Override
+    protected void shutdown()
+    {
+      close();
     }
-
-    public void send(SpacePacket packet) throws Exception {
-        /*
-      java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO,
-                "ServerTCPSPPSocket.send(" + packet + ')');
-         */
-        channel.send(packet);
-    }
-
-    public String getDescription() {
-        return "-" + port;
-    }
-
-    class ReaderDaemon extends Daemon {
-
-        private Socket socket;
-
-        private SpacePacket packet;
-
-        protected ReaderDaemon() {
-//            super("ReaderDaemon", logger);
-            super("ReaderDaemon", logger);
-        }
-
-        public final void run() {
-            try {
-                /*
-                java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO,
-                        "Listen...");
-                 */
-                socket = listen.accept();
-                socket.setTcpNoDelay(tcpNoDelay);
-                socket.setSoLinger(true, 1000);
-                channel = new SPPChannel(socket);
-
-                /*
-      java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO,
-                "Accepted connection from: " + socket.getRemoteSocketAddress());
-                 */
-                while (running) {
-                    canStop = true;
-                    packet = channel.receive();
-                    input.offer(packet);
-                }
-            } catch (Exception exc) {
-                java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO,
-                        this.getName() + ", error during packet receive", exc);
-            } finally {
-                finish();
-            }
-        }
-
-        protected void close() {
-            if (listen != null) {
-                try {
-                    listen.close();
-                } catch (IOException e) {
-                }
-            }
-        }
-
-        protected void shutdown() {
-            close();
-        }
-    }
+  }
 
 }

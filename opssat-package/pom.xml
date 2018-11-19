@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Licensed under the European Space Agency Public License, Version 2.0
+    You may not use this file except in compliance with the License.
+
+    Except as expressly set forth in this License, the Software is provided to
+    You on an "as is" basis and without warranties of any kind, including without
+    limitation merchantability, fitness for a particular purpose, absence of
+    defects or errors, accuracy or non-infringement of intellectual property rights.
+
+    See the License for the specific language governing permissions and limitations under the License.
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>int.esa.nmf.mission.opssat</groupId>
+    <artifactId>parent</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+    <relativePath>../parent/pom.xml</relativePath>
+  </parent>
+
+  <groupId>int.esa.nmf.mission.opssat</groupId>
+  <artifactId>package</artifactId>
+  <name>ESA NMF Mission OPS-SAT - Package Assembly</name>
+  <packaging>jar</packaging>
+
+  <organization>
+    <name>ESA</name>
+    <url>http://www.esa.int</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <name>The European Space Agency Public License, Version 2.0</name>
+      <url>https://raw.github.com/esa/CCSDS_MO_APPS/master/LICENCE.md</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:git@github.com:esa/NMF_MISSION_OPS-SAT.git</connection>
+    <developerConnection>scm:git:git@github.com:esa/NMF_MISSION_OPS-SAT.git</developerConnection>
+    <url>https://github.com/esa/NMF_MISSION_OPS-SAT</url>
+  </scm>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/esa/NMF_MISSION_OPS-SAT/issues</url>
+  </issueManagement>
+
+  <developers>
+    <developer>
+      <id>CesarCoelho</id>
+      <name>César Coelho</name>
+      <url>https://github.com/CesarCoelho</url>
+    </developer>
+  </developers>
+
+  <properties>
+    <esa.nmf.mission.opssat.assembly.outputdir>${project.build.directory}/nmf-opssat-${esa.nmf.version}</esa.nmf.mission.opssat.assembly.outputdir>
+  </properties>
+  <dependencies>
+    <!-- NOTE: Imprecise version resolution using ${esa.nmf.version-qualifier} cannot be used here,
+    as maven-dependency-plugin:copy does not support it. -->
+    <dependency>
+      <groupId>int.esa.nmf.sdk.examples.space</groupId>
+      <artifactId>all-mc-services</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.nmf.sdk.examples.space</groupId>
+      <artifactId>camera</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.nmf.sdk.examples.space</groupId>
+      <artifactId>publish-clock</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.nmf.core</groupId>
+      <artifactId>nanosat-mo-connector</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- To be removed in the future -->
+    <dependency>
+      <groupId>int.esa.nmf.mission.simulator</groupId>
+      <artifactId>nanosat-mo-supervisor</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.nmf.mission.opssat</groupId>
+      <artifactId>nanosat-mo-supervisor</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.opssat.transport</groupId>
+      <artifactId>malspp-over-cfp-tcp</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.opssat.transport.dlr</groupId>
+      <artifactId>malspp-encoding-opssat</artifactId>
+      <version>1.0.1-FC</version>
+      <exclusions>
+        <exclusion>
+          <!-- Encoding depends on Orekit 6.1, but Simulator uses Orekit 7.2 -->
+          <groupId>org.orekit</groupId>
+          <artifactId>orekit</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <!-- disable JAR assembly -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.4</version>
+        <executions>
+          <execution>
+            <id>default-jar</id>
+            <phase/>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>appassembler-maven-plugin-nested-bin-fix</artifactId>
+        <version>2.0.0</version>
+        <configuration>
+          <licenseHeaderFile>${basedir}/license-header.txt</licenseHeaderFile>
+          <!-- Shared configuration -->
+          <assembleDirectory>${esa.nmf.mission.opssat.assembly.outputdir}/bin</assembleDirectory>
+          <!--
+            Cannot use flat repository layout here, since there are
+            conflicting artifactIds coming from OPS-SAT and SDK groups.
+            It does not matter anyway, as target platform here is only Unix.
+          -->
+          <repositoryName>lib</repositoryName>
+          <platforms>
+            <platform>unix</platform>
+          </platforms>
+          <binFileExtensions>
+            <unix>.sh</unix>
+          </binFileExtensions>
+        </configuration>
+        <executions>
+          <execution>
+            <id>emit-ctt</id>
+            <phase>package</phase>
+            <goals>
+              <goal>assemble</goal>
+            </goals>
+            <configuration>
+              <binFolder>tools/consumer-test-tool</binFolder>
+              <programs>
+                <program>
+                  <mainClass>esa.mo.nmf.ctt.guis.ConsumerTestToolGUI</mainClass>
+                  <id>consumer-test-tool</id>
+                </program>
+              </programs>
+            </configuration>
+          </execution>
+          <execution>
+            <id>emit-ground-mo-proxy</id>
+            <phase>package</phase>
+            <goals>
+              <goal>assemble</goal>
+            </goals>
+            <configuration>
+              <binFolder>ground/ground-mo-proxy</binFolder>
+              <programs>
+                <program>
+                  <mainClass>esa.mo.nmf.groundmoproxy.GroundMOProxyOPSSATImpl</mainClass>
+                  <id>ground-mo-proxy</id>
+                </program>
+              </programs>
+            </configuration>
+          </execution>
+          <execution>
+            <id>emit-space-opssat-supervisor</id>
+            <phase>package</phase>
+            <goals>
+              <goal>assemble</goal>
+            </goals>
+            <configuration>
+              <binFolder>space/nanosat-mo-supervisor-opssat</binFolder>
+              <programs>
+                <program>
+                  <mainClass>esa.mo.nmf.provider.NanoSatMOSupervisorOPSSATImpl</mainClass>
+                  <id>nanosat-mo-supervisor-opssat</id>
+                </program>
+              </programs>
+            </configuration>
+          </execution>
+          <execution>
+            <id>emit-space-sim-supervisor</id>
+            <phase>package</phase>
+            <goals>
+              <goal>assemble</goal>
+            </goals>
+            <configuration>
+              <binFolder>space/nanosat-mo-supervisor-sim</binFolder>
+              <programs>
+                <program>
+                  <mainClass>esa.mo.nmf.provider.NanoSatMOSupervisorSoftSimImpl</mainClass>
+                  <id>nanosat-mo-supervisor-sim</id>
+                </program>
+              </programs>
+            </configuration>
+          </execution>
+          <execution>
+            <id>emit-space-app-all-mc-services</id>
+            <phase>package</phase>
+            <goals>
+              <goal>assemble</goal>
+            </goals>
+            <configuration>
+              <binFolder>space/apps/all-mc-services</binFolder>
+              <programs>
+                <program>
+                  <mainClass>esa.mo.nmf.apps.AllInOne</mainClass>
+                  <id>all-mc-services</id>
+                </program>
+              </programs>
+            </configuration>
+          </execution>
+          <execution>
+            <id>emit-space-app-publish-clock</id>
+            <phase>package</phase>
+            <goals>
+              <goal>assemble</goal>
+            </goals>
+            <configuration>
+              <binFolder>space/apps/publish-clock</binFolder>
+              <programs>
+                <program>
+                  <mainClass>esa.mo.nmf.apps.PushClock</mainClass>
+                  <id>publish-clock</id>
+                </program>
+              </programs>
+            </configuration>
+          </execution>
+          <execution>
+            <id>emit-space-app-camera</id>
+            <phase>package</phase>
+            <goals>
+              <goal>assemble</goal>
+            </goals>
+            <configuration>
+              <binFolder>space/apps/camera</binFolder>
+              <programs>
+                <program>
+                  <mainClass>esa.mo.nmf.apps.SnapNMF</mainClass>
+                  <id>camera</id>
+                </program>
+              </programs>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration combine.self="override">
+          <finalName>nmf-opssat-${project.version}</finalName>
+          <appendAssemblyId>false</appendAssemblyId>
+          <descriptors>
+            <descriptor>${basedir}/src/main/assembly/zip.xml</descriptor>
+          </descriptors>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+    <resources>
+      <resource>
+        <targetPath>${esa.nmf.mission.opssat.assembly.outputdir}/bin/space</targetPath>
+        <directory>${basedir}/src/main/resources/space-root</directory>
+      </resource>
+      <resource>
+        <targetPath>${esa.nmf.mission.opssat.assembly.outputdir}/bin/space</targetPath>
+        <directory>${basedir}/src/main/resources/common-transport</directory>
+      </resource>
+      <resource>
+        <targetPath>${esa.nmf.mission.opssat.assembly.outputdir}/bin/space/nanosat-mo-supervisor-sim</targetPath>
+        <directory>${basedir}/src/main/resources/space-supervisor-sim-root</directory>
+      </resource>
+      <resource>
+        <targetPath>${esa.nmf.mission.opssat.assembly.outputdir}/bin/space/nanosat-mo-supervisor-opssat</targetPath>
+        <directory>${basedir}/src/main/resources/space-supervisor-opssat-root</directory>
+      </resource>
+      <resource>
+        <targetPath>${esa.nmf.mission.opssat.assembly.outputdir}/bin/space/apps/all-mc-services</targetPath>
+        <directory>${basedir}/src/main/resources/space-app-root</directory>
+      </resource>
+      <resource>
+        <targetPath>${esa.nmf.mission.opssat.assembly.outputdir}/bin/space/apps/camera</targetPath>
+        <directory>${basedir}/src/main/resources/space-app-root</directory>
+      </resource>
+      <resource>
+        <targetPath>${esa.nmf.mission.opssat.assembly.outputdir}/bin/space/apps/publish-clock</targetPath>
+        <directory>${basedir}/src/main/resources/space-app-root</directory>
+      </resource>
+      <resource>
+        <targetPath>${esa.nmf.mission.opssat.assembly.outputdir}/bin/ground/ground-mo-proxy</targetPath>
+        <directory>${basedir}/src/main/resources/ground-mo-proxy-root</directory>
+      </resource>
+      <resource>
+        <targetPath>${esa.nmf.mission.opssat.assembly.outputdir}/bin/ground/ground-mo-proxy</targetPath>
+        <directory>${basedir}/src/main/resources/common-transport</directory>
+      </resource>
+    </resources>
+  </build>
+</project>

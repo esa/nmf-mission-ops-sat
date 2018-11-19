@@ -32,6 +32,7 @@
  *******************************************************************************/
 package org.ccsds.moims.mo.testbed.util.sppimpl.util;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -59,7 +60,7 @@ public class SPPWriter {
     //sequenceCounters = new Hashtable();
   }
   
-  public synchronized void send(SpacePacket packet) throws Exception {
+  public synchronized void send(SpacePacket packet) throws IOException {
 
       if(SPPHelper.isAPIDqualifierInMessage){
         // 1- Write the APID qualifier

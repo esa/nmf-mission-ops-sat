@@ -23,7 +23,8 @@
     <relativePath>parent/pom.xml</relativePath>
   </parent>
 
-  <artifactId>NMF_MISSION_OPS-SAT</artifactId>
+  <groupId>int.esa.nmf.mission.opssat</groupId>
+  <artifactId>reactor</artifactId>
   <packaging>pom</packaging>
   <name>ESA NMF Mission OPS-SAT Reactor</name>
   <description>Reactor POM for NMF OPS-SAT mission</description>
@@ -71,7 +72,7 @@
     <module>platform-service-impl</module>
     <module>nanosat-mo-supervisor</module>
     <module>ground-mo-proxy</module>
-    <module>nmf-library</module>
+    <module>opssat-package</module>
   </modules>
 
 </project>

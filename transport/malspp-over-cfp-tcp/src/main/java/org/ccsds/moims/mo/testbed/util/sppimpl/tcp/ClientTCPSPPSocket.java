@@ -34,106 +34,96 @@
  */
 package org.ccsds.moims.mo.testbed.util.sppimpl.tcp;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-import org.ccsds.moims.mo.mal.MALException;
+import java.util.logging.Logger;
 import org.ccsds.moims.mo.testbed.util.spp.SPPSocket;
 import org.ccsds.moims.mo.testbed.util.spp.SpacePacket;
 
-public class ClientTCPSPPSocket implements SPPSocket {
+public class ClientTCPSPPSocket implements SPPSocket
+{
 
-    public static final String HOSTNAME = "org.ccsds.moims.mo.malspp.test.sppimpl.tcp.hostname";
-    public static final String PORT = "org.ccsds.moims.mo.malspp.test.sppimpl.tcp.port";
-    private static final String PROPERTY_APID = "org.ccsds.moims.mo.malspp.apid";
+  private static final Logger LOGGER
+      = java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName());
+  public static final String HOSTNAME = "org.ccsds.moims.mo.malspp.test.sppimpl.tcp.hostname";
+  public static final String PORT = "org.ccsds.moims.mo.malspp.test.sppimpl.tcp.port";
 
-    private String host;
-    private int port;
-    private SPPChannel channel;
+  private String host;
+  private int port;
+  private SPPChannel channel;
 
-//    private int lastSPPSequenceCount = -1;
-    private final HashMap<Integer, Integer> lastSPPsMap = new HashMap<Integer, Integer>();
-    private int apid = -1;
+  private final HashMap<Integer, Integer> lastSPPsMap = new HashMap<>();
 
-    public ClientTCPSPPSocket() {
-        super();
+  public ClientTCPSPPSocket()
+  {
+    super();
+  }
+
+  public void init(Map properties) throws Exception
+  {
+    LOGGER.log(Level.FINE, "ClientTCPSPPSocket.init({0})", properties);
+    host = (String) properties.get(HOSTNAME);
+    String portS = (String) properties.get(PORT);
+    port = Integer.parseInt(portS);
+    connect(host, port);
+  }
+
+  public void connect(String host, int port) throws Exception
+  {
+    LOGGER.log(Level.FINE, "ClientTCPSPPSocket.connect({0},{1})", new Object[]{host, port});
+    Socket socket = new Socket(host, port);
+    channel = new SPPChannel(socket);
+  }
+
+  @Override
+  public void close() throws Exception
+  {
+    channel.close();
+  }
+
+  @Override
+  public SpacePacket receive() throws Exception
+  {
+    SpacePacket packet = channel.receive();
+
+    int packetAPID = packet.getHeader().getApid();
+    final int sequenceCount = packet.getHeader().getSequenceCount();
+    final int previous = (lastSPPsMap.get(packetAPID) != null) ? lastSPPsMap.get(packetAPID) : -1;
+
+    if (previous != sequenceCount - 1
+        && previous != 16383
+        && sequenceCount != 0) { // Exclude also the transition zone
+      LOGGER.log(Level.WARNING,
+          "Out-of-order detected! Sequence count: {0} - Last: {1} (For APID:{2})", new Object[]{
+            sequenceCount,
+            previous, packetAPID});
     }
 
-    public void init(Map properties) throws Exception {
-        if (System.getProperty(PROPERTY_APID) != null) {
-            apid = Integer.parseInt(System.getProperty(PROPERTY_APID));
-        } else {
-            throw new MALException("Please set the APID on the property: " + PROPERTY_APID);
-        }
+    lastSPPsMap.put(packetAPID, sequenceCount);
 
-        /*
-        java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO,
-                "ClientTCPSPPSocket.init(" + properties + ')');
-         */
-        host = (String) properties.get(HOSTNAME);
-        String portS = (String) properties.get(PORT);
-        port = Integer.parseInt(portS);
-        connect(host, port);
+    LOGGER.log(Level.FINE, "Received: {0}", packet);
+
+    return packet;
+  }
+
+  @Override
+  public void send(SpacePacket packet) throws Exception
+  {
+    LOGGER.log(Level.FINE, "send({0})", packet);
+
+    if (channel != null) {
+      channel.send(packet);
+    } else {
+      throw new IOException("SPP send called, but no connection established!");
     }
+  }
 
-    public void connect(String host, int port) throws Exception {
-        /*
-        java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO,
-                "ClientTCPSPPSocket.connect(" + host + ',' + port + ')');
-         */
-        Socket socket = new Socket(host, port);
-        channel = new SPPChannel(socket);
-    }
-
-    public void close() throws Exception {
-        channel.close();
-    }
-
-    public SpacePacket receive() throws Exception {
-        SpacePacket packet = channel.receive();
-
-        // Reject all messages coming from the Nanomind (apid==10)
-        while (packet.getHeader().getApid() == 10) {
-            /*
-            java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO,
-                "Rejecting: " + packet);
-            }
-             */
-            packet = channel.receive();
-        }
-
-        int packetAPID = packet.getHeader().getApid();
-        final int sequenceCount = packet.getHeader().getSequenceCount();
-        final int previous = (lastSPPsMap.get(packetAPID) != null) ? lastSPPsMap.get(packetAPID) : -1;
-
-        if (previous != sequenceCount - 1
-                && previous != 16383
-                && sequenceCount != 0) { // Exclude also the transition zone
-            java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO,
-                    "Out-of-order detected! Sequence count: " + sequenceCount + " - Last: " + previous
-                    + " (For APID:" + packetAPID + ")");
-        }
-
-        lastSPPsMap.put(packetAPID, sequenceCount);
-
-        /*
-        java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO,
-                "Received: " + packet);
-         */
-        return packet;
-    }
-
-    public void send(SpacePacket packet) throws Exception {
-        /*
-        java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName()).log(Level.INFO,
-                "ClientTCPSPPSocket.send(" + packet + ')');
-         */
-
-        channel.send(packet);
-    }
-
-    public String getDescription() {
-        return host + '-' + port;
-    }
+  @Override
+  public String getDescription()
+  {
+    return host + '-' + port;
+  }
 }
