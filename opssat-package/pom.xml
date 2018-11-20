@@ -160,22 +160,6 @@
         </configuration>
         <executions>
           <execution>
-            <id>emit-ctt</id>
-            <phase>package</phase>
-            <goals>
-              <goal>assemble</goal>
-            </goals>
-            <configuration>
-              <binFolder>tools/consumer-test-tool</binFolder>
-              <programs>
-                <program>
-                  <mainClass>esa.mo.nmf.ctt.guis.ConsumerTestToolGUI</mainClass>
-                  <id>consumer-test-tool</id>
-                </program>
-              </programs>
-            </configuration>
-          </execution>
-          <execution>
             <id>emit-ground-mo-proxy</id>
             <phase>package</phase>
             <goals>
