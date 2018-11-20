@@ -17,7 +17,7 @@
 			<format unit="second">00011100</format>
 		</duration>
 		<authenticationId>000000</authenticationId>
-		<domain>esa.OPS-SAT.NanoSat_MO_Supervisor</domain>
+		<domain>esa.OPS-SAT.nanosat-mo-supervisor</domain>
 		<networkZone>esa.OPS-SAT.space.SEPP</networkZone>
 		<sessionName>LIVE</sessionName>
 		<priority>4294967295</priority>
