@@ -87,26 +87,32 @@ public class ClientTCPSPPSocket implements SPPSocket
   @Override
   public SpacePacket receive() throws Exception
   {
-    SpacePacket packet = channel.receive();
+    try {
+      SpacePacket packet = channel.receive();
 
-    int packetAPID = packet.getHeader().getApid();
-    final int sequenceCount = packet.getHeader().getSequenceCount();
-    final int previous = (lastSPPsMap.get(packetAPID) != null) ? lastSPPsMap.get(packetAPID) : -1;
+      int packetAPID = packet.getHeader().getApid();
+      final int sequenceCount = packet.getHeader().getSequenceCount();
+      final int previous = (lastSPPsMap.get(packetAPID) != null) ? lastSPPsMap.get(packetAPID) : -1;
 
-    if (previous != sequenceCount - 1
-        && previous != 16383
-        && sequenceCount != 0) { // Exclude also the transition zone
-      LOGGER.log(Level.WARNING,
-          "Out-of-order detected! Sequence count: {0} - Last: {1} (For APID:{2})", new Object[]{
-            sequenceCount,
-            previous, packetAPID});
+      if (previous != sequenceCount - 1
+          && previous != 16383
+          && sequenceCount != 0) { // Exclude also the transition zone
+        LOGGER.log(Level.WARNING,
+            "Out-of-order detected! Sequence count: {0} - Last: {1} (For APID:{2})", new Object[]{
+              sequenceCount,
+              previous, packetAPID});
+      }
+
+      lastSPPsMap.put(packetAPID, sequenceCount);
+
+      LOGGER.log(Level.FINE, "Received: {0}", packet);
+      return packet;
+    } catch (IOException ex) {
+      LOGGER.log(Level.WARNING, "Interrupted socket receive - restarting the channel...");
+      channel.close();
+      connect(host, port);
+      throw ex;
     }
-
-    lastSPPsMap.put(packetAPID, sequenceCount);
-
-    LOGGER.log(Level.FINE, "Received: {0}", packet);
-
-    return packet;
   }
 
   @Override

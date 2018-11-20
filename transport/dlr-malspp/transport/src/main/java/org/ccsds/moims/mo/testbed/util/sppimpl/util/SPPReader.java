@@ -71,7 +71,7 @@ public class SPPReader
       if (n != -1) {
         len += n;
       } else {
-        throw new IOException("End of stream input stream.");
+        throw new IOException("End of input stream.");
       }
     } while (len < totalLength);
     return len;
