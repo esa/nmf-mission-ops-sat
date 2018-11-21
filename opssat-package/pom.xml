@@ -295,33 +295,31 @@
             </goals>
             <configuration>
               <target>
-                <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/bin/space">
-                  <fileset dir="${basedir}/src/main/resources/space-root"/>
-                  <fileset dir="${basedir}/src/main/resources/common-transport"/>
-                </copy>
-                <!-- Workaround for transport.properties pointing at ../mappingConfigurationParameters.xml -->
-                <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/bin/space/apps">
-                  <fileset dir="${basedir}/src/main/resources/common-transport"/>
-                </copy>
+                <!-- TODO - ideally space-common should be copied once and symlinks used -->
                 <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/bin/space/nanosat-mo-supervisor-sim">
+                  <fileset dir="${basedir}/src/main/resources/space-common"/>
                   <fileset dir="${basedir}/src/main/resources/space-supervisor-sim-root"/>
                 </copy>
                 <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/bin/space/nanosat-mo-supervisor-opssat">
+                  <fileset dir="${basedir}/src/main/resources/space-common"/>
                   <fileset dir="${basedir}/src/main/resources/space-supervisor-opssat-root"/>
                 </copy>
                 <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/bin/space/apps/all-mc-services">
+                  <fileset dir="${basedir}/src/main/resources/space-common"/>
                   <fileset dir="${basedir}/src/main/resources/space-app-root"/>
                   <filterset>
                     <filter token="APID" value="1501"/>
                   </filterset>
                 </copy>
                 <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/bin/space/apps/camera">
+                  <fileset dir="${basedir}/src/main/resources/space-common"/>
                   <fileset dir="${basedir}/src/main/resources/space-app-root"/>
                   <filterset>
                     <filter token="APID" value="1502"/>
                   </filterset>
                 </copy>
                 <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/bin/space/apps/publish-clock">
+                  <fileset dir="${basedir}/src/main/resources/space-common"/>
                   <fileset dir="${basedir}/src/main/resources/space-app-root"/>
                   <filterset>
                     <filter token="APID" value="1503"/>
@@ -329,7 +327,7 @@
                 </copy>
                 <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/bin/ground/ground-mo-proxy">
                   <fileset dir="${basedir}/src/main/resources/ground-mo-proxy-root"/>
-                  <fileset dir="${basedir}/src/main/resources/common-transport"/>
+                  <fileset dir="${basedir}/src/main/resources/space-common" includes="mappingConfigurationParameters.xml"/>
                 </copy>
               </target>
             </configuration>
