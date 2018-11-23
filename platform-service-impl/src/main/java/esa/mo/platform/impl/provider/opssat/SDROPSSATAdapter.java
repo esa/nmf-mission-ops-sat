@@ -27,31 +27,42 @@ import org.ccsds.moims.mo.platform.softwaredefinedradio.structures.IQComponentsL
 import org.ccsds.moims.mo.platform.softwaredefinedradio.structures.SDRConfiguration;
 import at.tugraz.ihf.opssat.sdr.SEPP_SDR_API;
 
+public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
+{
 
-public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface {
-    private SEPP_SDR_API sdrApi;
-    public SDROPSSATAdapter()
-    {
-        Logger.getLogger(SDROPSSATAdapter.class.getName()).log(Level.INFO, "Initialisation");
-        System.loadLibrary("sdr_api_jni");
-        sdrApi = new SEPP_SDR_API();
-        sdrApi.Print_Info();
-        
-    }
-    @Override
-    public boolean setConfiguration(SDRConfiguration configuration) {
-        //sdrApi.Set_RX_Gain_in_dB(
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+  private SEPP_SDR_API sdrApi;
 
-    @Override
-    public boolean enableSDR(Boolean enable) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+  public SDROPSSATAdapter()
+  {
+    Logger.getLogger(SDROPSSATAdapter.class.getName()).log(Level.INFO, "Initialisation");
+    System.loadLibrary("sdr_api_jni");
+    sdrApi = new SEPP_SDR_API();
+    sdrApi.Print_Info();
+  }
 
-    @Override
-    public IQComponentsList getIQComponents() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
+  @Override
+  public boolean isUnitAvailable()
+  {
+    return false;
+  }
+
+  @Override
+  public boolean setConfiguration(SDRConfiguration configuration)
+  {
+    //sdrApi.Set_RX_Gain_in_dB(
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
+  @Override
+  public boolean enableSDR(Boolean enable)
+  {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
+  @Override
+  public IQComponentsList getIQComponents()
+  {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
 }

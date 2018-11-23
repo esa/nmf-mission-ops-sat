@@ -40,4 +40,10 @@ public class OpticalRxOPSSATAdapter implements OpticalDataReceiverAdapterInterfa
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
+  @Override
+  public boolean isUnitAvailable()
+  {
+    return false;
+  }
+
 }

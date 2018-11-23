@@ -27,8 +27,6 @@ import at.tugraz.ihf.opssat.ims100.bst_ims100_tele_std_t;
 import at.tugraz.ihf.opssat.ims100.ims100_api;
 import esa.mo.helpertools.helpers.HelperTime;
 import esa.mo.platform.impl.provider.gen.CameraAdapterInterface;
-import esa.opssat.camera.processing.OPSSATCameraDebayering;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
@@ -66,20 +64,36 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   private int nativeImageWidth;
   private bst_ims100_img_config_t imageConfig = new bst_ims100_img_config_t();
   private final PictureFormatList supportedFormats = new PictureFormatList();
+  private boolean unitAvailable = false;
 
   public CameraOPSSATAdapter()
   {
     supportedFormats.add(PictureFormat.RAW);
     Logger.getLogger(CameraOPSSATAdapter.class.getName()).log(Level.INFO, "Initialisation");
-    System.loadLibrary("ims100_api_jni");
-
+    try {
+      System.loadLibrary("ims100_api_jni");
+    } catch (Exception ex) {
+      Logger.getLogger(CameraOPSSATAdapter.class.getName()).log(Level.SEVERE,
+          "Camera library could not be loaded!", ex);
+      unitAvailable = false;
+      return;
+    }
     try {
       this.initBSTCamera();
-    } catch (IOException ex) {
+    } catch (Exception ex) {
       Logger.getLogger(CameraOPSSATAdapter.class.getName()).log(Level.SEVERE,
           "BST Camera adapter could not be initialized!", ex);
+      unitAvailable = false;
+      return;
     }
     dumpHKTelemetry();
+    unitAvailable = true;
+  }
+
+  @Override
+  public boolean isUnitAvailable()
+  {
+    return unitAvailable;
   }
 
   private void initBSTCamera() throws IOException
@@ -197,5 +211,4 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   {
     return supportedFormats;
   }
-
 }
