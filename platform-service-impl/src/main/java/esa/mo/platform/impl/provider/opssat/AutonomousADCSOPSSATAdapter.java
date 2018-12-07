@@ -23,6 +23,7 @@ package esa.mo.platform.impl.provider.opssat;
 import at.tugraz.ihf.opssat.iadcs.*;
 import esa.mo.platform.impl.provider.gen.AutonomousADCSAdapterInterface;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.structures.FloatList;
@@ -61,9 +62,9 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.INFO,
         "Dumping HK Telemetry...");
     SEPP_IADCS_API_STANDARD_TELEMETRY stdTM = adcsApi.Get_Standard_Telemetry();
-    SEPP_IADCS_API_POWER_STATUS_TELEMETRY powerTM = stdTM.getPOWER_TM();
+    SEPP_IADCS_API_POWER_STATUS_TELEMETRY powerTM = adcsApi.Get_Power_Status_Telemetry();
     SEPP_IADCS_API_INFO_TELEMETRY infoTM = adcsApi.Get_Info_Telemetry();
-    Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.INFO,
+    /*Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.INFO,
         String.format("Standard TM:\n"
             + "IADCS_STATUS_REGISTER = %d\n"
             + "IADCS_ERROR_REGISTER = %d\n"
@@ -81,32 +82,32 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
             stdTM.getELAPSED_SECONDS_SINCE_EPOCH_SEC(),
             stdTM.getELAPSED_SUBSECONDS_SINCE_EPOCH_MSEC(),
             stdTM.getGYRO_1_TEMPERATURE_DEGC(),
-            stdTM.getGYRO_2_TEMPERATURE_DEGC()));
+            stdTM.getGYRO_2_TEMPERATURE_DEGC()));*/
     Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.INFO,
         String.format("Power TM:\n"
-            + " MAGNETTORQUER_POWER_CONSUMPTION_mW = %d\n"
-            + " MAGNETTORQUER_SUPPLY_VOLTAGE_mV = %d\n"
-            + " STARTRACKER_CURRENT_CONSUMPTION_mA = %d\n"
-            + " STARTRACKER_POWER_CONSUMPTION_mW = %d\n"
-            + " STARTRACKER_SUPPLY_VOLTAGE_mV = %d\n"
-            + " IADCS_3V3_CURRENTtrue_CONSUMPTION_mA = %d\n"
-            + " IADCS_3V3_POWER_CONSUMPTION_mW = %d\n"
-            + " IADCS_3V3_SUPPLY_VOLTAGE_mV = %d\n"
-            + " REACTIONWHEEL_CURRENT_CONSUMPTION_mA = %d\n"
-            + " REACTIONWHEEL_POWER_CONSUMPTION_mW = %d\n"
-            + " REACTIONWHEEL_SUPPLY_VOLTAGE_mV = %d\n",
-            powerTM.getMAGNETTORQUER_POWER_CONSUMPTION_mW(),
-            powerTM.getMAGNETTORQUER_SUPPLY_VOLTAGE_mV(),
-            powerTM.getSTARTRACKER_CURRENT_CONSUMPTION_mA(),
-            powerTM.getSTARTRACKER_POWER_CONSUMPTION_mW(),
-            powerTM.getSTARTRACKER_SUPPLY_VOLTAGE_mV(),
-            powerTM.getIADCS_3V3_CURRENT_CONSUMPTION_mA(),
-            powerTM.getIADCS_3V3_POWER_CONSUMPTION_mW(),
-            powerTM.getIADCS_3V3_SUPPLY_VOLTAGE_mV(),
-            powerTM.getREACTIONWHEEL_CURRENT_CONSUMPTION_mA(),
-            powerTM.getREACTIONWHEEL_POWER_CONSUMPTION_mW(),
-            powerTM.getREACTIONWHEEL_SUPPLY_VOLTAGE_mV()));
-    Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.INFO,
+            + " MAGNETTORQUER_POWER_CONSUMPTION_W = %.3f\n"
+            + " MAGNETTORQUER_SUPPLY_VOLTAGE_V = %.3f\n"
+            + " STARTRACKER_CURRENT_CONSUMPTION_A = %.3f\n"
+            + " STARTRACKER_POWER_CONSUMPTION_W = %.3f\n"
+            + " STARTRACKER_SUPPLY_VOLTAGE_V = %.3f\n"
+            + " IADCS_CURRENT_CONSUMPTION_A = %.3f\n"
+            + " IADCS_POWER_CONSUMPTION_W = %.3f\n"
+            + " IADCS_SUPPLY_VOLTAGE_V = %.3f\n"
+            + " REACTIONWHEEL_CURRENT_CONSUMPTION_A = %.3f\n"
+            + " REACTIONWHEEL_POWER_CONSUMPTION_W = %.3f\n"
+            + " REACTIONWHEEL_SUPPLY_VOLTAGE_V = %.3f\n",
+            powerTM.getMAGNETTORQUER_POWER_CONSUMPTION_W(),
+            powerTM.getMAGNETTORQUER_SUPPLY_VOLTAGE_V(),
+            powerTM.getSTARTRACKER_CURRENT_CONSUMPTION_A(),
+            powerTM.getSTARTRACKER_POWER_CONSUMPTION_W(),
+            powerTM.getSTARTRACKER_SUPPLY_VOLTAGE_V(),
+            powerTM.getIADCS_CURRENT_CONSUMPTION_A(),
+            powerTM.getIADCS_POWER_CONSUMPTION_W(),
+            powerTM.getIADCS_SUPPLY_VOLTAGE_V(),
+            powerTM.getREACTIONWHEEL_CURRENT_CONSUMPTION_A(),
+            powerTM.getREACTIONWHEEL_POWER_CONSUMPTION_W(),
+            powerTM.getREACTIONWHEEL_SUPPLY_VOLTAGE_V()));
+    /*Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.INFO,
         String.format("Info TM:\n"
             + "PRIMARY_TARGET_TYPE = %d\n"
             + "SECONDARY_TARGET_TYPE = %d\n"
@@ -129,23 +130,45 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
             infoTM.getDEBUG_LEVEL(),
             infoTM.getGIT_COMMIT_ID(),
             infoTM.getCOMPILER(),
-            infoTM.getCOMPILER_VERSION()));
+            infoTM.getCOMPILER_VERSION()));*/
   }
 
-  static public Vector3D convertAdcsApiVector(SEPP_IADCS_API_VECTOR3_XYZ_FLOAT in)
+  static private Quaternion convertAdcsApiQuaternion(SEPP_IADCS_API_QUATERNION_FLOAT in)
+  {
+    return new Quaternion(in.getQ(), in.getQ_I(), in.getQ_J(), in.getQ_K());
+  }
+
+  static private MagnetorquersState convertAdcsApiMtqState(long in)
+  {
+    int mappedOrdinal;
+    switch ((int) in) {
+      case 1:
+        mappedOrdinal = MagnetorquersState._ACTIVE_INDEX;
+        break;
+      case 2:
+        mappedOrdinal = MagnetorquersState._SUSPEND_INDEX;
+        break;
+      case 0:
+      default:
+        mappedOrdinal = MagnetorquersState._INACTIVE_INDEX;
+        break;
+    }
+    return MagnetorquersState.fromOrdinal(mappedOrdinal);
+  }
+
+  static private Vector3D convertAdcsApiVector(SEPP_IADCS_API_VECTOR3_XYZ_FLOAT in)
   {
     return new Vector3D(in.getX(), in.getY(), in.getZ());
   }
 
-  static public Vector3D convertAdcsApiMagMoment(SEPP_IADCS_API_VECTOR3_XYZ_SHORT in)
+  static private Vector3D convertAdcsApiMagMoment(SEPP_IADCS_API_VECTOR3_XYZ_FLOAT in)
   {
-    // Moment is provided in mA*m^2, convert to A*m^2
-    return new Vector3D(((float) in.getX()) * 1000, ((float) in.getY()) * 1000,
-        ((float) in.getZ()) * 1000);
+    // Moment is provided in A*m^2
+    return new Vector3D((float) in.getX(), (float) in.getY(), (float) in.getZ());
   }
 
-  static public WheelsSpeed convertAdcsApiWheelSpeed(SEPP_IADCS_API_VECTOR3_XYZ_SHORT in1,
-      SEPP_IADCS_API_VECTOR3_UVW_SHORT in2)
+  static private WheelsSpeed convertAdcsApiWheelSpeed(SEPP_IADCS_API_VECTOR3_XYZ_FLOAT in1,
+      SEPP_IADCS_API_VECTOR3_UVW_FLOAT in2)
   {
     FloatList list = new FloatList(6);
     list.add((float) in1.getX());
@@ -165,6 +188,13 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     } else if (attitude instanceof AttitudeModeNadirPointing) {
     } else if (attitude instanceof AttitudeModeSingleSpinning) {
     } else if (attitude instanceof AttitudeModeSunPointing) {
+      AttitudeModeSunPointing sunPointing = (AttitudeModeSunPointing) attitude;
+      SEPP_IADCS_API_SUN_POINTING_MODE_PARAMETERS params
+          = new SEPP_IADCS_API_SUN_POINTING_MODE_PARAMETERS();
+      params.setSTART_EPOCH_TIME(BigInteger.valueOf(0));
+      params.setSTOP_EPOCH_TIME(BigInteger.valueOf(0xFFFFFFFF));
+      adcsApi.Start_Operation_Mode_Sun_Pointing(params);
+      return;
     } else if (attitude instanceof AttitudeModeTargetTracking) {
     }
     throw new UnsupportedOperationException("Not supported yet.");
@@ -173,8 +203,15 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   @Override
   public void unset() throws IOException
   {
-    this.activeAttitudeMode = null;
-    adcsApi.Set_Operation_Mode(SEPP_IADCS_API_DEV_OPERATION_MODE.IADCS_OPERATION_MODE_IDLE);
+    if (activeAttitudeMode instanceof AttitudeModeBDot) {
+    } else if (activeAttitudeMode instanceof AttitudeModeNadirPointing) {
+    } else if (activeAttitudeMode instanceof AttitudeModeSingleSpinning) {
+    } else if (activeAttitudeMode instanceof AttitudeModeSunPointing) {
+      adcsApi.Stop_Operation_Mode_Sun_Pointing();
+    } else if (activeAttitudeMode instanceof AttitudeModeTargetTracking) {
+    }
+    activeAttitudeMode = null;
+    adcsApi.Set_Operation_Mode_Idle();
   }
 
   @Override
@@ -183,57 +220,45 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     return unitAvailable;
   }
 
-  /**
-   *
-   * @return Measured magnetic flux density in teslas [T]
-   */
-  public Vector3D getMagneticField()
-  {
-    SEPP_IADCS_API_MAGNETIC_TELEMETRY sensorTM = adcsApi.Get_Magnetic_Telemetry();
-    return convertAdcsApiVector(sensorTM.getMEASURED_FIELD_XYZ());
-  }
-
   @Override
   public AttitudeTelemetry getAttitudeTelemetry() throws IOException
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-
-    /*
     SEPP_IADCS_API_ATTITUDE_TELEMETRY attitudeTm = adcsApi.Get_Attitude_Telemetry();
-
-
-    AttitudeTelemetry ret = new AttitudeTelemetry();
-    ret.setAngularVelocity(convertAdcsApiVector(attitudeTm.getANGULAR_RATE_XYZ()));*/
- /*ret.setAttitude(attitudeTm);
-    ret.setMagneticField(HelperIADCS100.getMagneticFieldFromSensorTM(tmBuffer));
-    ret.setSunVector(new Vector3D((float)1, (float)0, (float)0)); // TODO provide real data
-    return ret;*/
-//    byte[] tmBuffer = instrumentsSimulator.getpFineADCS().GetSensorTelemetry();
-//    AttitudeTelemetry ret = new AttitudeTelemetry();
-//    ret.setAngularVelocity(HelperIADCS100.getAngularVelocityFromSensorTM(tmBuffer));
-//    ret.setAttitude(HelperIADCS100.getAttitudeFromSensorTM(tmBuffer));
-//    ret.setMagneticField(HelperIADCS100.getMagneticFieldFromSensorTM(tmBuffer));
-//    ret.setSunVector(new Vector3D((float)1, (float)0, (float)0)); // TODO provide real data
-//    return ret;
-//    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    attitudeTm.getATTITUDE_QUATERNION_BF();
+    Quaternion attitude = convertAdcsApiQuaternion(attitudeTm.getATTITUDE_QUATERNION_BF());
+    Vector3D angularVel = convertAdcsApiVector(attitudeTm.getANGULAR_VELOCITY_VECTOR_RADPS());
+    Vector3D magneticField = convertAdcsApiVector(
+        attitudeTm.getMEASURED_MAGNETIC_FIELD_VECTOR_BF_T());
+    Vector3D sunVector = convertAdcsApiVector(attitudeTm.getMEASURED_SUN_VECTOR_BF());
+    return new AttitudeTelemetry(attitude, angularVel, sunVector, magneticField);
   }
 
   @Override
   public ActuatorsTelemetry getActuatorsTelemetry() throws IOException
   {
     SEPP_IADCS_API_ACTUATOR_TELEMETRY actuatorTm = adcsApi.Get_Actuator_Telemetry();
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    WheelsSpeed targetSpeed = convertAdcsApiWheelSpeed(
+        actuatorTm.getREACTIONWHEEL_TARGET_SPEED_VECTOR_XYZ_RADPS(),
+        actuatorTm.getREACTIONWHEEL_TARGET_SPEED_VECTOR_UVW_RADPS());
+    WheelsSpeed currentSpeed = convertAdcsApiWheelSpeed(
+        actuatorTm.getREACTIONWHEEL_CURRENT_SPEED_VECTOR_XYZ_RADPS(),
+        actuatorTm.getREACTIONWHEEL_CURRENT_SPEED_VECTOR_UVW_RADPS());
+    Vector3D mtqDipoleMoment = convertAdcsApiMagMoment(
+        actuatorTm.getMAGNETORQUERS_TARGET_DIPOLE_MOMENT_VECTOR_AM2());
+    MagnetorquersState mtqState
+        = convertAdcsApiMtqState(actuatorTm.getMAGNETORQUERS_CURRENT_STATE());
+    return new ActuatorsTelemetry(targetSpeed, currentSpeed, mtqDipoleMoment, mtqState);
   }
 
   @Override
   public String validateAttitudeDescriptor(AttitudeMode attitude)
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    return ""; //Return no error for now
   }
 
   @Override
   public AttitudeMode getActiveAttitudeMode()
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    return activeAttitudeMode;
   }
 }
