@@ -1,14 +1,12 @@
-# NanoSat MO Framework
-The NanoSat MO Framework is a software framework for nanosatellites based on CCSDS Mission Operations services.
+# NanoSat MO Framework - mission tailoring for OPS-SAT
+This repository contains parts of the NanoSat MO Framework specific to the OPS-SAT mission.
 
-It introduces the concept of apps in space that can be started and stopped from ground. Apps can retrieve data from the platform through a set of well-defined MO services. Many possibilities for extensions are available due to its modular and flexible design approach which is not limited to the space segment but extends down to ground by providing all the building blocks for a complete and free end-to-end solution. The research was carried by Graz University of Technology in partnership with the European Space Agency.
+The content of this repository is mostly relevant for a deployment on a representative hardware (MityArm, OPS-SAT FlatSat and OPS-SAT flight model) and serves mostly as a reference.
 
-A Software Development Kit (SDK) is available in order to facilitate the development with the NanoSat MO Framework.
+During the development it is recommended to use the NMF SDK (released as a source in the main NMF repository on [GitHub]).
+The SDK is based on a simulator, providing most of the platform functionalities accessible to the experimenter. Simulator allows running NMF applications without an access to a real satellite hardware.
 
 The official website of the NanoSat MO Framework is available [here].
-
-# Source Code
-The source code of the NanoSat MO Framework can be found on [GitHub].
 
 # Bugs Reporting
 Bug Reports can be submitted on: [Bug Reports]
@@ -24,6 +22,6 @@ The NanoSat MO Framework is **licensed** under the **[European Space Agency Publ
 [ESAImage]: http://www.esa.int/esalogo/images/logotype/img_colorlogo_darkblue.gif
 [here]: https://nanosat-mo-framework.github.io/
 [European Space Agency Public License - v2.0]: https://github.com/esa/CCSDS_MO_TRANS/blob/master/LICENCE.md
-[GitHub]: https://github.com/NanoSat-MO-Framework
-[Bug Reports]: https://github.com/CesarCoelho/BUG_REPORTS_NANOSAT_MO_FRAMEWORK/issues
+[GitHub]: https://github.com/esa/nanosat-mo-framework
+[Bug Reports]: https://github.com/esa/nanosat-mo-framework/issues
 [website]: http://www.esa.int/
