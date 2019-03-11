@@ -88,7 +88,7 @@
     <!-- To be removed in the future -->
     <dependency>
       <groupId>int.esa.nmf.mission.simulator</groupId>
-      <artifactId>nanosat-mo-supervisor</artifactId>
+      <artifactId>nanosat-mo-supervisor-sim</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -98,7 +98,7 @@
     </dependency>
     <dependency>
       <groupId>int.esa.nmf.mission.opssat</groupId>
-      <artifactId>nanosat-mo-supervisor</artifactId>
+      <artifactId>nanosat-mo-supervisor-opssat</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -150,11 +150,7 @@
           <licenseHeaderFile>${basedir}/license-header.txt</licenseHeaderFile>
           <!-- Shared configuration -->
           <assembleDirectory>${esa.nmf.mission.opssat.assembly.outputdir}/bin</assembleDirectory>
-          <!--
-            Cannot use flat repository layout here, since there are
-            conflicting artifactIds coming from OPS-SAT and SDK groups.
-            It does not matter anyway, as target platform here is only Unix.
-          -->
+          <repositoryLayout>flat</repositoryLayout>
           <repositoryName>lib</repositoryName>
           <platforms>
             <platform>unix</platform>

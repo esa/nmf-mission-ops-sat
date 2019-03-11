@@ -23,7 +23,7 @@
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
   
-    <artifactId>nanosat-mo-supervisor</artifactId>
+    <artifactId>nanosat-mo-supervisor-opssat</artifactId>
     <packaging>jar</packaging>
 
     <name>ESA NMF Mission OPS-SAT - NanoSat MO Supervisor</name>
