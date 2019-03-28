@@ -57,6 +57,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   private static final String USE_WATCHDOG_DEFAULT = "true";
   private static final Duration PREVIEW_EXPOSURE_TIME = new Duration(0.100); // 100ms
   private static final Duration MINIMUM_PERIOD = new Duration(1); // 1 second for now...
+  private static final float PREVIEW_GAIN = 10.f;
   private String blockDevice;
   private String serialPort;
   private boolean useWatchdog;
@@ -150,53 +151,56 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   {
     final PixelResolution resolution = new PixelResolution(new UInteger(nativeImageWidth),
         new UInteger(nativeImageLength));
-    return takePicture(resolution, PictureFormat.RAW, PREVIEW_EXPOSURE_TIME);
+    return takePicture(new CameraSettings(resolution, PictureFormat.RAW, PREVIEW_EXPOSURE_TIME,
+        PREVIEW_GAIN, PREVIEW_GAIN, PREVIEW_GAIN));
 
   }
 
   @Override
-  public synchronized Picture takePicture(final PixelResolution resolution,
-      final PictureFormat format, final Duration exposureTime) throws IOException
+  public synchronized Picture takePicture(CameraSettings settings) throws IOException
   {
     bst_ims100_img_t image = new bst_ims100_img_t();
     ims100_api.bst_ims100_img_config_default(imageConfig);
     // TODO this is not scaling but cropping the picture
-    imageConfig.setCol_end((int) resolution.getHeight().getValue() - 1);
-    imageConfig.setRow_end((int) resolution.getWidth().getValue() - 1);
-    imageConfig.setT_exp((int) (exposureTime.getValue() * 1000));
+    imageConfig.setCol_end((int) settings.getResolution().getHeight().getValue() - 1);
+    imageConfig.setRow_end((int) settings.getResolution().getWidth().getValue() - 1);
+    imageConfig.setT_exp((int) (settings.getExposureTime().getValue() * 1000));
+    imageConfig.setG_green(settings.getGainGreen().shortValue());
+    imageConfig.setG_blue(settings.getGainBlue().shortValue());
+    imageConfig.setG_red(settings.getGainRed().shortValue());
     ims100_api.bst_ims100_set_img_config(imageConfig);
     ims100_api.bst_ims100_set_exp_time(imageConfig.getT_exp());
     // Each pixel of raw image is encoded as uint16
     ByteBuffer imageData = ByteBuffer.allocateDirect(
-        (int) (resolution.getHeight().getValue() * resolution.getWidth().getValue() * 2));
+        (int) (settings.getResolution().getHeight().getValue() * settings.getResolution().getWidth().getValue() * 2));
     image.setData(imageData);
 
     final Time timestamp = HelperTime.getTimestampMillis();
     if (ims100_api.bst_ims100_get_img_n(image, 1, (short) 0) != bst_ret_t.BST_RETURN_SUCCESS) {
       throw new IOException("bst_ims100_get_img_n failed");
     }
-    if (format == PictureFormat.RAW) {
+    if (settings.getFormat() == PictureFormat.RAW) {
       byte[] rawData = new byte[imageData.capacity()];
       ((ByteBuffer) (imageData.duplicate().clear())).get(rawData);
 
       CameraSettings pictureSettings = new CameraSettings();
-      pictureSettings.setResolution(resolution);
+      pictureSettings.setResolution(settings.getResolution());
       pictureSettings.setFormat(PictureFormat.RAW);
-      pictureSettings.setExposureTime(exposureTime);
+      pictureSettings.setExposureTime(settings.getExposureTime());
       Picture picture = new Picture(timestamp, pictureSettings, new Blob(rawData));
       return picture;
     } else {
       // Run debayering and possibly process further
-      if (format == PictureFormat.RGB24) {
+      if (settings.getFormat() == PictureFormat.RGB24) {
         throw new IOException("RGB24 format not supported.");
-      } else if (format == PictureFormat.BMP) {
+      } else if (settings.getFormat() == PictureFormat.BMP) {
         throw new IOException("BMP format not supported.");
-      } else if (format == PictureFormat.PNG) {
+      } else if (settings.getFormat() == PictureFormat.PNG) {
         throw new IOException("PNG format not supported.");
-      } else if (format == PictureFormat.JPG) {
+      } else if (settings.getFormat() == PictureFormat.JPG) {
         throw new IOException("JPG format not supported.");
       }
-      throw new IOException(format.toString() + " format not supported.");
+      throw new IOException(settings.getFormat().toString() + " format not supported.");
     }
   }
 

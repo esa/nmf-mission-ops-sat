@@ -77,6 +77,11 @@
     </dependency>
     <dependency>
       <groupId>int.esa.nmf.sdk.examples.space</groupId>
+      <artifactId>payloads-test</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.nmf.sdk.examples.space</groupId>
       <artifactId>publish-clock</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -256,6 +261,22 @@
               </programs>
             </configuration>
           </execution>
+          <execution>
+            <id>emit-space-app-payloads-test</id>
+            <phase>package</phase>
+            <goals>
+              <goal>assemble</goal>
+            </goals>
+            <configuration>
+              <binFolder>space/apps/payloads-test</binFolder>
+              <programs>
+                <program>
+                  <mainClass>esa.mo.nmf.apps.PayloadsTestApp</mainClass>
+                  <id>payloads-test</id>
+                </program>
+              </programs>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <plugin>
@@ -324,6 +345,13 @@
                   <fileset dir="${basedir}/src/main/resources/space-app-root"/>
                   <filterset>
                     <filter token="APID" value="1503"/>
+                  </filterset>
+                </copy>
+                <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/bin/space/apps/payloads-test">
+                  <fileset dir="${basedir}/src/main/resources/space-common"/>
+                  <fileset dir="${basedir}/src/main/resources/space-app-root"/>
+                  <filterset>
+                    <filter token="APID" value="1504"/>
                   </filterset>
                 </copy>
                 <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/bin/ground/ground-mo-proxy">

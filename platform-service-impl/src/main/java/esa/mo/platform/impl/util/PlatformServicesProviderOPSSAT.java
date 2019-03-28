@@ -52,7 +52,7 @@ public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderI
         cameraService.init(comServices, new CameraOPSSATAdapter());
         gpsService.init(comServices, new GPSOPSSATAdapter(gmvServicesConsumer));
         optrxService.init(new esa.mo.platform.impl.provider.opssat.OpticalRxOPSSATAdapter());
-        powerService.init(new esa.mo.platform.impl.provider.opssat.PowerControlOPSSATAdapter());
+        powerService.init(new esa.mo.platform.impl.provider.opssat.PowerControlOPSSATAdapter(gmvServicesConsumer));
         sdrService.init(new esa.mo.platform.impl.provider.opssat.SDROPSSATAdapter());
     }
 
