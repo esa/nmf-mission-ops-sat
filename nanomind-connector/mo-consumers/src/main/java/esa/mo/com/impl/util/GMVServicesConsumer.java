@@ -48,8 +48,6 @@ public class GMVServicesConsumer {
     private static final String MAL_SPP_BINDINDING = "malspp"; // Use the SPP Implementation
     private static final String SOURCE_ID = "0"; // OBSW supports any value. By default it is set to 0
     
-    private String originalPropNodeDestination;
-    private String originalPropVirtualChannel;
     
     public GMVServicesConsumer() {
 
@@ -59,7 +57,7 @@ public class GMVServicesConsumer {
         // Enforce DLR's SPP
         System.setProperty("org.ccsds.moims.mo.mal.transport.protocol.malspp", "de.dlr.gsoc.mo.malspp.transport.SPPTransportFactory");
         System.setProperty("org.ccsds.moims.mo.mal.encoding.protocol.malspp", "de.dlr.gsoc.mo.malspp.encoding.SPPElementStreamFactory");
-        System.setProperty("org.ccsds.moims.mo.malspp.test.spp.factory.class", "org.ccsds.moims.mo.testbed.util.sppimpl.cfp.CFPSPPSocketFactory");  // It is not being taken!!
+                System.setProperty("org.ccsds.moims.mo.malspp.test.spp.factory.class", "org.ccsds.moims.mo.testbed.util.sppimpl.tcp.TCPSPPSocketFactory");
 //        System.setProperty("helpertools.configurations.ground.Network", "SEPP");
 
         // Disable some flags
@@ -68,17 +66,6 @@ public class GMVServicesConsumer {
         System.setProperty("org.ccsds.moims.mo.malspp.networkZoneFlag", "false");
         System.setProperty("org.ccsds.moims.mo.malspp.sessionNameFlag", "false");
         System.setProperty("org.ccsds.moims.mo.malspp.timestampFlag", "false");
-
-        // Remember previous properties
-        originalPropNodeDestination = System.getProperty("esa.mo.transport.can.opssat.nodeDestination");
-        originalPropVirtualChannel = System.getProperty("esa.mo.transport.can.opssat.virtualChannel");
-        
-        // CFP Properties
-        System.setProperty("esa.mo.transport.can.opssat.nodeDestination", String.valueOf("32"));  // Nanomind (from: CANBusConnector)
-        System.setProperty("esa.mo.transport.can.opssat.virtualChannel", String.valueOf("0"));
-
-        Logger.getLogger(GMVServicesConsumer.class.getName()).log(Level.FINE, "Node Destination: " 
-                + System.getProperty("esa.mo.transport.can.opssat.nodeDestination"));
 
         SingleConnectionDetails details;
 
@@ -104,20 +91,6 @@ public class GMVServicesConsumer {
         } catch (MalformedURLException ex) {
             Logger.getLogger(GMVServicesConsumer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        // Restore the original properties!!
-        if(originalPropNodeDestination == null){
-            System.getProperties().remove("esa.mo.transport.can.opssat.nodeDestination");
-        }else{
-            System.setProperty("esa.mo.transport.can.opssat.nodeDestination", originalPropNodeDestination);
-        }
-
-        if(originalPropNodeDestination == null){
-            System.getProperties().remove("esa.mo.transport.can.opssat.virtualChannel");
-        }else{
-            System.setProperty("esa.mo.transport.can.opssat.virtualChannel", originalPropVirtualChannel);
-        }
-        
     }
 
     public GPSNanomindConsumerServiceImpl getGPSNanomindService() {
