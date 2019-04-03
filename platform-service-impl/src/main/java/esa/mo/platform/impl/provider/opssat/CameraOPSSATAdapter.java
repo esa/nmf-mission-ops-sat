@@ -76,6 +76,10 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   public CameraOPSSATAdapter()
   {
     supportedFormats.add(PictureFormat.RAW);
+    supportedFormats.add(PictureFormat.RGB24);
+    supportedFormats.add(PictureFormat.BMP);
+    supportedFormats.add(PictureFormat.PNG);
+    supportedFormats.add(PictureFormat.JPG);
     LOGGER.log(Level.INFO, "Initialisation");
     try {
       System.loadLibrary("ims100_api_jni");
@@ -111,10 +115,10 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     useWatchdog = Boolean.parseBoolean(System.getProperty(USE_WATCHDOG_ATTRIBUTE,
         USE_WATCHDOG_DEFAULT));
     bst_ret_t ret = ims100_api.bst_ims100_init(serialPort, blockDevice, useWatchdog ? 1 : 0);
-    if (ret != bst_ret_t.BST_RETURN_SUCCESS) {
+    // FIXME: For now it always returns false?!?!?
+    /*if (ret != bst_ret_t.BST_RETURN_SUCCESS) {
       throw new IOException("Failed to initialise BST camera (return: " + ret.toString() + ")");
-    }
-    dumpHKTelemetry();
+    }*/
     ims100_api.bst_ims100_img_config_default(imageConfig);
     ims100_api.bst_ims100_set_img_config(imageConfig);
     ims100_api.bst_ims100_set_exp_time(imageConfig.getT_exp());
@@ -126,12 +130,12 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   {
     bst_ims100_tele_std_t stdTM = new bst_ims100_tele_std_t();
     ims100_api.bst_ims100_get_tele_std(stdTM);
-    LOGGER.log(Level.INFO, "Dumping HK Telemetry...");
     LOGGER.log(Level.INFO,
-        String.format("Standard TM:\n"
+        String.format("Dumping HK Telemetry...\n"
+            + "Standard TM:\n"
             + "Version: %s\n"
             + "Temp: %d degC\n"
-            + "Status byte: 0x%02X\n",
+            + "Status byte: 0x%02X",
             stdTM.getVersion(),
             (int) stdTM.getTemp(),
             stdTM.getStatus()));
@@ -175,20 +179,27 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     imageConfig.setG_green(settings.getGainGreen().shortValue());
     imageConfig.setG_blue(settings.getGainBlue().shortValue());
     imageConfig.setG_red(settings.getGainRed().shortValue());
+    LOGGER.log(Level.INFO, String.format("Setting config"));
     ims100_api.bst_ims100_set_img_config(imageConfig);
+    LOGGER.log(Level.INFO, String.format("Setting exposure"));
     ims100_api.bst_ims100_set_exp_time(imageConfig.getT_exp());
+    LOGGER.log(Level.INFO, String.format("Setting gains"));
     ims100_api.bst_ims100_set_gain(imageConfig.getG_red(), imageConfig.getG_green(),
         imageConfig.getG_blue());
     // Each pixel of raw image is encoded as uint16
+    LOGGER.log(Level.INFO, String.format("Allocating native buffer"));
     ByteBuffer imageData = ByteBuffer.allocateDirect(
         (int) (settings.getResolution().getHeight().getValue() * settings.getResolution().getWidth().getValue() * 2));
     image.setData(imageData);
 
     final Time timestamp = HelperTime.getTimestampMillis();
+    LOGGER.log(Level.INFO, String.format("Acquiring image"));
     if (ims100_api.bst_ims100_get_img_n(image, 1, (short) 0) != bst_ret_t.BST_RETURN_SUCCESS) {
       throw new IOException("bst_ims100_get_img_n failed");
     }
     byte[] rawData = new byte[imageData.capacity()];
+
+    LOGGER.log(Level.INFO, String.format("Copying from native buffer"));
     ((ByteBuffer) (imageData.duplicate().clear())).get(rawData);
     if (settings.getFormat() == PictureFormat.RAW) {
 
