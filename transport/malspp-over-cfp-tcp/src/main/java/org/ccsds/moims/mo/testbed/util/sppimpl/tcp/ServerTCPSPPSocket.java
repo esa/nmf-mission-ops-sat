@@ -42,6 +42,8 @@ import org.ccsds.moims.mo.testbed.util.spp.SPPSocket;
 import org.ccsds.moims.mo.testbed.util.spp.SpacePacket;
 
 import fr.dyade.aaa.common.Daemon;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -57,8 +59,8 @@ public class ServerTCPSPPSocket implements SPPSocket
   private int port;
   private ServerSocket listenerSocket;
   private boolean tcpNoDelay;
-  private SPPChannel channel;
-  private ReaderDaemon readerDaemon;
+  private final List<SPPChannel> channels = new ArrayList<>();
+  private AcceptorDaemon readerDaemon;
 
   private final LinkedBlockingQueue<SpacePacket> input = new LinkedBlockingQueue<>();
 
@@ -78,18 +80,27 @@ public class ServerTCPSPPSocket implements SPPSocket
   {
     LOGGER.log(Level.FINE, "listen({0})", new Object[]{port});
     listenerSocket = new ServerSocket(port);
-    readerDaemon = new ReaderDaemon();
+    readerDaemon = new AcceptorDaemon();
     readerDaemon.start();
   }
 
   @Override
   public void close() throws Exception
   {
-    if (channel != null) {
-      channel.close();
-    }
+    closeClientChannels();
     if (readerDaemon != null) {
       readerDaemon.stop();
+    }
+  }
+
+  private void closeClientChannels()
+  {
+    synchronized (channels) {
+      for (SPPChannel channel : channels) {
+        if (channel != null) {
+          channel.close();
+        }
+      }
     }
   }
 
@@ -105,29 +116,36 @@ public class ServerTCPSPPSocket implements SPPSocket
   public void send(SpacePacket packet) throws IOException
   {
     LOGGER.log(Level.FINE, "send({0})", packet);
-    if (channel != null) {
-      channel.send(packet);
-    } else {
-      throw new IOException("SPP send called, but no connection established!");
+    synchronized (channels) {
+      if (channels.isEmpty()) {
+        throw new IOException("SPP send called, but no connection established!");
+      }
+      for (SPPChannel channel : channels) {
+        if (channel != null) {
+          channel.send(packet);
+        }
+      }
     }
+
   }
 
   @Override
   public String getDescription()
   {
     return "-" + port;
+
   }
 
-  class ReaderDaemon extends Daemon
+  class AcceptorDaemon extends Daemon
   {
 
-    private Socket connSocket;
+    private Socket clientSocket;
 
     private SpacePacket packet;
 
-    protected ReaderDaemon()
+    protected AcceptorDaemon()
     {
-      super("ReaderDaemon", null);
+      super("AcceptorDaemon", null);
     }
 
     @Override
@@ -142,31 +160,50 @@ public class ServerTCPSPPSocket implements SPPSocket
         try {
           LOGGER.log(Level.INFO, "Listening for a client connection on {0}",
               listenerSocket.getLocalSocketAddress());
-          connSocket = listenerSocket.accept();
+          clientSocket = listenerSocket.accept();
         } catch (IOException ex) {
           LOGGER.log(Level.SEVERE, "Error when accepting the client connection", ex);
-          if (channel != null) {
-            channel.close();
-            channel = null;
-          }
           errorCount++;
           continue;
         }
+        SPPChannel newChannel = null;
         try {
-          connSocket.setTcpNoDelay(tcpNoDelay);
-          connSocket.setSoLinger(true, 1000);
-          channel = new SPPChannel(connSocket);
+          clientSocket.setTcpNoDelay(tcpNoDelay);
+          clientSocket.setSoLinger(true, 1000);
+          newChannel = new SPPChannel(clientSocket);
         } catch (IOException ex) {
           LOGGER.log(Level.SEVERE, "Error when configuring the client connection", ex);
-          if (channel != null) {
-            channel.close();
-            channel = null;
+          if (newChannel != null) {
+            newChannel.close();
+            newChannel = null;
           }
           errorCount++;
           continue;
         }
         errorCount = 0;
-        LOGGER.log(Level.INFO, "Accepted connection from: {0}", connSocket.getRemoteSocketAddress());
+        LOGGER.log(Level.INFO, "Accepted connection from: {0}",
+            clientSocket.getRemoteSocketAddress());
+        synchronized (channels) {
+          channels.add(newChannel);
+        }
+        new ClientThread(newChannel).start();
+      }
+      shutdown();
+      finish();
+    }
+
+    private class ClientThread extends Thread
+    {
+
+      protected SPPChannel channel;
+
+      public ClientThread(SPPChannel channel)
+      {
+        this.channel = channel;
+      }
+
+      public void run()
+      {
         try {
           while (running) {
             canStop = true;
@@ -179,13 +216,14 @@ public class ServerTCPSPPSocket implements SPPSocket
 
         } finally {
           if (channel != null) {
+            synchronized (channels) {
+              channels.remove(channel);
+            }
             channel.close();
             channel = null;
           }
         }
       }
-      shutdown();
-      finish();
     }
 
     @Override
@@ -196,10 +234,6 @@ public class ServerTCPSPPSocket implements SPPSocket
           listenerSocket.close();
         } catch (IOException e) {
         }
-      }
-      if (channel != null) {
-        channel.close();
-        channel = null;
       }
     }
 
