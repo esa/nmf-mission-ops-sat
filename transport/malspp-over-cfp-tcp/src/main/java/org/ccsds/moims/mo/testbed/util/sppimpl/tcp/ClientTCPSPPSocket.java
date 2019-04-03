@@ -48,11 +48,14 @@ public class ClientTCPSPPSocket implements SPPSocket
 
   private static final Logger LOGGER
       = java.util.logging.Logger.getLogger(ClientTCPSPPSocket.class.getName());
+  public static final int DEFAULT_RETRY_TIME = 5000;
+  public static final String RETRYTIME = "org.ccsds.moims.mo.malspp.test.sppimpl.tcp.retrytime";
   public static final String HOSTNAME = "org.ccsds.moims.mo.malspp.test.sppimpl.tcp.hostname";
   public static final String PORT = "org.ccsds.moims.mo.malspp.test.sppimpl.tcp.port";
 
   private String host;
   private int port;
+  private int retryTime;
   private SPPChannel channel;
 
   private final HashMap<Integer, Integer> lastSPPsMap = new HashMap<>();
@@ -68,10 +71,15 @@ public class ClientTCPSPPSocket implements SPPSocket
     host = (String) properties.get(HOSTNAME);
     String portS = (String) properties.get(PORT);
     port = Integer.parseInt(portS);
-    connect(host, port);
+    String retryTimeS = (String) properties.get(RETRYTIME);
+    if (retryTimeS != null) {
+      retryTime = Integer.parseInt(retryTimeS);
+    } else {
+      retryTime = DEFAULT_RETRY_TIME;
+    }
   }
 
-  public void connect(String host, int port) throws Exception
+  public void connect(String host, int port) throws IOException
   {
     LOGGER.log(Level.FINE, "ClientTCPSPPSocket.connect({0},{1})", new Object[]{host, port});
     Socket socket = new Socket(host, port);
@@ -87,31 +95,48 @@ public class ClientTCPSPPSocket implements SPPSocket
   @Override
   public SpacePacket receive() throws Exception
   {
-    try {
-      SpacePacket packet = channel.receive();
+    while (true) {
+      if (channel != null) {
+        try {
+          SpacePacket packet = channel.receive();
 
-      int packetAPID = packet.getHeader().getApid();
-      final int sequenceCount = packet.getHeader().getSequenceCount();
-      final int previous = (lastSPPsMap.get(packetAPID) != null) ? lastSPPsMap.get(packetAPID) : -1;
+          int packetAPID = packet.getHeader().getApid();
+          final int sequenceCount = packet.getHeader().getSequenceCount();
+          final int previous = (lastSPPsMap.get(packetAPID) != null) ? lastSPPsMap.get(packetAPID)
+              : -1;
 
-      if (previous != sequenceCount - 1
-          && previous != 16383
-          && sequenceCount != 0) { // Exclude also the transition zone
-        LOGGER.log(Level.WARNING,
-            "Out-of-order detected! Sequence count: {0} - Last: {1} (For APID:{2})", new Object[]{
-              sequenceCount,
-              previous, packetAPID});
+          if (previous != -1 && previous != sequenceCount - 1
+              && previous != 16383
+              && sequenceCount != 0) { // Exclude also the transition zone
+            LOGGER.log(Level.WARNING,
+                "Out-of-order detected! Sequence count: {0} - Last: {1} (For APID:{2})",
+                new Object[]{
+                  sequenceCount,
+                  previous, packetAPID});
+          }
+
+          lastSPPsMap.put(packetAPID, sequenceCount);
+
+          LOGGER.log(Level.FINE, "Received: {0}", packet);
+          return packet;
+        } catch (IOException ex) {
+          LOGGER.log(Level.WARNING, "Failed socket receive - restarting the channel...", ex);
+          channel.close();
+          try {
+            connect(host, port);
+          } catch (IOException ex2) {
+            LOGGER.log(Level.WARNING, "Couldn't connect - sleeping for " + retryTime + " ms", ex2);
+            Thread.sleep(DEFAULT_RETRY_TIME);
+          }
+        }
+      } else {
+        try {
+          connect(host, port);
+        } catch (IOException ex2) {
+          LOGGER.log(Level.WARNING, "Couldn't connect - sleeping for " + retryTime + " ms", ex2);
+          Thread.sleep(DEFAULT_RETRY_TIME);
+        }
       }
-
-      lastSPPsMap.put(packetAPID, sequenceCount);
-
-      LOGGER.log(Level.FINE, "Received: {0}", packet);
-      return packet;
-    } catch (IOException ex) {
-      LOGGER.log(Level.WARNING, "Interrupted socket receive - restarting the channel...");
-      channel.close();
-      connect(host, port);
-      throw ex;
     }
   }
 
@@ -120,10 +145,29 @@ public class ClientTCPSPPSocket implements SPPSocket
   {
     LOGGER.log(Level.FINE, "send({0})", packet);
 
-    if (channel != null) {
-      channel.send(packet);
-    } else {
-      throw new IOException("SPP send called, but no connection established!");
+    while (true) {
+      if (channel != null) {
+        try {
+          channel.send(packet);
+          return;
+        } catch (IOException ex) {
+          LOGGER.log(Level.WARNING, "Failed socket send - restarting the channel...", ex);
+          channel.close();
+          try {
+            connect(host, port);
+          } catch (IOException ex2) {
+            LOGGER.log(Level.WARNING, "Couldn't connect - sleeping for " + retryTime + " ms", ex2);
+            Thread.sleep(DEFAULT_RETRY_TIME);
+          }
+        }
+      } else {
+        try {
+          connect(host, port);
+        } catch (IOException ex) {
+          LOGGER.log(Level.WARNING, "Couldn't connect - sleeping for " + retryTime + " ms", ex);
+          Thread.sleep(DEFAULT_RETRY_TIME);
+        }
+      }
     }
   }
 
