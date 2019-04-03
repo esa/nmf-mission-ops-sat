@@ -60,8 +60,6 @@
   </properties>
 
   <modules>
-      <module>Kayak</module>
-      <module>can-fragmentation-protocol</module>
       <module>dlr-malspp</module>
       <module>malspp-over-cfp-tcp</module>
       <module>esa-malspp-wrapper</module>
