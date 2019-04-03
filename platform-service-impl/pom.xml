@@ -111,6 +111,12 @@
             <systemPath>${basedir}/src/main/resources/sdr_api.jar</systemPath>
             <scope>system</scope>
         </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.2</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
   
     <build>

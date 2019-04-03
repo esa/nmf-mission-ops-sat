@@ -55,7 +55,7 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
 
     @Override
     public boolean isUnitAvailable() {
-        return false;
+        return true;
     }
 
     private class GPSHandler extends GPSAdapter {

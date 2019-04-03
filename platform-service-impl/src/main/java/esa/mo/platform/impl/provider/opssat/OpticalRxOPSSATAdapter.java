@@ -24,14 +24,30 @@ import esa.mo.platform.impl.provider.gen.OpticalDataReceiverAdapterInterface;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.structures.Duration;
+import at.tugraz.ihf.opssat.opt_rx.SEPP_OPT_RX_API;
 
 public class OpticalRxOPSSATAdapter implements OpticalDataReceiverAdapterInterface
 {
 
+  private static Logger LOGGER = Logger.getLogger(OpticalRxOPSSATAdapter.class.getName());
+  private SEPP_OPT_RX_API optRxApi;
+  private boolean unitAvailable = false;
+
   public OpticalRxOPSSATAdapter()
   {
+
     Logger.getLogger(OpticalRxOPSSATAdapter.class.getName()).log(Level.INFO, "Initialisation");
-    System.loadLibrary("opt_rx_api_jni");
+    try {
+      System.loadLibrary("opt_rx_api_jni");
+      optRxApi = new SEPP_OPT_RX_API();
+    } catch (Exception ex) {
+      LOGGER.log(Level.SEVERE,
+          "OPT RX API could not be initialized!", ex);
+      unitAvailable = false;
+      return;
+    }
+    unitAvailable = true;
+
   }
 
   @Override
@@ -43,7 +59,7 @@ public class OpticalRxOPSSATAdapter implements OpticalDataReceiverAdapterInterfa
   @Override
   public boolean isUnitAvailable()
   {
-    return false;
+    return unitAvailable;
   }
 
 }

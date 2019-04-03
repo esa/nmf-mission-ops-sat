@@ -27,10 +27,14 @@ import at.tugraz.ihf.opssat.ims100.bst_ims100_tele_std_t;
 import at.tugraz.ihf.opssat.ims100.ims100_api;
 import esa.mo.helpertools.helpers.HelperTime;
 import esa.mo.platform.impl.provider.gen.CameraAdapterInterface;
+import esa.opssat.camera.processing.OPSSATCameraDebayering;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import org.ccsds.moims.mo.mal.structures.Blob;
 import org.ccsds.moims.mo.mal.structures.Duration;
 import org.ccsds.moims.mo.mal.structures.Time;
@@ -63,26 +67,29 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   private boolean useWatchdog;
   private int nativeImageLength;
   private int nativeImageWidth;
-  private bst_ims100_img_config_t imageConfig = new bst_ims100_img_config_t();
+  private bst_ims100_img_config_t imageConfig;
   private final PictureFormatList supportedFormats = new PictureFormatList();
   private boolean unitAvailable = false;
+
+  private static final Logger LOGGER = Logger.getLogger(CameraOPSSATAdapter.class.getName());
 
   public CameraOPSSATAdapter()
   {
     supportedFormats.add(PictureFormat.RAW);
-    Logger.getLogger(CameraOPSSATAdapter.class.getName()).log(Level.INFO, "Initialisation");
+    LOGGER.log(Level.INFO, "Initialisation");
     try {
       System.loadLibrary("ims100_api_jni");
     } catch (Exception ex) {
-      Logger.getLogger(CameraOPSSATAdapter.class.getName()).log(Level.SEVERE,
+      LOGGER.log(Level.SEVERE,
           "Camera library could not be loaded!", ex);
       unitAvailable = false;
       return;
     }
+    imageConfig = new bst_ims100_img_config_t();
     try {
       this.initBSTCamera();
-    } catch (Exception ex) {
-      Logger.getLogger(CameraOPSSATAdapter.class.getName()).log(Level.SEVERE,
+    } catch (IOException ex) {
+      LOGGER.log(Level.SEVERE,
           "BST Camera adapter could not be initialized!", ex);
       unitAvailable = false;
       return;
@@ -105,7 +112,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
         USE_WATCHDOG_DEFAULT));
     bst_ret_t ret = ims100_api.bst_ims100_init(serialPort, blockDevice, useWatchdog ? 1 : 0);
     if (ret != bst_ret_t.BST_RETURN_SUCCESS) {
-      throw new IOException("Failed to initialise BST camera");
+      throw new IOException("Failed to initialise BST camera (return: " + ret.toString() + ")");
     }
     dumpHKTelemetry();
     ims100_api.bst_ims100_img_config_default(imageConfig);
@@ -119,8 +126,8 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   {
     bst_ims100_tele_std_t stdTM = new bst_ims100_tele_std_t();
     ims100_api.bst_ims100_get_tele_std(stdTM);
-    Logger.getLogger(CameraOPSSATAdapter.class.getName()).log(Level.INFO, "Dumping HK Telemetry...");
-    Logger.getLogger(CameraOPSSATAdapter.class.getName()).log(Level.INFO,
+    LOGGER.log(Level.INFO, "Dumping HK Telemetry...");
+    LOGGER.log(Level.INFO,
         String.format("Standard TM:\n"
             + "Version: %s\n"
             + "Temp: %d degC\n"
@@ -170,6 +177,8 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     imageConfig.setG_red(settings.getGainRed().shortValue());
     ims100_api.bst_ims100_set_img_config(imageConfig);
     ims100_api.bst_ims100_set_exp_time(imageConfig.getT_exp());
+    ims100_api.bst_ims100_set_gain(imageConfig.getG_red(), imageConfig.getG_green(),
+        imageConfig.getG_blue());
     // Each pixel of raw image is encoded as uint16
     ByteBuffer imageData = ByteBuffer.allocateDirect(
         (int) (settings.getResolution().getHeight().getValue() * settings.getResolution().getWidth().getValue() * 2));
@@ -179,9 +188,9 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     if (ims100_api.bst_ims100_get_img_n(image, 1, (short) 0) != bst_ret_t.BST_RETURN_SUCCESS) {
       throw new IOException("bst_ims100_get_img_n failed");
     }
+    byte[] rawData = new byte[imageData.capacity()];
+    ((ByteBuffer) (imageData.duplicate().clear())).get(rawData);
     if (settings.getFormat() == PictureFormat.RAW) {
-      byte[] rawData = new byte[imageData.capacity()];
-      ((ByteBuffer) (imageData.duplicate().clear())).get(rawData);
 
       CameraSettings pictureSettings = new CameraSettings();
       pictureSettings.setResolution(settings.getResolution());
@@ -191,6 +200,15 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       return picture;
     } else {
       // Run debayering and possibly process further
+      //TODO Use a native debayering acceleration
+      rawData = convertImage(rawData, settings.getFormat());
+      CameraSettings pictureSettings = new CameraSettings();
+      pictureSettings.setResolution(settings.getResolution());
+      pictureSettings.setFormat(settings.getFormat());
+      pictureSettings.setExposureTime(settings.getExposureTime());
+      Picture picture = new Picture(timestamp, pictureSettings, new Blob(rawData));
+      return picture;
+      /*
       if (settings.getFormat() == PictureFormat.RGB24) {
         throw new IOException("RGB24 format not supported.");
       } else if (settings.getFormat() == PictureFormat.BMP) {
@@ -199,8 +217,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
         throw new IOException("PNG format not supported.");
       } else if (settings.getFormat() == PictureFormat.JPG) {
         throw new IOException("JPG format not supported.");
-      }
-      throw new IOException(settings.getFormat().toString() + " format not supported.");
+      }*/
     }
   }
 
@@ -214,5 +231,43 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   public PictureFormatList getAvailableFormats()
   {
     return supportedFormats;
+  }
+
+  private byte[] convertImage(byte[] rawImage, final PictureFormat targetFormat) throws
+      IOException
+  {
+    BufferedImage image = OPSSATCameraDebayering.getDebayeredImage(rawImage);
+    byte[] ret = null;
+
+    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+
+    if (targetFormat.equals(PictureFormat.RGB24)) {
+      int w = image.getWidth();
+      int h = image.getHeight();
+      int[] rgba = image.getRGB(0, 0, w, h, null, 0, w);
+      ret = new byte[rgba.length * 3];
+      for (int i = 0; i < rgba.length; ++i) {
+        final int pixelval = rgba[i];
+        ret[i * 3 + 0] = (byte) ((pixelval >> 16) & 0xFF); // R
+        ret[i * 3 + 1] = (byte) ((pixelval >> 8) & 0xFF);  // G
+        ret[i * 3 + 2] = (byte) ((pixelval) & 0xFF);       // B
+        // Ignore Alpha channel
+      }
+    } else if (targetFormat.equals(PictureFormat.BMP)) {
+      ImageIO.write(image, "BMP", stream);
+      ret = stream.toByteArray();
+      stream.close();
+    } else if (targetFormat.equals(PictureFormat.PNG)) {
+      ImageIO.write(image, "PNG", stream);
+      ret = stream.toByteArray();
+      stream.close();
+    } else if (targetFormat.equals(PictureFormat.JPG)) {
+      ImageIO.write(image, "JPEG", stream);
+      ret = stream.toByteArray();
+      stream.close();
+    } else {
+      throw new IOException(targetFormat.toString() + " format not supported.");
+    }
+    return ret;
   }
 }
