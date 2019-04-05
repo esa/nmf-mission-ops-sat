@@ -122,8 +122,8 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     ims100_api.bst_ims100_img_config_default(imageConfig);
     ims100_api.bst_ims100_set_img_config(imageConfig);
     ims100_api.bst_ims100_set_exp_time(imageConfig.getT_exp());
-    nativeImageLength = imageConfig.getCol_end() - imageConfig.getCol_start() + 1;
-    nativeImageWidth = imageConfig.getRow_end() - imageConfig.getRow_start() + 1;
+    nativeImageWidth = imageConfig.getCol_end() - imageConfig.getCol_start() + 1;
+    nativeImageLength = imageConfig.getRow_end() - imageConfig.getRow_start() + 1;
   }
 
   private synchronized void dumpHKTelemetry()
@@ -151,8 +151,8 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   public PixelResolutionList getAvailableResolutions()
   {
     PixelResolutionList availableResolutions = new PixelResolutionList();
-    availableResolutions.add(new PixelResolution(new UInteger(nativeImageLength), new UInteger(
-        nativeImageWidth)));
+    availableResolutions.add(new PixelResolution(new UInteger(nativeImageWidth), new UInteger(
+        nativeImageLength)));
 
     return availableResolutions;
   }
@@ -173,24 +173,24 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     bst_ims100_img_t image = new bst_ims100_img_t();
     ims100_api.bst_ims100_img_config_default(imageConfig);
     // TODO this is not scaling but cropping the picture
-    imageConfig.setCol_end((int) settings.getResolution().getHeight().getValue() - 1);
-    imageConfig.setRow_end((int) settings.getResolution().getWidth().getValue() - 1);
+    imageConfig.setCol_start(0);
+    imageConfig.setCol_end((int) settings.getResolution().getWidth().getValue() - 1);
+    imageConfig.setRow_start(0);
+    imageConfig.setRow_end((int) settings.getResolution().getHeight().getValue() - 1);
     imageConfig.setT_exp((int) (settings.getExposureTime().getValue() * 1000));
+    imageConfig.setG_red(settings.getGainRed().shortValue());
     imageConfig.setG_green(settings.getGainGreen().shortValue());
     imageConfig.setG_blue(settings.getGainBlue().shortValue());
-    imageConfig.setG_red(settings.getGainRed().shortValue());
     LOGGER.log(Level.INFO, String.format("Setting config"));
     ims100_api.bst_ims100_set_img_config(imageConfig);
-    LOGGER.log(Level.INFO, String.format("Setting exposure"));
-    ims100_api.bst_ims100_set_exp_time(imageConfig.getT_exp());
-    LOGGER.log(Level.INFO, String.format("Setting gains"));
-    ims100_api.bst_ims100_set_gain(imageConfig.getG_red(), imageConfig.getG_green(),
-        imageConfig.getG_blue());
     // Each pixel of raw image is encoded as uint16
     LOGGER.log(Level.INFO, String.format("Allocating native buffer"));
+    int dataN
+        = (int) (settings.getResolution().getHeight().getValue() * settings.getResolution().getWidth().getValue());
     ByteBuffer imageData = ByteBuffer.allocateDirect(
-        (int) (settings.getResolution().getHeight().getValue() * settings.getResolution().getWidth().getValue() * 2));
+        (int) (dataN * 2));
     image.setData(imageData);
+    image.setData_n(dataN);
 
     final Time timestamp = HelperTime.getTimestampMillis();
     LOGGER.log(Level.INFO, String.format("Acquiring image"));
@@ -201,35 +201,20 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
 
     LOGGER.log(Level.INFO, String.format("Copying from native buffer"));
     ((ByteBuffer) (imageData.duplicate().clear())).get(rawData);
-    if (settings.getFormat() == PictureFormat.RAW) {
-
-      CameraSettings pictureSettings = new CameraSettings();
-      pictureSettings.setResolution(settings.getResolution());
-      pictureSettings.setFormat(PictureFormat.RAW);
-      pictureSettings.setExposureTime(settings.getExposureTime());
-      Picture picture = new Picture(timestamp, pictureSettings, new Blob(rawData));
-      return picture;
-    } else {
+    CameraSettings replySettings = new CameraSettings();
+    replySettings.setResolution(settings.getResolution());
+    replySettings.setExposureTime(settings.getExposureTime());
+    replySettings.setGainRed(settings.getGainRed());
+    replySettings.setGainGreen(settings.getGainGreen());
+    replySettings.setGainBlue(settings.getGainBlue());
+    if (settings.getFormat() != PictureFormat.RAW) {
       // Run debayering and possibly process further
       //TODO Use a native debayering acceleration
       rawData = convertImage(rawData, settings.getFormat());
-      CameraSettings pictureSettings = new CameraSettings();
-      pictureSettings.setResolution(settings.getResolution());
-      pictureSettings.setFormat(settings.getFormat());
-      pictureSettings.setExposureTime(settings.getExposureTime());
-      Picture picture = new Picture(timestamp, pictureSettings, new Blob(rawData));
-      return picture;
-      /*
-      if (settings.getFormat() == PictureFormat.RGB24) {
-        throw new IOException("RGB24 format not supported.");
-      } else if (settings.getFormat() == PictureFormat.BMP) {
-        throw new IOException("BMP format not supported.");
-      } else if (settings.getFormat() == PictureFormat.PNG) {
-        throw new IOException("PNG format not supported.");
-      } else if (settings.getFormat() == PictureFormat.JPG) {
-        throw new IOException("JPG format not supported.");
-      }*/
     }
+    replySettings.setFormat(settings.getFormat());
+    Picture picture = new Picture(timestamp, replySettings, new Blob(rawData));
+    return picture;
   }
 
   @Override
