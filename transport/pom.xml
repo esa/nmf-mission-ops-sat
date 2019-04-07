@@ -63,7 +63,6 @@
       <module>dlr-malspp</module>
       <module>malspp-over-cfp-tcp</module>
       <module>esa-malspp-wrapper</module>
-      <module>can-test</module>
   </modules>
    
 </project>
