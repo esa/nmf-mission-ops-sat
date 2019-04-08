@@ -31,54 +31,74 @@ import esa.mo.platform.impl.provider.gen.SoftwareDefinedRadioProviderServiceImpl
 import esa.mo.platform.impl.provider.opssat.CameraOPSSATAdapter;
 import esa.mo.platform.impl.provider.opssat.GPSOPSSATAdapter;
 import esa.mo.platform.impl.provider.opssat.AutonomousADCSOPSSATAdapter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.MALException;
 
 /**
  *
  *
  */
-public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderInterface {
+public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderInterface
+{
 
-    private final AutonomousADCSProviderServiceImpl adcsService = new AutonomousADCSProviderServiceImpl();
-    private final CameraProviderServiceImpl cameraService = new CameraProviderServiceImpl();
-    private final GPSProviderServiceImpl gpsService = new GPSProviderServiceImpl();
-    private final OpticalDataReceiverProviderServiceImpl optrxService = new OpticalDataReceiverProviderServiceImpl();
-    private final PowerControlProviderServiceImpl powerService = new PowerControlProviderServiceImpl();
-    private final SoftwareDefinedRadioProviderServiceImpl sdrService = new SoftwareDefinedRadioProviderServiceImpl();
+  private final static Logger LOGGER = Logger.getLogger(
+      PlatformServicesProviderOPSSAT.class.getName());
+  private final AutonomousADCSProviderServiceImpl adcsService
+      = new AutonomousADCSProviderServiceImpl();
+  private final CameraProviderServiceImpl cameraService = new CameraProviderServiceImpl();
+  private final GPSProviderServiceImpl gpsService = new GPSProviderServiceImpl();
+  private final OpticalDataReceiverProviderServiceImpl optrxService
+      = new OpticalDataReceiverProviderServiceImpl();
+  private final PowerControlProviderServiceImpl powerService = new PowerControlProviderServiceImpl();
+  private final SoftwareDefinedRadioProviderServiceImpl sdrService
+      = new SoftwareDefinedRadioProviderServiceImpl();
 
-    public void init(COMServicesProvider comServices, GMVServicesConsumer gmvServicesConsumer) throws MALException {
-        AutonomousADCSOPSSATAdapter adcsAdapter = new AutonomousADCSOPSSATAdapter();
-        adcsService.init(comServices, adcsAdapter);
-        cameraService.init(comServices, new CameraOPSSATAdapter());
-        gpsService.init(comServices, new GPSOPSSATAdapter(gmvServicesConsumer));
-        optrxService.init(new esa.mo.platform.impl.provider.opssat.OpticalRxOPSSATAdapter());
-        powerService.init(new esa.mo.platform.impl.provider.opssat.PowerControlOPSSATAdapter(gmvServicesConsumer));
-        sdrService.init(new esa.mo.platform.impl.provider.opssat.SDROPSSATAdapter());
+  public void init(COMServicesProvider comServices, GMVServicesConsumer gmvServicesConsumer) throws
+      MALException
+  {
+    try {
+      adcsService.init(comServices, new AutonomousADCSOPSSATAdapter());
+      cameraService.init(comServices, new CameraOPSSATAdapter());
+      gpsService.init(comServices, new GPSOPSSATAdapter(gmvServicesConsumer));
+      optrxService.init(new esa.mo.platform.impl.provider.opssat.OpticalRxOPSSATAdapter());
+      powerService.init(new esa.mo.platform.impl.provider.opssat.PowerControlOPSSATAdapter(
+          gmvServicesConsumer));
+      sdrService.init(new esa.mo.platform.impl.provider.opssat.SDROPSSATAdapter());
+    } catch (UnsatisfiedLinkError | NoClassDefFoundError | NoSuchMethodError error) {
+      LOGGER.log(Level.SEVERE,
+          "Could not load platform adapters (check for missing JARs and libraries)", error);
     }
+  }
 
-    @Override
-    public GPSProviderServiceImpl getGPSService() {
-        return this.gpsService;
-    }
+  @Override
+  public GPSProviderServiceImpl getGPSService()
+  {
+    return this.gpsService;
+  }
 
-    @Override
-    public CameraProviderServiceImpl getCameraService() {
-        return this.cameraService;
-    }
+  @Override
+  public CameraProviderServiceImpl getCameraService()
+  {
+    return this.cameraService;
+  }
 
-    @Override
-    public AutonomousADCSProviderServiceImpl getAutonomousADCSService() {
-        return this.adcsService;
-    }
+  @Override
+  public AutonomousADCSProviderServiceImpl getAutonomousADCSService()
+  {
+    return this.adcsService;
+  }
 
-    @Override
-    public OpticalDataReceiverProviderServiceImpl getOpticalDataReceiverService() {
-        return this.optrxService;
-    }
+  @Override
+  public OpticalDataReceiverProviderServiceImpl getOpticalDataReceiverService()
+  {
+    return this.optrxService;
+  }
 
-    @Override
-    public SoftwareDefinedRadioProviderServiceImpl getSoftwareDefinedRadioService() {
-        return this.sdrService;
-    }
+  @Override
+  public SoftwareDefinedRadioProviderServiceImpl getSoftwareDefinedRadioService()
+  {
+    return this.sdrService;
+  }
 
 }
