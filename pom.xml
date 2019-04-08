@@ -26,7 +26,7 @@
   <groupId>int.esa.nmf.mission.opssat</groupId>
   <artifactId>reactor</artifactId>
   <packaging>pom</packaging>
-  <name>ESA NMF Mission OPS-SAT Reactor</name>
+  <name>Maven Reactor for ESA NMF Mission OPS-SAT</name>
   <description>Reactor POM for NMF OPS-SAT mission</description>
 
   <organization>

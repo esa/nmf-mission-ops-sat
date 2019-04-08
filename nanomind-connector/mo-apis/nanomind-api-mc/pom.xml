@@ -20,69 +20,78 @@
     <groupId>int.esa.nmf.mission.opssat</groupId>
     <artifactId>parent</artifactId>
     <version>2.0.0-SNAPSHOT</version>
-    <relativePath>../../parent/pom.xml</relativePath>
+    <relativePath>../../../parent/pom.xml</relativePath>
   </parent>
-  
-  <groupId>int.esa.nmf.mission.opssat.nanomind</groupId>
-  <artifactId>consumers</artifactId>
+
+  <groupId>int.esa.nmf.mission.opssat.nanomind.api</groupId>
+  <artifactId>nanomind-api-mc</artifactId>
   <packaging>jar</packaging>
 
-  <name>ESA NMF Mission OPS-SAT - Nanomind MO Service Consumers Implementation</name>
-  <description>GMV service consumers implementation</description>
+  <name>ESA NMF Mission OPS-SAT Nanomind MO API - MC Services</name>
+  <description>OBSW MC API for Java</description>
   <url>http://www.esa.int</url>
   
   <organization>
     <name>ESA</name>
     <url>http://www.esa.int</url>
   </organization>
-
+  
   <licenses>
     <license>
       <name>The European Space Agency Public License, Version 2.0</name>
-      <url>https://raw.github.com/esa/CCSDS_APPS/master/LICENCE.md</url>
+      <url>https://raw.github.com/esa/CCSDS_MO_APIS/master/LICENCE.md</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
-  
+
   <scm>
-    <connection>scm:git:git@github.com:esa/CCSDS_APPS.git</connection>
-    <developerConnection>scm:git:git@github.com:esa/CCSDS_APPS.git</developerConnection>
-    <url>https://github.com/esa/CCSDS_APPS</url>
+    <connection>scm:git:git@github.com:esa/CCSDS_MO_APIS.git</connection>
+    <developerConnection>scm:git:git@github.com:esa/CCSDS_MO_APIS.git</developerConnection>
+    <url>https://github.com/esa/CCSDS_MO_APIS</url>
   </scm>
   
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/CesarCoelho/BUG_REPORTS_NANOSAT_MO_FRAMEWORK/issues</url>
+    <url>https://github.com/esa/CCSDS_MO_APIS/issues</url>
   </issueManagement>
   
   <developers>
     <developer>
-      <id>CesarCoelho</id>
-      <name>César Coelho</name>
-      <email>Cesar.Coelho@esa.int</email>
-      <url>https://github.com/CesarCoelho</url>
+      <id>SamCooper</id>
+      <name>Sam Cooper</name>
+      <email>sam.cooper@scisys.co.uk</email>
+      <url>https://github.com/SamCooper</url>
     </developer>
   </developers>
 
+  <properties>
+    <ccsds.specification.download.group>int.esa.nmf.mission.opssat.nanomind</ccsds.specification.download.group>
+    <ccsds.specification.download.artifact>xml</ccsds.specification.download.artifact>
+    <ccsds.specification.download.ref-group>int.esa.nmf.mission.opssat.nanomind</ccsds.specification.download.ref-group>
+    <ccsds.specification.download.ref-artifact>xml</ccsds.specification.download.ref-artifact>
+    <ccsds.specification.version>${project.version}</ccsds.specification.version>
+    <ccsds.specification.download.skip>false</ccsds.specification.download.skip>
+    <ccsds.specification.download.directory>${project.build.directory}</ccsds.specification.download.directory>
+    <ccsds.specification.download.filter>**/ServiceDefMC.xml</ccsds.specification.download.filter>
+    <ccsds.specification.download.ref-skip>false</ccsds.specification.download.ref-skip>
+    <ccsds.specification.download.ref-filter>**/ServiceDefMAL.xml, **/ServiceDefCOM.xml</ccsds.specification.download.ref-filter>
+  </properties>
+  
   <dependencies>
     <dependency>
-      <groupId>int.esa.nmf.core</groupId>
-      <artifactId>helper-tools</artifactId>
+      <groupId>int.esa.nmf.mission.opssat.nanomind</groupId>
+      <artifactId>xml</artifactId>
     </dependency>
     <dependency>
-      <groupId>int.esa.nmf.mission.opssat.nanomind.api</groupId>
-      <artifactId>nanomind-api-mc</artifactId>
+      <groupId>int.esa.ccsds.mo</groupId>
+      <artifactId>API_MAL</artifactId>
     </dependency>
     <dependency>
       <groupId>int.esa.nmf.mission.opssat.nanomind.api</groupId>
       <artifactId>nanomind-api-com</artifactId>
     </dependency>
-    <dependency>
-      <groupId>int.esa.nmf.mission.opssat.nanomind.api</groupId>
-      <artifactId>nanomind-api-pf</artifactId>
-    </dependency>
   </dependencies>
-  
+
   <build>
     <resources>
       <resource>
@@ -92,6 +101,7 @@
         </includes>
       </resource>
     </resources>
+    
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -106,12 +116,18 @@
         <artifactId>build-helper-maven-plugin</artifactId>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
+        <groupId>int.esa.ccsds.mo</groupId>
+        <artifactId>StubGenerator</artifactId>
+        <configuration>
+          <packageBindings>
+            <com>esa.opssat.nanomind</com>
+            <mc>esa.opssat.nanomind</mc>
+          </packageBindings>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
+        <artifactId>maven-compiler-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

@@ -53,7 +53,7 @@ import org.ccsds.moims.mo.mc.structures.ArgumentDefinitionDetailsList;
 import org.ccsds.moims.mo.mc.structures.AttributeValue;
 import org.ccsds.moims.mo.mc.structures.AttributeValueList;
 import org.ccsds.moims.mo.mc.structures.ConditionalConversionList;
-import org.ccsds.moims.mo.opssat_pf.gps.consumer.GPSAdapter;
+import esa.opssat.nanomind.opssat_pf.gps.consumer.GPSAdapter;
 
 // Specific OPS-SAT Monitoring and Control
 public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {

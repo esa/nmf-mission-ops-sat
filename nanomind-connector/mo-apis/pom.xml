@@ -60,8 +60,8 @@
   </properties>
 
   <modules>  
-    <module>com</module>
-    <module>mc</module>
-    <module>pf</module>
+    <module>nanomind-api-com</module>
+    <module>nanomind-api-mc</module>
+    <module>nanomind-api-pf</module>
   </modules>
 </project>

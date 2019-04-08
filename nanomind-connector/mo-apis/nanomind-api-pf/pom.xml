@@ -24,11 +24,11 @@
   </parent>
 
   <groupId>int.esa.nmf.mission.opssat.nanomind.api</groupId>
-  <artifactId>com</artifactId>
+  <artifactId>nanomind-api-pf</artifactId>
   <packaging>jar</packaging>
 
-  <name>ESA NMF Mission OPS-SAT Nanomind MO API - COM Services</name>
-  <description>GMV's COM API for Java</description>
+  <name>ESA NMF Mission OPS-SAT Nanomind MO API - PF</name>
+  <description>OBSW PF API for Java</description>
   <url>http://www.esa.int</url>
   
   <organization>
@@ -57,10 +57,10 @@
   
   <developers>
     <developer>
-      <id>SamCooper</id>
-      <name>Sam Cooper</name>
-      <email>sam.cooper@scisys.co.uk</email>
-      <url>https://github.com/SamCooper</url>
+      <id>CesarCoelho</id>
+      <name>César Coelho</name>
+      <email>cesar.coelho@esa.int</email>
+      <url>https://github.com/CesarCoelho</url>
     </developer>
   </developers>
 
@@ -72,7 +72,7 @@
     <ccsds.specification.version>${project.version}</ccsds.specification.version>
     <ccsds.specification.download.skip>false</ccsds.specification.download.skip>
     <ccsds.specification.download.directory>${project.build.directory}</ccsds.specification.download.directory>
-    <ccsds.specification.download.filter>**/ServiceDefCOM.xml</ccsds.specification.download.filter>
+    <ccsds.specification.download.filter>**/OPSSAT_PF.xml</ccsds.specification.download.filter>
     <ccsds.specification.download.ref-skip>false</ccsds.specification.download.ref-skip>
     <ccsds.specification.download.ref-filter>**/ServiceDefMAL.xml, **/ServiceDefCOM.xml</ccsds.specification.download.ref-filter>
   </properties>
@@ -86,13 +86,9 @@
       <groupId>int.esa.ccsds.mo</groupId>
       <artifactId>API_MAL</artifactId>
     </dependency>
-    <!--
-      FIXME: Work-around for some classes not being produced due to old XML.
-      Including an API generated from newer XMLs fixes it.
-    -->
     <dependency>
-      <groupId>int.esa.nmf.core.moservices.api</groupId>
-      <artifactId>com-nmf</artifactId>
+      <groupId>int.esa.nmf.mission.opssat.nanomind.api</groupId>
+      <artifactId>nanomind-api-com</artifactId>
     </dependency>
   </dependencies>
 
@@ -122,6 +118,11 @@
       <plugin>
         <groupId>int.esa.ccsds.mo</groupId>
         <artifactId>StubGenerator</artifactId>
+        <configuration>
+          <packageBindings>
+            <opssat_pf>esa.opssat.nanomind</opssat_pf>
+          </packageBindings>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

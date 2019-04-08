@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.MALException;
-import org.ccsds.moims.mo.opssat_pf.gps.consumer.GPSAdapter;
+import esa.opssat.nanomind.opssat_pf.gps.consumer.GPSAdapter;
 import org.ccsds.moims.mo.mal.structures.Blob;
 
 /**

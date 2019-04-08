@@ -91,17 +91,17 @@
       <!-- Nanomind OBSW APIs -->
       <dependency>
         <groupId>int.esa.nmf.mission.opssat.nanomind.api</groupId>
-        <artifactId>mc</artifactId>
+        <artifactId>nanomind-api-mc</artifactId>
         <version>${esa.nmf.opssat.version-qualifier}</version>
       </dependency>
       <dependency>
         <groupId>int.esa.nmf.mission.opssat.nanomind.api</groupId>
-        <artifactId>com</artifactId>
+        <artifactId>nanomind-api-com</artifactId>
         <version>${esa.nmf.opssat.version-qualifier}</version>
       </dependency>
       <dependency>
         <groupId>int.esa.nmf.mission.opssat.nanomind.api</groupId>
-        <artifactId>pf</artifactId>
+        <artifactId>nanomind-api-pf</artifactId>
         <version>${esa.nmf.opssat.version-qualifier}</version>
       </dependency>
 
@@ -129,7 +129,7 @@
       <!-- NMF Platform services implementation -->
       <dependency>
         <groupId>int.esa.nmf.mission.opssat.moservices.impl</groupId>
-        <artifactId>nmf-platform</artifactId>
+        <artifactId>nmf-platform-impl-opssat</artifactId>
         <version>${esa.nmf.opssat.version-qualifier}</version>
       </dependency>
 

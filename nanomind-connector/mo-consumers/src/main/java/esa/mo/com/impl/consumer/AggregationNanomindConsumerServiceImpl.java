@@ -26,14 +26,14 @@ import esa.mo.helpertools.connections.SingleConnectionDetails;
 import java.net.MalformedURLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.ccsds.moims.mo.com.COMHelper;
+import esa.opssat.nanomind.com.COMHelper;
 import org.ccsds.moims.mo.mal.MALContextFactory;
 import org.ccsds.moims.mo.mal.MALException;
 import org.ccsds.moims.mo.mal.MALHelper;
 import org.ccsds.moims.mo.mal.consumer.MALConsumer;
-import org.ccsds.opssat.gmv.mc.MCHelper;
-import org.ccsds.opssat.gmv.mc.aggregation.AggregationHelper;
-import org.ccsds.opssat.gmv.mc.aggregation.consumer.AggregationStub;
+import esa.opssat.nanomind.mc.MCHelper;
+import esa.opssat.nanomind.mc.aggregation.AggregationHelper;
+import esa.opssat.nanomind.mc.aggregation.consumer.AggregationStub;
 
 /**
  *

@@ -78,7 +78,7 @@
         </dependency>
         <dependency>
             <groupId>int.esa.nmf.mission.opssat.moservices.impl</groupId>
-            <artifactId>nmf-platform</artifactId>
+            <artifactId>nmf-platform-impl-opssat</artifactId>
         </dependency>
         <dependency>
             <groupId>int.esa.opssat.transport</groupId>
