@@ -153,7 +153,14 @@ public class SPPReader
       this.packet = outPacket;
 
       if (CRC != readCRC) {
-        throw new IOException("CRC Error: expected=" + CRC + " , read=" + readCRC);
+        throw new IOException(
+            "CRC Error:"
+            + " expected=" + CRC
+            + ", read=" + readCRC
+            + " for "
+            + " APID(" + apid + ")"
+            + ", SSC=" + seq_count + ""
+            + ", pkt_len=" + pkt_length_value);
       }
     }
 
