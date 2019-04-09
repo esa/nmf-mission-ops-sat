@@ -31,6 +31,9 @@ import esa.mo.platform.impl.provider.gen.SoftwareDefinedRadioProviderServiceImpl
 import esa.mo.platform.impl.provider.opssat.CameraOPSSATAdapter;
 import esa.mo.platform.impl.provider.opssat.GPSOPSSATAdapter;
 import esa.mo.platform.impl.provider.opssat.AutonomousADCSOPSSATAdapter;
+import esa.mo.platform.impl.provider.opssat.OpticalRxOPSSATAdapter;
+import esa.mo.platform.impl.provider.opssat.PowerControlOPSSATAdapter;
+import esa.mo.platform.impl.provider.opssat.SDROPSSATAdapter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.MALException;
@@ -61,10 +64,9 @@ public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderI
       adcsService.init(comServices, new AutonomousADCSOPSSATAdapter());
       cameraService.init(comServices, new CameraOPSSATAdapter());
       gpsService.init(comServices, new GPSOPSSATAdapter(gmvServicesConsumer));
-      optrxService.init(new esa.mo.platform.impl.provider.opssat.OpticalRxOPSSATAdapter());
-      powerService.init(new esa.mo.platform.impl.provider.opssat.PowerControlOPSSATAdapter(
-          gmvServicesConsumer));
-      sdrService.init(new esa.mo.platform.impl.provider.opssat.SDROPSSATAdapter());
+      optrxService.init(new OpticalRxOPSSATAdapter());
+      powerService.init(new PowerControlOPSSATAdapter(gmvServicesConsumer));
+      sdrService.init(new SDROPSSATAdapter());
     } catch (UnsatisfiedLinkError | NoClassDefFoundError | NoSuchMethodError error) {
       LOGGER.log(Level.SEVERE,
           "Could not load platform adapters (check for missing JARs and libraries)", error);
