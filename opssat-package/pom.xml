@@ -201,7 +201,7 @@
             <configuration>
               <target>
                 <!-- TODO - ideally most of space-common should be copied once and symlinks used -->
-                <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/home/nmf/nanosat-mo-supervisor-opssat">
+                <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/home/nmf/supervisor">
                   <fileset dir="${basedir}/src/main/resources/space-common"/>
                   <fileset dir="${basedir}/src/main/resources/space-supervisor-opssat-root"/>
                   <filterset>
@@ -210,7 +210,7 @@
                     <filter token="NMF_LIB" value="`cd ../lib > /dev/null; pwd`/*"/>
                   </filterset>
                   <firstmatchmapper>
-                    <globmapper from="startscript.sh" to="nanosat-mo-supervisor-opssat.sh"/>
+                    <globmapper from="startscript.sh" to="supervisor.sh"/>
                     <globmapper from="*" to="*"/>
                   </firstmatchmapper>
                 </copy>
