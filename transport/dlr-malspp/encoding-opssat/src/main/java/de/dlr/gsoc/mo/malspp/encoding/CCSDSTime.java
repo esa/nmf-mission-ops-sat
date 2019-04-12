@@ -1,4 +1,4 @@
-/* 
+/*
  * MAL/SPP Binding for CCSDS Mission Operations Framework
  * Copyright (C) 2015 Deutsches Zentrum für Luft- und Raumfahrt e.V. (DLR).
  *
@@ -31,6 +31,7 @@ import org.orekit.time.DateTimeComponents;
 import org.orekit.time.TimeComponents;
 import org.orekit.time.TimeScale;
 import org.orekit.time.TimeScalesFactory;
+import org.orekit.utils.IERSConventions;
 
 /**
  * Helper class for working with CCSDS time codes and preamble fields.
@@ -478,7 +479,7 @@ public class CCSDSTime {
 				case "TAI":
 					return TimeScalesFactory.getTAI();
 				case "GMST":
-					return TimeScalesFactory.getGMST();
+					return TimeScalesFactory.getGMST(IERSConventions.IERS_2010, false);
 				case "GPS":
 					return TimeScalesFactory.getGPS();
 				case "GST":
