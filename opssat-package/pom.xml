@@ -89,13 +89,6 @@
       <groupId>int.esa.opssat.transport.dlr</groupId>
       <artifactId>malspp-encoding-opssat</artifactId>
       <version>1.0.1-FC</version>
-      <exclusions>
-        <exclusion>
-          <!-- Encoding depends on Orekit 6.1, but Simulator uses Orekit 7.2 -->
-          <groupId>org.orekit</groupId>
-          <artifactId>orekit</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>int.esa.nmf.sdk.examples.space</groupId>
