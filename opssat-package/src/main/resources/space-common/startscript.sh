@@ -9,7 +9,7 @@ fi
 MAIN_CLASS_NAME=@MAIN_CLASS_NAME@
 
 exec java $JAVA_OPTS \
-  -classpath "$NMF_LIB:lib/*" \
+  -classpath "$NMF_LIB:lib/*:/usr/lib/java/*" \
   "$MAIN_CLASS_NAME" \
   "$@"
 
