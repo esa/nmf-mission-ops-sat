@@ -68,11 +68,6 @@
             <artifactId>consumers</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.purejavacomm</groupId>
-            <artifactId>purejavacomm</artifactId>
-            <version>1.0.1.RELEASE</version>
-        </dependency>
-        <dependency>
             <groupId>int.esa.opssat</groupId>
             <artifactId>image-debayer</artifactId>
         </dependency>
