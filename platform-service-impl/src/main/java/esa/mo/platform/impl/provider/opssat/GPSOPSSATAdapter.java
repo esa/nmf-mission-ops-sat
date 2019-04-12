@@ -46,7 +46,7 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
     public String getNMEASentence(String identifier) throws IOException {
         GPSHandler gpsHandler = new GPSHandler();
         try {
-            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData(new Blob(identifier.getBytes()), gpsHandler);
+            //gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData(new Blob(identifier.getBytes()), gpsHandler);
         } catch (Exception e) {
             throw new IOException("Error when retrieving GPS NMEA response from Nanomind", e);
         }
@@ -55,7 +55,7 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
 
     @Override
     public boolean isUnitAvailable() {
-        return true;
+        return false;
     }
 
     private class GPSHandler extends GPSAdapter {
