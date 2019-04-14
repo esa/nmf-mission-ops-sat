@@ -53,7 +53,16 @@ public class OpticalRxOPSSATAdapter implements OpticalDataReceiverAdapterInterfa
   @Override
   public byte[] recordOpticalReceiverData(Duration duration)
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    optRxApi.Clear_SharedMemory_Data_Buffer();
+    optRxApi.Enable_RX_Detector();
+    try {
+      Thread.sleep((long)(duration.getValue() * 1000));
+    }
+    catch(InterruptedException e) {
+      return null;
+    }
+    // TODO capture data from the API
+    return new byte[0];
   }
 
   @Override

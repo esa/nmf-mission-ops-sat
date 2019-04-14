@@ -210,6 +210,8 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     if (settings.getFormat() != PictureFormat.RAW) {
       // Run debayering and possibly process further
       //TODO Use a native debayering acceleration
+      LOGGER.log(Level.INFO, String.format(
+            "Converting the image from RAW to " + settings.getFormat().toString()));
       rawData = convertImage(rawData, settings.getFormat());
     }
     replySettings.setFormat(settings.getFormat());

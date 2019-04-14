@@ -31,8 +31,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.collections.buffer.CircularFifoBuffer;
-import org.ccsds.moims.mo.platform.softwaredefinedradio.structures.IQComponentsList;
+import org.ccsds.moims.mo.mal.structures.FloatList;
+import org.ccsds.moims.mo.platform.softwaredefinedradio.structures.IQComponents;
 import org.ccsds.moims.mo.platform.softwaredefinedradio.structures.SDRConfiguration;
 
 public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
@@ -182,11 +182,19 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
   }
 
   @Override
-  public IQComponentsList getIQComponents()
+  public IQComponents getIQComponents()
   {
     if (!configured) {
       return null;
     }
-    throw new UnsupportedOperationException("Not supported yet.");
+    FloatList iList = new FloatList(bufferLength);
+    FloatList qList = new FloatList(bufferLength);
+    // TODO add SWIG pointer mapping
+    // sdrApi.Receive_IQ_Samples(new SWIGTYPE_p_unsigned_int(), bufferLength);
+    for (int i = 0; i < bufferLength; ++i) {
+      iList.add((float)sampleBuffer.getInt());
+      qList.add((float)sampleBuffer.getInt());
+    }
+    return new IQComponents(iList, qList);
   }
 }
