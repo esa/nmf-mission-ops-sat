@@ -42,14 +42,15 @@ import org.ccsds.moims.mo.testbed.util.spp.SpacePacketHeader;
 public class SPPReader
 {
 
-  final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+  final protected static char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
-  private byte[] apidQualifierBuffer;
+  private final byte[] apidQualifierBuffer;
 
-  private byte[] inHeaderBuffer;
+  private final byte[] inHeaderBuffer;
 
-  private byte[] inCrcBuffer;
-  private InputStream is;
+  private final byte[] inCrcBuffer;
+  private final InputStream is;
+  private final boolean crcEnabled;
 
   private SpacePacket packet;
 
@@ -59,6 +60,7 @@ public class SPPReader
     apidQualifierBuffer = new byte[2];
     inHeaderBuffer = new byte[6];
     inCrcBuffer = new byte[2];
+    crcEnabled = SPPHelper.getCrcEnabled();
   }
 
   private int read(final byte[] b, final int initialOffset, final int totalLength) throws
@@ -113,7 +115,7 @@ public class SPPReader
     int pkt_length_value = inHeaderBuffer[4] & 0xFF;
     pkt_length_value = ((pkt_length_value << 8) | (inHeaderBuffer[5] & 0xFF)) + 1;
 
-    if (SPPHelper.isCRCEnabled) {
+    if (crcEnabled) {
       pkt_length_value = pkt_length_value - 2;
     }
     SpacePacketHeader sph = outPacket.getHeader();
@@ -144,7 +146,7 @@ public class SPPReader
 //        System.arraycopy(outPacket.getBody(), 0, trimmedBody, 0, outPacket.getLength());
 //        outPacket.setBody(trimmedBody);
     // Read CRC
-    if (SPPHelper.isCRCEnabled) {
+    if (crcEnabled) {
       int CRC = SPPHelper.computeCRC(inHeaderBuffer, data, outPacket.getOffset(), dataLength);
 
       is.read(inCrcBuffer);
@@ -177,8 +179,8 @@ public class SPPReader
         char[] hexChars = new char[bytes.length * 2];
         for (int j = 0; j < bytes.length; j++) {
             int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
         }
         return new String(hexChars);
     }
