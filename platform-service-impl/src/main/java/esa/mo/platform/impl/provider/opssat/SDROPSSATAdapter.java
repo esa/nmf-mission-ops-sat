@@ -193,8 +193,8 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
     // TODO add SWIG pointer mapping
     // sdrApi.Receive_IQ_Samples(new SWIGTYPE_p_unsigned_int(), bufferLength);
     for (int i = 0; i < bufferLength; ++i) {
-      iList.add((float)sampleBuffer.getInt());
-      qList.add((float)sampleBuffer.getInt());
+      iList.add((float) sampleBuffer.getInt());
+      qList.add((float) sampleBuffer.getInt());
     }
     return new IQComponents(iList, qList);
   }
