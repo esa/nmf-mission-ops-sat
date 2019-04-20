@@ -36,34 +36,45 @@ import org.ccsds.moims.mo.platform.autonomousadcs.structures.*;
 public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterface
 {
 
+  private static final Logger LOGGER = Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName());
   private AttitudeMode activeAttitudeMode;
-  private final SEPP_IADCS_API adcsApi;
-  private boolean unitAvailable = false;
+  private SEPP_IADCS_API adcsApi;
+  private boolean initialized = false;
 
   public AutonomousADCSOPSSATAdapter()
   {
-    Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.INFO, "Initialisation");
-    System.loadLibrary("iadcs_api_jni");
+    LOGGER.log(Level.INFO, "Initialisation");
+    try {
+      System.loadLibrary("iadcs_api_jni");
+    } catch (Exception ex) {
+      LOGGER.log(Level.SEVERE, "iADCS library could not be loaded!", ex);
+      initialized = false;
+      return;
+    }
     adcsApi = new SEPP_IADCS_API();
     activeAttitudeMode = null;
     try {
-      dumpHKTelemetry();
+      // Try running a short command as a ping
+      adcsApi.Get_Epoch_Time();
     } catch (Exception e) {
-      Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.SEVERE,
-          "Failed to initialize iADCS", e);
-      unitAvailable = false;
+      LOGGER.log(Level.SEVERE, "Failed to initialize iADCS", e);
+      initialized = false;
       return;
     }
-    unitAvailable = true;
+    try {
+      dumpHKTelemetry();
+    } catch (Exception e) {
+      LOGGER.log(Level.WARNING, "Failed to dump iADCS TM", e);
+    }
+    initialized = true;
   }
 
   private void dumpHKTelemetry()
   {
-    Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.INFO,
-        "Dumping HK Telemetry...");
-    SEPP_IADCS_API_STANDARD_TELEMETRY stdTM = adcsApi.Get_Standard_Telemetry();
+    LOGGER.log(Level.INFO, "Dumping HK Telemetry...");
+    //SEPP_IADCS_API_STANDARD_TELEMETRY stdTM = adcsApi.Get_Standard_Telemetry();
     SEPP_IADCS_API_POWER_STATUS_TELEMETRY powerTM = adcsApi.Get_Power_Status_Telemetry();
-    SEPP_IADCS_API_INFO_TELEMETRY infoTM = adcsApi.Get_Info_Telemetry();
+    //SEPP_IADCS_API_INFO_TELEMETRY infoTM = adcsApi.Get_Info_Telemetry();
     /*Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.INFO,
         String.format("Standard TM:\n"
             + "IADCS_STATUS_REGISTER = %d\n"
@@ -83,7 +94,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
             stdTM.getELAPSED_SUBSECONDS_SINCE_EPOCH_MSEC(),
             stdTM.getGYRO_1_TEMPERATURE_DEGC(),
             stdTM.getGYRO_2_TEMPERATURE_DEGC()));*/
-    Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.INFO,
+    LOGGER.log(Level.INFO,
         String.format("Power TM:\n"
             + " MAGNETTORQUER_POWER_CONSUMPTION_W = %.3f\n"
             + " MAGNETTORQUER_SUPPLY_VOLTAGE_V = %.3f\n"
@@ -217,7 +228,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   @Override
   public boolean isUnitAvailable()
   {
-    return unitAvailable;
+    return initialized;
   }
 
   @Override

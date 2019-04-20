@@ -48,11 +48,12 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
   private final Map<Identifier, Device> deviceByName;
   private final Map<Long, Device> deviceByObjInstId;
   private final Map<Long, PayloadDevice> payloadIdByObjInstId;
+  private static final Logger LOGGER = Logger.getLogger(PowerControlOPSSATAdapter.class.getName());
 
   public PowerControlOPSSATAdapter(GMVServicesConsumer gmvServicesConsumer)
   {
     this.gmvServicesConsumer = gmvServicesConsumer;
-    Logger.getLogger(PowerControlOPSSATAdapter.class.getName()).log(Level.INFO, "Initialisation");
+    LOGGER.log(Level.INFO, "Initialisation");
     devices = new ArrayList<>();
     deviceByName = new HashMap<>();
     deviceByObjInstId = new HashMap<>();
@@ -108,6 +109,7 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
   public void enableDevices(DeviceList inputList) throws IOException
   {
     for (Device device : inputList) {
+      LOGGER.log(Level.INFO, "Looking up Device {0}", new Object[]{device});
       PayloadDevice payloadId = payloadIdByObjInstId.get(device.getUnitObjInstId());
       if (device.getUnitObjInstId() != null) {
         payloadId = payloadIdByObjInstId.get(device.getUnitObjInstId());
@@ -116,29 +118,30 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
         if (found != null) {
           payloadId = payloadIdByObjInstId.get(found.getUnitObjInstId());
         } else {
-          throw new IOException("Cannot find the device.");
+          throw new IOException("Cannot find the device by type " + device.toString());
         }
       }
       if (payloadId != null) {
         switchDevice(payloadId, device.getEnabled());
       } else {
-        throw new IOException("Cannot find the payload id.");
+        throw new IOException("Cannot find the device by oId " + device.toString());
       }
     }
   }
 
   private void switchDevice(PayloadDevice device, Boolean enabled) throws IOException
   {
+    // TODO: Track status of the device in the device list
     PayloadDeviceList deviceList = new PayloadDeviceList();
     BooleanList powerStates = new BooleanList();
     deviceList.add(device);
     powerStates.add(enabled);
+    LOGGER.log(Level.INFO, "Switching device {0} to enabled: {1}", new Object[]{device, enabled});
     try {
       gmvServicesConsumer.getPowerNanomindService().getPowerNanomindStub().setPowerState(deviceList,
           powerStates);
     } catch (MALInteractionException | MALException ex) {
-      Logger.getLogger(PowerControlOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
-      throw new IOException("Cannot switch device through OBSW", ex);
+      throw new IOException("Cannot switch device through OBC", ex);
     }
   }
 
