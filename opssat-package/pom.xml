@@ -216,7 +216,6 @@
             <configuration>
               <target if="${isGround}">
                 <ant antfile="copy_ground.xml" target="copyfiles"/>
-                <!-- TODO: Second copy.xml for ground profile files that shall be copied -->
               </target>
             </configuration>
           </execution>
