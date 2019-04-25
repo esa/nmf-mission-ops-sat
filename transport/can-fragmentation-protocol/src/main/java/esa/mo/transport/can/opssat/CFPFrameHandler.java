@@ -32,6 +32,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import esa.mo.helpertools.misc.TaskScheduler;
+import java.util.concurrent.TimeUnit;
 
 /**
  * CFP Frame Processing
@@ -132,9 +134,9 @@ public class CFPFrameHandler implements FrameListener {
     public void init() {
         this.connector.init();
 
-        final Timer timer = new Timer();
+        final TaskScheduler timer = new TaskScheduler(1);
 
-        timer.scheduleAtFixedRate(new TimerTask() {
+        timer.scheduleTask(new Thread() {
             @Override
             public void run() {
                 // Collect how many messages were exchanged in the bus...
@@ -143,7 +145,7 @@ public class CFPFrameHandler implements FrameListener {
 
                 // An adaptive speed algorithm could go in here to minimize collisions
             }
-        }, MESSAGES_COUNTER_INTERVAL, MESSAGES_COUNTER_INTERVAL);
+        }, MESSAGES_COUNTER_INTERVAL, MESSAGES_COUNTER_INTERVAL, TimeUnit.MILLISECONDS, true);
 
         /*
         if (DESTRUCTION_ENABLED) {

@@ -21,8 +21,10 @@
 package esa.mo.nmf.provider;
 
 import esa.mo.com.impl.util.GMVServicesConsumer;
+import esa.mo.helpertools.misc.TaskScheduler;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.MALException;
@@ -35,14 +37,14 @@ import org.ccsds.moims.mo.mal.MALInteractionException;
 public class NanomindAliveMessage {
 
     private final GMVServicesConsumer gmvServicesConsumer;
-    private final Timer timer;
+    private final TaskScheduler timer;
     private static final int PERIOD = 10000;  // 10 seconds
     private boolean active = false;
     private final int apid;
 
     public NanomindAliveMessage(final GMVServicesConsumer gmvServicesConsumer, final int apid) {
         this.apid = apid;
-        this.timer = new Timer();
+        this.timer = new TaskScheduler(1);
         this.gmvServicesConsumer = gmvServicesConsumer;
     }
 
@@ -51,7 +53,7 @@ public class NanomindAliveMessage {
         // To do: Spoofing the APID is still not being done...
 
         // Start the periodic reporting here!
-        timer.scheduleAtFixedRate(new TimerTask() {
+        timer.scheduleTask(new Thread() {
             @Override
             public void run() {
                 if (active) {
@@ -64,7 +66,7 @@ public class NanomindAliveMessage {
                     }
                 }
             }
-        }, PERIOD, PERIOD); // the time has to be converted to milliseconds by multiplying by 1000
+        }, PERIOD, PERIOD, TimeUnit.MILLISECONDS, true); // the time has to be converted to milliseconds by multiplying by 1000
 
     }
     
