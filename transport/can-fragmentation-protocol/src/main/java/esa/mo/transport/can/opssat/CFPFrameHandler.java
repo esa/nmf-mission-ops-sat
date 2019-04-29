@@ -22,18 +22,16 @@ package esa.mo.transport.can.opssat;
 
 import com.github.kayak.core.Frame;
 import com.github.kayak.core.FrameListener;
+import esa.mo.helpertools.misc.TaskScheduler;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import esa.mo.helpertools.misc.TaskScheduler;
-import java.util.concurrent.TimeUnit;
 
 /**
  * CFP Frame Processing

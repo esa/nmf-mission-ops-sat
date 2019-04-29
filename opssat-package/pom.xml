@@ -62,6 +62,41 @@
   <properties>
     <esa.nmf.mission.opssat.assembly.outputdir>${project.build.directory}/nmf-opssat-${esa.nmf.version}</esa.nmf.mission.opssat.assembly.outputdir>
   </properties>
+  <profiles>
+    <profile>
+      <id>ground</id>
+      <properties>
+        <isGround>true</isGround>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>int.esa.nmf.sdk.examples.space</groupId>
+          <artifactId>payloads-test</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>int.esa.nmf.sdk.examples.space</groupId>
+          <artifactId>publish-clock</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>int.esa.nmf.sdk.examples.space</groupId>
+          <artifactId>all-mc-services</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>int.esa.nmf.sdk.examples.space</groupId>
+          <artifactId>camera</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>int.esa.nmf.mission.simulator</groupId>
+          <artifactId>nanosat-mo-supervisor-sim</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
   <dependencies>
     <!-- NOTE: Imprecise version resolution using ${esa.nmf.version-qualifier} cannot be used here,
     as maven-dependency-plugin:copy does not support it. -->
@@ -77,7 +112,7 @@
     </dependency>
     <dependency>
       <groupId>int.esa.nmf.mission.opssat</groupId>
-      <artifactId>nanosat-mo-supervisor-opssat</artifactId>
+      <artifactId>nanos<!-- TODO: Non essential parts, should be activated on a profile-basis -->at-mo-supervisor-opssat</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -89,32 +124,6 @@
       <groupId>int.esa.opssat.transport.dlr</groupId>
       <artifactId>malspp-encoding-opssat</artifactId>
       <version>1.0.1-FC</version>
-    </dependency>
-    <dependency>
-      <groupId>int.esa.nmf.sdk.examples.space</groupId>
-      <artifactId>payloads-test</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <!-- TODO: Non essential parts, should be activated on a profile-basis -->
-    <dependency>
-      <groupId>int.esa.nmf.sdk.examples.space</groupId>
-      <artifactId>publish-clock</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>int.esa.nmf.sdk.examples.space</groupId>
-      <artifactId>all-mc-services</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>int.esa.nmf.sdk.examples.space</groupId>
-      <artifactId>camera</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>int.esa.nmf.mission.simulator</groupId>
-      <artifactId>nanosat-mo-supervisor-sim</artifactId>
-      <version>${project.version}</version>
     </dependency>
   </dependencies>
   <build>
@@ -187,6 +196,7 @@
         <version>1.8</version>
         <executions>
           <execution>
+            <id>space</id>
             <phase>process-resources</phase>
             <goals>
               <goal>run</goal>
@@ -194,6 +204,19 @@
             <configuration>
               <target>
                 <ant antfile="copy.xml" target="copyfiles"/>
+              </target>
+            </configuration>
+          </execution>
+          <execution>
+            <id>ground</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target if="${isGround}">
+                <ant antfile="copy_ground.xml" target="copyfiles"/>
+                <!-- TODO: Second copy.xml for ground profile files that shall be copied -->
               </target>
             </configuration>
           </execution>
