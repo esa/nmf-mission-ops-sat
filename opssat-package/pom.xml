@@ -94,6 +94,11 @@
           <artifactId>nanosat-mo-supervisor-sim</artifactId>
           <version>${project.version}</version>
         </dependency>
+        <dependency>
+          <groupId>int.esa.nmf.mission.opssat</groupId>
+          <artifactId>ground-mo-proxy</artifactId>
+          <version>${project.version}</version>
+        </dependency>
       </dependencies>
     </profile>
   </profiles>
@@ -103,11 +108,6 @@
     <dependency>
       <groupId>int.esa.nmf.core</groupId>
       <artifactId>nanosat-mo-connector</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>int.esa.nmf.mission.opssat</groupId>
-      <artifactId>ground-mo-proxy</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
