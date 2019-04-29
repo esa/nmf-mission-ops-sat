@@ -1,7 +1,19 @@
 <project name="OPS-SAT package" default="copyfiles" basedir=".">
   <target name="copyfiles">
     <!-- TODO - ideally most of space-common should be copied once and symlinks used -->
-    <!-- TODO: Non essential parts, should be activated on a profile-basis -->
+    <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/home/payloads-test">
+      <fileset dir="${basedir}/src/main/resources/space-common"/>
+      <fileset dir="${basedir}/src/main/resources/space-app-root"/>
+      <filterset>
+        <filter token="MAIN_CLASS_NAME" value="esa.mo.nmf.apps.PayloadsTestApp"/>
+        <filter token="APID" value="1504"/>
+        <filter token="NMF_LIB" value="`cd ../nmf/lib > /dev/null; pwd`/*"/>
+      </filterset>
+      <firstmatchmapper>
+        <globmapper from="startscript.sh" to="start_payloads-test.sh"/>
+        <globmapper from="*" to="*"/>
+      </firstmatchmapper>
+    </copy>
     <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/home/nmf/nanosat-mo-supervisor-sim">
       <fileset dir="${basedir}/src/main/resources/space-common"/>
       <fileset dir="${basedir}/src/main/resources/space-supervisor-sim-root"/>

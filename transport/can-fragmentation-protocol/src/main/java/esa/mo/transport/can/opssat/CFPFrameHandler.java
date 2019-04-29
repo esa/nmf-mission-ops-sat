@@ -32,8 +32,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import esa.mo.helpertools.misc.TaskScheduler;
-import java.util.concurrent.TimeUnit;
 
 /**
  * CFP Frame Processing
