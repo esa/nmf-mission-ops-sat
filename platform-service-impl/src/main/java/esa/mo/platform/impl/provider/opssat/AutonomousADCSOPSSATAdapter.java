@@ -356,8 +356,6 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
         throw new UnsupportedOperationException("Only X, Y and Z are valid Single Spinning axis.");
       }
       adcsApi.Start_SingleAxis_AngularVelocity_Controller(vec, a.getAngularVelocity());
-      adcsApi.Start_SingleAxis_AngularVelocity_Controller(
-          SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X, 0);
       activeAttitudeMode = a;
     } else if (attitude instanceof AttitudeModeSunPointing) {
       if (targetVector == null) {
@@ -426,6 +424,8 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       params.setSTOP_LONGITUDE(a.getLongitude_end());
       params.setTOLERANCE_PARAMETERS(tolerance);
       params.setUPDATE_INTERVAL(BigInteger.valueOf(500));
+      adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
+      adcsApi.Init_Orbit_Module(readTLEFile());
       adcsApi.Start_Target_Pointing_Earth_Const_Velocity_Mode(params);
       activeAttitudeMode = a;
     } else {
@@ -448,7 +448,6 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
           SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
     } else if (activeAttitudeMode instanceof AttitudeModeSunPointing) {
-
       adcsApi.Stop_Operation_Mode_Sun_Pointing();
     } else if (activeAttitudeMode instanceof AttitudeModeTargetTracking) {
       adcsApi.Stop_Target_Pointing_Earth_Fix_Mode();
