@@ -22,8 +22,14 @@ package esa.mo.platform.impl.provider.opssat;
 
 import at.tugraz.ihf.opssat.iadcs.*;
 import esa.mo.platform.impl.provider.gen.AutonomousADCSAdapterInterface;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.structures.FloatList;
@@ -40,6 +46,13 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   private AttitudeMode activeAttitudeMode;
   private SEPP_IADCS_API adcsApi;
   private boolean initialized = false;
+
+  // Additional parameters which need to be used for attitude mode changes.
+  private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT losVector;
+  private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT flightVector;
+  private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT targetVector; // For sun pointing
+  private SEPP_IADCS_API_TARGET_POINTING_TOLERANCE_PARAMETERS tolerance
+      = new SEPP_IADCS_API_TARGET_POINTING_TOLERANCE_PARAMETERS();
 
   public AutonomousADCSOPSSATAdapter()
   {
@@ -67,6 +80,94 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       LOGGER.log(Level.WARNING, "Failed to dump iADCS TM", e);
     }
     initialized = true;
+    tolerance.setPREALIGNMENT_ANGLE_TOLERANCE_RAD(0.0872665f);
+    tolerance.setPREALIGNMENT_ANGLE_TOLERANCE_PERCENT(20.0f);
+    tolerance.setPREALIGNMENT_ANGULAR_VELOCITY_TOLERANCE_RADPS(0.00872665f);
+    tolerance.setPREALIGNMENT_TARGET_THRESHOLD_RAD(0.261799f); // See section 6.2.2.4 in ICD
+  }
+
+  private SEPP_IADCS_API_ORBIT_TLE_DATA readTLEFile() throws IOException, FileNotFoundException
+  {
+    File f = new File("/etc/tle");
+    BufferedReader br = new BufferedReader(new FileReader(f));
+    String s;
+    List<String> lines = new ArrayList<String>();
+    while ((s = br.readLine()) != null) {
+      String l = new String(s);
+      lines.add(l);
+    }
+    if (lines.size() == 3) {
+      lines.remove(0);
+    }
+    SEPP_IADCS_API_ORBIT_TLE_DATA tle = new SEPP_IADCS_API_ORBIT_TLE_DATA();
+    byte[] l1 = lines.get(0).getBytes();
+    byte[] l2 = lines.get(1).getBytes();
+    Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.INFO,
+        "Successfully loaded " + l1.length + " bytes of line 1.");
+    Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.INFO,
+        "Successfully loaded " + l2.length + " bytes of line 2.");
+    tle.setTLE_1(l1);
+    tle.setTLE_2(l2);
+    return tle;
+  }
+
+  /**
+   * Sets the line of sight vector for the different target pointing modes.
+   *
+   * @param los Line of sight unit vector in body frame of the satellite.
+   * @throws IllegalArgumentException Thrown when the vector does not have length 1.
+   */
+  public void setLOSVector(Vector3D los) throws IllegalArgumentException
+  {
+    double x2 = (double) los.getX() * (double) los.getX();
+    double y2 = (double) los.getY() * (double) los.getY();
+    double z2 = (double) los.getZ() * (double) los.getZ();
+    if (!isUnity(los)) {
+      throw new IllegalArgumentException("The provided line of sight vector needs to have length 1.");
+    }
+    losVector = convertToAdcsApiVector(los);
+  }
+
+  /**
+   * Sets the flight vector for different target pointing modes.
+   *
+   * @param flight Flight vector as unit vector in body frame of the satellite.
+   * @throws IllegalArgumentException Thrown when the vector does not have length 1.
+   */
+  public void setFlightVector(Vector3D flight) throws IllegalArgumentException
+  {
+    if (!isUnity(flight)) {
+      throw new IllegalArgumentException("The provided flight vector needs to have length 1.");
+    }
+    flightVector = convertToAdcsApiVector(flight);
+  }
+
+  /**
+   * Sets the target vector for active sun pointing mode.
+   *
+   * @param target Target vector as unit vector in body frame of the satellite.
+   * @throws IllegalArgumentException Thrown when the vector is not a unit vector.
+   */
+  public void setTargetVector(Vector3D target) throws IllegalArgumentException
+  {
+    if (!isUnity(target)) {
+      throw new IllegalArgumentException("The provided target vector needs to have length 1.");
+    }
+    targetVector = convertToAdcsApiVector(target);
+  }
+
+  /**
+   * Checks if a given Vector3D has the euclidian length 1 (is a unit vector).
+   *
+   * @param vec The vector to be checked.
+   * @return True iff length is 1.
+   */
+  private boolean isUnity(Vector3D vec)
+  {
+    double x2 = (double) vec.getX() * (double) vec.getX();
+    double y2 = (double) vec.getY() * (double) vec.getY();
+    double z2 = (double) vec.getZ() * (double) vec.getZ();
+    return Math.sqrt(x2 + y2 + z2) == 1.0;
   }
 
   private void dumpHKTelemetry()
@@ -133,7 +234,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
             + "COMPILER_VERSION = %s\n",
             infoTM.getPRIMARY_TARGET_TYPE(),
             infoTM.getSECONDARY_TARGET_TYPE(),
-            infoTM.getDEVICE_NAME(),
+            infoTM.getDEVICE_NAME(),z2
             infoTM.getDEVICE_MODEL_NAME(),
             infoTM.getSERIAL_NUMBER(),
             infoTM.getCOMPILE_TIME(),
@@ -167,6 +268,15 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     return MagnetorquersState.fromOrdinal(mappedOrdinal);
   }
 
+  static private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT convertToAdcsApiVector(Vector3D vec)
+  {
+    SEPP_IADCS_API_VECTOR3_XYZ_FLOAT sepp = new SEPP_IADCS_API_VECTOR3_XYZ_FLOAT();
+    sepp.setX(vec.getX());
+    sepp.setY(vec.getY());
+    sepp.setZ(vec.getZ());
+    return sepp;
+  }
+
   static private Vector3D convertAdcsApiVector(SEPP_IADCS_API_VECTOR3_XYZ_FLOAT in)
   {
     return new Vector3D(in.getX(), in.getY(), in.getZ());
@@ -196,30 +306,127 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       UnsupportedOperationException
   {
     if (attitude instanceof AttitudeModeBDot) {
+      AttitudeModeBDot a = (AttitudeModeBDot) attitude;
+      SEPP_IADCS_API_DETUMBLING_MODE_PARAMETERS params
+          = new SEPP_IADCS_API_DETUMBLING_MODE_PARAMETERS();
+      adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
+      params.setSTART_EPOCH_TIME(BigInteger.valueOf(System.currentTimeMillis()));
+      params.setSTOP_EPOCH_TIME(BigInteger.valueOf(Long.MAX_VALUE));
+      adcsApi.Start_Operation_Mode_Detumbling(params);
+      activeAttitudeMode = a;
     } else if (attitude instanceof AttitudeModeNadirPointing) {
+      if (losVector == null || flightVector == null) {
+        throw new IOException(
+            "LOS vector or flight vector not set. Call setLOSVector and setFlightVector before calling setDesiredAttitudeMode.");
+      }
+      AttitudeModeNadirPointing a = (AttitudeModeNadirPointing) attitude;
+      SEPP_IADCS_API_TARGET_POINTING_NADIR_MODE_PARAMETERS params
+          = new SEPP_IADCS_API_TARGET_POINTING_NADIR_MODE_PARAMETERS();
+      // Set parameters
+      params.setLOS_VECTOR_BF(losVector);
+      params.setFLIGHT_VECTOR_BF(flightVector);
+      params.setUPDATE_INTERVAL(BigInteger.valueOf(500));
+      params.setMODE(
+          SEPP_IADCS_API_TARGET_POINTING_ATTITUDE_DETERMINATION_MODES.IADCS_ATTITUDE_DETERMINATION_STARTRACKER_ONLY);
+
+      params.setTOLERANCE_PARAMETERS(tolerance);
+      params.setOFFSET_TIME(.0f);
+      adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
+      adcsApi.Init_Orbit_Module(readTLEFile());
+      adcsApi.Start_Target_Pointing_Nadir_Mode(params);
+      activeAttitudeMode = a;
     } else if (attitude instanceof AttitudeModeSingleSpinning) {
+      AttitudeModeSingleSpinning a = (AttitudeModeSingleSpinning) attitude;
+      Vector3D target = a.getBodyAxis();
+      SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS vec;
+      if (target.equals(new Vector3D(1.0f, 0f, 0f))) {
+        vec = SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X;
+      } else if (target.equals(new Vector3D(0f, 1.0f, 0f))) {
+        vec = SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y;
+      } else if (target.equals(new Vector3D(0f, 0f, 1.0f))) {
+        vec = SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z;
+      } else {
+        throw new UnsupportedOperationException("Only X, Y and Z are valid Single Spinning axis.");
+      }
+      adcsApi.Start_SingleAxis_AngularVelocity_Controller(
+          SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X, 0);
+      activeAttitudeMode = a;
     } else if (attitude instanceof AttitudeModeSunPointing) {
+      if (targetVector == null) {
+        throw new IOException(
+            "Target vector is not set. Call setTargetVector before calling setDesiredAttitudeMode.");
+      }
       AttitudeModeSunPointing sunPointing = (AttitudeModeSunPointing) attitude;
       SEPP_IADCS_API_SUN_POINTING_MODE_PARAMETERS params
           = new SEPP_IADCS_API_SUN_POINTING_MODE_PARAMETERS();
       params.setSTART_EPOCH_TIME(BigInteger.valueOf(0));
-      params.setSTOP_EPOCH_TIME(BigInteger.valueOf(0xFFFFFFFF));
+      params.setSTOP_EPOCH_TIME(BigInteger.valueOf(Long.MAX_VALUE));
+      params.setTARGET_VECTOR_BF(targetVector);
+      adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
+      adcsApi.Init_Orbit_Module(readTLEFile());
       adcsApi.Start_Operation_Mode_Sun_Pointing(params);
-      return;
+      activeAttitudeMode = sunPointing;
     } else if (attitude instanceof AttitudeModeTargetTracking) {
+      if (losVector == null || flightVector == null) {
+        throw new IOException("LOS or flight vector not set.");
+      }
+
+      SEPP_IADCS_API_EARTH_TARGET_POINTING_FIXED_MODE_PARAMETERS params
+          = new SEPP_IADCS_API_EARTH_TARGET_POINTING_FIXED_MODE_PARAMETERS();
+
+      params.setMODE(
+          SEPP_IADCS_API_TARGET_POINTING_ATTITUDE_DETERMINATION_MODES.IADCS_ATTITUDE_DETERMINATION_STARTRACKER_ONLY);
+      params.setTOLERANCE_PARAMETERS(tolerance);
+      params.setFLIGHT_VECTOR_BF(flightVector);
+      params.setLOS_VECTOR_BF(losVector);
+      params.setUPDATE_INTERVAL(BigInteger.valueOf(500));
+      AttitudeModeTargetTracking a = (AttitudeModeTargetTracking) attitude;
+      params.setTARGET_LATITUDE(a.getLatitude());
+      params.setTARGET_LONGITUDE(a.getLongitude());
+      adcsApi.Start_Target_Pointing_Earth_Fix_Mode(params);
+      activeAttitudeMode = a;
+    } else if (attitude instanceof AttitudeModeTargetTrackingLinear) {
+      if (losVector == null || flightVector == null) {
+        throw new IOException("LOS or flight vector not set.");
+      }
+
+      SEPP_IADCS_API_EARTH_TARGET_POINTING_CONST_VELOCITY_MODE_PARAMETERS params
+          = new SEPP_IADCS_API_EARTH_TARGET_POINTING_CONST_VELOCITY_MODE_PARAMETERS();
+      params.setFLIGHT_VECTOR_BF(flightVector);
+      params.setLOS_VECTOR_BF(losVector);
+      params.setMODE(
+          SEPP_IADCS_API_TARGET_POINTING_ATTITUDE_DETERMINATION_MODES.IADCS_ATTITUDE_DETERMINATION_STARTRACKER_ONLY);
+      params.setOFFSET_TIME(BigInteger.valueOf(0));
+      AttitudeModeTargetTrackingLinear a = (AttitudeModeTargetTrackingLinear) attitude;
+      params.setSTART_EPOCH_TIME(BigInteger.valueOf(a.getStart_epoch()));
+      params.setSTOP_EPOCH_TIME(BigInteger.valueOf(a.getEnd_epoch()));
+      params.setSTART_LATITUDE(a.getLatitude_start());
+      params.setSTART_LONGITUDE(a.getLongitude_start());
+      params.setSTOP_LATITUDE(a.getLatitude_end());
+      params.setSTOP_LONGITUDE(a.getLongitude_end());
+      params.setTOLERANCE_PARAMETERS(tolerance);
+      params.setUPDATE_INTERVAL(BigInteger.valueOf(500));
+      adcsApi.Start_Target_Pointing_Earth_Const_Velocity_Mode(params);
+      activeAttitudeMode = a;
+    } else {
+      throw new UnsupportedOperationException("Not supported yet.");
     }
-    throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
   public void unset() throws IOException
   {
     if (activeAttitudeMode instanceof AttitudeModeBDot) {
+
     } else if (activeAttitudeMode instanceof AttitudeModeNadirPointing) {
+
     } else if (activeAttitudeMode instanceof AttitudeModeSingleSpinning) {
+
     } else if (activeAttitudeMode instanceof AttitudeModeSunPointing) {
+
       adcsApi.Stop_Operation_Mode_Sun_Pointing();
     } else if (activeAttitudeMode instanceof AttitudeModeTargetTracking) {
+
     }
     activeAttitudeMode = null;
     adcsApi.Set_Operation_Mode_Idle();
