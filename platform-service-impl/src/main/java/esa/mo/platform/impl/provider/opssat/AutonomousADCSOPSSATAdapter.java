@@ -86,10 +86,10 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     }
     initialized = true;
 
-    tolerance.setPREALIGNMENT_ANGLE_TOLERANCE_RAD(ANGLE_TOL_RAD);
-    tolerance.setPREALIGNMENT_ANGLE_TOLERANCE_PERCENT(ANGLE_TOL_PERCENT);
-    tolerance.setPREALIGNMENT_ANGULAR_VELOCITY_TOLERANCE_RADPS(ANGLE_VEL_TOL_RADPS);
-    tolerance.setPREALIGNMENT_TARGET_THRESHOLD_RAD(TARGET_THRESHOLD_RAD); // See section 6.2.2.4 in ICD
+    tolerance.setPREALIGNMENT_ANGLE_TOLERANCE_RAD(0.0872665f);
+    tolerance.setPREALIGNMENT_ANGLE_TOLERANCE_PERCENT(20.0f);
+    tolerance.setPREALIGNMENT_ANGULAR_VELOCITY_TOLERANCE_RADPS(0.00872665f);
+    tolerance.setPREALIGNMENT_TARGET_THRESHOLD_RAD(0.261799f); // See section 6.2.2.4 in ICD
   }
 
   private SEPP_IADCS_API_ORBIT_TLE_DATA readTLEFile() throws IOException, FileNotFoundException
@@ -108,9 +108,10 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     SEPP_IADCS_API_ORBIT_TLE_DATA tle = new SEPP_IADCS_API_ORBIT_TLE_DATA();
     byte[] l1 = lines.get(0).getBytes();
     byte[] l2 = lines.get(1).getBytes();
-    LOGGER.log(Level.INFO,
+
+    Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.INFO,
         "Successfully loaded " + l1.length + " bytes of line 1.");
-    LOGGER.log(Level.INFO,
+    Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.INFO,
         "Successfully loaded " + l2.length + " bytes of line 2.");
     tle.setTLE_1(l1);
     tle.setTLE_2(l2);
@@ -355,6 +356,8 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
         throw new UnsupportedOperationException("Only X, Y and Z are valid Single Spinning axis.");
       }
       adcsApi.Start_SingleAxis_AngularVelocity_Controller(vec, a.getAngularVelocity());
+      adcsApi.Start_SingleAxis_AngularVelocity_Controller(
+          SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X, 0);
       activeAttitudeMode = a;
     } else if (attitude instanceof AttitudeModeSunPointing) {
       if (targetVector == null) {
@@ -415,6 +418,14 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       params.setUPDATE_INTERVAL(BigInteger.valueOf(500));
       adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
       adcsApi.Init_Orbit_Module(readTLEFile());
+      params.setSTART_EPOCH_TIME(BigInteger.valueOf(a.getStart_epoch()));
+      params.setSTOP_EPOCH_TIME(BigInteger.valueOf(a.getEnd_epoch()));
+      params.setSTART_LATITUDE(a.getLatitude_start());
+      params.setSTART_LONGITUDE(a.getLongitude_start());
+      params.setSTOP_LATITUDE(a.getLatitude_end());
+      params.setSTOP_LONGITUDE(a.getLongitude_end());
+      params.setTOLERANCE_PARAMETERS(tolerance);
+      params.setUPDATE_INTERVAL(BigInteger.valueOf(500));
       adcsApi.Start_Target_Pointing_Earth_Const_Velocity_Mode(params);
       activeAttitudeMode = a;
     } else {
@@ -437,6 +448,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
           SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
     } else if (activeAttitudeMode instanceof AttitudeModeSunPointing) {
+
       adcsApi.Stop_Operation_Mode_Sun_Pointing();
     } else if (activeAttitudeMode instanceof AttitudeModeTargetTracking) {
       adcsApi.Stop_Target_Pointing_Earth_Fix_Mode();
