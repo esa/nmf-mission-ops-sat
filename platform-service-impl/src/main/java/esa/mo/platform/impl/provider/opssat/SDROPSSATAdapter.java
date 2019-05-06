@@ -26,6 +26,7 @@ import at.tugraz.ihf.opssat.sdr.eSDR_RFFE_RX_LPF_BW;
 import at.tugraz.ihf.opssat.sdr.eSDR_RFFE_RX_SAMPLING_FREQ;
 import esa.mo.platform.impl.provider.gen.SoftwareDefinedRadioAdapterInterface;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -190,11 +191,14 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
     }
     FloatList iList = new FloatList(bufferLength);
     FloatList qList = new FloatList(bufferLength);
-    // TODO add SWIG pointer mapping
-    // sdrApi.Receive_IQ_Samples(new SWIGTYPE_p_unsigned_int(), bufferLength);
+
+    int[] ints = new int[bufferLength];
+    sdrApi.Receive_IQ_Samples(ints, bufferSize);
+    IntBuffer tempBuffer = sampleBuffer.asIntBuffer();
+    tempBuffer.put(ints);
     for (int i = 0; i < bufferLength; ++i) {
-      iList.add((float) sampleBuffer.getInt());
-      qList.add((float) sampleBuffer.getInt());
+      iList.add((float) (sampleBuffer.getInt() & 0xFFFFFFFFL)); // remove sign extension
+      qList.add((float) (sampleBuffer.getInt() & 0xFFFFFFFFL));
     }
     return new IQComponents(iList, qList);
   }
