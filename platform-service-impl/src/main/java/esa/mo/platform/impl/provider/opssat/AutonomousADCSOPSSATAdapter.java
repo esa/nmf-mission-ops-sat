@@ -399,12 +399,12 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
           SEPP_IADCS_API_TARGET_POINTING_ATTITUDE_DETERMINATION_MODES.IADCS_ATTITUDE_DETERMINATION_STARTRACKER_ONLY);
       params.setOFFSET_TIME(BigInteger.valueOf(0));
       AttitudeModeTargetTrackingLinear a = (AttitudeModeTargetTrackingLinear) attitude;
-      params.setSTART_EPOCH_TIME(BigInteger.valueOf(a.getStart_epoch()));
-      params.setSTOP_EPOCH_TIME(BigInteger.valueOf(a.getEnd_epoch()));
-      params.setSTART_LATITUDE(a.getLatitude_start());
-      params.setSTART_LONGITUDE(a.getLongitude_start());
-      params.setSTOP_LATITUDE(a.getLatitude_end());
-      params.setSTOP_LONGITUDE(a.getLongitude_end());
+      params.setSTART_EPOCH_TIME(BigInteger.valueOf(a.getStartEpoch()));
+      params.setSTOP_EPOCH_TIME(BigInteger.valueOf(a.getEndEpoch()));
+      params.setSTART_LATITUDE(a.getLatitudeStart());
+      params.setSTART_LONGITUDE(a.getLongitudeStart());
+      params.setSTOP_LATITUDE(a.getLatitudeEnd());
+      params.setSTOP_LONGITUDE(a.getLongitudeEnd());
       params.setTOLERANCE_PARAMETERS(tolerance);
       params.setUPDATE_INTERVAL(BigInteger.valueOf(500));
       adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
