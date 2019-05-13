@@ -416,16 +416,6 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       params.setUPDATE_INTERVAL(BigInteger.valueOf(500));
       adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
       adcsApi.Init_Orbit_Module(readTLEFile());
-      params.setSTART_EPOCH_TIME(BigInteger.valueOf(a.getStart_epoch()));
-      params.setSTOP_EPOCH_TIME(BigInteger.valueOf(a.getEnd_epoch()));
-      params.setSTART_LATITUDE(a.getLatitude_start());
-      params.setSTART_LONGITUDE(a.getLongitude_start());
-      params.setSTOP_LATITUDE(a.getLatitude_end());
-      params.setSTOP_LONGITUDE(a.getLongitude_end());
-      params.setTOLERANCE_PARAMETERS(tolerance);
-      params.setUPDATE_INTERVAL(BigInteger.valueOf(500));
-      adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
-      adcsApi.Init_Orbit_Module(readTLEFile());
       adcsApi.Start_Target_Pointing_Earth_Const_Velocity_Mode(params);
       activeAttitudeMode = a;
     } else {
