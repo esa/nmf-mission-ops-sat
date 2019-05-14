@@ -86,10 +86,10 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     }
     initialized = true;
 
-    tolerance.setPREALIGNMENT_ANGLE_TOLERANCE_RAD(0.0872665f);
-    tolerance.setPREALIGNMENT_ANGLE_TOLERANCE_PERCENT(20.0f);
-    tolerance.setPREALIGNMENT_ANGULAR_VELOCITY_TOLERANCE_RADPS(0.00872665f);
-    tolerance.setPREALIGNMENT_TARGET_THRESHOLD_RAD(0.261799f); // See section 6.2.2.4 in ICD
+    tolerance.setPREALIGNMENT_ANGLE_TOLERANCE_RAD(ANGLE_TOL_RAD);
+    tolerance.setPREALIGNMENT_ANGLE_TOLERANCE_PERCENT(ANGLE_TOL_PERCENT);
+    tolerance.setPREALIGNMENT_ANGULAR_VELOCITY_TOLERANCE_RADPS(ANGLE_VEL_TOL_RADPS);
+    tolerance.setPREALIGNMENT_TARGET_THRESHOLD_RAD(TARGET_THRESHOLD_RAD); // See section 6.2.2.4 in ICD
   }
 
   private SEPP_IADCS_API_ORBIT_TLE_DATA readTLEFile() throws IOException, FileNotFoundException
