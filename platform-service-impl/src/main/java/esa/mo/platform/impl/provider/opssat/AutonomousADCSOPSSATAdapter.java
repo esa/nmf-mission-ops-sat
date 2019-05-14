@@ -102,9 +102,9 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     SEPP_IADCS_API_ORBIT_TLE_DATA tle = new SEPP_IADCS_API_ORBIT_TLE_DATA();
     byte[] l1 = lines.get(0).getBytes();
     byte[] l2 = lines.get(1).getBytes();
-    Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.INFO,
+    LOGGER.log(Level.INFO,
         "Successfully loaded " + l1.length + " bytes of line 1.");
-    Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.INFO,
+    LOGGER.log(Level.INFO,
         "Successfully loaded " + l2.length + " bytes of line 2.");
     tle.setTLE_1(l1);
     tle.setTLE_2(l2);

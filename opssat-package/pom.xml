@@ -112,7 +112,7 @@
     </dependency>
     <dependency>
       <groupId>int.esa.nmf.mission.opssat</groupId>
-      <artifactId>nanos<!-- TODO: Non essential parts, should be activated on a profile-basis -->at-mo-supervisor-opssat</artifactId>
+      <artifactId>nanosat-mo-supervisor-opssat</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
