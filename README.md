@@ -9,7 +9,9 @@ The SDK is based on a simulator, providing most of the platform functionalities 
 The official website of the NanoSat MO Framework is available [here].
 
 # Building the project
-You can build this project for two scenarios. In the first scenario you want a minimal build which gets put onto the SEPP. You can produce this build by just running 'mvn install' in the root directory of this repository. In the other scenario you want to test and simulate your apps in order to validate their correctness. This is done by providing a separate build profile which can be invoked by running 'mvn install -Pground' inside the main directory of this repository.
+You can build this project for two scenarios. In the first scenario you want a minimal build which gets put onto the SEPP. You can produce this build by just running 'mvn install' in the root directory of 
+this repository. In the other scenario you want to test and simulate your apps in order to validate their correctness and later connect to your apps on the space-craft by using the Ground MO Proxy. 
+This is done by providing a separate build profile which can be invoked by running 'mvn install -Pground' inside the main directory of this repository.
 
 ## Adding apps to the default build
 If you want your app to be included in the minimal default build, you have to take two steps.
@@ -17,8 +19,8 @@ If you want your app to be included in the minimal default build, you have to ta
 2. Add a copy task for your app in the opssat-package/copy.xml file. An example is provided inside this file for the payloads-test app.
 Remember that the startscript.sh should be mapped to "start\_YOURAPPNAME.sh", so it can be started by the supervisor.
 
-## Adding apps to the ground build
-1. Add your app to the dependencies inside the 'ground' profile in opssat-package/pom.xml.
+## Adding applications to the ground build
+1. Add your application to the dependencies inside the 'ground' profile in opssat-package/pom.xml.
 2. Add a copy task for your app in the opssat-package/copy\_ground.xml file. 
 
 # Bugs Reporting
