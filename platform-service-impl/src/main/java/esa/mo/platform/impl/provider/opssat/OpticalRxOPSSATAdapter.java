@@ -59,13 +59,13 @@ public class OpticalRxOPSSATAdapter implements OpticalDataReceiverAdapterInterfa
       return null;
     }
     LOGGER.log(Level.INFO, "Recording optical data for {0}s", duration);
-    optRxApi.Clear_SharedMemory_Data_Buffer();
-    optRxApi.Enable_RX_Detector();
+    optRxApi.Set_SharedMemory_IF_Switch(1);
     try {
       Thread.sleep((long) (duration.getValue() * 1000));
     } catch (InterruptedException e) {
       return null;
     }
+    optRxApi.Set_SharedMemory_IF_Switch(0);
     // TODO capture data from the API
     return new byte[0];
   }
