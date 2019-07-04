@@ -56,8 +56,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT losVector;
   private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT flightVector;
   private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT targetVector; // For sun pointing
-  private SEPP_IADCS_API_TARGET_POINTING_TOLERANCE_PARAMETERS tolerance
-      = new SEPP_IADCS_API_TARGET_POINTING_TOLERANCE_PARAMETERS();
+  private SEPP_IADCS_API_TARGET_POINTING_TOLERANCE_PARAMETERS tolerance;
 
   public AutonomousADCSOPSSATAdapter()
   {
@@ -85,7 +84,8 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       LOGGER.log(Level.WARNING, "Failed to dump iADCS TM", e);
     }
     initialized = true;
-
+    
+    tolerance = new SEPP_IADCS_API_TARGET_POINTING_TOLERANCE_PARAMETERS();
     tolerance.setPREALIGNMENT_ANGLE_TOLERANCE_RAD(ANGLE_TOL_RAD);
     tolerance.setPREALIGNMENT_ANGLE_TOLERANCE_PERCENT(ANGLE_TOL_PERCENT);
     tolerance.setPREALIGNMENT_ANGULAR_VELOCITY_TOLERANCE_RADPS(ANGLE_VEL_TOL_RADPS);
