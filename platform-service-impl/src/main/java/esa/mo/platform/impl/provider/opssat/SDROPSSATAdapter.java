@@ -160,7 +160,7 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
       bufferSize = (int) (bufferLength * 8);
       sampleBuffer = ByteBuffer.allocateDirect(bufferSize);
     } catch (Exception ex) {
-      LOGGER.log(Level.WARNING, "Setting SDR configuration failed", ex);
+      LOGGER.log(Level.WARNING, "Setting SDR configuration " + configuration + " failed", ex);
       return false;
     }
     configured = true;
