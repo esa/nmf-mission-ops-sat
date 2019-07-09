@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.MALException;
 import esa.opssat.nanomind.opssat_pf.gps.consumer.GPSAdapter;
+import org.ccsds.moims.mo.mal.MALInteractionException;
 import org.ccsds.moims.mo.mal.structures.Blob;
 
 /**
@@ -46,8 +47,8 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
     public String getNMEASentence(String identifier) throws IOException {
         GPSHandler gpsHandler = new GPSHandler();
         try {
-            //gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData(new Blob(identifier.getBytes()), gpsHandler);
-        } catch (Exception e) {
+            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData(new Blob(identifier.getBytes()), gpsHandler);
+        } catch (IllegalArgumentException | MALException | MALInteractionException e) {
             throw new IOException("Error when retrieving GPS NMEA response from Nanomind", e);
         }
         return gpsHandler.response;
@@ -55,7 +56,7 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
 
     @Override
     public boolean isUnitAvailable() {
-        return false;
+        return true;
     }
 
     private class GPSHandler extends GPSAdapter {
