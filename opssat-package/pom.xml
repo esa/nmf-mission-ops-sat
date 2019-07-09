@@ -71,11 +71,6 @@
       <dependencies>
         <dependency>
           <groupId>int.esa.nmf.sdk.examples.space</groupId>
-          <artifactId>payloads-test</artifactId>
-          <version>${project.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>int.esa.nmf.sdk.examples.space</groupId>
           <artifactId>publish-clock</artifactId>
           <version>${project.version}</version>
         </dependency>
@@ -113,6 +108,11 @@
     <dependency>
       <groupId>int.esa.nmf.mission.opssat</groupId>
       <artifactId>nanosat-mo-supervisor-opssat</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.nmf.sdk.examples.space</groupId>
+      <artifactId>payloads-test</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
