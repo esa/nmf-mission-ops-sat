@@ -5,6 +5,8 @@ if [ -z "$NMF_LIB" ] ; then
     NMF_LIB=@NMF_LIB@
 fi
 
+export NMF_LIB
+
 # Replaced with the main class name
 MAIN_CLASS_NAME=@MAIN_CLASS_NAME@
 
