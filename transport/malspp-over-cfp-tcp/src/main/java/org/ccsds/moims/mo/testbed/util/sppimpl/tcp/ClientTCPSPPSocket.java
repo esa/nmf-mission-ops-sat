@@ -100,6 +100,10 @@ public class ClientTCPSPPSocket implements SPPSocket
         try {
           SpacePacket packet = channel.receive();
 
+          if(packet == null){ // return null if packet is not NMF relevant
+            return packet;
+          }
+
           int packetAPID = packet.getHeader().getApid();
           final int sequenceCount = packet.getHeader().getSequenceCount();
           final int previous = (lastSPPsMap.get(packetAPID) != null) ? lastSPPsMap.get(packetAPID)

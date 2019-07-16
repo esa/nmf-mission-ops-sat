@@ -145,7 +145,7 @@ public class SPPMessageHeader implements MALMessageHeader {
 		SpacePacketHeader sppHeader = spacePacket.getHeader();
 		if (sppHeader.getPacketVersionNumber() != SPPTransport.SPP_VERSION
 				|| sppHeader.getSecondaryHeaderFlag() != 1) {
-			throw new MALException(MALFORMED_SPACE_PACKET);
+			throw new MALException(MALFORMED_SPACE_PACKET+" APID is: "+sppHeader.getApid());
 		}
 		short primaryApid = (short) sppHeader.getApid();
 		int primaryApidQualifier = spacePacket.getApidQualifier();

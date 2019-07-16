@@ -411,7 +411,10 @@ public class SPPTransport implements MALTransport {
 
 		try {
 			SpacePacket spacePacket = sppSocket.receive(); // blocks until a space packet has been received
-
+                        if(spacePacket == null){
+                          LOGGER.log(Level.INFO, "Discarding message as it is not relevant for NMF.");
+                          return null;
+                        }
                         // PENDING: SPP TCP implementation allocates a new Space Packet with a body size of
 			// 65536 bytes. If the received Space Packet is smaller, the body byte array is not
 			// trimmed to fit. Here: Create new byte array of right size, copy contents, and set

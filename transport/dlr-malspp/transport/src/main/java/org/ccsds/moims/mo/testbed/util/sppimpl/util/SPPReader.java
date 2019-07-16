@@ -32,8 +32,14 @@
  */
 package org.ccsds.moims.mo.testbed.util.sppimpl.util;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ccsds.moims.mo.testbed.util.spp.SpacePacket;
@@ -51,7 +57,8 @@ public class SPPReader
   private final byte[] inCrcBuffer;
   private final InputStream is;
   private final boolean crcEnabled;
-
+  private List<Integer> apidWhitelist;
+  private boolean allAllowed = false;
   private SpacePacket packet;
 
   public SPPReader(InputStream is)
@@ -61,6 +68,38 @@ public class SPPReader
     inHeaderBuffer = new byte[6];
     inCrcBuffer = new byte[2];
     crcEnabled = SPPHelper.getCrcEnabled();
+    apidWhitelist = initWhitelist(new File("apids.txt"));
+
+  }
+
+  public ArrayList<Integer> initWhitelist(File f)
+  {
+    ArrayList<Integer> result = new ArrayList<Integer>();
+
+    BufferedReader br;
+    try {
+      br = new BufferedReader(new FileReader(f));
+      String line = null;
+
+      while ((line = br.readLine()) != null) {
+        String[] range = line.split("-");
+        if (range.length == 2) {
+          for (int i = Integer.valueOf(range[0]); i <= Integer.valueOf(range[1]); i++) {
+            result.add(i);
+          }
+        } else {
+          result.add(Integer.valueOf(range[0]));
+        }
+      }
+    } catch (FileNotFoundException ex) {
+      Logger.getLogger(SPPReader.class.getName()).log(Level.SEVERE, null, ex);
+      allAllowed = true;
+    } catch (IOException ex) {
+      Logger.getLogger(SPPReader.class.getName()).log(Level.SEVERE, null, ex);
+      allAllowed = true;
+    }
+
+    return result;
   }
 
   private int read(final byte[] b, final int initialOffset, final int totalLength) throws
@@ -107,6 +146,8 @@ public class SPPReader
     int sec_head_flag = (pk_ident >> 11) & 0x0001;
     int apid = pk_ident & 0x07FF;
 
+    Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "APID is " + apid);
+
     int pkt_seq_ctrl = inHeaderBuffer[2] & 0xFF;
     pkt_seq_ctrl = (pkt_seq_ctrl << 8) | (inHeaderBuffer[3] & 0xFF);
     int segt_flag = (pkt_seq_ctrl >> 14) & 0x0003;
@@ -138,6 +179,7 @@ public class SPPReader
     outPacket.setLength(dataLength);
     byte[] data = new byte[outPacket.getLength()];
     read(data, outPacket.getOffset(), dataLength);
+
     outPacket.setBody(data);
 
 //        read(data, packet.getOffset(), dataLength - 2);  // -2 to remove the CRC part
@@ -147,9 +189,16 @@ public class SPPReader
 //        outPacket.setBody(trimmedBody);
     // Read CRC
     if (crcEnabled) {
+      System.out.println("Incoming apid = " + apid);
+      //if (apidWhitelist.contains(apid)) {
+      System.out.println(sph.toString());
       int CRC = SPPHelper.computeCRC(inHeaderBuffer, data, outPacket.getOffset(), dataLength);
 
       is.read(inCrcBuffer);
+      if (apid != 100 && (apid < 1024 || apid > 1535)) {
+        Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "NULL MF");
+        return null;
+      }
       int readCRC = inCrcBuffer[0] & 0xFF;
       readCRC = (readCRC << 8) | (inCrcBuffer[1] & 0xFF);
       this.packet = outPacket;
@@ -164,8 +213,13 @@ public class SPPReader
             + ", SSC=" + seq_count + ""
             + ", pkt_len=" + pkt_length_value);
       }
+      //}
     }
-
+    if(apid != 100 && (apid < 1024 || apid > 1535)){
+      Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "NULL MF");
+      return null;
+    }
+    System.out.println(outPacket.toString());
     return outPacket;
   }
 
