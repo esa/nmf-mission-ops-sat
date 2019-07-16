@@ -58,7 +58,6 @@ public class SPPReader
   private final InputStream is;
   private final boolean crcEnabled;
   private List<Integer> apidWhitelist;
-  private boolean allAllowed = false;
   private SpacePacket packet;
 
   public SPPReader(InputStream is)
@@ -92,11 +91,9 @@ public class SPPReader
         }
       }
     } catch (FileNotFoundException ex) {
-      Logger.getLogger(SPPReader.class.getName()).log(Level.SEVERE, null, ex);
-      allAllowed = true;
+      Logger.getLogger(SPPReader.class.getName()).log(Level.WARNING, null, ex);
     } catch (IOException ex) {
-      Logger.getLogger(SPPReader.class.getName()).log(Level.SEVERE, null, ex);
-      allAllowed = true;
+      Logger.getLogger(SPPReader.class.getName()).log(Level.WARNING, null, ex);
     }
 
     return result;
@@ -146,8 +143,6 @@ public class SPPReader
     int sec_head_flag = (pk_ident >> 11) & 0x0001;
     int apid = pk_ident & 0x07FF;
 
-    Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "APID is " + apid);
-
     int pkt_seq_ctrl = inHeaderBuffer[2] & 0xFF;
     pkt_seq_ctrl = (pkt_seq_ctrl << 8) | (inHeaderBuffer[3] & 0xFF);
     int segt_flag = (pkt_seq_ctrl >> 14) & 0x0003;
@@ -189,37 +184,32 @@ public class SPPReader
 //        outPacket.setBody(trimmedBody);
     // Read CRC
     if (crcEnabled) {
-      System.out.println("Incoming apid = " + apid);
-      //if (apidWhitelist.contains(apid)) {
-      System.out.println(sph.toString());
+
       int CRC = SPPHelper.computeCRC(inHeaderBuffer, data, outPacket.getOffset(), dataLength);
 
       is.read(inCrcBuffer);
       if (apid != 100 && (apid < 1024 || apid > 1535)) {
-        Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "NULL MF");
         return null;
       }
       int readCRC = inCrcBuffer[0] & 0xFF;
       readCRC = (readCRC << 8) | (inCrcBuffer[1] & 0xFF);
       this.packet = outPacket;
-
-      if (CRC != readCRC) {
-        throw new IOException(
-            "CRC Error:"
-            + " expected=" + CRC
-            + ", read=" + readCRC
-            + " for "
-            + " APID(" + apid + ")"
-            + ", SSC=" + seq_count + ""
-            + ", pkt_len=" + pkt_length_value);
+      if (apidWhitelist.contains(apid)) {
+        if (CRC != readCRC) {
+          throw new IOException(
+              "CRC Error:"
+              + " expected=" + CRC
+              + ", read=" + readCRC
+              + " for "
+              + " APID(" + apid + ")"
+              + ", SSC=" + seq_count + ""
+              + ", pkt_len=" + pkt_length_value);
+        }
       }
-      //}
     }
-    if(apid != 100 && (apid < 1024 || apid > 1535)){
-      Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "NULL MF");
+    if (apid != 100 && (apid < 1024 || apid > 1535)) {
       return null;
     }
-    System.out.println(outPacket.toString());
     return outPacket;
   }
 

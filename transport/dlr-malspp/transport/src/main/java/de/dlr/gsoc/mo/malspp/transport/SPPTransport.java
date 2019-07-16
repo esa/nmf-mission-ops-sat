@@ -412,7 +412,7 @@ public class SPPTransport implements MALTransport {
 		try {
 			SpacePacket spacePacket = sppSocket.receive(); // blocks until a space packet has been received
                         if(spacePacket == null){
-                          LOGGER.log(Level.INFO, "Discarding message as it is not relevant for NMF.");
+                          LOGGER.log(Level.FINE, "Discarding message as it is not relevant for NMF.");
                           return null;
                         }
                         // PENDING: SPP TCP implementation allocates a new Space Packet with a body size of
