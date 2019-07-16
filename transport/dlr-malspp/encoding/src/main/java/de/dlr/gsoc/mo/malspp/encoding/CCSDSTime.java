@@ -358,7 +358,7 @@ public class CCSDSTime {
 			tField.write((byte) (days >> (8 * (i - 1))));
 		}
 
-		double seconds = dateTime.getTime().getSecondsInDay();
+		double seconds = dateTime.getTime().getSecondsInUTCDay();
 		long millisecs = (long) (seconds * 1000);
 		for (int i = 4; i > 0; i--) {
 			tField.write((byte) (millisecs >> (8 * (i - 1))));
