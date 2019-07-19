@@ -49,6 +49,8 @@ public class SPPReader
 {
 
   final protected static char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+  private final String CRC_FILENAME = "crc_apids.txt";
+  private final String PROCESSED_FILENAME = "processed_apids.txt";
 
   private final byte[] apidQualifierBuffer;
 
@@ -57,7 +59,8 @@ public class SPPReader
   private final byte[] inCrcBuffer;
   private final InputStream is;
   private final boolean crcEnabled;
-  private List<Integer> apidWhitelist;
+  private APIDRangeList crcApids;
+  private APIDRangeList processedApids;
   private SpacePacket packet;
 
   public SPPReader(InputStream is)
@@ -67,13 +70,13 @@ public class SPPReader
     inHeaderBuffer = new byte[6];
     inCrcBuffer = new byte[2];
     crcEnabled = SPPHelper.getCrcEnabled();
-    apidWhitelist = initWhitelist(new File("apids.txt"));
-
+    crcApids = initWhitelist(new File(CRC_FILENAME));
+    processedApids = initWhitelist(new File(PROCESSED_FILENAME));
   }
 
-  public ArrayList<Integer> initWhitelist(File f)
+  public APIDRangeList initWhitelist(File f)
   {
-    ArrayList<Integer> result = new ArrayList<Integer>();
+    APIDRangeList result = new APIDRangeList();
 
     BufferedReader br;
     try {
@@ -83,11 +86,13 @@ public class SPPReader
       while ((line = br.readLine()) != null) {
         String[] range = line.split("-");
         if (range.length == 2) {
-          for (int i = Integer.valueOf(range[0]); i <= Integer.valueOf(range[1]); i++) {
-            result.add(i);
-          }
-        } else {
-          result.add(Integer.valueOf(range[0]));
+          int first = Integer.valueOf(range[0]);
+          int second = Integer.valueOf(range[1]);
+          APIDRange r = new APIDRange(Math.min(first, second), Math.max(first, second));
+          result.add(r);
+        } else if (range.length == 1) {
+          int val = Integer.valueOf(range[0]);
+          result.add(new APIDRange(val, val));
         }
       }
     } catch (FileNotFoundException ex) {
@@ -188,13 +193,13 @@ public class SPPReader
       int CRC = SPPHelper.computeCRC(inHeaderBuffer, data, outPacket.getOffset(), dataLength);
 
       is.read(inCrcBuffer);
-      if (apid != 100 && (apid < 1024 || apid > 1535)) {
+      if (!processedApids.inRange(apid)) {
         return null;
       }
       int readCRC = inCrcBuffer[0] & 0xFF;
       readCRC = (readCRC << 8) | (inCrcBuffer[1] & 0xFF);
       this.packet = outPacket;
-      if (apidWhitelist.contains(apid)) {
+      if (crcApids.inRange(apid)) {
         if (CRC != readCRC) {
           throw new IOException(
               "CRC Error:"
