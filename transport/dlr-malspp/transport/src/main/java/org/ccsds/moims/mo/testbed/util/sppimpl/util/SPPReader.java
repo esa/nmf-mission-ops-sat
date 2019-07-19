@@ -212,7 +212,7 @@ public class SPPReader
         }
       }
     }
-    if (apid != 100 && (apid < 1024 || apid > 1535)) {
+    if (!processedApids.inRange(apid)) {
       return null;
     }
     return outPacket;
