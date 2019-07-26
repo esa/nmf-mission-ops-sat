@@ -189,9 +189,6 @@ public class SPPReader
 //        outPacket.setBody(trimmedBody);
     // Read CRC
     if (crcEnabled) {
-
-      int CRC = SPPHelper.computeCRC(inHeaderBuffer, data, outPacket.getOffset(), dataLength);
-
       is.read(inCrcBuffer);
       if (!processedApids.inRange(apid)) {
         return null;
@@ -200,6 +197,7 @@ public class SPPReader
       readCRC = (readCRC << 8) | (inCrcBuffer[1] & 0xFF);
       this.packet = outPacket;
       if (crcApids.inRange(apid)) {
+        int CRC = SPPHelper.computeCRC(inHeaderBuffer, data, outPacket.getOffset(), dataLength);
         if (CRC != readCRC) {
           throw new IOException(
               "CRC Error:"
