@@ -32,6 +32,7 @@
  ****************************************************************************** */
 package org.ccsds.moims.mo.testbed.util.sppimpl.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.logging.Level;
@@ -49,6 +50,7 @@ public class SPPWriter
 
   private final byte[] outCrcBuffer;
   private final boolean crcEnabled;
+  private APIDRangeList crcApids;
 
   //private Hashtable sequenceCounters;
   private final OutputStream os;
@@ -60,6 +62,7 @@ public class SPPWriter
     outHeaderBuffer = new byte[6];
     outCrcBuffer = new byte[2];
     crcEnabled = SPPHelper.getCrcEnabled();
+    crcApids = SPPHelper.initWhitelist(new File(SPPHelper.CRC_FILENAME));
     //sequenceCounters = new Hashtable();
   }
 
@@ -94,10 +97,10 @@ public class SPPWriter
     }*/
     int pkt_seq_ctrl = (segt_flag << 14)
         | (packet.getHeader().getSequenceCount());
-
+    boolean processCrc = crcEnabled && crcApids.inRange(apid);
     // Remove 1 byte as specified by the specification.
 //    int pkt_length_value = packet.getLength() - 1;
-    int pkt_length_value = (crcEnabled) ? packet.getLength() - 1 + 2
+    int pkt_length_value = (processCrc) ? packet.getLength() - 1 + 2
         : packet.getLength() - 1;  // + 2 because of the appended CRC
 
     outHeaderBuffer[0] = (byte) (pkt_ident >> 8);
@@ -111,7 +114,7 @@ public class SPPWriter
     os.write(data, packet.getOffset(), packet.getLength());
 
     // There is no CRC in the SPP specification
-    if (crcEnabled) {
+    if (processCrc) {
       int CRC = SPPHelper.computeCRC(outHeaderBuffer, data,
           packet.getOffset(), packet.getLength());
 

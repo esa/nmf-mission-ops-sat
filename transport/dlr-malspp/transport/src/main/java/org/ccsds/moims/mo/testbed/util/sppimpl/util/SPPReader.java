@@ -49,7 +49,6 @@ public class SPPReader
 {
 
   final protected static char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
-  private final String CRC_FILENAME = "crc_apids.txt";
   private final String PROCESSED_FILENAME = "processed_apids.txt";
 
   private final byte[] apidQualifierBuffer;
@@ -70,38 +69,8 @@ public class SPPReader
     inHeaderBuffer = new byte[6];
     inCrcBuffer = new byte[2];
     crcEnabled = SPPHelper.getCrcEnabled();
-    crcApids = initWhitelist(new File(CRC_FILENAME));
-    processedApids = initWhitelist(new File(PROCESSED_FILENAME));
-  }
-
-  public APIDRangeList initWhitelist(File f)
-  {
-    APIDRangeList result = new APIDRangeList();
-
-    BufferedReader br;
-    try {
-      br = new BufferedReader(new FileReader(f));
-      String line = null;
-
-      while ((line = br.readLine()) != null) {
-        String[] range = line.split("-");
-        if (range.length == 2) {
-          int first = Integer.valueOf(range[0]);
-          int second = Integer.valueOf(range[1]);
-          APIDRange r = new APIDRange(Math.min(first, second), Math.max(first, second));
-          result.add(r);
-        } else if (range.length == 1) {
-          int val = Integer.valueOf(range[0]);
-          result.add(new APIDRange(val, val));
-        }
-      }
-    } catch (FileNotFoundException ex) {
-      Logger.getLogger(SPPReader.class.getName()).log(Level.WARNING, null, ex);
-    } catch (IOException ex) {
-      Logger.getLogger(SPPReader.class.getName()).log(Level.WARNING, null, ex);
-    }
-
-    return result;
+    crcApids = SPPHelper.initWhitelist(new File(SPPHelper.CRC_FILENAME));
+    processedApids = SPPHelper.initWhitelist(new File(PROCESSED_FILENAME));
   }
 
   private int read(final byte[] b, final int initialOffset, final int totalLength) throws
@@ -148,6 +117,8 @@ public class SPPReader
     int sec_head_flag = (pk_ident >> 11) & 0x0001;
     int apid = pk_ident & 0x07FF;
 
+    boolean processCrc = crcEnabled && crcApids.inRange(apid);
+
     int pkt_seq_ctrl = inHeaderBuffer[2] & 0xFF;
     pkt_seq_ctrl = (pkt_seq_ctrl << 8) | (inHeaderBuffer[3] & 0xFF);
     int segt_flag = (pkt_seq_ctrl >> 14) & 0x0003;
@@ -156,7 +127,7 @@ public class SPPReader
     int pkt_length_value = inHeaderBuffer[4] & 0xFF;
     pkt_length_value = ((pkt_length_value << 8) | (inHeaderBuffer[5] & 0xFF)) + 1;
 
-    if (crcEnabled) {
+    if (processCrc) {
       pkt_length_value = pkt_length_value - 2;
     }
     SpacePacketHeader sph = outPacket.getHeader();
@@ -187,32 +158,30 @@ public class SPPReader
 //        byte[] trimmedBody = new byte[outPacket.getLength()];
 //        System.arraycopy(outPacket.getBody(), 0, trimmedBody, 0, outPacket.getLength());
 //        outPacket.setBody(trimmedBody);
-    // Read CRC
-    if (crcEnabled) {
-      is.read(inCrcBuffer);
-      if (!processedApids.inRange(apid)) {
-        return null;
-      }
-      int readCRC = inCrcBuffer[0] & 0xFF;
-      readCRC = (readCRC << 8) | (inCrcBuffer[1] & 0xFF);
-      this.packet = outPacket;
-      if (crcApids.inRange(apid)) {
-        int CRC = SPPHelper.computeCRC(inHeaderBuffer, data, outPacket.getOffset(), dataLength);
-        if (CRC != readCRC) {
-          throw new IOException(
-              "CRC Error:"
-              + " expected=" + CRC
-              + ", read=" + readCRC
-              + " for "
-              + " APID(" + apid + ")"
-              + ", SSC=" + seq_count + ""
-              + ", pkt_len=" + pkt_length_value);
-        }
-      }
-    }
+    
     if (!processedApids.inRange(apid)) {
       return null;
     }
+
+    // Read CRC
+    if (processCrc) {
+      is.read(inCrcBuffer);
+      int readCRC = inCrcBuffer[0] & 0xFF;
+      readCRC = (readCRC << 8) | (inCrcBuffer[1] & 0xFF);
+      this.packet = outPacket;
+      int CRC = SPPHelper.computeCRC(inHeaderBuffer, data, outPacket.getOffset(), dataLength);
+      if (CRC != readCRC) {
+        throw new IOException(
+            "CRC Error:"
+            + " expected=" + CRC
+            + ", read=" + readCRC
+            + " for "
+            + " APID(" + apid + ")"
+            + ", SSC=" + seq_count + ""
+            + ", pkt_len=" + pkt_length_value);
+      }
+    }
+    
     return outPacket;
   }
 

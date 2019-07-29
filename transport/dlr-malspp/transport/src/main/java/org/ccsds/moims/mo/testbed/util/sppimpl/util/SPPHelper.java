@@ -32,6 +32,14 @@
  ****************************************************************************** */
 package org.ccsds.moims.mo.testbed.util.sppimpl.util;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class SPPHelper
 {
 
@@ -43,6 +51,7 @@ public class SPPHelper
 //  public static boolean isAPIDqualifierInMessage = true;
   public static boolean isAPIDqualifierInMessage = false;
   public static int defaultAPIDqualifier = 247;
+  public static final String CRC_FILENAME = "crc_apids.txt";
   private static final String CRC_ENABLED_PROPERTY = "org.ccsds.moims.mo.malspp.crcenabled";
 
   static {
@@ -92,6 +101,36 @@ public class SPPHelper
       CRC = ((CRC << 8) & 0xFF00) ^ lookUpTable[(((CRC >> 8) ^ data[i]) & 0x00FF)];
     }
     return CRC;
+  }
+
+  public static APIDRangeList initWhitelist(File f)
+  {
+    APIDRangeList result = new APIDRangeList();
+
+    BufferedReader br;
+    try {
+      br = new BufferedReader(new FileReader(f));
+      String line = null;
+
+      while ((line = br.readLine()) != null) {
+        String[] range = line.split("-");
+        if (range.length == 2) {
+          int first = Integer.valueOf(range[0]);
+          int second = Integer.valueOf(range[1]);
+          APIDRange r = new APIDRange(Math.min(first, second), Math.max(first, second));
+          result.add(r);
+        } else if (range.length == 1) {
+          int val = Integer.valueOf(range[0]);
+          result.add(new APIDRange(val, val));
+        }
+      }
+    } catch (FileNotFoundException ex) {
+      Logger.getLogger(SPPReader.class.getName()).log(Level.WARNING, null, ex);
+    } catch (IOException ex) {
+      Logger.getLogger(SPPReader.class.getName()).log(Level.WARNING, null, ex);
+    }
+
+    return result;
   }
 
 }
