@@ -220,6 +220,36 @@
               </target>
             </configuration>
           </execution>
+          <execution>
+            <id>ipk</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <echo>${basedir}</echo>
+                <copy todir="${basedir}/target/nmf-package">
+                  <fileset dir="${basedir}/nmf-package"/>
+                </copy>
+                <copy todir="${basedir}/target/nmf-package/data">
+                  <fileset dir="${basedir}/target/nmf-opssat-${project.version}"/>
+                </copy>
+                <tar compression="gzip" destfile="${basedir}/target/nmf-package/control.tar.gz">
+                  <tarfileset dir="${basedir}/target/nmf-package/control" uid="0" gid="0"/>
+                </tar>
+                <tar compression="gzip" destfile="${basedir}/target/nmf-package/data.tar.gz">
+                  <tarfileset dir="${basedir}/target/nmf-package/data" uid="0" gid="0"/>
+                </tar>
+                <tar compression="gzip" destfile="${basedir}/target/nmf-package.ipk">
+                  <tarfileset dir="${basedir}/target/nmf-package/" uid="0" gid="0">
+                    <exclude name="${basedir}/target/nmf-package/data"/>
+                    <exclude name="${basedir}/target/nmf-package/control"/>
+                  </tarfileset>
+                </tar>
+              </target>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
     </plugins>
