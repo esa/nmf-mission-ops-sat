@@ -1,0 +1,7 @@
+Package: nmf-package
+Version: #VERSION#
+Architecture: sepp
+Maintainer: ESOC
+Section: Applications
+Description: NMF OPS-SAT package
+Priority: optional
