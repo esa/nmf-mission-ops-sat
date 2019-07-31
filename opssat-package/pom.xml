@@ -231,6 +231,9 @@
                 <echo>${basedir}</echo>
                 <copy todir="${basedir}/target/nmf-package">
                   <fileset dir="${basedir}/nmf-package"/>
+                  <filterset>
+                    <filter token="VERSION" value="${project.version}"/>
+                  </filterset>
                 </copy>
                 <copy todir="${basedir}/target/nmf-package/data">
                   <fileset dir="${basedir}/target/nmf-opssat-${project.version}"/>
