@@ -5,12 +5,17 @@ if [ -z "$NMF_LIB" ] ; then
     NMF_LIB=@NMF_LIB@
 fi
 
+if [ -z "$NMF_HOME" ] ; then
+    NMF_HOME=@NMF_HOME@
+fi
+
 if [ -z "$JAVA_OPTS" ] ; then
     JAVA_OPTS="-Xms32m -Xmx512m"
 fi
 
 export JAVA_OPTS
 export NMF_LIB
+export NMF_HOME
 
 # Replaced with the main class name
 MAIN_CLASS_NAME=@MAIN_CLASS_NAME@
