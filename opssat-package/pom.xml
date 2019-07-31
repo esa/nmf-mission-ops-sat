@@ -235,21 +235,36 @@
                     <filter token="VERSION" value="${project.version}"/>
                   </filterset>
                 </copy>
+                <chmod file="${basedir}/target/nmf-package/control/postinst" perm="+x"/>
                 <copy todir="${basedir}/target/nmf-package/data">
                   <fileset dir="${basedir}/target/nmf-opssat-${project.version}"/>
                 </copy>
-                <tar compression="gzip" destfile="${basedir}/target/nmf-package/control.tar.gz">
-                  <tarfileset dir="${basedir}/target/nmf-package/control" uid="0" gid="0"/>
-                </tar>
-                <tar compression="gzip" destfile="${basedir}/target/nmf-package/data.tar.gz">
-                  <tarfileset dir="${basedir}/target/nmf-package/data" uid="0" gid="0"/>
-                </tar>
-                <tar compression="gzip" destfile="${basedir}/target/nmf-package.ipk">
-                  <tarfileset dir="${basedir}/target/nmf-package/" uid="0" gid="0">
-                    <exclude name="${basedir}/target/nmf-package/data"/>
-                    <exclude name="${basedir}/target/nmf-package/control"/>
-                  </tarfileset>
-                </tar>
+                <exec dir="${basedir}/target/nmf-package/control" executable="tar">
+                  <arg value="--numeric-owner"/>
+                  <arg value="--group=0"/>
+                  <arg value="--owner=0"/>
+                  <arg value="-czf"/>
+                  <arg value="../control.tar.gz"/>
+                  <arg value="./"/>
+                </exec>
+                <exec dir="${basedir}/target/nmf-package/data" executable="tar">
+                  <arg value="--numeric-owner"/>
+                  <arg value="--group=0"/>
+                  <arg value="--owner=0"/>
+                  <arg value="-czf"/>
+                  <arg value="../data.tar.gz"/>
+                  <arg value="./"/>
+                </exec>
+                <exec dir="${basedir}/target/nmf-package/" executable="tar">
+                  <arg value="--numeric-owner"/>
+                  <arg value="--group=0"/>
+                  <arg value="--owner=0"/>
+                  <arg value="-cf"/>
+                  <arg value="../nmf-package.ipk"/>
+                  <arg value="./debian-binary"/>
+                  <arg value="./control.tar.gz"/>
+                  <arg value="./data.tar.gz"/>
+                </exec>
               </target>
             </configuration>
           </execution>
