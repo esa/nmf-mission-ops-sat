@@ -1,5 +1,5 @@
 Package: nmf-package
-Version: #VERSION#
+Version: @VERSION@
 Architecture: sepp
 Maintainer: ESOC
 Section: Applications
