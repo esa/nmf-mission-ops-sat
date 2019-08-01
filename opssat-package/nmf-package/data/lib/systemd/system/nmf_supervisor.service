@@ -4,6 +4,7 @@ After=network.target spp_bridge.service
 
 [Service]
 Type=simple
+WorkingDirectory=/home/nmf/supervisor
 ExecStart=/home/nmf/supervisor/supervisor.sh
 
 [Install]
