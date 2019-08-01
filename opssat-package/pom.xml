@@ -236,6 +236,7 @@
                   </filterset>
                 </copy>
                 <chmod file="${basedir}/target/nmf-package/control/postinst" perm="+x"/>
+                <chmod file="${basedir}/target/nmf-package/control/prerm" perm="+x"/>
                 <copy todir="${basedir}/target/nmf-package/data">
                   <fileset dir="${basedir}/target/nmf-opssat-${project.version}"/>
                 </copy>
