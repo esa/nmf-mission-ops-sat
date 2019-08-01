@@ -1,0 +1,10 @@
+[Unit]
+Description=Start the NMF supervisor
+After=network.target spp_bridge.service
+
+[Service]
+Type=simple
+ExecStart=/home/nmf/supervisor/supervisor.sh
+
+[Install]
+WantedBy=multi-user.target
