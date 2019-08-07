@@ -16,6 +16,11 @@
     <name>DLR MO MAL/SPP Encoding</name>
     <description>DLR implementation of CCSDS MO MAL/SPP Binding, encoding part</description>
     <url>http://www.dlr.de</url>
+
+    <properties>
+      <skipTests>true</skipTests>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>int.esa.ccsds.mo</groupId>
