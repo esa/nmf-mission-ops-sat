@@ -12,6 +12,10 @@
     <artifactId>malspp-transport</artifactId>
     <version>1.0.1-FC</version>
     <packaging>jar</packaging>
+    
+    <properties>
+      <skipTests>true</skipTests>
+    </properties>
 
     <name>DLR MO MAL/SPP Transport Layer</name>
     <description>DLR implementation of CCSDS MO MAL/SPP Binding, transport part</description>

@@ -8,7 +8,9 @@
         <version>1.0.1</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
-
+    <properties>
+      <skipTests>true</skipTests>
+    </properties>
     <artifactId>malspp-encoding-opssat</artifactId>
     <version>1.0.1-FC</version>
     <packaging>jar</packaging>
