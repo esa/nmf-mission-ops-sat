@@ -100,14 +100,14 @@
       <id>exp</id>
       <properties>
         <isExp>true</isExp>
-        <expId>exp1337</expId>
+        <expId>000</expId>
         <expVersion>2.0.0-SNAPSHOT</expVersion>
       </properties>
       <dependencies>
         <dependency>
           <groupId>int.esa.nmf.sdk.examples.space</groupId>
           <artifactId>publish-clock</artifactId>
-          <version>${project.version}</version>
+          <version>${expVersion}</version>
         </dependency>
       </dependencies>
       <build>
@@ -133,7 +133,7 @@
                       <!-- Do not change this -->
                       <type>jar</type>
                       <overWrite>true</overWrite>
-                      <outputDirectory>${esa.nmf.mission.opssat.assembly.outputdir}/experimenter-package/home/${expId}/lib/</outputDirectory>
+                      <outputDirectory>${esa.nmf.mission.opssat.assembly.outputdir}/experimenter-package/home/exp${expId}/lib/</outputDirectory>
                     </artifactItem>
                   </artifactItems>
                 </configuration>
