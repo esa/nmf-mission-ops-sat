@@ -9,6 +9,7 @@
         <filter token="APPS_DIR" value="../.."/>
         <filter token="NMF_HOME" value="`cd .. > /dev/null; pwd`"/>
         <filter token="NMF_LIB" value="`cd ../lib > /dev/null; pwd`/*"/>
+        <filter token="USER" value="root"/>
       </filterset>
       <firstmatchmapper>
         <globmapper from="startscript.sh" to="supervisor.sh"/>
@@ -28,6 +29,7 @@
         <filter token="APID" value="${apid}"/>
         <filter token="NMF_HOME" value="`cd ../nmf > /dev/null; pwd`"/>
         <filter token="NMF_LIB" value="`cd ../nmf/lib > /dev/null; pwd`/*"/>
+        <filter token="USER" value="root"/>
       </filterset>
       <firstmatchmapper>
         <globmapper from="startscript.sh" to="start_payloads-test.sh"/>
@@ -51,6 +53,7 @@
         <filter token="APID" value="${expApid}"/>
         <filter token="NMF_HOME" value="`cd ../nmf > /dev/null; pwd`"/>
         <filter token="NMF_LIB" value="`cd ../nmf/lib > /dev/null; pwd`/*"/>
+        <filter token="USER" value="exp${expId}"/>
       </filterset>
       <firstmatchmapper>
         <globmapper from="startscript.sh" to="start_exp${expId}.sh"/>
