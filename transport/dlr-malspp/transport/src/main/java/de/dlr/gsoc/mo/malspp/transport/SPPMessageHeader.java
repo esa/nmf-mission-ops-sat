@@ -557,4 +557,30 @@ public class SPPMessageHeader implements MALMessageHeader {
 	public void setIsErrorMessage(final Boolean newValue) {
 		isErrorMessage = newValue;
 	}
+        @Override
+        public String toString()
+        {
+		StringBuffer buf = new StringBuffer();
+		buf.append("SPPMEssageHeader(");
+		buf.append("uriFrom = " +  uriFrom);
+		buf.append(",  authenticationId = " +  authenticationId);
+		buf.append(",  uriTo = " +  uriTo);
+		buf.append(",  timestamp = " +  timestamp);
+		buf.append(",  qosLevel = " +  qosLevel);
+		buf.append(",  priority = " +  priority);
+		buf.append(",  domain = " +  domain);
+		buf.append(",  networkZone = " +  networkZone);
+		buf.append(",  session = " +  session);
+		buf.append(",  sessionName = " +  sessionName);
+		buf.append(",  interactionType = " +  interactionType);
+		buf.append(",  interactionStage = " +  interactionStage);
+		buf.append(",  transactionId = " +  transactionId);
+		buf.append(",  serviceArea = " +  serviceArea);
+		buf.append(",  service = " +  service);
+		buf.append(",  operation = " +  operation);
+		buf.append(",  areaVersion = " +  areaVersion);
+		buf.append(",  isErrorMessage = " +  isErrorMessage);
+		buf.append(")");
+		return buf.toString();
+        }
 }

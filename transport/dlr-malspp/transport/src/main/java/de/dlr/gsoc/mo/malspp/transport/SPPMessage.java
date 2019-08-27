@@ -85,10 +85,17 @@ public class SPPMessage implements MALMessage {
 		}
 		byte[] userDataField = baos.toByteArray();
 
-		MALOperation op = MALContextFactory
+		MALOperation op;
+		try {
+				op = MALContextFactory
 				.lookupArea(header.getServiceArea(), header.getAreaVersion())
 				.getServiceByNumber(header.getService())
 				.getOperationByNumber(header.getOperation());
+		}
+		catch (NullPointerException npe)
+		{
+				throw new MALException("Could not resolve operation. " + header);
+		}
 		MALEncodingContext ctx = new MALEncodingContext(header, op, -1, null, this.qosProperties);
 		MALEncodedBody encodedBody = userDataField.length == 0 ? null : new MALEncodedBody(new Blob(userDataField));
 		body = SPPEndpoint.createMessageBody(encodedBody, esf, ctx);
