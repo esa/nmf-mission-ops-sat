@@ -27,7 +27,7 @@ build_target1:
   artifacts:
     paths:
       - $NMF_HOME/.m2/repository
-      - $NMF_HOME/$(find . -type d -name "nmf-opssat-*")
+      - $NMF_HOME/opssat-package/target/
 
 deploy_target1:
   stage: deploy
