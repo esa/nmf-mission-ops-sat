@@ -320,7 +320,7 @@
                   <arg value="--group=0"/>
                   <arg value="--owner=0"/>
                   <arg value="-cf"/>
-                  <arg value="../nmf_package_${project.version}.ipk"/>
+                  <arg value="../nmf-ops-sat_${project.version}.ipk"/>
                   <arg value="./debian-binary"/>
                   <arg value="./control.tar.gz"/>
                   <arg value="./data.tar.gz"/>
