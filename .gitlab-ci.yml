@@ -24,11 +24,10 @@ build_target1:
   stage: build
   script:
     - mvn clean install -Pground
-    - export OUTPUT=$(find . -type d -name "nmf-opssat-*")
   artifacts:
     paths:
       - $NMF_HOME/.m2/repository
-      - $NMF_HOME/$OUTPUT
+      - $NMF_HOME/$(find . -type d -name "nmf-opssat-*")
 
 deploy_target1:
   stage: deploy
