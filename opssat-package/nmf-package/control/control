@@ -1,4 +1,4 @@
-Package: nmf_package
+Package: nmf-ops-sat
 Version: @VERSION@
 Architecture: sepp
 Maintainer: ESOC
