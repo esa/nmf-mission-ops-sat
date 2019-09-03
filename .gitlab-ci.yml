@@ -57,7 +57,7 @@ deploy_target1:
 deploy_target2:
   stage: deploy
   script:
-    - if [ "$SCHEDULE" != $(date +"%T") ] ; then exit(0) ; fi
+    - if [ "$SCHEDULE" != $(date +"%T") ] ; then exit 0 ; fi
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
