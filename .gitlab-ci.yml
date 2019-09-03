@@ -1,0 +1,45 @@
+stages:
+  - build
+  - deploy
+
+image: maven:3.3.9-jdk-8
+
+variables:
+  NMF_HOME: /builds/nanosat-mo-framework/nmf-ops-sat
+  MAVEN_OPTS: "-Dmaven.repo.local=$NMF_HOME/.m2/repository"
+
+before_script:
+  - git clone https://github.com/esa/CCSDS_MO_TRANS.git
+  - cd CCSDS_MO_TRANS
+  - git checkout tcp_bind_fix
+  - mvn clean install -PESA
+  - cd ..
+  - git clone https://github.com/esa/nanosat-mo-framework.git
+  - cd nanosat-mo-framework
+  - git checkout dev
+  - mvn clean install
+  - cd ..
+
+build_target1:
+  stage: build
+  script:
+    - mvn clean install -Pground
+  artifacts:
+    paths:
+      - $NMF_HOME/.m2/repository
+      - $NMF_HOME/opssat-package/target/nmf-opssat-*/
+
+deploy_target1:
+  stage: deploy
+  script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - cd opssat-package/target/nmf-opssat-*
+    - scp -r home/ $T1USER@$TARGET1:~/nmf-opssat
+    - ssh $T1USER@$TARGET1 "rm -rf /home/nmf/ /home/payloads-test/ && cp -r ~/nmf-opssat/* /home/"
+    - ssh $T1USER@$TARGET1 "rm -rf ~/nmf-opssat"
+  dependencies:
+    - build_target1
