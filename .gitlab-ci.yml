@@ -29,11 +29,21 @@ build_base:
       - $NMF_HOME/nanosat-mo-framework/mission/simulator/opssat-spacecraft-simulator/platformsim.properties
     expire_in: 1 day
 
-build_target1:
+build_ground:
   stage: build_nmf_opssat
   script:
     - cp $NMF_HOME/nanosat-mo-framework/mission/simulator/opssat-spacecraft-simulator/platformsim.properties $NMF_HOME/opssat-package/src/main/resources/space-supervisor-sim-root/
     - mvn clean install -Pground
+  artifacts:
+    paths:
+      - $NMF_HOME/.m2/repository
+      - $NMF_HOME/opssat-package/target/
+    expire_in: 1 day
+
+build_space:
+  stage: build_nmf_opssat
+  script:
+    - mvn clean install -Pexp
   artifacts:
     paths:
       - $NMF_HOME/.m2/repository
@@ -52,12 +62,12 @@ deploy_target1:
     - scp -r home/ $T1USER@$TARGET1:~/nmf-opssat
     - ssh $T1USER@$TARGET1 "rm -rf /home/nmf/ /home/payloads-test/ && cp -r ~/nmf-opssat/* /home/"
     - ssh $T1USER@$TARGET1 "rm -rf ~/nmf-opssat"
-  needs: ["build_target1"]
+  needs: ["build_ground"]
 
 deploy_target2:
   stage: deploy
   script:
-    - if [ "$SCHEDULE" != $(date +"%T") ] ; then exit 0 ; fi
+   # - if [ "$SCHEDULE" != $(date +"%H") ] ; then exit 0 ; fi
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
@@ -66,4 +76,17 @@ deploy_target2:
     - cd opssat-package/target/nmf-opssat-*
     - ssh $T2USER@$TARGET2 "rm -rf nmf/"
     - scp -r home/nmf/ $T2USER@TARGET2:~/nmf/
-  needs: ["build_target1"]
+  needs: ["build_ground"]
+
+deploy_target3:
+  stage: deploy
+  script:
+   # - if [ "$SCHEDULE" != $(date +"%H") ] ; then exit 0 ; fi
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - cd opssat-package/target/
+    - scp -oProxyJump=$JUSER@$JHOST nmf-ops-sat_*.ipk $T3USER@$TARGET3:~/
+    - ssh -J $JUSER@$JHOST $T3USER@$TARGET3 "opkg install nmf-ops-sat_*.ipk & rm nmf-ops-sat_*.ipk"
