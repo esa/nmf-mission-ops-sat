@@ -75,7 +75,7 @@ deploy_target2:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - cd opssat-package/target/nmf-opssat-*
     - ssh $T2USER@$TARGET2 "rm -rf nmf/"
-    - scp -r home/nmf/ $T2USER@TARGET2:~/nmf/
+    - scp -r home/nmf/ $T2USER@$TARGET2:~/nmf/
   needs: ["build_ground"]
 
 deploy_target3:
@@ -88,5 +88,5 @@ deploy_target3:
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - cd opssat-package/target/
-    - scp -oProxyJump=$JUSER@$JHOST nmf-ops-sat_*.ipk $T3USER@$TARGET3:~/
-    - ssh -J $JUSER@$JHOST $T3USER@$TARGET3 "opkg install nmf-ops-sat_*.ipk & rm nmf-ops-sat_*.ipk"
+    - scp -o ProxyCommand="ssh -W %h:%p $JUSER@$JHOST" nmf-ops-sat_*.ipk $T3USER@$TARGET3:~/
+    - ssh -o ProxyCommand="ssh -W %h:%p $JUSER@$JHOST" $T3USER@$TARGET3 "opkg install nmf-ops-sat_*.ipk & rm nmf-ops-sat_*.ipk"
