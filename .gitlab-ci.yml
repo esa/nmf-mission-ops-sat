@@ -90,3 +90,16 @@ deploy_target3:
     - cd opssat-package/target/
     - scp -o ProxyCommand="ssh -W %h:%p $JUSER@$JHOST" nmf-ops-sat_*.ipk $T3USER@$TARGET3:~/
     - ssh -o ProxyCommand="ssh -W %h:%p $JUSER@$JHOST" $T3USER@$TARGET3 "opkg install nmf-ops-sat_*.ipk & rm nmf-ops-sat_*.ipk"
+
+deploy_target4:
+  stage: deploy
+  script:
+   # - if [ "$SCHEDULE" != $(date +"%H") ] ; then exit 0 ; fi
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - cd opssat-package/target/nmf-opssat*/experimenter-package/home/exp000
+    - scp -r * $T4USER@$TARGET4:$T4PATH/$NMF_USER
+    - ssh $T4USER@$TARGET4 "chown $T4USER:$T4GROUP $T4PATH/$NMF_USER & chmod 644 $T4PATH/$NMF_USER/* & chmod +x $T4PATH/$NMF_USER/lib"
