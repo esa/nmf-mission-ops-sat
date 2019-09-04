@@ -115,4 +115,4 @@ deploy_sim:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - cd opssat-package/target/nmf-opssat-*/home/nmf/
     - scp -r -o ProxyCommand="ssh -W %h:%p $JUSER@$JHOST" lib/ nanosat-mo-supervisor-sim/ $T3USER@$TARGET3:/home/nmf/
-  needs: ["deploy_target3","build_groud"]
+  needs: ["deploy_target3","build_ground"]
