@@ -20,7 +20,7 @@
  */
 package esa.mo.platform.impl.provider.opssat;
 
-import esa.mo.nanomind.impl.util.GMVServicesConsumer;
+import esa.mo.nanomind.impl.util.NanomindServicesConsumer;
 import esa.mo.platform.impl.provider.gen.GPSNMEAonlyAdapter;
 import java.io.IOException;
 import java.util.Arrays;
@@ -37,17 +37,17 @@ import org.ccsds.moims.mo.mal.structures.Blob;
  */
 public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
 
-    private final GMVServicesConsumer gmvServicesConsumer;
+    private final NanomindServicesConsumer obcServicesConsumer;
 
-    public GPSOPSSATAdapter(GMVServicesConsumer gmvServicesConsumer) {
-        this.gmvServicesConsumer = gmvServicesConsumer;
+    public GPSOPSSATAdapter(NanomindServicesConsumer obcServicesConsumer) {
+        this.obcServicesConsumer = obcServicesConsumer;
     }
 
     @Override
     public String getNMEASentence(String identifier) throws IOException {
         GPSHandler gpsHandler = new GPSHandler();
         try {
-            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData(new Blob(identifier.getBytes()), gpsHandler);
+            obcServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData(new Blob(identifier.getBytes()), gpsHandler);
         } catch (IllegalArgumentException | MALException | MALInteractionException e) {
             throw new IOException("Error when retrieving GPS NMEA response from Nanomind", e);
         }

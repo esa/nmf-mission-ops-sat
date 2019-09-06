@@ -21,7 +21,7 @@
 package esa.mo.platform.impl.util;
 
 import esa.mo.com.impl.util.COMServicesProvider;
-import esa.mo.nanomind.impl.util.GMVServicesConsumer;
+import esa.mo.nanomind.impl.util.NanomindServicesConsumer;
 import esa.mo.platform.impl.provider.gen.PowerControlProviderServiceImpl;
 import esa.mo.platform.impl.provider.gen.CameraProviderServiceImpl;
 import esa.mo.platform.impl.provider.gen.GPSProviderServiceImpl;
@@ -57,15 +57,15 @@ public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderI
   private final SoftwareDefinedRadioProviderServiceImpl sdrService
       = new SoftwareDefinedRadioProviderServiceImpl();
 
-  public void init(COMServicesProvider comServices, GMVServicesConsumer gmvServicesConsumer) throws
+  public void init(COMServicesProvider comServices, NanomindServicesConsumer obcServicesConsumer) throws
       MALException
   {
     try {
       adcsService.init(comServices, new AutonomousADCSOPSSATAdapter());
       cameraService.init(comServices, new CameraOPSSATAdapter());
-      gpsService.init(comServices, new GPSOPSSATAdapter(gmvServicesConsumer));
+      gpsService.init(comServices, new GPSOPSSATAdapter(obcServicesConsumer));
       optrxService.init(new OpticalRxOPSSATAdapter());
-      powerService.init(new PowerControlOPSSATAdapter(gmvServicesConsumer));
+      powerService.init(new PowerControlOPSSATAdapter(obcServicesConsumer));
       sdrService.init(new SDROPSSATAdapter());
     } catch (UnsatisfiedLinkError | NoClassDefFoundError | NoSuchMethodError error) {
       LOGGER.log(Level.SEVERE,

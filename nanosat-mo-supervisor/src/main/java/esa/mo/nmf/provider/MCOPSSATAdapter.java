@@ -20,7 +20,7 @@
  */
 package esa.mo.nmf.provider;
 
-import esa.mo.nanomind.impl.util.GMVServicesConsumer;
+import esa.mo.nanomind.impl.util.NanomindServicesConsumer;
 import esa.mo.helpertools.helpers.HelperAttributes;
 import esa.mo.nmf.MCRegistration;
 import esa.mo.nmf.MonitorAndControlNMFAdapter;
@@ -75,7 +75,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
 
     private final ShellCommander shellCommander = new ShellCommander();
 
-    private GMVServicesConsumer gmvServicesConsumer;
+    private NanomindServicesConsumer obcServicesConsumer;
 
     @Override
     public void initialRegistrations(MCRegistration registration) {
@@ -166,15 +166,15 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
 
         LongList actionObjIds = registration.registerActions(actionIdentifiers, actionDefs);
 
-        // Start the GMV consumer
-        gmvServicesConsumer = new GMVServicesConsumer();
-        gmvServicesConsumer.init();
+        // Start the OBC consumer
+        obcServicesConsumer = new NanomindServicesConsumer();
+        obcServicesConsumer.init();
 
         /*
         LongList ids = new LongList();
         ids.add((long) 1);
         try {
-            GetValueResponse values = gmvServicesConsumer.getAggregationNanomindService().getAggregationNanomindStub().getValue(ids);
+            GetValueResponse values = obcServicesConsumer.getAggregationNanomindService().getAggregationNanomindStub().getValue(ids);
             AggregationValueList agValues = values.getBodyElement1();
             LOGGER.log(Level.INFO, "Values: " + agValues.toString());
         } catch (MALInteractionException ex) {
@@ -247,13 +247,13 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
 
 /*
         try {
-//            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData("GPGGALONG", new MCGPSAdapter());
-//            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData("log gpggalonga\n", new MCGPSAdapter());
-//            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().asyncGetGPSData(new Blob("log gpggalonga\n".getBytes()), new MCGPSAdapter());
-            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().asyncGetGPSData(new Blob("log timea\n".getBytes()), new MCGPSAdapter());
+//            obcServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData("GPGGALONG", new MCGPSAdapter());
+//            obcServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData("log gpggalonga\n", new MCGPSAdapter());
+//            obcServicesConsumer.getGPSNanomindService().getGPSNanomindStub().asyncGetGPSData(new Blob("log gpggalonga\n".getBytes()), new MCGPSAdapter());
+            obcServicesConsumer.getGPSNanomindService().getGPSNanomindStub().asyncGetGPSData(new Blob("log timea\n".getBytes()), new MCGPSAdapter());
             
             
-//            gmvServicesConsumer.getPowerNanomindService().getPowerNanomindStub().powerOnSBandTX();
+//            obcServicesConsumer.getPowerNanomindService().getPowerNanomindStub().powerOnSBandTX();
         } catch (MALInteractionException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         } catch (MALException ex) {
@@ -265,7 +265,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         LOGGER.log(Level.INFO, "log timea\n");
         
         try {
-            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().asyncGetGPSData(new Blob("log timea\n".getBytes()), new MCGPSAdapter());
+            obcServicesConsumer.getGPSNanomindService().getGPSNanomindStub().asyncGetGPSData(new Blob("log timea\n".getBytes()), new MCGPSAdapter());
         } catch (MALInteractionException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         } catch (MALException ex) {
@@ -281,7 +281,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         LOGGER.log(Level.INFO, "log timea\n");
         
         try {
-            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().asyncGetGPSData(new Blob("log timea\n".getBytes()), new MCGPSAdapter());
+            obcServicesConsumer.getGPSNanomindService().getGPSNanomindStub().asyncGetGPSData(new Blob("log timea\n".getBytes()), new MCGPSAdapter());
         } catch (MALInteractionException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         } catch (MALException ex) {
@@ -297,7 +297,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         }
         
         try {
-            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().asyncGetGPSData(new Blob("log rxstatusa\n".getBytes()), new MCGPSAdapter());
+            obcServicesConsumer.getGPSNanomindService().getGPSNanomindStub().asyncGetGPSData(new Blob("log rxstatusa\n".getBytes()), new MCGPSAdapter());
         } catch (MALInteractionException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         } catch (MALException ex) {
@@ -313,7 +313,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         }
         
         try {
-            gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().asyncGetGPSData(new Blob("log bestxyza\n".getBytes()), new MCGPSAdapter());
+            obcServicesConsumer.getGPSNanomindService().getGPSNanomindStub().asyncGetGPSData(new Blob("log bestxyza\n".getBytes()), new MCGPSAdapter());
         } catch (MALInteractionException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         } catch (MALException ex) {
@@ -347,7 +347,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
             Long actionInstanceObjId, boolean reportProgress, MALInteraction interaction) {
         if (ACTION_GPS_SENTENCE.equals(name.getValue())) {
             try {
-                gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().asyncGetGPSData(new Blob("GPGGALONG".getBytes()), new MCGPSAdapter());
+                obcServicesConsumer.getGPSNanomindService().getGPSNanomindStub().asyncGetGPSData(new Blob("GPGGALONG".getBytes()), new MCGPSAdapter());
             } catch (MALInteractionException ex) {
                 LOGGER.log(Level.SEVERE, null, ex);
             } catch (MALException ex) {

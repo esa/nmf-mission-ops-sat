@@ -20,7 +20,7 @@
  */
 package esa.mo.nmf.provider;
 
-import esa.mo.nanomind.impl.util.GMVServicesConsumer;
+import esa.mo.nanomind.impl.util.NanomindServicesConsumer;
 import esa.mo.helpertools.misc.TaskScheduler;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -34,16 +34,16 @@ import org.ccsds.moims.mo.mal.MALInteractionException;
  */
 public class NanomindAliveMessage {
 
-    private final GMVServicesConsumer gmvServicesConsumer;
+    private final NanomindServicesConsumer obcServicesConsumer;
     private final TaskScheduler timer;
     private static final int PERIOD = 10000;  // 10 seconds
     private boolean active = false;
     private final int apid;
 
-    public NanomindAliveMessage(final GMVServicesConsumer gmvServicesConsumer, final int apid) {
+    public NanomindAliveMessage(final NanomindServicesConsumer obcServicesConsumer, final int apid) {
         this.apid = apid;
         this.timer = new TaskScheduler(1);
-        this.gmvServicesConsumer = gmvServicesConsumer;
+        this.obcServicesConsumer = obcServicesConsumer;
     }
 
     public void init() {
@@ -56,7 +56,7 @@ public class NanomindAliveMessage {
             public void run() {
                 if (active) {
                     try {
-                        gmvServicesConsumer.getExperimentWDNanomindService().getExperimentWDNanomindStub().alive();
+                        obcServicesConsumer.getExperimentWDNanomindService().getExperimentWDNanomindStub().alive();
                     } catch (MALInteractionException ex) {
                         Logger.getLogger(NanomindAliveMessage.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (MALException ex) {

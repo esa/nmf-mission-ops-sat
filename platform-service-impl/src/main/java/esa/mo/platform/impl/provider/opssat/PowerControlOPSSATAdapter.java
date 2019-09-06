@@ -20,7 +20,7 @@
  */
 package esa.mo.platform.impl.provider.opssat;
 
-import esa.mo.nanomind.impl.util.GMVServicesConsumer;
+import esa.mo.nanomind.impl.util.NanomindServicesConsumer;
 import esa.mo.platform.impl.provider.gen.PowerControlAdapterInterface;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,16 +43,16 @@ import org.ccsds.moims.mo.platform.powercontrol.structures.DeviceType;
 public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
 {
 
-  private final GMVServicesConsumer gmvServicesConsumer;
+  private final NanomindServicesConsumer obcServicesConsumer;
   private final List<Device> devices;
   private final Map<Identifier, Device> deviceByName;
   private final Map<Long, Device> deviceByObjInstId;
   private final Map<Long, PayloadDevice> payloadIdByObjInstId;
   private static final Logger LOGGER = Logger.getLogger(PowerControlOPSSATAdapter.class.getName());
 
-  public PowerControlOPSSATAdapter(GMVServicesConsumer gmvServicesConsumer)
+  public PowerControlOPSSATAdapter(NanomindServicesConsumer obcServicesConsumer)
   {
-    this.gmvServicesConsumer = gmvServicesConsumer;
+    this.obcServicesConsumer = obcServicesConsumer;
     LOGGER.log(Level.INFO, "Initialisation");
     devices = new ArrayList<>();
     deviceByName = new HashMap<>();
@@ -138,7 +138,7 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
     powerStates.add(enabled);
     LOGGER.log(Level.INFO, "Switching device {0} to enabled: {1}", new Object[]{device, enabled});
     try {
-      gmvServicesConsumer.getPowerNanomindService().getPowerNanomindStub().setPowerState(deviceList,
+      obcServicesConsumer.getPowerNanomindService().getPowerNanomindStub().setPowerState(deviceList,
           powerStates);
     } catch (MALInteractionException | MALException ex) {
       throw new IOException("Cannot switch device through OBC", ex);

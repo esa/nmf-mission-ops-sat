@@ -21,7 +21,7 @@
 package esa.mo.nmf.provider;
 
 import esa.mo.com.impl.util.COMServicesProvider;
-import esa.mo.nanomind.impl.util.GMVServicesConsumer;
+import esa.mo.nanomind.impl.util.NanomindServicesConsumer;
 import esa.mo.nmf.MonitorAndControlNMFAdapter;
 import esa.mo.nmf.nanosatmosupervisor.NanoSatMOSupervisor;
 import esa.mo.nmf.nmfpackage.NMFPackagePMBackend;
@@ -39,7 +39,7 @@ import org.ccsds.moims.mo.mal.MALException;
 public final class NanoSatMOSupervisorOPSSATImpl extends NanoSatMOSupervisor {
 
     private PlatformServicesProviderOPSSAT platformServicesOPSSAT;
-    private GMVServicesConsumer gmvServicesConsumer;
+    private NanomindServicesConsumer obcServicesConsumer;
 
     @Override
     public void init(final MonitorAndControlNMFAdapter mcAdapter) {
@@ -49,12 +49,12 @@ public final class NanoSatMOSupervisorOPSSATImpl extends NanoSatMOSupervisor {
     @Override
     public void initPlatformServices(COMServicesProvider comServices) {
         // Initialize the consumers to the Nanomind
-        gmvServicesConsumer = new GMVServicesConsumer();
-        gmvServicesConsumer.init();
+        obcServicesConsumer = new NanomindServicesConsumer();
+        obcServicesConsumer.init();
 
         try {
             platformServicesOPSSAT = new PlatformServicesProviderOPSSAT();
-            platformServicesOPSSAT.init(comServices, gmvServicesConsumer);
+            platformServicesOPSSAT.init(comServices, obcServicesConsumer);
         } catch (MALException ex) {
             Logger.getLogger(NanoSatMOSupervisorOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
