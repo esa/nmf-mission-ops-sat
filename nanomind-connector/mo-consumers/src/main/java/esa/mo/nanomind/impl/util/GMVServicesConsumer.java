@@ -87,10 +87,13 @@ public class GMVServicesConsumer {
             powerNanomindService = new PowerNanomindConsumerServiceImpl(details);
             experimentWDNanomindService = new ExperimentWDNanomindConsumerServiceImpl(details);
             aggregationService = new AggregationNanomindConsumerServiceImpl(details);
+            eventService = new EventNanomindConsumerServiceImpl(details);
+            eventService.registerDefaultEventHandler();
 
             // Add the other services!!
             
-        } catch (MALException | MalformedURLException ex) {
+        } catch (MALException | MalformedURLException |
+            MALInteractionException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         }
     }
