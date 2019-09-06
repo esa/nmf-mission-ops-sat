@@ -132,37 +132,37 @@ public class EventNanomindConsumerServiceImpl extends ConsumerServiceImpl
           Map qosProperties)
       {
         if (objectDetailsList.size() == lUpdateHeaderList.size()) {
-            for (int i = 0; i < lUpdateHeaderList.size(); i++) {
+          for (int i = 0; i < lUpdateHeaderList.size(); i++) {
 
-                Identifier entityKey1 = lUpdateHeaderList.get(i).getKey().getFirstSubKey();
-                Long entityKey2 = lUpdateHeaderList.get(i).getKey().getSecondSubKey();
-                Long entityKey3 = lUpdateHeaderList.get(i).getKey().getThirdSubKey();
-                Long entityKey4 = lUpdateHeaderList.get(i).getKey().getFourthSubKey(); // ObjType of the source
+            Identifier entityKey1 = lUpdateHeaderList.get(i).getKey().getFirstSubKey();
+            Long entityKey2 = lUpdateHeaderList.get(i).getKey().getSecondSubKey();
+            Long entityKey3 = lUpdateHeaderList.get(i).getKey().getThirdSubKey();
+            Long entityKey4 = lUpdateHeaderList.get(i).getKey().getFourthSubKey(); // ObjType of the source
 
-                // (UShort area, UShort service, UOctet version, UShort number)
-                // (UShort area, UShort service, UOctet version, 0)
-                ObjectType objType = HelperCOM.objectTypeId2objectType(entityKey2);
-                objType.setNumber(new UShort(Integer.parseInt(entityKey1.toString())));
+            // (UShort area, UShort service, UOctet version, UShort number)
+            // (UShort area, UShort service, UOctet version, 0)
+            ObjectType objType = HelperCOM.objectTypeId2objectType(entityKey2);
+            objType.setNumber(new UShort(Integer.parseInt(entityKey1.toString())));
 
-                Object nativeBody = ((elementList == null) ? null : elementList.get(i));
-                Element body = (Element) HelperAttributes.javaType2Attribute(nativeBody);
+            Object nativeBody = ((elementList == null) ? null : elementList.get(i));
+            Element body = (Element) HelperAttributes.javaType2Attribute(nativeBody);
 
-                // ----
-                EventCOMObject newEvent = new EventCOMObject();
+            // ----
+            EventCOMObject newEvent = new EventCOMObject();
 //                        newEvent.setDomain(msgHeader.getDomain());
-                newEvent.setDomain(connectionDetails.getDomain());
-                newEvent.setObjType(objType);
-                newEvent.setObjId(entityKey3);
+            newEvent.setDomain(connectionDetails.getDomain());
+            newEvent.setObjType(objType);
+            newEvent.setObjId(entityKey3);
 
-                newEvent.setSource(objectDetailsList.get(i).getSource());
-                newEvent.setRelated(objectDetailsList.get(i).getRelated());
-                newEvent.setBody(body);
+            newEvent.setSource(objectDetailsList.get(i).getSource());
+            newEvent.setRelated(objectDetailsList.get(i).getRelated());
+            newEvent.setBody(body);
 
-                newEvent.setTimestamp(lUpdateHeaderList.get(i).getTimestamp());
-                newEvent.setSourceURI(lUpdateHeaderList.get(i).getSourceURI());
-                newEvent.setNetworkZone(msgHeader.getNetworkZone());
-
-            }
+            newEvent.setTimestamp(lUpdateHeaderList.get(i).getTimestamp());
+            newEvent.setSourceURI(lUpdateHeaderList.get(i).getSourceURI());
+            newEvent.setNetworkZone(msgHeader.getNetworkZone());
+            LOGGER.log(Level.INFO, "COM Event from the Nanomind: {0}", newEvent.toString());
+          }
         }
       }
     }
