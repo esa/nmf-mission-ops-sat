@@ -20,7 +20,7 @@
  */
 package esa.mo.platform.impl.provider.opssat;
 
-import esa.mo.com.impl.util.GMVServicesConsumer;
+import esa.mo.nanomind.impl.util.GMVServicesConsumer;
 import esa.mo.platform.impl.provider.gen.GPSNMEAonlyAdapter;
 import java.io.IOException;
 import java.util.Arrays;

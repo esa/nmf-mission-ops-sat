@@ -20,7 +20,7 @@
  */
 package esa.mo.nmf.provider;
 
-import esa.mo.com.impl.util.GMVServicesConsumer;
+import esa.mo.nanomind.impl.util.GMVServicesConsumer;
 import esa.mo.helpertools.helpers.HelperAttributes;
 import esa.mo.nmf.MCRegistration;
 import esa.mo.nmf.MonitorAndControlNMFAdapter;

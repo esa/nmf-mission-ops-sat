@@ -18,7 +18,7 @@
  * limitations under the License. 
  * ----------------------------------------------------------------------------
  */
-package esa.mo.com.impl.consumer;
+package esa.mo.nanomind.impl.consumer;
 
 import esa.mo.helpertools.connections.ConnectionConsumer;
 import esa.mo.helpertools.misc.ConsumerServiceImpl;
@@ -32,32 +32,32 @@ import org.ccsds.moims.mo.mal.MALException;
 import org.ccsds.moims.mo.mal.MALHelper;
 import org.ccsds.moims.mo.mal.consumer.MALConsumer;
 import esa.opssat.nanomind.opssat_pf.OPSSAT_PFHelper;
-import esa.opssat.nanomind.opssat_pf.power.PowerHelper;
-import esa.opssat.nanomind.opssat_pf.power.consumer.PowerStub;
+import esa.opssat.nanomind.opssat_pf.gps.GPSHelper;
+import esa.opssat.nanomind.opssat_pf.gps.consumer.GPSStub;
 
 /**
  *
  * @author Cesar Coelho
  */
-public class PowerNanomindConsumerServiceImpl extends ConsumerServiceImpl {
+public class GPSNanomindConsumerServiceImpl extends ConsumerServiceImpl {
 
-    private PowerStub powerNanomindService = null;
+    private GPSStub gpsNanomindService = null;
 
     @Override
     public Object generateServiceStub(MALConsumer tmConsumer) {
-        return new PowerStub(tmConsumer);
+        return new GPSStub(tmConsumer);
     }
 
-    public PowerStub getPowerNanomindStub() {
-        return powerNanomindService;
+    public GPSStub getGPSNanomindStub() {
+        return gpsNanomindService;
     }
 
     @Override
     public Object getStub() {
-        return getPowerNanomindStub();
+        return getGPSNanomindStub();
     }
 
-    public PowerNanomindConsumerServiceImpl(SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
+    public GPSNanomindConsumerServiceImpl(SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
 
         if (MALContextFactory.lookupArea(MALHelper.MAL_AREA_NAME, MALHelper.MAL_AREA_VERSION) == null) {
             MALHelper.init(MALContextFactory.getElementFactoryRegistry());
@@ -72,10 +72,10 @@ public class PowerNanomindConsumerServiceImpl extends ConsumerServiceImpl {
         }
 
         try {
-            PowerHelper.init(MALContextFactory.getElementFactoryRegistry());
+            GPSHelper.init(MALContextFactory.getElementFactoryRegistry());
         } catch (MALException ex) {
         }
-
+        
         connection = new ConnectionConsumer();
         this.connectionDetails = connectionDetails;
 
@@ -84,7 +84,7 @@ public class PowerNanomindConsumerServiceImpl extends ConsumerServiceImpl {
             try {
                 tmConsumer.close();
             } catch (MALException ex) {
-                Logger.getLogger(PowerNanomindConsumerServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(GPSNanomindConsumerServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
@@ -92,10 +92,9 @@ public class PowerNanomindConsumerServiceImpl extends ConsumerServiceImpl {
                 this.connectionDetails.getProviderURI(),
                 this.connectionDetails.getBrokerURI(),
                 this.connectionDetails.getDomain(),
-                PowerHelper.POWER_SERVICE);
+                GPSHelper.GPS_SERVICE);
 
-        this.powerNanomindService = new PowerStub(tmConsumer);
-
+        this.gpsNanomindService = new GPSStub(tmConsumer);
     }
 
 }

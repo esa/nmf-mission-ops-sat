@@ -18,17 +18,19 @@
  * limitations under the License. 
  * ----------------------------------------------------------------------------
  */
-package esa.mo.com.impl.util;
+package esa.mo.nanomind.impl.util;
 
-import esa.mo.com.impl.consumer.AggregationNanomindConsumerServiceImpl;
-import esa.mo.com.impl.consumer.ExperimentWDNanomindConsumerServiceImpl;
-import esa.mo.com.impl.consumer.GPSNanomindConsumerServiceImpl;
-import esa.mo.com.impl.consumer.PowerNanomindConsumerServiceImpl;
+import esa.mo.nanomind.impl.consumer.AggregationNanomindConsumerServiceImpl;
+import esa.mo.nanomind.impl.consumer.ExperimentWDNanomindConsumerServiceImpl;
+import esa.mo.nanomind.impl.consumer.GPSNanomindConsumerServiceImpl;
+import esa.mo.nanomind.impl.consumer.PowerNanomindConsumerServiceImpl;
 import esa.mo.helpertools.connections.SingleConnectionDetails;
+import esa.mo.nanomind.impl.consumer.EventNanomindConsumerServiceImpl;
 import java.net.MalformedURLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.MALException;
+import org.ccsds.moims.mo.mal.MALInteractionException;
 import org.ccsds.moims.mo.mal.structures.Identifier;
 import org.ccsds.moims.mo.mal.structures.IdentifierList;
 import org.ccsds.moims.mo.mal.structures.URI;
@@ -38,11 +40,13 @@ import org.ccsds.moims.mo.mal.structures.URI;
  *
  */
 public class GMVServicesConsumer {
+    private static final Logger LOGGER = Logger.getLogger(GMVServicesConsumer.class.getName());
 
     private GPSNanomindConsumerServiceImpl gpsNanomindService;
     private PowerNanomindConsumerServiceImpl powerNanomindService;
     private ExperimentWDNanomindConsumerServiceImpl experimentWDNanomindService;
     private AggregationNanomindConsumerServiceImpl aggregationService;
+    private EventNanomindConsumerServiceImpl eventService;
 
     private static final String NANOMIND_APID = "10";  // Default Nanomind APID (on 13 June 2016)
     private static final String MAL_SPP_BINDINDING = "malspp"; // Use the SPP Implementation
@@ -86,10 +90,8 @@ public class GMVServicesConsumer {
 
             // Add the other services!!
             
-        } catch (MALException ex) {
-            Logger.getLogger(GMVServicesConsumer.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(GMVServicesConsumer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (MALException | MalformedURLException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
         }
     }
 

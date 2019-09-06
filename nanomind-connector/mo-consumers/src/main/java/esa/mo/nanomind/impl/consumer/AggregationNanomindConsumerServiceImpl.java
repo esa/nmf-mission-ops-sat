@@ -18,7 +18,7 @@
  * limitations under the License. 
  * ----------------------------------------------------------------------------
  */
-package esa.mo.com.impl.consumer;
+package esa.mo.nanomind.impl.consumer;
 
 import esa.mo.helpertools.connections.ConnectionConsumer;
 import esa.mo.helpertools.misc.ConsumerServiceImpl;
@@ -31,33 +31,33 @@ import org.ccsds.moims.mo.mal.MALContextFactory;
 import org.ccsds.moims.mo.mal.MALException;
 import org.ccsds.moims.mo.mal.MALHelper;
 import org.ccsds.moims.mo.mal.consumer.MALConsumer;
-import esa.opssat.nanomind.opssat_pf.OPSSAT_PFHelper;
-import esa.opssat.nanomind.opssat_pf.gps.GPSHelper;
-import esa.opssat.nanomind.opssat_pf.gps.consumer.GPSStub;
+import esa.opssat.nanomind.mc.MCHelper;
+import esa.opssat.nanomind.mc.aggregation.AggregationHelper;
+import esa.opssat.nanomind.mc.aggregation.consumer.AggregationStub;
 
 /**
  *
  * @author Cesar Coelho
  */
-public class GPSNanomindConsumerServiceImpl extends ConsumerServiceImpl {
+public class AggregationNanomindConsumerServiceImpl extends ConsumerServiceImpl {
 
-    private GPSStub gpsNanomindService = null;
+    private AggregationStub aggregationService = null;
 
     @Override
     public Object generateServiceStub(MALConsumer tmConsumer) {
-        return new GPSStub(tmConsumer);
+        return new AggregationStub(tmConsumer);
     }
 
-    public GPSStub getGPSNanomindStub() {
-        return gpsNanomindService;
+    public AggregationStub getAggregationNanomindStub() {
+        return aggregationService;
     }
 
     @Override
     public Object getStub() {
-        return getGPSNanomindStub();
+        return getAggregationNanomindStub();
     }
 
-    public GPSNanomindConsumerServiceImpl(SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
+    public AggregationNanomindConsumerServiceImpl(SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
 
         if (MALContextFactory.lookupArea(MALHelper.MAL_AREA_NAME, MALHelper.MAL_AREA_VERSION) == null) {
             MALHelper.init(MALContextFactory.getElementFactoryRegistry());
@@ -67,15 +67,15 @@ public class GPSNanomindConsumerServiceImpl extends ConsumerServiceImpl {
             COMHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
 
-        if (MALContextFactory.lookupArea(OPSSAT_PFHelper.OPSSAT_PF_AREA_NAME, OPSSAT_PFHelper.OPSSAT_PF_AREA_VERSION) == null) {
-            OPSSAT_PFHelper.init(MALContextFactory.getElementFactoryRegistry());
+        if (MALContextFactory.lookupArea(MCHelper.MC_AREA_NAME, MCHelper.MC_AREA_VERSION) == null) {
+            MCHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
 
         try {
-            GPSHelper.init(MALContextFactory.getElementFactoryRegistry());
+            AggregationHelper.init(MALContextFactory.getElementFactoryRegistry());
         } catch (MALException ex) {
         }
-        
+
         connection = new ConnectionConsumer();
         this.connectionDetails = connectionDetails;
 
@@ -84,7 +84,7 @@ public class GPSNanomindConsumerServiceImpl extends ConsumerServiceImpl {
             try {
                 tmConsumer.close();
             } catch (MALException ex) {
-                Logger.getLogger(GPSNanomindConsumerServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(AggregationNanomindConsumerServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
@@ -92,9 +92,10 @@ public class GPSNanomindConsumerServiceImpl extends ConsumerServiceImpl {
                 this.connectionDetails.getProviderURI(),
                 this.connectionDetails.getBrokerURI(),
                 this.connectionDetails.getDomain(),
-                GPSHelper.GPS_SERVICE);
+                AggregationHelper.AGGREGATION_SERVICE);
 
-        this.gpsNanomindService = new GPSStub(tmConsumer);
+        this.aggregationService = new AggregationStub(tmConsumer);
+
     }
 
 }
