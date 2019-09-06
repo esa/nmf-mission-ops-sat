@@ -89,7 +89,9 @@ deploy_target3:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - cd opssat-package/target/
     - scp -o ProxyCommand="ssh -W %h:%p $JUSER@$JHOST" nmf-ops-sat_*.ipk $T3USER@$TARGET3:~/
-    - ssh -o ProxyCommand="ssh -W %h:%p $JUSER@$JHOST" $T3USER@$TARGET3 "opkg remove nmf-ops-sat & opkg install nmf-ops-sat_*.ipk & rm nmf-ops-sat_*.ipk"
+    - ssh -o ProxyCommand="ssh -W %h:%p $JUSER@$JHOST" $T3USER@$TARGET3 "opkg remove nmf-ops-sat"
+    - ssh -o ProxyCommand="ssh -W %h:%p $JUSER@$JHOST" $T3USER@$TARGET3 "opkg install nmf-ops-sat_*.ipk"
+    - ssh -o ProxyCommand="ssh -W %h:%p $JUSER@$JHOST" $T3USER@$TARGET3 "rm nmf-ops-sat_*.ipk"
   needs: ["build_space"]
 
 deploy_target4:
