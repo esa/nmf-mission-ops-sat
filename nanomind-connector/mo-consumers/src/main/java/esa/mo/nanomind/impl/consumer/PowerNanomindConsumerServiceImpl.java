@@ -18,7 +18,7 @@
  * limitations under the License. 
  * ----------------------------------------------------------------------------
  */
-package esa.mo.com.impl.consumer;
+package esa.mo.nanomind.impl.consumer;
 
 import esa.mo.helpertools.connections.ConnectionConsumer;
 import esa.mo.helpertools.misc.ConsumerServiceImpl;
@@ -32,32 +32,32 @@ import org.ccsds.moims.mo.mal.MALException;
 import org.ccsds.moims.mo.mal.MALHelper;
 import org.ccsds.moims.mo.mal.consumer.MALConsumer;
 import esa.opssat.nanomind.opssat_pf.OPSSAT_PFHelper;
-import esa.opssat.nanomind.opssat_pf.experimentwd.ExperimentWDHelper;
-import esa.opssat.nanomind.opssat_pf.experimentwd.consumer.ExperimentWDStub;
+import esa.opssat.nanomind.opssat_pf.power.PowerHelper;
+import esa.opssat.nanomind.opssat_pf.power.consumer.PowerStub;
 
 /**
  *
  * @author Cesar Coelho
  */
-public class ExperimentWDNanomindConsumerServiceImpl extends ConsumerServiceImpl {
+public class PowerNanomindConsumerServiceImpl extends ConsumerServiceImpl {
 
-    private ExperimentWDStub experimentWDNanomindService = null;
+    private PowerStub powerNanomindService = null;
 
     @Override
     public Object generateServiceStub(MALConsumer tmConsumer) {
-        return new ExperimentWDStub(tmConsumer);
+        return new PowerStub(tmConsumer);
     }
 
-    public ExperimentWDStub getExperimentWDNanomindStub() {
-        return experimentWDNanomindService;
+    public PowerStub getPowerNanomindStub() {
+        return powerNanomindService;
     }
 
     @Override
     public Object getStub() {
-        return getExperimentWDNanomindStub();
+        return getPowerNanomindStub();
     }
 
-    public ExperimentWDNanomindConsumerServiceImpl(SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
+    public PowerNanomindConsumerServiceImpl(SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
 
         if (MALContextFactory.lookupArea(MALHelper.MAL_AREA_NAME, MALHelper.MAL_AREA_VERSION) == null) {
             MALHelper.init(MALContextFactory.getElementFactoryRegistry());
@@ -72,7 +72,7 @@ public class ExperimentWDNanomindConsumerServiceImpl extends ConsumerServiceImpl
         }
 
         try {
-            ExperimentWDHelper.init(MALContextFactory.getElementFactoryRegistry());
+            PowerHelper.init(MALContextFactory.getElementFactoryRegistry());
         } catch (MALException ex) {
         }
 
@@ -84,7 +84,7 @@ public class ExperimentWDNanomindConsumerServiceImpl extends ConsumerServiceImpl
             try {
                 tmConsumer.close();
             } catch (MALException ex) {
-                Logger.getLogger(ExperimentWDNanomindConsumerServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(PowerNanomindConsumerServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
@@ -92,9 +92,9 @@ public class ExperimentWDNanomindConsumerServiceImpl extends ConsumerServiceImpl
                 this.connectionDetails.getProviderURI(),
                 this.connectionDetails.getBrokerURI(),
                 this.connectionDetails.getDomain(),
-                ExperimentWDHelper.EXPERIMENTWD_SERVICE);
+                PowerHelper.POWER_SERVICE);
 
-        this.experimentWDNanomindService = new ExperimentWDStub(tmConsumer);
+        this.powerNanomindService = new PowerStub(tmConsumer);
 
     }
 

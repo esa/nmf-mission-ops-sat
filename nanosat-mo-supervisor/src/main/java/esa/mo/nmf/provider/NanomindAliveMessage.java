@@ -20,7 +20,7 @@
  */
 package esa.mo.nmf.provider;
 
-import esa.mo.com.impl.util.GMVServicesConsumer;
+import esa.mo.nanomind.impl.util.GMVServicesConsumer;
 import esa.mo.helpertools.misc.TaskScheduler;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;

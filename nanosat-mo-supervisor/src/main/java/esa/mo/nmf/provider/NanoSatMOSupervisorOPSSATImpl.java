@@ -21,7 +21,7 @@
 package esa.mo.nmf.provider;
 
 import esa.mo.com.impl.util.COMServicesProvider;
-import esa.mo.com.impl.util.GMVServicesConsumer;
+import esa.mo.nanomind.impl.util.GMVServicesConsumer;
 import esa.mo.nmf.MonitorAndControlNMFAdapter;
 import esa.mo.nmf.nanosatmosupervisor.NanoSatMOSupervisor;
 import esa.mo.nmf.nmfpackage.NMFPackagePMBackend;

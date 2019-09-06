@@ -21,7 +21,7 @@
 package esa.mo.platform.impl.util;
 
 import esa.mo.com.impl.util.COMServicesProvider;
-import esa.mo.com.impl.util.GMVServicesConsumer;
+import esa.mo.nanomind.impl.util.GMVServicesConsumer;
 import esa.mo.platform.impl.provider.gen.PowerControlProviderServiceImpl;
 import esa.mo.platform.impl.provider.gen.CameraProviderServiceImpl;
 import esa.mo.platform.impl.provider.gen.GPSProviderServiceImpl;
