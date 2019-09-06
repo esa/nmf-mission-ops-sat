@@ -28,7 +28,7 @@
   <packaging>jar</packaging>
 
   <name>ESA NMF Mission OPS-SAT - Nanomind MO Service Consumers Implementation</name>
-  <description>GMV service consumers implementation</description>
+  <description>OPS-SAT OBC service consumers implementation</description>
   <url>http://www.esa.int</url>
   
   <organization>

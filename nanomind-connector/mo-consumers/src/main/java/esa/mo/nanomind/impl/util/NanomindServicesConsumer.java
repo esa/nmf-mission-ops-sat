@@ -39,8 +39,8 @@ import org.ccsds.moims.mo.mal.structures.URI;
  *
  *
  */
-public class GMVServicesConsumer {
-    private static final Logger LOGGER = Logger.getLogger(GMVServicesConsumer.class.getName());
+public class NanomindServicesConsumer {
+    private static final Logger LOGGER = Logger.getLogger(NanomindServicesConsumer.class.getName());
 
     private GPSNanomindConsumerServiceImpl gpsNanomindService;
     private PowerNanomindConsumerServiceImpl powerNanomindService;
@@ -53,7 +53,7 @@ public class GMVServicesConsumer {
     private static final String SOURCE_ID = "0"; // OBSW supports any value. By default it is set to 0
     
     
-    public GMVServicesConsumer() {
+    public NanomindServicesConsumer() {
 
     }
     
