@@ -167,8 +167,9 @@ public class EventNanomindConsumerServiceImpl extends ConsumerServiceImpl
       }
     }
     // Register with the subscription key provided
-    this.getEventStub().monitorEventRegister(ConnectionConsumer.subscriptionWildcard(
-        new Identifier("SUB")), new EventReceivedAdapter());
+    // FIXME: Causes an exception at SPPMessageHeader.java:115
+  //  this.getEventStub().monitorEventRegister(ConnectionConsumer.subscriptionWildcard(
+  //      new Identifier("SUB")), new EventReceivedAdapter());
   }
 
   /**
