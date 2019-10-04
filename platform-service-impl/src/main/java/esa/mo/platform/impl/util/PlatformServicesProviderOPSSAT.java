@@ -57,10 +57,13 @@ public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderI
   private final SoftwareDefinedRadioProviderServiceImpl sdrService
       = new SoftwareDefinedRadioProviderServiceImpl();
 
-  public void init(COMServicesProvider comServices, NanomindServicesConsumer obcServicesConsumer) throws
+  @Override
+  public void init(COMServicesProvider comServices) throws
       MALException
   {
     try {
+      NanomindServicesConsumer obcServicesConsumer = new NanomindServicesConsumer();
+        obcServicesConsumer.init();
       adcsService.init(comServices, new AutonomousADCSOPSSATAdapter());
       cameraService.init(comServices, new CameraOPSSATAdapter());
       gpsService.init(comServices, new GPSOPSSATAdapter(obcServicesConsumer));
