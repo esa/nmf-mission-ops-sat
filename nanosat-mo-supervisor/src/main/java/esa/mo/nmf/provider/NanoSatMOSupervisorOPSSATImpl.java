@@ -54,7 +54,7 @@ public final class NanoSatMOSupervisorOPSSATImpl extends NanoSatMOSupervisor {
 
         try {
             platformServicesOPSSAT = new PlatformServicesProviderOPSSAT();
-            platformServicesOPSSAT.init(comServices, obcServicesConsumer);
+            platformServicesOPSSAT.init(comServices);
         } catch (MALException ex) {
             Logger.getLogger(NanoSatMOSupervisorOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
