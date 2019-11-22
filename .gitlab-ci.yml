@@ -104,7 +104,7 @@ deploy_target4:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - cd opssat-package/target/nmf-opssat*/experimenter-package/home/exp000
     - scp -r * $T4USER@$TARGET4:$T4PATH/$NMF_USER
-    - ssh $T4USER@$TARGET4 "chown $T4USER:$T4GROUP $T4PATH/$NMF_USER & chmod 644 $T4PATH/$NMF_USER/* & for d in $T4PATH/$NMF_USER/*; do if [ -d \"$d\"  ] ; then ( chmod a+x $d ) fi done"
+    - ssh $T4USER@$TARGET4 "chown $T4USER:$T4GROUP $T4PATH/$NMF_USER && chmod 644 $T4PATH/$NMF_USER/* && for d in $T4PATH/$NMF_USER/*; do if [ -d \"$d\"  ] ; then ( chmod a+x $d ) fi done"
   needs: ["build_space"]
 
 deploy_sim:
