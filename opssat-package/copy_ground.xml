@@ -2,7 +2,7 @@
   <target name="copyfiles">
     <!-- TODO - ideally most of space-common should be copied once and symlinks used -->
     <!-- TODO: Non essential parts, should be activated on a profile-basis -->
-    <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/home/nmf/nanosat-mo-supervisor-sim">
+    <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/home/nmf/supervisor-sim">
       <fileset dir="${basedir}/src/main/resources/space-common"/>
       <fileset dir="${basedir}/src/main/resources/space-supervisor-sim-root"/>
       <filterset>
