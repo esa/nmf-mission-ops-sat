@@ -70,7 +70,6 @@
     <module>transport</module>
     <module>nanomind-connector</module>
     <module>platform-service-impl</module>
-    <module>nanosat-mo-supervisor</module>
     <module>ground-mo-proxy</module>
     <module>opssat-package</module>
   </modules>

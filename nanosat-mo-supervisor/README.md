@@ -20,5 +20,5 @@ Three actions were defined with the following names and respective descriptions:
 * Reboot_MityArm: "Reboots the mityArm."
 * Clock.setTimeUsingDeltaMilliseconds: "Sets the clock using a diff between the on-board time and the desired time."
 
-
+Note that the supervisor code was merged with the NMF baseline. This README is left in place for legacy purpsoes.
 

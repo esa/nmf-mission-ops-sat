@@ -133,13 +133,6 @@
         <version>${esa.nmf.opssat.version-qualifier}</version>
       </dependency>
 
-      <!-- NMF Supervisor -->
-      <dependency>
-        <groupId>int.esa.nmf.mission.opssat</groupId>
-        <artifactId>nanosat-mo-supervisor-opssat</artifactId>
-        <version>${esa.nmf.opssat.version-qualifier}</version>
-      </dependency>
-
       <!-- Standalone modules -->
       <dependency>
         <groupId>int.esa.opssat</groupId>
