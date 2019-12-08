@@ -66,8 +66,10 @@ deploy_target1:
 
 deploy_target2:
   stage: deploy
+  only:
+    variables:
+      - $DEPLOY == "1"
   script:
-    - if [ "$SCHEDULE" != $(date +"%H") ] ; then exit 0 ; fi
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
@@ -80,8 +82,10 @@ deploy_target2:
 
 deploy_target3:
   stage: deploy
+  only:
+    variables:
+      - $DEPLOY == "1"
   script:
-    - if [ "$SCHEDULE" != $(date +"%H") ] ; then exit 0 ; fi
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
@@ -95,8 +99,10 @@ deploy_target3:
 
 deploy_target4:
   stage: deploy
+  only:
+    variables:
+      - $DEPLOY == "1"
   script:
-    - if [ "$SCHEDULE" != $(date +"%H") ] ; then exit 0 ; fi
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
@@ -109,8 +115,10 @@ deploy_target4:
 
 deploy_sim:
   stage: deploy_extras
+  only:
+    variables:
+      - $DEPLOY == "1"
   script:
-    - if [ "$SCHEDULE" != $(date +"%H") ] ; then exit 0 ; fi
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
