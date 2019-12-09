@@ -1,5 +1,3 @@
-[![][NMFImage]][NanoSat MO Framework]
-
 # NanoSat MO Framework - mission tailoring for OPS-SAT
 This repository contains parts of the NanoSat MO Framework specific to the OPS-SAT mission.
 
