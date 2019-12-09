@@ -52,6 +52,9 @@ build_space:
 
 deploy_target1:
   stage: deploy
+  only:
+    variables:
+      - $DEPLOY == "1"
   script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
