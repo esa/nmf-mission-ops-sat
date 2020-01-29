@@ -21,7 +21,7 @@ export NMF_HOME
 MAIN_CLASS_NAME=@MAIN_CLASS_NAME@
 
 exec java $JAVA_OPTS \
-  -classpath "$NMF_LIB:lib/*:/usr/lib/java/*" \
+  -classpath "$NMF_LIB/*:lib/*:/usr/lib/java/*" \
   -Dnmf.platform.impl=@PLATFORM@ \
   -Djava.util.logging.config.file="$NMF_HOME/logging.properties" \
   "$MAIN_CLASS_NAME" \

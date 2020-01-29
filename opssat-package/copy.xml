@@ -8,7 +8,7 @@
         <filter token="MAIN_CLASS_NAME" value="esa.mo.nmf.nanosatmosupervisor.NanosatMOSupervisorBasicImpl"/>
         <filter token="APPS_DIR" value="../.."/>
         <filter token="NMF_HOME" value="`cd .. > /dev/null; pwd`"/>
-        <filter token="NMF_LIB" value="`cd ../lib > /dev/null; pwd`/*"/>
+        <filter token="NMF_LIB" value="`cd ../lib > /dev/null; pwd`"/>
         <filter token="USER" value="root"/>
         <filter token="PLATFORM" value="esa.mo.platform.impl.util.PlatformServicesProviderOPSSAT"/>
       </filterset>
@@ -29,7 +29,7 @@
         <filter token="MAIN_CLASS_NAME" value="esa.mo.nmf.apps.PayloadsTestApp"/>
         <filter token="APID" value="${apid}"/>
         <filter token="NMF_HOME" value="`cd ../nmf > /dev/null; pwd`"/>
-        <filter token="NMF_LIB" value="`cd ../nmf/lib > /dev/null; pwd`/*"/>
+        <filter token="NMF_LIB" value="`cd ../nmf/lib > /dev/null; pwd`"/>
         <filter token="USER" value="root"/>
       </filterset>
       <firstmatchmapper>
@@ -53,7 +53,7 @@
         <filter token="MAIN_CLASS_NAME" value="esa.mo.nmf.apps.PayloadsTestApp"/>
         <filter token="APID" value="${expApid}"/>
         <filter token="NMF_HOME" value="`cd ../nmf > /dev/null; pwd`"/>
-        <filter token="NMF_LIB" value="`cd ../nmf/lib > /dev/null; pwd`/*"/>
+        <filter token="NMF_LIB" value="`cd ../nmf/lib > /dev/null; pwd`"/>
         <filter token="USER" value="exp${expId}"/>
       </filterset>
       <firstmatchmapper>
