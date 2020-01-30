@@ -28,9 +28,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.MALException;
 import esa.opssat.nanomind.opssat_pf.gps.consumer.GPSAdapter;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.ccsds.moims.mo.mal.MALInteractionException;
 import org.ccsds.moims.mo.mal.structures.Blob;
 import org.ccsds.moims.mo.platform.gps.structures.TwoLineElementSet;
+import org.orekit.propagation.analytical.tle.TLE;
 
 /**
  *
@@ -40,6 +44,9 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter
 {
 
   private final NanomindServicesConsumer obcServicesConsumer;
+  private final String TLE_LOCATION = File.separator + "etc" + File.separator + "tle";
+  private String currentTleSentence = "";
+  private long tleLastModified = -1;
 
   public GPSOPSSATAdapter(NanomindServicesConsumer obcServicesConsumer)
   {
@@ -67,9 +74,66 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter
   }
 
   @Override
+  public String getTLESentence() throws IOException
+  {
+    // read TLE from file
+    String content = "";
+    File file = new File(this.TLE_LOCATION);
+
+    // check if cached version is still accurate
+    if (file.lastModified() == this.tleLastModified) {
+      return this.currentTleSentence;
+    }
+
+    // if cached version is outdated, load from file
+    this.tleLastModified = file.lastModified();
+    this.currentTleSentence = new String(Files.readAllBytes(file.toPath()));
+    return this.currentTleSentence;
+  }
+
+  @Override
   public TwoLineElementSet getTLE()
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    String content = "";
+    try {
+      content = this.getTLESentence();
+    } catch (IOException ex) {
+      Logger.getLogger(GPSOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    String[] lines = content.split(System.lineSeparator());
+    String line1;
+    String line2;
+
+    //split TLE into two main lines
+    switch (lines.length) {
+      case 3:
+        //if header line exists, discard it
+        line1 = lines[1];
+        line2 = lines[2];
+        break;
+      case 2:
+        line1 = lines[0];
+        line2 = lines[1];
+        break;
+      default:
+        Logger.getLogger(GPSOPSSATAdapter.class.getName()).log(Level.SEVERE,
+            "TLE is empty or wrongly formatet. TLE:{0}{1}", new Object[]{System.lineSeparator(),
+              Arrays.toString(lines)});
+        return null;
+    }
+
+    TLE tle = new TLE(line1, line2);
+
+    return new TwoLineElementSet(tle.getSatelliteNumber(), "" + tle.getClassification(),
+        tle.getLaunchYear(), tle.getLaunchNumber(), tle.getLaunchPiece(),
+        tle.getDate().getComponents(0).getDate().getYear(),
+        tle.getDate().getComponents(0).getDate().getDayOfYear(),
+        tle.getDate().getComponents(0).getTime().getSecondsInUTCDay(),
+        tle.getMeanMotionFirstDerivative(), tle.getMeanMotionSecondDerivative(),
+        tle.getBStar(), tle.getElementNumber(), tle.getI(), tle.getRaan(), tle.getE(),
+        tle.getPerigeeArgument(), tle.getMeanAnomaly(), tle.getMeanMotion(),
+        tle.getRevolutionNumberAtEpoch());
+
   }
 
   private class GPSHandler extends GPSAdapter
