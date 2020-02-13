@@ -148,6 +148,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>int.esa.nmf.core</groupId>
+      <artifactId>nanosat-mo-supervisor</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>int.esa.nmf.sdk.examples.space</groupId>
       <artifactId>payloads-test</artifactId>
       <version>${project.version}</version>
@@ -155,6 +160,11 @@
     <dependency>
       <groupId>int.esa.opssat.transport</groupId>
       <artifactId>malspp-over-cfp-tcp</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.nmf.mission.opssat.moservices.impl</groupId>
+      <artifactId>nmf-platform-impl-opssat</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
