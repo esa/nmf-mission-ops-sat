@@ -85,6 +85,11 @@
           <version>${project.version}</version>
         </dependency>
         <dependency>
+          <groupId>int.esa.nmf.sdk.examples.space</groupId>
+          <artifactId>camera-acquisitor-system</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+        <dependency>
           <groupId>int.esa.nmf.mission.opssat</groupId>
           <artifactId>ground-mo-proxy</artifactId>
           <version>${project.version}</version>
