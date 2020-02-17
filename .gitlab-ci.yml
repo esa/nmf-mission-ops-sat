@@ -20,7 +20,7 @@ build_base:
     - cd ..
     - git clone https://github.com/esa/nanosat-mo-framework.git
     - cd nanosat-mo-framework
-    - git checkout dev
+    - git checkout $NMF_BRANCH
     - mvn clean install
     - cd ..
   artifacts:
