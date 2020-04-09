@@ -628,6 +628,18 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   }
 
   @Override
+  public void setAllMagnetorquersDipoleMoments(Float dipoleX, Float dipoleY, Float dipoleZ)
+  {
+    SEPP_IADCS_API_VECTOR3_XYZ_FLOAT moments = new SEPP_IADCS_API_VECTOR3_XYZ_FLOAT();
+
+    moments.setX(dipoleX);
+    moments.setY(dipoleY);
+    moments.setZ(dipoleZ);
+
+    adcsApi.Set_Magnettorquer_All_Dipole_Moments(moments);
+  }
+
+  @Override
   public void unset() throws IOException
   {
     if (activeAttitudeMode instanceof AttitudeModeBDot) {
