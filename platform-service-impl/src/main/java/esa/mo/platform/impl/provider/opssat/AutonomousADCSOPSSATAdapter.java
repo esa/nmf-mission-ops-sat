@@ -640,6 +640,14 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   }
 
   @Override
+  public ReactionWheelParameters getAllReactionWheelParameters()
+  {
+    SEPP_IADCS_API_REACTIONWHEEL_ARRAY_PARAMETERS param = adcsApi.Get_ReactionWheel_All_Parameters();
+    return new ReactionWheelParameters(param.getMAX_SPEED(), param.getMAX_TORQUE(),
+        param.getMOMENT_OF_INERTIA(), param.getMOTOR_CONSTANT());
+  }
+
+  @Override
   public void unset() throws IOException
   {
     if (activeAttitudeMode instanceof AttitudeModeBDot) {
@@ -713,4 +721,5 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   {
     return activeAttitudeMode;
   }
+
 }
