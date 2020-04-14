@@ -54,6 +54,9 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   private static final float ANGLE_VEL_TOL_RADPS = 0.00872665f;
   private static final float TARGET_THRESHOLD_RAD = 0.261799f;
 
+  private static final float MAX_REACTION_WHEEL_SPEED = 1047.197551f;
+  private static final float MAX_REACTION_WHEEL_TORQUE = 0.0001f;
+
   private AttitudeMode activeAttitudeMode;
   private SEPP_IADCS_API adcsApi;
   private boolean initialized = false;
@@ -628,6 +631,56 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   }
 
   @Override
+  public void setAllReactionWheelParameters(ReactionWheelParameters parameters)
+  {
+
+    ReactionWheelParameters oldParams = getAllReactionWheelParameters();
+    SEPP_IADCS_API_REACTIONWHEEL_ARRAY_PARAMETERS params =
+        new SEPP_IADCS_API_REACTIONWHEEL_ARRAY_PARAMETERS();
+
+    if (parameters.getControlMode() >= 0 && parameters.getControlMode() <= 2) {
+      params.setCONTROL_MODE(parameters.getControlMode());
+    } else {
+      if (parameters.getControlMode() != -1) {
+        LOGGER.log(Level.WARNING, "{0} is no valid control mode. control mode has not been changed!",
+            parameters.getControlMode());
+      }
+      params.setCONTROL_MODE(oldParams.getControlMode());
+    }
+
+    if (parameters.getMaxSpeed() < MAX_REACTION_WHEEL_SPEED) {
+      params.setMAX_SPEED(parameters.getMaxSpeed());
+    } else {
+      if (parameters.getMaxSpeed() < 0) {
+        LOGGER.log(Level.WARNING,
+            "Negative maximum speed is not allowed! Max speed will not be changed");
+        params.setMAX_SPEED(oldParams.getMaxSpeed());
+      } else {
+        LOGGER.log(Level.WARNING,
+            "Maximum speed is not allowed to exceed {0}! Max speed will be set to {0}",
+            MAX_REACTION_WHEEL_SPEED);
+        params.setMAX_SPEED(MAX_REACTION_WHEEL_SPEED);
+      }
+    }
+
+    if (params.getMAX_TORQUE() < MAX_REACTION_WHEEL_TORQUE) {
+      params.setMAX_SPEED(parameters.getMaxSpeed());
+    } else {
+      if (parameters.getMaxTorque() < 0) {
+        LOGGER.log(Level.WARNING,
+            "Negative maximum torque is not allowed! Max torque will not be changed");
+        params.setMAX_TORQUE(oldParams.getMaxTorque());
+      } else {
+        LOGGER.log(Level.WARNING,
+            "Maximum torque is not allowed to exceed {0}! Max torque will be set to {0}",
+            MAX_REACTION_WHEEL_TORQUE);
+        params.setMAX_TORQUE(MAX_REACTION_WHEEL_TORQUE);
+      }
+    }
+    adcsApi.Set_ReactionWheel_All_Parameters(params);
+  }
+
+  @Override
   public void setAllMagnetorquersDipoleMoments(Float dipoleX, Float dipoleY, Float dipoleZ)
   {
     SEPP_IADCS_API_VECTOR3_XYZ_FLOAT moments = new SEPP_IADCS_API_VECTOR3_XYZ_FLOAT();
@@ -643,7 +696,8 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   public ReactionWheelParameters getAllReactionWheelParameters()
   {
     SEPP_IADCS_API_REACTIONWHEEL_ARRAY_PARAMETERS param = adcsApi.Get_ReactionWheel_All_Parameters();
-    return new ReactionWheelParameters(param.getMAX_SPEED(), param.getMAX_TORQUE(),
+    return new ReactionWheelParameters((int) param.getCONTROL_MODE(), param.getMAX_SPEED(),
+        param.getMAX_TORQUE(),
         param.getMOMENT_OF_INERTIA(), param.getMOTOR_CONSTANT());
   }
 
@@ -721,5 +775,4 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   {
     return activeAttitudeMode;
   }
-
 }
