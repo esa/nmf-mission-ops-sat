@@ -20,7 +20,11 @@ build_base:
     - cd ..
     - git clone https://github.com/esa/nanosat-mo-framework.git
     - cd nanosat-mo-framework
+    - if [ $NMF_BRANCH = "dev" ] && [ -n "$(git branch --list $CI_COMMIT_REF_NAME)" ]; then
+    - git checkout $CI_COMMIT_REF_NAME
+    - else
     - git checkout $NMF_BRANCH
+    - fi
     - mvn clean install
     - cd ..
   artifacts:
