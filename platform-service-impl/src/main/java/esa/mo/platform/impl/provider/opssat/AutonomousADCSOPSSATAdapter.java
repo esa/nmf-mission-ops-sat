@@ -35,6 +35,11 @@ import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.structures.FloatList;
 import org.ccsds.moims.mo.platform.autonomousadcs.structures.*;
 import org.ccsds.moims.mo.platform.structures.VectorF3D;
+import org.hipparchus.geometry.euclidean.threed.Rotation;
+import org.hipparchus.geometry.euclidean.threed.RotationConvention;
+import org.hipparchus.geometry.euclidean.threed.RotationOrder;
+import org.hipparchus.geometry.euclidean.threed.Vector3D;
+import org.hipparchus.util.FastMath;
 
 /**
  *
@@ -58,6 +63,8 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT flightVector;
   private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT targetVector; // For sun pointing
   private SEPP_IADCS_API_TARGET_POINTING_TOLERANCE_PARAMETERS tolerance;
+
+  private PositionHolder holder;
 
   public AutonomousADCSOPSSATAdapter()
   {
@@ -91,6 +98,155 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     tolerance.setPREALIGNMENT_ANGLE_TOLERANCE_PERCENT(ANGLE_TOL_PERCENT);
     tolerance.setPREALIGNMENT_ANGULAR_VELOCITY_TOLERANCE_RADPS(ANGLE_VEL_TOL_RADPS);
     tolerance.setPREALIGNMENT_TARGET_THRESHOLD_RAD(TARGET_THRESHOLD_RAD); // See section 6.2.2.4 in ICD
+  }
+
+  /**
+   * class for controlling the vector pointing mode
+   */
+  private class PositionHolder implements Runnable
+  {
+
+    private final Vector3D targetVec;
+
+    private final float margin;
+    private boolean isHoldingPosition;
+    private boolean isX = true;
+    private boolean isY = false;
+    private boolean isZ = false;
+    private boolean isFinshed;
+
+    public PositionHolder(Vector3D targetVec, float margin)
+    {
+      this.targetVec = targetVec;
+      this.margin = margin;
+      isHoldingPosition = true;
+      LOGGER.log(Level.INFO, "OPSSAT vector pointing initiated");
+    }
+
+    /**
+     * stops the vector pointing mode
+     */
+    public void stop()
+    {
+      isHoldingPosition = false;
+      while (!isFinshed) {
+        try {
+          wait(1);
+        } catch (InterruptedException ex) {
+          Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+      }
+    }
+
+    public void run()
+    {
+      do {
+        try {
+          wait(1);
+
+          // get current attitude telemetry
+          SEPP_IADCS_API_QUATERNION_FLOAT telemetry =
+              adcsApi.Get_Attitude_Telemetry().getATTITUDE_QUATERNION_BF();
+          Rotation currentRotation = new Rotation(telemetry.getQ(), telemetry.getQ_I(),
+              telemetry.getQ_J(), telemetry.getQ_K(), true);
+
+          /* calculate rotation angles
+             by creating a rotation from the camera vector (in spacecraft frame)
+             to the target vector
+             (which has to be transformed into spacecraft frame from ICRF, hence the applyInverse)*/
+          Vector3D diff = new Vector3D(
+              new Rotation(new Vector3D(0, 0, -1), currentRotation.applyInverseTo(targetVec))
+                  .getAngles(RotationOrder.XYZ, RotationConvention.VECTOR_OPERATOR));
+
+          // rotate around each axis in spacecraft frame. (first x than y than z)
+          if (isX) {
+            //rotate diff.getX() around x
+            adcsApi.Start_SingleAxis_AngleStep_Controller(
+                SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X,
+                (float) diff.getX());
+          } else if (isY) {
+            //rotate diff.getY() around y
+            adcsApi.Start_SingleAxis_AngleStep_Controller(
+                SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y,
+                (float) diff.getY());
+          } else if (isZ) {
+            //rotate diff.getZ() around z
+            adcsApi.Start_SingleAxis_AngleStep_Controller(
+                SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z,
+                (float) diff.getZ());
+          } else {
+            // in case of drift, restart alignment
+            if (Math.abs(FastMath.toDegrees(diff.getX())) > this.margin) {
+
+              adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                  SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X);
+              adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                  SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
+              adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                  SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z);
+
+              isX = true;
+            } else {
+              // if attitude is good, hold attitude
+              adcsApi.Start_SingleAxis_AngularVelocity_Controller(
+                  SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X,
+                  0);
+              adcsApi.Start_SingleAxis_AngularVelocity_Controller(
+                  SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y,
+                  0);
+              adcsApi.Start_SingleAxis_AngularVelocity_Controller(
+                  SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z,
+                  0);
+            }
+          }
+
+          // if x target is reached swap to y axis
+          if (isX && Math.abs(FastMath.toDegrees(diff.getX())) <= this.margin) {
+            isX = false;
+            isY = true;
+            adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X);
+          }
+
+          // if y target is reached swap to z axis
+          if (isY && Math.abs(FastMath.toDegrees(diff.getY())) <= this.margin + 0.01) {
+            isY = false;
+            isZ = true;
+            adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
+          }
+
+          // if z target is reached, stop rotation
+          if (isZ && Math.abs(FastMath.toDegrees(diff.getZ())) <= this.margin + 0.01) {
+            isZ = false;
+            adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z);
+          }
+
+        } catch (InterruptedException ex) {
+          Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.SEVERE, null,
+              ex);
+        }
+
+      } while (isHoldingPosition); // do this while the vectorpointing mode is active
+
+      // cleanup: stop every mode that is possibly running
+      adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+          SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X);
+      adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+          SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
+      adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+          SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
+
+      adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+          SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X);
+      adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+          SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
+      adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+          SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z);
+
+      isFinshed = true;
+    }
   }
 
   private SEPP_IADCS_API_ORBIT_TLE_DATA readTLEFile() throws IOException, FileNotFoundException
@@ -419,6 +575,14 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       adcsApi.Init_Orbit_Module(readTLEFile());
       adcsApi.Start_Target_Pointing_Earth_Const_Velocity_Mode(params);
       activeAttitudeMode = a;
+    } else if (attitude instanceof AttitudeModeVectorPointing) {
+
+      AttitudeModeVectorPointing a = (AttitudeModeVectorPointing) attitude;
+
+      holder = new PositionHolder(new Vector3D(a.getTarget().getX(), a.getTarget().getY(),
+          a.getTarget().getZ()), a.getMargin());
+      Thread runner = new Thread(holder);
+      runner.start();
     } else {
       throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -444,6 +608,8 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       adcsApi.Stop_Target_Pointing_Earth_Fix_Mode();
     } else if (activeAttitudeMode instanceof AttitudeModeTargetTrackingLinear) {
       adcsApi.Stop_Target_Pointing_Earth_Const_Velocity_Mode();
+    } else if (activeAttitudeMode instanceof AttitudeModeVectorPointing) {
+      holder.stop();
     }
     activeAttitudeMode = null;
     adcsApi.Set_Operation_Mode_Idle();
