@@ -35,6 +35,7 @@ import java.nio.ByteBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import org.ccsds.moims.mo.mal.MALException;
 import org.ccsds.moims.mo.mal.structures.Blob;
 import org.ccsds.moims.mo.mal.structures.Duration;
 import org.ccsds.moims.mo.mal.structures.Time;
@@ -165,6 +166,53 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     return takePicture(new CameraSettings(resolution, PictureFormat.RAW, PREVIEW_EXPOSURE_TIME,
         PREVIEW_GAIN, PREVIEW_GAIN, PREVIEW_GAIN));
 
+  }
+
+  @Override
+  public synchronized Picture takeAutoExposedPicture(CameraSettings settings) throws IOException,
+      MALException
+  {
+    Duration defaultExposure = new Duration(0.1);
+    final double F = 4;// f^2 value of ops-sat camera
+    double EV = Math.log(F / defaultExposure.getValue()) / Math.log(2);
+
+    CameraSettings tmpSettings = new CameraSettings(settings.getResolution(), PictureFormat.RAW,
+        defaultExposure, 1.0f, 1.0f, 1.0f);
+    LOGGER.log(Level.INFO, "take sample picture");
+    Picture initialPicture = takePicture(tmpSettings);
+
+    BufferedImage image = OPSSATCameraDebayering.getDebayeredImage(
+        initialPicture.getContent().getValue());
+
+    int w = (int) settings.getResolution().getWidth().getValue();
+    int h = (int) settings.getResolution().getHeight().getValue();
+    int[] rgb = image.getRGB(0, 0, w, h, null, 0, w);
+
+    double luminanceSum = 0;
+    for (int color : rgb) {
+      int red = (color >>> 16) & 0xFF;
+      int green = (color >>> 8) & 0xFF;
+      int blue = color & 0xFF; // shift by 0
+
+      //calc luminance using sRGB luminance constants
+      luminanceSum += (red * 0.2126 + green * 0.7152 + blue * 0.0722) / 255;
+    }
+
+    LOGGER.log(Level.INFO, "Luminance = {0}", luminanceSum);
+    luminanceSum /= w * h;
+
+    double optimal_EV =
+        EV
+        + (Math.log(luminanceSum) / Math.log(2))
+        - (Math.log(0.5) / Math.log(2));
+
+    double optimalExposureTime = F * Math.pow(2, -optimal_EV);
+    LOGGER.log(Level.INFO, "normalised Luminance = {0}", luminanceSum);
+    LOGGER.log(Level.INFO, "Exposure = {0}", optimalExposureTime);
+
+    tmpSettings.setFormat(settings.getFormat());
+    tmpSettings.setExposureTime(new Duration(optimalExposureTime));
+    return takePicture(tmpSettings);
   }
 
   @Override
