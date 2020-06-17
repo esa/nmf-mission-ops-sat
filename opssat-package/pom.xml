@@ -327,18 +327,24 @@
                   <fileset dir="${basedir}/target/nmf-opssat-${project.version}"/>
                 </copy>
                 <exec dir="${basedir}/target/nmf-package/control" executable="tar">
+                  <arg value="--use-compress-program=gzip -9 -n"/>
                   <arg value="--numeric-owner"/>
                   <arg value="--group=0"/>
                   <arg value="--owner=0"/>
-                  <arg value="-czf"/>
+                  <arg value="--sort=name"/>
+                  <arg value="--mtime=1970-01-01"/>
+                  <arg value="-cf"/>
                   <arg value="../control.tar.gz"/>
                   <arg value="./"/>
                 </exec>
                 <exec dir="${basedir}/target/nmf-package/data" executable="tar">
+                  <arg value="--use-compress-program=gzip -9 -n"/>
                   <arg value="--numeric-owner"/>
                   <arg value="--group=0"/>
                   <arg value="--owner=0"/>
-                  <arg value="-czf"/>
+                  <arg value="--sort=name"/>
+                  <arg value="--mtime=1970-01-01"/>
+                  <arg value="-cf"/>
                   <arg value="../data.tar.gz"/>
                   <arg value="./"/>
                 </exec>
@@ -346,6 +352,8 @@
                   <arg value="--numeric-owner"/>
                   <arg value="--group=0"/>
                   <arg value="--owner=0"/>
+                  <arg value="--sort=name"/>
+                  <arg value="--mtime=1970-01-01"/>
                   <arg value="-cf"/>
                   <arg value="../nmf-ops-sat_${project.version}.ipk"/>
                   <arg value="./debian-binary"/>
