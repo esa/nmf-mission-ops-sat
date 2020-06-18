@@ -32,7 +32,9 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.ccsds.moims.mo.mal.MALInteractionException;
+import org.ccsds.moims.mo.mal.MALStandardError;
 import org.ccsds.moims.mo.mal.structures.Blob;
+import org.ccsds.moims.mo.mal.structures.UInteger;
 import org.ccsds.moims.mo.platform.gps.structures.TwoLineElementSet;
 import org.orekit.propagation.analytical.tle.TLE;
 
@@ -56,12 +58,19 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter
   @Override
   public String getNMEASentence(String identifier) throws IOException
   {
+    Logger.getLogger(GPSOPSSATAdapter.class.getName()).log(Level.INFO,
+        "run getNMEASentence");
     GPSHandler gpsHandler = new GPSHandler();
     try {
       obcServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData(new Blob(
           identifier.getBytes()), gpsHandler);
-    } catch (MALInteractionException | MALException ex) {
-      Logger.getLogger(GPSOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (MALInteractionException ex) {
+      Logger.getLogger(GPSOPSSATAdapter.class.getName()).log(Level.SEVERE,
+          "MALInteractionException {0}", ex);
+      throw new IOException("Error when retrieving GPS NMEA response from Nanomind", ex);
+    } catch (MALException ex) {
+      Logger.getLogger(GPSOPSSATAdapter.class.getName()).log(Level.SEVERE, "MALException {0}",
+          ex.getMessage());
       throw new IOException("Error when retrieving GPS NMEA response from Nanomind", ex);
     }
     return gpsHandler.response;
