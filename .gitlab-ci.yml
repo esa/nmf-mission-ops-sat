@@ -3,7 +3,7 @@ stages:
   - build_nmf_opssat
   - deploy
   - deploy_extras
-
+  - build_ipk
 image: maven:3.3.9-jdk-8
 
 variables:
@@ -33,6 +33,18 @@ build_base:
     paths:
       - $NMF_HOME/.m2/repository
       - $NMF_HOME/nanosat-mo-framework/mission/simulator/opssat-spacecraft-simulator/platformsim.properties
+    expire_in: 1 day
+
+build_ipk:
+  stage: build_ipk
+  only:
+    variables:
+       - $IPK == "1"
+  script:
+    - mvn clean install -Pipk-build
+  artifacts:
+    paths:
+      - $NMF_HOME/opssat-package/target/
     expire_in: 1 day
 
 build_ground:
