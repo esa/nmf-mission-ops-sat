@@ -79,7 +79,7 @@ deploy_target1:
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - cd opssat-package/target/nmf-opssat-*
+    - cd opssat-package/target/nmf-opssat-*/
     - scp -r home/ $T1USER@$TARGET1:~/nmf-opssat
     - ssh $T1USER@$TARGET1 "rm -rf /home/nmf/ /home/payloads-test/ && cp -r ~/nmf-opssat/* /home/"
     - ssh $T1USER@$TARGET1 "rm -rf ~/nmf-opssat"
@@ -96,7 +96,7 @@ deploy_target2:
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - cd opssat-package/target/nmf-opssat-*
+    - cd opssat-package/target/nmf-opssat-*/
     - ssh $T2USER@$TARGET2 "rm -rf nmf/"
     - scp -r home/nmf/ $T2USER@$TARGET2:~/nmf/
   needs: ["build_ground"]
