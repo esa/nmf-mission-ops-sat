@@ -72,7 +72,7 @@
           <version>${project.version}</version>
           <exclusions>
             <exclusion>
-      	      <groupId>int.esa.nmf.mission.simulator.moservices.impl</groupId>
+              <groupId>int.esa.nmf.mission.simulator.moservices.impl</groupId>
               <artifactId>nmf-platform-impl-sim</artifactId>
           </exclusion>
         </exclusions>
@@ -172,12 +172,6 @@
       <groupId>int.esa.nmf.core</groupId>
       <artifactId>nanosat-mo-supervisor</artifactId>
       <version>${project.version}</version>
-      <!--exclusions>
-         <exclusion>
-    	     <groupId>int.esa.nmf.mission.simulator.moservices.impl</groupId>
-        	 <artifactId>nmf-platform-impl-sim</artifactId>
- 	     </exclusion>
-      </exclusions-->
     </dependency>
     <dependency>
       <groupId>int.esa.nmf.sdk.examples.space</groupId>
