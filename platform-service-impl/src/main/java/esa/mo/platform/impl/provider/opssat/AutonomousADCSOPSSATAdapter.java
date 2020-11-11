@@ -737,6 +737,9 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   @Override
   public AttitudeTelemetry getAttitudeTelemetry() throws IOException
   {
+    SEPP_IADCS_API_TARGET_POINTING_OPERATION_DATA_TELEMETRY TargetPointingTm = 
+        adcsApi.Get_Target_Pointing_Operation_Data_Telemetry();
+    Short StateFSM = TargetPointingTm.getCURRENT_FSM_STATE();
     SEPP_IADCS_API_ATTITUDE_TELEMETRY attitudeTm = adcsApi.Get_Attitude_Telemetry();
     attitudeTm.getATTITUDE_QUATERNION_BF();
     Quaternion attitude = convertAdcsApiQuaternion(attitudeTm.getATTITUDE_QUATERNION_BF());
@@ -744,7 +747,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     VectorF3D magneticField = convertAdcsApiVector(
         attitudeTm.getMEASURED_MAGNETIC_FIELD_VECTOR_BF_T());
     VectorF3D sunVector = convertAdcsApiVector(attitudeTm.getMEASURED_SUN_VECTOR_BF());
-    return new AttitudeTelemetry(attitude, angularVel, sunVector, magneticField);
+    return new AttitudeTelemetry(attitude, angularVel, sunVector, magneticField, StateFSM);
   }
 
   @Override
