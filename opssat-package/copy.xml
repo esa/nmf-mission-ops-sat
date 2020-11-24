@@ -41,11 +41,6 @@
   </target>
 
   <target name="copyExp">
-    <exec executable="expr" outputproperty="expApid">
-      <arg value="1024"/>
-      <arg value="+"/>
-      <arg value="${expId}"/>
-    </exec>   
     <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/experimenter-package/home/exp${expId}/">
       <fileset dir="${basedir}/src/main/resources/space-common"/>
       <fileset dir="${basedir}/src/main/resources/space-app-root"/>

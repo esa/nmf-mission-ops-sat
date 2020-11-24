@@ -117,6 +117,7 @@
       <properties>
         <isExp>true</isExp>
         <expId>000</expId>
+        <expApid>1024</expApid>
         <expVersion>2.0.0-SNAPSHOT</expVersion>
       </properties>
       <dependencies>
