@@ -56,7 +56,7 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter
   }
 
   @Override
-  public String getNMEASentence(String identifier) throws IOException
+  public synchronized String getNMEASentence(String identifier) throws IOException
   {
     Logger.getLogger(GPSOPSSATAdapter.class.getName()).log(Level.INFO,
         "run getNMEASentence");
@@ -86,7 +86,6 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter
   public String getTLESentence() throws IOException
   {
     // read TLE from file
-    String content = "";
     File file = new File(this.TLE_LOCATION);
 
     // check if cached version is still accurate
