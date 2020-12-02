@@ -215,10 +215,6 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
 
         for (int i = 0; i < archiveSyncs.size(); i++) {
             ArchiveSyncConsumerServiceImpl archiveSync = archiveSyncs.get(i);
-            Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(
-                    Level.INFO,
-                    "Synchronizing provider: "
-                    + archiveSync.getConnectionDetails().getDomain());
 
             GetTimeResponse response = archiveSync.getArchiveSyncStub().getTime();
             FineTime from = response.getBodyElement1();
@@ -229,6 +225,10 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
 
             FineTime until = response.getBodyElement0();
 
+            Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(
+                    Level.INFO,
+                    "Synchronizing provider: {0}, From: {1}, Until: {2}",
+                    new Object[] {archiveSync.getConnectionDetails().getDomain(), from, until});
             // This value should be obtained from the getCurrent timestamp!
             ArrayList<COMObjectStructure> comObjects = archiveSync.retrieveCOMObjects(from, until, objTypes);
 
@@ -257,12 +257,11 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
                                 Level.SEVERE, "Error!", ex);
                     }
                 }
-
-                // Change the Archive URI to be the one of the local COM Archive service
-                IdentifierList providerDomain = archiveSync.getConnectionDetails().getDomain();
-                URI localCOMArchiveURI = super.getCOMArchiveServiceURI();
-                super.localDirectoryService.rerouteArchiveServiceURI(providerDomain, localCOMArchiveURI);
             }
+            // Change the Archive URI to be the one of the local COM Archive service
+            IdentifierList providerDomain = archiveSync.getConnectionDetails().getDomain();
+            URI localCOMArchiveURI = super.getCOMArchiveServiceURI();
+            super.localDirectoryService.rerouteArchiveServiceURI(providerDomain, localCOMArchiveURI);
         }
     }
 
