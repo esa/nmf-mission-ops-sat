@@ -86,14 +86,14 @@ public class SpacePacket {
   }
 
   public int getApidQualifier() {
-  	return apidQualifier;
+    return apidQualifier;
   }
 
   public void setApidQualifier(int apidQualifier) {
-  	this.apidQualifier = apidQualifier;
+    this.apidQualifier = apidQualifier;
   }
 
-	/**
+  /**
    * @return the body
    */
   public byte[] getBody() {

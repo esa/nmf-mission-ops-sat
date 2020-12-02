@@ -24,60 +24,60 @@ import java.util.NoSuchElementException;
 
 public class SPPCounter {
 
-	private final long wrap;
-	private long counter;
+    private final long wrap;
+    private long counter;
 
-	/**
-	 * Creates new counter, that starts at 0 and wraps around at wrap (i.e. this value is never
-	 * reached).
-	 *
-	 * @param wrap The value where the counter wraps around to start at 0 again.
-	 */
-	public SPPCounter(final long wrap) {
-		if (wrap < 1) {
-			throw new IllegalArgumentException();
-		}
-		this.counter = -1;
-		this.wrap = wrap;
-	}
+    /**
+     * Creates new counter, that starts at 0 and wraps around at wrap (i.e. this value is never
+     * reached).
+     *
+     * @param wrap The value where the counter wraps around to start at 0 again.
+     */
+    public SPPCounter(final long wrap) {
+        if (wrap < 1) {
+            throw new IllegalArgumentException();
+        }
+        this.counter = -1;
+        this.wrap = wrap;
+    }
 
-	/**
-	 * Increment the counter by delta steps, wrapping around correctly and returning an iterator for
-	 * accessing the corresponding counter values. The number of generated values is delta.
-	 *
-	 * @param delta The number of counter values to generate. If negative, the counter is decreased
-	 * accordingly, but the iterator will not return any value.
-	 * @return Iterator for accessing the generated counter values.
-	 */
-	public synchronized Iterator<Long> increment(final int delta) {
-		final long old = counter;
-		counter = (counter + delta) % wrap;
+    /**
+     * Increment the counter by delta steps, wrapping around correctly and returning an iterator for
+     * accessing the corresponding counter values. The number of generated values is delta.
+     *
+     * @param delta The number of counter values to generate. If negative, the counter is decreased
+     * accordingly, but the iterator will not return any value.
+     * @return Iterator for accessing the generated counter values.
+     */
+    public synchronized Iterator<Long> increment(final int delta) {
+        final long old = counter;
+        counter = (counter + delta) % wrap;
 
-		// No synchronization of the Iterator methods because it should only be accessed from a
-		// single thread.
-		return new Iterator<Long>() {
-			private long c = old;
-			private int d = delta;
+        // No synchronization of the Iterator methods because it should only be accessed from a
+        // single thread.
+        return new Iterator<Long>() {
+            private long c = old;
+            private int d = delta;
 
-			@Override
-			public boolean hasNext() {
-				return d > 0;
-			}
+            @Override
+            public boolean hasNext() {
+                return d > 0;
+            }
 
-			@Override
-			public Long next() {
-				if (!hasNext()) {
-					throw new NoSuchElementException();
-				}
-				d--;
-				c = (c + 1) % wrap;
-				return c;
-			}
+            @Override
+            public Long next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                d--;
+                c = (c + 1) % wrap;
+                return c;
+            }
 
-			@Override
-			public void remove() {
-				throw new UnsupportedOperationException("Not supported.");
-			}
-		};
-	}
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException("Not supported.");
+            }
+        };
+    }
 }
