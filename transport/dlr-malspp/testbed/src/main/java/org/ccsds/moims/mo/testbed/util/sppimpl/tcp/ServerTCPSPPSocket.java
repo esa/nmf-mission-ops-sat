@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright or © or Copr. CNES
+ * Copyright or ï¿½ or Copr. CNES
  *
  * This software is a computer program whose purpose is to provide a 
  * framework for the CCSDS Mission Operations services.
@@ -46,35 +46,34 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.common.Daemon;
 
 public class ServerTCPSPPSocket implements SPPSocket {
-  
-  public final static Logger logger = fr.dyade.aaa.common.Debug
-      .getLogger(ServerTCPSPPSocket.class.getName());
-  
+
+  public final static Logger logger = fr.dyade.aaa.common.Debug.getLogger(ServerTCPSPPSocket.class.getName());
+
   public final static String PORT_PROP = "org.ccsds.moims.mo.malspp.test.sppimpl.tcp.port";
-  
+
   private int port;
-  
+
   private ServerSocket listen;
 
   private boolean tcpNoDelay;
-  
+
   private SPPChannel channel;
-  
+
   private ReaderDaemon readerDaemon;
-  
+
   private LinkedBlockingQueue<SpacePacket> input;
-  
+
   public ServerTCPSPPSocket() {
-	  super();
-	  input = new LinkedBlockingQueue<SpacePacket>();
+    super();
+    input = new LinkedBlockingQueue<SpacePacket>();
   }
 
-	public void init(Map properties) throws Exception {
+  public void init(Map properties) throws Exception {
     String portS = (String) properties.get(PORT_PROP);
     port = Integer.parseInt(portS);
     listen(port);
   }
-  
+
   public void listen(int port) throws Exception {
     listen = new ServerSocket(port);
     readerDaemon = new ReaderDaemon();
@@ -98,15 +97,15 @@ public class ServerTCPSPPSocket implements SPPSocket {
       logger.log(BasicLevel.DEBUG, "ServerTCPSPPSocket.send(" + packet + ')');
     channel.send(packet);
   }
-  
+
   public String getDescription() {
     return "-" + port;
   }
-  
+
   class ReaderDaemon extends Daemon {
-    
-    private Socket socket; 
-    
+
+    private Socket socket;
+
     private SpacePacket packet;
 
     protected ReaderDaemon() {
@@ -115,16 +114,16 @@ public class ServerTCPSPPSocket implements SPPSocket {
 
     public final void run() {
       try {
-        if (logger.isLoggable(BasicLevel.DEBUG))
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
           logger.log(BasicLevel.DEBUG, "Listen...");
+        }
         socket = listen.accept();
         socket.setTcpNoDelay(tcpNoDelay);
         socket.setSoLinger(true, 1000);
-        channel = new SPPChannel(socket); 
-        
+        channel = new SPPChannel(socket);
+
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG,
-              "Accepted connection from: " + socket.getRemoteSocketAddress());
+          logger.log(BasicLevel.DEBUG, "Accepted connection from: " + socket.getRemoteSocketAddress());
 
         while (running) {
           canStop = true;
@@ -132,18 +131,18 @@ public class ServerTCPSPPSocket implements SPPSocket {
           input.offer(packet);
         }
       } catch (Exception exc) {
-        logger.log(BasicLevel.DEBUG, this.getName()
-            + ", error during packet receive", exc);
+        logger.log(BasicLevel.DEBUG, this.getName() + ", error during packet receive", exc);
       } finally {
         finish();
       }
     }
-    
+
     protected void close() {
       if (listen != null) {
         try {
           listen.close();
-        } catch (IOException e) {}
+        } catch (IOException e) {
+        }
       }
     }
 
@@ -151,5 +150,5 @@ public class ServerTCPSPPSocket implements SPPSocket {
       close();
     }
   }
-  
+
 }

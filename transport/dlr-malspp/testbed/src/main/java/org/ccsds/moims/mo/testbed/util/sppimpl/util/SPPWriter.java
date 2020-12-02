@@ -98,18 +98,8 @@ public class SPPWriter {
     
     os.write(outHeaderBuffer);
     os.write(data, packet.getOffset(), packet.getLength());
-    
-    /* There is no CRC in the SPP specification
-    int CRC = SPPHelper.computeCRC(outHeaderBuffer, data,
-        packet.getOffset(), packet.getLength());
-    
-    outCrcBuffer[0] = (byte) (CRC>>8);
-    outCrcBuffer[1] = (byte) (CRC & 0xFF);
-    os.write(outCrcBuffer);
-    */
-    
+
     os.flush();
-    
-    //counter = new Integer(counter.intValue() + 1);
+
   }
 }

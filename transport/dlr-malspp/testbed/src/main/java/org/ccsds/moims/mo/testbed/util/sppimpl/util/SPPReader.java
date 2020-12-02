@@ -74,7 +74,7 @@ public class SPPReader {
         read(apidQualifierBuffer, 0, 2);
 //       Logger.getLogger(this.getClass().getName()).log(Level.INFO, "APID Qualifier: {0}",bytesToHex(apidQualifierBuffer));
 
-        
+
         int apidQualifier = (((apidQualifierBuffer[0] & 0xFF) << 8) | (apidQualifierBuffer[1] & 0xFF));
 
         SpacePacketHeader header = new SpacePacketHeader();
@@ -109,27 +109,13 @@ public class SPPReader {
         sph.setSequenceCount(seq_count);
         sph.setSequenceFlags(segt_flag);
 
-    // Don't read the CRC (last two bytes)
-        //int dataLength = pkt_length_value - 2;
         int dataLength = pkt_length_value;
         byte[] data = packet.getBody();
         packet.setLength(dataLength);
         read(data, packet.getOffset(), dataLength);
-//        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Data: {0}",bytesToHex(data));
-
-        /*
-         int CRC = SPPHelper.computeCRC(inHeaderBuffer, data, packet.getOffset(), dataLength);
-  
-         // Read CRC
-         is.read(inCrcBuffer);
-         int readCRC = inCrcBuffer[0] & 0xFF;
-         readCRC = (readCRC<<8) | (inCrcBuffer[1] & 0xFF);
-    
-         if (CRC != readCRC) throw new Exception("CRC Error: expected=" + CRC + " , read=" + readCRC);
-         */
         return packet;
     }
-    
+
 /*
     public static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];

@@ -48,7 +48,6 @@ public class SPPHelper
    */
   private static int[] lookUpTable;
 
-//  public static boolean isAPIDqualifierInMessage = true;
   public static boolean isAPIDqualifierInMessage = false;
   public static int defaultAPIDqualifier = 247;
   public static final String CRC_FILENAME = "crc_apids.txt";
