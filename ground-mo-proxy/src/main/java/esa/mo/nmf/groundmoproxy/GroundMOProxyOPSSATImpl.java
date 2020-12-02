@@ -217,10 +217,10 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
             ArchiveSyncConsumerServiceImpl archiveSync = archiveSyncs.get(i);
 
             GetTimeResponse response = archiveSync.getArchiveSyncStub().getTime();
-            FineTime from = response.getBodyElement1();
+            FineTime lastSyncTime = response.getBodyElement1();
 
-            if (from.getValue() == 0) {
-                from = latestTimestampForProvider(archiveSync);
+            if (lastSyncTime.getValue() == 0) {
+                lastSyncTime = latestTimestampForProvider(archiveSync);
             }
 
             FineTime until = response.getBodyElement0();
@@ -228,9 +228,9 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
             Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(
                     Level.INFO,
                     "Synchronizing provider: {0}, From: {1}, Until: {2}",
-                    new Object[] {archiveSync.getConnectionDetails().getDomain(), from, until});
+                    new Object[] {archiveSync.getConnectionDetails().getDomain(), lastSyncTime, until});
             // This value should be obtained from the getCurrent timestamp!
-            ArrayList<COMObjectStructure> comObjects = archiveSync.retrieveCOMObjects(from, until, objTypes);
+            ArrayList<COMObjectStructure> comObjects = archiveSync.retrieveCOMObjects(lastSyncTime, until, objTypes);
 
             for (COMObjectStructure comObject : comObjects) {
                 ArchiveDetailsList detailsList = new ArchiveDetailsList();
@@ -262,6 +262,10 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
             IdentifierList providerDomain = archiveSync.getConnectionDetails().getDomain();
             URI localCOMArchiveURI = super.getCOMArchiveServiceURI();
             super.localDirectoryService.rerouteArchiveServiceURI(providerDomain, localCOMArchiveURI);
+            Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(
+                    Level.INFO,
+                    "Synchronizing provider {0} completed",
+                    new Object[] {archiveSync.getConnectionDetails().getDomain()});
         }
     }
 
