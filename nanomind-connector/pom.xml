@@ -65,6 +65,7 @@
         <module>mo-xml</module>
         <module>mo-apis</module>
         <module>mo-consumers</module>
+        <module>parameters-provisioning</module>
     </modules>
 
 </project>

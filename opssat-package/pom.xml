@@ -178,6 +178,16 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>int.esa.nmf.core</groupId>
+      <artifactId>common-mo-adapter</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.nmf.core</groupId>
+      <artifactId>space-mo-adapter</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>int.esa.nmf.sdk.examples.space</groupId>
       <artifactId>payloads-test</artifactId>
       <version>${project.version}</version>
@@ -196,6 +206,11 @@
       <groupId>int.esa.opssat.transport.dlr</groupId>
       <artifactId>malspp-encoding-opssat</artifactId>
       <version>1.0.1-FC</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.nmf.mission.opssat.nanomind</groupId>
+      <artifactId>parameters-provisioning</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
   <build>
