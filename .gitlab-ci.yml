@@ -32,7 +32,6 @@ build_base:
   artifacts:
     paths:
       - $NMF_HOME/.m2/repository
-      - $NMF_HOME/nanosat-mo-framework/mission/simulator/opssat-spacecraft-simulator/platformsim.properties
     expire_in: 1 day
 
 build_ipk:
@@ -50,7 +49,6 @@ build_ipk:
 build_ground:
   stage: build_nmf_opssat
   script:
-    - cp $NMF_HOME/nanosat-mo-framework/mission/simulator/opssat-spacecraft-simulator/platformsim.properties $NMF_HOME/opssat-package/src/main/resources/space-supervisor-sim-root/
     - mvn clean install -Pground
   artifacts:
     paths:
