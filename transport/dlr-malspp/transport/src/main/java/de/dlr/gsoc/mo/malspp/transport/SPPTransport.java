@@ -621,7 +621,7 @@ public class SPPTransport implements MALTransport {
 		if (errMsg != null) {
 			targetEndpoint.sendMessage(errMsg);
 		} else {
-			LOGGER.log(Level.WARNING, error.toString());
+			LOGGER.log(Level.WARNING, "Error: {0} replying to {1}", new Object[]{error.toString(), replyToMsg.getHeader()});
 		}
 	}
 
