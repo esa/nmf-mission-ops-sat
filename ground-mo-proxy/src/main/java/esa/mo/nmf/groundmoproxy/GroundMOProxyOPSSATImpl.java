@@ -113,7 +113,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
     }
 
     @Override
-    public void additionalHandling() {
+    public synchronized void additionalHandling() {
         IdentifierList domain = new IdentifierList();
         domain.add(new Identifier("*"));
 
@@ -155,7 +155,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
                         Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 } catch (IOException ex) {
-                    // The ArchiveSync service does not exist on this provider...
+                    // The Action service does not exist on this provider...
                     // Do nothing!
                 }
 
@@ -261,7 +261,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
             // Change the Archive URI to be the one of the local COM Archive service
             IdentifierList providerDomain = archiveSync.getConnectionDetails().getDomain();
             URI localCOMArchiveURI = super.getCOMArchiveServiceURI();
-            super.localDirectoryService.rerouteArchiveServiceURI(providerDomain, localCOMArchiveURI);
+            //super.localDirectoryService.rerouteArchiveServiceURI(providerDomain, localCOMArchiveURI);
             Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(
                     Level.INFO,
                     "Synchronizing provider {0} completed",
