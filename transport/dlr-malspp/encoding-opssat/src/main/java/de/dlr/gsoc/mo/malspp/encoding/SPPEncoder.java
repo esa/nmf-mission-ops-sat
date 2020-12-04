@@ -259,8 +259,8 @@ public class SPPEncoder implements MALEncoder, MALListEncoder {
 		try {
 			byte[] bytes = att.getBytes("UTF-8");
 //			encodeUInteger(new UInteger(bytes.length));
-                        encodeUShort(new UShort(bytes.length));
-                        write(bytes);
+			encodeUShort(new UShort(bytes.length));
+			write(bytes);
 		} catch (UnsupportedEncodingException ex) {
 			// UTF-8 is required by the Java Standard, this exception cannot be thrown
 		}
@@ -282,7 +282,7 @@ public class SPPEncoder implements MALEncoder, MALListEncoder {
 		// PENDING: Bug in MAL Java API: If the Blob is URL based, getLength() returns 0. Here:
 		// Workaround by directly querying the length of the value byte array in this case.
 		int length = att.isURLBased() ? att.getValue().length : att.getLength();
-		encodeUInteger(new UInteger(length));
+		encodeUShort(new UShort(length));
 		byte[] value = att.getValue();
 		if (null != value) {
 			write(value);
@@ -465,7 +465,7 @@ public class SPPEncoder implements MALEncoder, MALListEncoder {
 		if (list == null) {
 			throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
 		}
-		encodeUInteger(new UInteger(list.size()));
+		encodeUShort(new UShort(list.size()));
 		return this;
 	}
 
