@@ -57,6 +57,7 @@ public class ClientTCPSPPSocket implements SPPSocket
   private int port;
   private int retryTime;
   private SPPChannel channel;
+  private boolean exiting = false;
 
   private final HashMap<Integer, Integer> lastSPPsMap = new HashMap<>();
 
@@ -89,6 +90,7 @@ public class ClientTCPSPPSocket implements SPPSocket
   @Override
   public void close() throws Exception
   {
+    this.exiting = true;
     channel.close();
   }
 
@@ -124,6 +126,9 @@ public class ClientTCPSPPSocket implements SPPSocket
           LOGGER.log(Level.FINE, "Received: {0}", packet);
           return packet;
         } catch (IOException ex) {
+          if (exiting) {
+            return null;
+          }
           LOGGER.log(Level.WARNING, "Failed socket receive - restarting the channel...", ex);
           channel.close();
           try {
