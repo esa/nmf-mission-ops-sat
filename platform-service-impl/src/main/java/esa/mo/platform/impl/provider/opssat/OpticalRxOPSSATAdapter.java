@@ -29,7 +29,7 @@ import at.tugraz.ihf.opssat.opt_rx.SEPP_OPT_RX_API;
 public class OpticalRxOPSSATAdapter implements OpticalDataReceiverAdapterInterface
 {
 
-  private static Logger LOGGER = Logger.getLogger(OpticalRxOPSSATAdapter.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(OpticalRxOPSSATAdapter.class.getName());
   private SEPP_OPT_RX_API optRxApi;
   private boolean initalized = false;
 
