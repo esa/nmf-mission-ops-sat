@@ -20,25 +20,24 @@
  */
 package esa.mo.platform.impl.provider.opssat;
 
-import esa.mo.nanomind.impl.util.NanomindServicesConsumer;
-import esa.mo.platform.impl.provider.gen.GPSNMEAonlyAdapter;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.ccsds.moims.mo.mal.MALException;
-import esa.opssat.nanomind.opssat_pf.gps.consumer.GPSAdapter;
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import org.ccsds.moims.mo.mal.MALInteractionException;
-import org.ccsds.moims.mo.mal.MALStandardError;
 import org.ccsds.moims.mo.mal.structures.Blob;
-import org.ccsds.moims.mo.mal.structures.UInteger;
 import org.ccsds.moims.mo.platform.gps.structures.TwoLineElementSet;
 import org.orekit.propagation.analytical.tle.TLE;
+
+import esa.mo.nanomind.impl.util.NanomindServicesConsumer;
+import esa.mo.platform.impl.provider.gen.GPSNMEAonlyAdapter;
+import esa.opssat.nanomind.opssat_pf.gps.consumer.GPSAdapter;
 
 /**
  *
@@ -158,7 +157,7 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
         org.ccsds.moims.mo.mal.structures.Blob data, java.util.Map qosProperties)
     {
       try {
-        response = Arrays.toString(data.getValue());
+        response = new String(data.getValue());
       } catch (MALException ex) {
         Logger.getLogger(GPSHandler.class.getName()).log(Level.SEVERE, null, ex);
       }
