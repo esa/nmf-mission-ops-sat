@@ -82,7 +82,6 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter
     return true;
   }
 
-  @Override
   public String getTLESentence() throws IOException
   {
     // read TLE from file
