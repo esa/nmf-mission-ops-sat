@@ -1,7 +1,7 @@
 Ground MO Proxy: OPS-SAT
 ============
 
-The Ground MO Proxy application acts as a proxy that is deployed on the Ground segment for ESA’s OPS-SAT mission. It extends the generic Ground MO Proxy of the NMF Core implementation and therefore most of the default behavior of the component is already present.
+The Ground MO Proxy application acts as a proxy that is deployed on the Ground segment for ESA's OPS-SAT mission. It extends the generic Ground MO Proxy of the NMF Core implementation and therefore most of the default behavior of the component is already present.
 
 It is capable of acting as a protocol bridge and as a COM Archive mirror. As a result, multiple consumers can share the same ground-to-space connection to the spacecraft, and connect to independent NMF Apps simultaneously
 

@@ -20,60 +20,63 @@
  */
 package esa.mo.platform.impl.provider.opssat;
 
-import esa.mo.nanomind.impl.util.NanomindServicesConsumer;
-import esa.mo.platform.impl.provider.gen.GPSNMEAonlyAdapter;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.ccsds.moims.mo.mal.MALException;
-import esa.opssat.nanomind.opssat_pf.gps.consumer.GPSAdapter;
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import org.ccsds.moims.mo.mal.MALInteractionException;
-import org.ccsds.moims.mo.mal.MALStandardError;
 import org.ccsds.moims.mo.mal.structures.Blob;
-import org.ccsds.moims.mo.mal.structures.UInteger;
 import org.ccsds.moims.mo.platform.gps.structures.TwoLineElementSet;
 import org.orekit.propagation.analytical.tle.TLE;
+
+import esa.mo.nanomind.impl.util.NanomindServicesConsumer;
+import esa.mo.platform.impl.provider.gen.GPSNMEAonlyAdapter;
+import esa.opssat.nanomind.opssat_pf.gps.consumer.GPSAdapter;
 
 /**
  *
  * @author Cesar Coelho
  */
-public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter
-{
-
+public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
+  private static final int GET_GPS_TIMEOUT_MS = 2000;
   private final NanomindServicesConsumer obcServicesConsumer;
   private final String TLE_LOCATION = File.separator + "etc" + File.separator + "tle";
   private String currentTleSentence = "";
   private long tleLastModified = -1;
 
-  public GPSOPSSATAdapter(NanomindServicesConsumer obcServicesConsumer)
-  {
+  public GPSOPSSATAdapter(NanomindServicesConsumer obcServicesConsumer) {
     this.obcServicesConsumer = obcServicesConsumer;
   }
 
   @Override
-  public synchronized String getNMEASentence(String identifier) throws IOException
-  {
-    Logger.getLogger(GPSOPSSATAdapter.class.getName()).log(Level.INFO,
-        "run getNMEASentence");
+  public synchronized String getNMEASentence(String identifier) throws IOException {
+    Logger.getLogger(GPSOPSSATAdapter.class.getName()).log(Level.FINE, "run getNMEASentence with \"{0}\"", identifier);
     GPSHandler gpsHandler = new GPSHandler();
     try {
-      obcServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData(new Blob(
-          identifier.getBytes()), gpsHandler);
+      obcServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData(new Blob(identifier.getBytes()),
+          gpsHandler);
     } catch (MALInteractionException ex) {
-      Logger.getLogger(GPSOPSSATAdapter.class.getName()).log(Level.SEVERE,
-          "MALInteractionException {0}", ex);
+      Logger.getLogger(GPSOPSSATAdapter.class.getName()).log(Level.SEVERE, "MALInteractionException {0}", ex);
       throw new IOException("Error when retrieving GPS NMEA response from Nanomind", ex);
     } catch (MALException ex) {
-      Logger.getLogger(GPSOPSSATAdapter.class.getName()).log(Level.SEVERE, "MALException {0}",
-          ex.getMessage());
+      Logger.getLogger(GPSOPSSATAdapter.class.getName()).log(Level.SEVERE, "MALException {0}", ex.getMessage());
       throw new IOException("Error when retrieving GPS NMEA response from Nanomind", ex);
     }
-    return gpsHandler.response;
+    try {
+      if(gpsHandler.lock.tryAcquire(GET_GPS_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+        return gpsHandler.response;
+      } else {
+        throw new IOException("Internal timeout when retrieving GPS NMEA response from Nanomind");
+      }
+    } catch (InterruptedException e) {
+      throw new IOException("Error when retrieving GPS NMEA response from Nanomind", e);
+    }
   }
 
   @Override
@@ -82,7 +85,6 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter
     return true;
   }
 
-  @Override
   public String getTLESentence() throws IOException
   {
     // read TLE from file
@@ -146,7 +148,7 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter
 
   private class GPSHandler extends GPSAdapter
   {
-
+    Semaphore lock = new Semaphore(0);
     String response = "";
 
     @Override
@@ -155,10 +157,11 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter
         org.ccsds.moims.mo.mal.structures.Blob data, java.util.Map qosProperties)
     {
       try {
-        response = Arrays.toString(data.getValue());
+        response = new String(data.getValue());
       } catch (MALException ex) {
         Logger.getLogger(GPSHandler.class.getName()).log(Level.SEVERE, null, ex);
       }
+      lock.release();
     }
   }
 }

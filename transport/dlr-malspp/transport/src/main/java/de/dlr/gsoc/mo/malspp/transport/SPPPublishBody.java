@@ -32,60 +32,60 @@ import org.ccsds.moims.mo.mal.transport.MALPublishBody;
 
 public class SPPPublishBody extends SPPMessageBody implements MALPublishBody {
 
-	protected int idx;
+    protected int idx;
 
-	public SPPPublishBody(final Object[] bodyElements, final MALElementStreamFactory esf, final MALEncodingContext ctx) {
-		super(bodyElements, esf, ctx);
-		idx = 0;
-	}
+    public SPPPublishBody(final Object[] bodyElements, final MALElementStreamFactory esf, final MALEncodingContext ctx) {
+        super(bodyElements, esf, ctx);
+        idx = 0;
+    }
 
-	public SPPPublishBody(final MALEncodedBody encodedBody, final MALElementStreamFactory esf, final MALEncodingContext ctx) {
-		super(encodedBody, esf, ctx);
-		idx = 0;
-	}
+    public SPPPublishBody(final MALEncodedBody encodedBody, final MALElementStreamFactory esf, final MALEncodingContext ctx) {
+        super(encodedBody, esf, ctx);
+        idx = 0;
+    }
 
-	@Override
-	public UpdateHeaderList getUpdateHeaderList() throws MALException {
-		return (UpdateHeaderList) getBodyElement(idx, new UpdateHeaderList());
-	}
+    @Override
+    public UpdateHeaderList getUpdateHeaderList() throws MALException {
+        return (UpdateHeaderList) getBodyElement(idx, new UpdateHeaderList());
+    }
 
-	@Override
-	public List[] getUpdateLists(final List... updateLists) throws MALException {
-		List[] lists = new List[getElementCount() - 1 - idx]; // Subtract 1 for UpdateHeaderList; subtract idx for Identifier in SPPNotifyBody.
-		for (int i = 0; i < lists.length; i++) {
-			lists[i] = getUpdateList(i, updateLists == null ? null : updateLists[i]);
-		}
-		return lists;
-	}
+    @Override
+    public List[] getUpdateLists(final List... updateLists) throws MALException {
+        List[] lists = new List[getElementCount() - 1 - idx]; // Subtract 1 for UpdateHeaderList; subtract idx for Identifier in SPPNotifyBody.
+        for (int i = 0; i < lists.length; i++) {
+            lists[i] = getUpdateList(i, updateLists == null ? null : updateLists[i]);
+        }
+        return lists;
+    }
 
-	@Override
-	public List getUpdateList(final int listIndex, final List updateList) throws MALException {
-		// idx is the body element index of the UpdateHeaderList,
-		// idx + 1 is the body element index of the first update value type list.
-		return (List) getBodyElement(idx + 1 + listIndex, updateList);
-	}
+    @Override
+    public List getUpdateList(final int listIndex, final List updateList) throws MALException {
+        // idx is the body element index of the UpdateHeaderList,
+        // idx + 1 is the body element index of the first update value type list.
+        return (List) getBodyElement(idx + 1 + listIndex, updateList);
+    }
 
-	@Override
-	public int getUpdateCount() throws MALException {
-		return getUpdateHeaderList().size();
-	}
+    @Override
+    public int getUpdateCount() throws MALException {
+        return getUpdateHeaderList().size();
+    }
 
-	@Override
-	public Object getUpdate(final int listIndex, final int updateIndex) throws MALException {
-		try {
-			return getUpdateList(listIndex, null).get(updateIndex);
-		} catch (IndexOutOfBoundsException ex) {
-			throw new MALException(ex.getMessage(), ex);
-		}
-	}
+    @Override
+    public Object getUpdate(final int listIndex, final int updateIndex) throws MALException {
+        try {
+            return getUpdateList(listIndex, null).get(updateIndex);
+        } catch (IndexOutOfBoundsException ex) {
+            throw new MALException(ex.getMessage(), ex);
+        }
+    }
 
-	@Override
-	public MALEncodedElement getEncodedUpdate(final int listIndex, final int updateIndex) throws MALException {
-		if (ctx != null
-				&& ctx.getHeader().getInteractionType().equals(InteractionType.PUBSUB)
-				&& ctx.getHeader().getInteractionStage().equals(MALPubSubOperation.PUBLISH_STAGE)) {
-			return (MALEncodedElement) getUpdate(listIndex, updateIndex);
-		}
-		throw new MALException(NOT_SUPPORTED);
-	}
+    @Override
+    public MALEncodedElement getEncodedUpdate(final int listIndex, final int updateIndex) throws MALException {
+        if (ctx != null
+                && ctx.getHeader().getInteractionType().equals(InteractionType.PUBSUB)
+                && ctx.getHeader().getInteractionStage().equals(MALPubSubOperation.PUBLISH_STAGE)) {
+            return (MALEncodedElement) getUpdate(listIndex, updateIndex);
+        }
+        throw new MALException(NOT_SUPPORTED);
+    }
 }

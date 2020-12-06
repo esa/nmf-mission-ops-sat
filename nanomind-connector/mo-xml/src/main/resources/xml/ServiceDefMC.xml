@@ -592,7 +592,7 @@
       <mal:capabilitySet number="2">
         <mal:requestIP comment="The getValue operation returns the latest value for a requested aggregation." name="getValue" number="2" supportInReplay="true">
           <mal:messages>
-            <mal:request comment="The request shall include a list of aggregation definition object instance identifiers.&#10;The wildcard value of ‘0’ shall be supported and matches all aggregations of the provider.&#10;If a request aggregation is unknown then an UNKNOWN error shall be returned.">
+            <mal:request comment="The request shall include a list of aggregation definition object instance identifiers.&#10;The wildcard value of '0' shall be supported and matches all aggregations of the provider.&#10;If a request aggregation is unknown then an UNKNOWN error shall be returned.">
               <mal:type area="MAL" list="true" name="Long"/>
             </mal:request>
             <mal:response comment="The response shall contain a list of returned aggregation definition object instance identifiers and a matching list of aggregation values.">

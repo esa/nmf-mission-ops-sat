@@ -64,11 +64,11 @@ public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderI
     try {
       NanomindServicesConsumer obcServicesConsumer = new NanomindServicesConsumer();
         obcServicesConsumer.init();
+      powerService.init(new PowerControlOPSSATAdapter(obcServicesConsumer));
+      gpsService.init(comServices, new GPSOPSSATAdapter(obcServicesConsumer));
       adcsService.init(comServices, new AutonomousADCSOPSSATAdapter());
       cameraService.init(comServices, new CameraOPSSATAdapter());
-      gpsService.init(comServices, new GPSOPSSATAdapter(obcServicesConsumer));
       optrxService.init(new OpticalRxOPSSATAdapter());
-      powerService.init(new PowerControlOPSSATAdapter(obcServicesConsumer));
       sdrService.init(new SDROPSSATAdapter());
     } catch (UnsatisfiedLinkError | NoClassDefFoundError | NoSuchMethodError error) {
       LOGGER.log(Level.SEVERE,

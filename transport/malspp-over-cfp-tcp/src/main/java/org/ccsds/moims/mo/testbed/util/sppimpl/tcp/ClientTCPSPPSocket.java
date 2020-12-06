@@ -57,6 +57,7 @@ public class ClientTCPSPPSocket implements SPPSocket
   private int port;
   private int retryTime;
   private SPPChannel channel;
+  private boolean exiting = false;
 
   private final HashMap<Integer, Integer> lastSPPsMap = new HashMap<>();
 
@@ -89,6 +90,7 @@ public class ClientTCPSPPSocket implements SPPSocket
   @Override
   public void close() throws Exception
   {
+    this.exiting = true;
     channel.close();
   }
 
@@ -112,7 +114,7 @@ public class ClientTCPSPPSocket implements SPPSocket
           if (previous != -1 && previous != sequenceCount - 1
               && previous != 16383
               && sequenceCount != 0) { // Exclude also the transition zone
-            LOGGER.log(Level.WARNING,
+            LOGGER.log(Level.FINE,
                 "Out-of-order detected! Sequence count: {0} - Last: {1} (For APID:{2})",
                 new Object[]{
                   sequenceCount,
@@ -124,6 +126,9 @@ public class ClientTCPSPPSocket implements SPPSocket
           LOGGER.log(Level.FINE, "Received: {0}", packet);
           return packet;
         } catch (IOException ex) {
+          if (exiting) {
+            return null;
+          }
           LOGGER.log(Level.WARNING, "Failed socket receive - restarting the channel...", ex);
           channel.close();
           try {

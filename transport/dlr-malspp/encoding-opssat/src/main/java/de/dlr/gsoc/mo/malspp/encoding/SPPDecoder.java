@@ -196,9 +196,8 @@ public class SPPDecoder implements MALDecoder {
 
 	@Override
 	public String decodeString() throws MALException {
-//		long length = decodeUInteger().getValue();
-		long length = decodeUShort().getValue();
-		if (length > Integer.MAX_VALUE) {
+		int length = decodeUShort().getValue();
+		if (length > 65535) {
 			throw new MALException(LENGTH_NOT_SUPPORTED);
 		}
 		String ret = null;
@@ -217,11 +216,11 @@ public class SPPDecoder implements MALDecoder {
 
 	@Override
 	public Blob decodeBlob() throws MALException {
-		long length = decodeUInteger().getValue();
-		if (length > Integer.MAX_VALUE) {
+		int length = decodeUShort().getValue();
+		if (length > 65535) {
 			throw new MALException(LENGTH_NOT_SUPPORTED);
 		}
-		return new Blob(read((int) length));
+		return new Blob(read(length));
 	}
 
 	@Override

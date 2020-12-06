@@ -33,7 +33,7 @@ import org.ccsds.moims.mo.mal.structures.Element;
 import org.ccsds.moims.mo.mal.structures.ElementList;
 import org.ccsds.moims.mo.mal.structures.Identifier;
 import org.ccsds.moims.mo.mal.structures.InteractionType;
-import org.ccsds.moims.mo.mal.structures.UInteger;
+import org.ccsds.moims.mo.mal.structures.UShort;
 import org.ccsds.moims.mo.mal.structures.Union;
 import org.ccsds.moims.mo.mal.structures.UpdateHeaderList;
 import org.ccsds.moims.mo.mal.transport.MALEncodedElement;
@@ -149,7 +149,7 @@ public class SPPElementOutputStream implements MALElementOutputStream {
 						// fall through on purpose
 						case ELEMENT:
 							((Element) e).encode(updateEncoder);
-							listEncoder.encodeUInteger(new UInteger(baos.size()));
+							listEncoder.encodeUShort(new UShort(baos.size()));
 							encoder.write(baos.toByteArray());
 							baos.reset();
 							break;

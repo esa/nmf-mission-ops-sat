@@ -32,14 +32,9 @@
  */
 package org.ccsds.moims.mo.testbed.util.sppimpl.util;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ccsds.moims.mo.testbed.util.spp.SpacePacket;
@@ -47,7 +42,7 @@ import org.ccsds.moims.mo.testbed.util.spp.SpacePacketHeader;
 
 public class SPPReader
 {
-
+  private static final Logger LOGGER = Logger.getLogger(SPPReader.class.getName());
   final protected static char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
   private final String PROCESSED_FILENAME = "processed_apids.txt";
 
@@ -61,9 +56,11 @@ public class SPPReader
   private APIDRangeList crcApids;
   private APIDRangeList processedApids;
   private SpacePacket packet;
+  private int errorCount;
 
   public SPPReader(InputStream is)
   {
+    errorCount = 0;
     this.is = is;
     apidQualifierBuffer = new byte[2];
     inHeaderBuffer = new byte[6];
@@ -138,27 +135,18 @@ public class SPPReader
     sph.setSequenceCount(seq_count);
     sph.setSequenceFlags(segt_flag);
 
-    // Don't read the CRC (last two bytes)
-//        int dataLength = pkt_length_value - 2;
     int dataLength = pkt_length_value;
 
     if (dataLength > 65536) {
       throw new IOException("The data length cannot be bigger than 65536!");
     }
 
-//        byte[] data = outPacket.getBody();
     outPacket.setLength(dataLength);
     byte[] data = new byte[outPacket.getLength()];
     read(data, outPacket.getOffset(), dataLength);
 
     outPacket.setBody(data);
 
-//        read(data, packet.getOffset(), dataLength - 2);  // -2 to remove the CRC part
-//        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Data: {0}",bytesToHex(data));
-//        byte[] trimmedBody = new byte[outPacket.getLength()];
-//        System.arraycopy(outPacket.getBody(), 0, trimmedBody, 0, outPacket.getLength());
-//        outPacket.setBody(trimmedBody);
-    
     if (!processedApids.inRange(apid)) {
       return null;
     }
@@ -171,17 +159,26 @@ public class SPPReader
       this.packet = outPacket;
       int CRC = SPPHelper.computeCRC(inHeaderBuffer, data, outPacket.getOffset(), dataLength);
       if (CRC != readCRC) {
-        throw new IOException(
-            "CRC Error:"
-            + " expected=" + CRC
-            + ", read=" + readCRC
-            + " for "
-            + " APID(" + apid + ")"
-            + ", SSC=" + seq_count + ""
-            + ", pkt_len=" + pkt_length_value);
+        String error =
+          "CRC Error:"
+          + " expected=" + CRC
+          + ", read=" + readCRC
+          + " for "
+          + " APID(" + apid + ")"
+          + ", SSC=" + seq_count + ""
+          + ", pkt_len=" + pkt_length_value
+          + ", header=" + bytesToHex(inHeaderBuffer)
+          + ", body=" + bytesToHex(data);
+        LOGGER.log(Level.WARNING, error);
+        errorCount++;
+        if (errorCount >= 3) {
+          throw new IOException(error);
+        }
+        // For singular errors - discard this packet and receive another one
+        return receive();
       }
     }
-    
+    errorCount = 0;
     return outPacket;
   }
 
@@ -190,15 +187,13 @@ public class SPPReader
     return packet;
   }
 
-  /*
-    public static String bytesToHex(byte[] bytes) {
-        char[] hexChars = new char[bytes.length * 2];
-        for (int j = 0; j < bytes.length; j++) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
-            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
-        }
-        return new String(hexChars);
-    }
-   */
+  public static String bytesToHex(byte[] bytes) {
+      char[] hexChars = new char[bytes.length * 2];
+      for (int j = 0; j < bytes.length; j++) {
+          int v = bytes[j] & 0xFF;
+          hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+          hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+      }
+      return new String(hexChars);
+  }
 }

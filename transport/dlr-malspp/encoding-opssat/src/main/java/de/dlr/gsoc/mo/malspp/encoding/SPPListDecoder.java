@@ -32,11 +32,11 @@ public class SPPListDecoder extends SPPDecoder implements MALListDecoder {
 
     public SPPListDecoder(final InputStream inputStream, final List list, final Map properties) throws MALException {
         super(inputStream, properties);
-        long listSize = decodeUInteger().getValue();
-        if (listSize > Integer.MAX_VALUE) {
+		int listSize = decodeUShort().getValue();
+        if (listSize > 65535) {
             throw new MALException(LENGTH_NOT_SUPPORTED);
         }
-        this.size = (int) listSize;
+        this.size = listSize;
         this.list = list;
     }
 

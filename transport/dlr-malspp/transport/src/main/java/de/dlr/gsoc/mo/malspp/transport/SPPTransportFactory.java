@@ -27,26 +27,26 @@ import org.ccsds.moims.mo.mal.transport.MALTransportFactory;
 
 public class SPPTransportFactory extends MALTransportFactory {
 
-	private static final String SUPPORTED_PROTOCOL = "malspp";
-	private static final String PROTOCOL_NOT_SUPPORTED = "Protocol not supported: ";
-	private static SPPTransport transport = null;
+    private static final String SUPPORTED_PROTOCOL = "malspp";
+    private static final String PROTOCOL_NOT_SUPPORTED = "Protocol not supported: ";
+    private static SPPTransport transport = null;
 
-	public SPPTransportFactory(final String protocol) throws IllegalArgumentException {
-		super(protocol);
-	}
+    public SPPTransportFactory(final String protocol) throws IllegalArgumentException {
+        super(protocol);
+    }
 
-	@Override
-	public MALTransport createTransport(final MALContext malContext, final Map properties) throws MALException {
-		final String protocol = getProtocol();
+    @Override
+    public MALTransport createTransport(final MALContext malContext, final Map properties) throws MALException {
+        final String protocol = getProtocol();
 
-		if (!protocol.equals(SUPPORTED_PROTOCOL)) {
-			throw new MALException(PROTOCOL_NOT_SUPPORTED + protocol);
-		}
+        if (!protocol.equals(SUPPORTED_PROTOCOL)) {
+            throw new MALException(PROTOCOL_NOT_SUPPORTED + protocol);
+        }
 
-		if (null == transport || transport.isClosed()) {
-			transport = new SPPTransport(protocol, properties);
-			return transport;
-		}
-		return transport;
-	}
+        if (null == transport || transport.isClosed()) {
+            transport = new SPPTransport(protocol, properties);
+            return transport;
+        }
+        return transport;
+    }
 }

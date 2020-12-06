@@ -29,23 +29,23 @@ import org.ccsds.moims.mo.mal.transport.MALErrorBody;
 
 public class SPPErrorBody extends SPPMessageBody implements MALErrorBody {
 
-	public SPPErrorBody(final Object[] bodyElements, final MALElementStreamFactory esf, final MALEncodingContext ctx) {
-		super(bodyElements, esf, ctx);
-		// Explicitly set the short forms here because querying the service as is done in the super
-		// class yields the short forms of the non-error body of the same operation and stage, which
-		// is not what we want here.
-		shortForms = new Object[]{UInteger.UINTEGER_SHORT_FORM, null};
-	}
+    public SPPErrorBody(final Object[] bodyElements, final MALElementStreamFactory esf, final MALEncodingContext ctx) {
+        super(bodyElements, esf, ctx);
+        // Explicitly set the short forms here because querying the service as is done in the super
+        // class yields the short forms of the non-error body of the same operation and stage, which
+        // is not what we want here.
+        shortForms = new Object[]{UInteger.UINTEGER_SHORT_FORM, null};
+    }
 
-	public SPPErrorBody(final MALEncodedBody encodedBody, final MALElementStreamFactory esf, final MALEncodingContext ctx) {
-		super(encodedBody, esf, ctx);
-		shortForms = new Object[]{UInteger.UINTEGER_SHORT_FORM, null};
-	}
+    public SPPErrorBody(final MALEncodedBody encodedBody, final MALElementStreamFactory esf, final MALEncodingContext ctx) {
+        super(encodedBody, esf, ctx);
+        shortForms = new Object[]{UInteger.UINTEGER_SHORT_FORM, null};
+    }
 
-	@Override
-	public MALStandardError getError() throws MALException {
-		UInteger errorNumber = (UInteger) getBodyElement(0, new UInteger());
-		Object extraInformation = getBodyElement(1, null);
-		return new MALStandardError(errorNumber, extraInformation);
-	}
+    @Override
+    public MALStandardError getError() throws MALException {
+        UInteger errorNumber = (UInteger) getBodyElement(0, new UInteger());
+        Object extraInformation = getBodyElement(1, null);
+        return new MALStandardError(errorNumber, extraInformation);
+    }
 }

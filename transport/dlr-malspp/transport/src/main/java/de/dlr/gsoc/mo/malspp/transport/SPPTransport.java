@@ -60,885 +60,888 @@ import org.ccsds.moims.mo.testbed.util.spp.SpacePacket;
 
 public class SPPTransport implements MALTransport {
 
-	private static final Logger LOGGER = Logger.getLogger(SPPTransport.class.getName());
-	// Error strings
-	private static final String ILLEGAL_NULL_ARGUMENT = "Argument may not be null.";
-	private static final String IDENTIFIER_UNAVAILABLE = "Source or destination identifier not available.";
-	private static final String TRANSPORT_CLOSED = "Trying to interact with a closed transport.";
-	private static final String SPP_ERROR = "Error in Space Packet Protocol library.";
-	private static final String SOCKET_ERROR = "Space Packet Socket error (ignore if socket closed on purpose).";
-	private static final String THREAD_INTERRUPTED = "The Space Packet receive thread has been interrupted.";
-	// Numeric constants
-	private static final short SEQUENCE_COUNTER_WRAP = 16384;
-	private static final long SEGMENT_COUNTER_WRAP = 4294967296L;
-	protected static final byte MALSPP_VERSION = 0;
-	protected static final byte SPP_VERSION = 0;
-	protected static final int MAX_SPACE_PACKET_SIZE = 65536;
-	// Member variables
-	private final String protocol;
-	private final Map properties;
-	private final SPPSocket sppSocket;
-	private final Map<String, SPPEndpoint> endpointsByName = new HashMap<>();
-	private final Map<URI, SPPEndpoint> endpointsByURI = new HashMap<>();
-        private final ShortList apids = new ShortList();
-	private boolean isClosed;
-	private Thread receiveThread = null; // is assigned on first endpoint creation
-	private Thread messageHandlerThread = null; // is assigned on first endpoint creation
-        
-        // We need to set the initial capacity to have the MAL mixing messages from different sources.
-        // For example, if I do a heavy query, I don't want to have the queue full of those messages, 
-        // but instead, a mix of those combined with other messages. This let's them work in parallel.
-	private LinkedBlockingQueue<MALMessage> receivedMessages = new LinkedBlockingQueue<>(15);
-//	private LinkedBlockingQueue<MALMessage> receivedMessages = new LinkedBlockingQueue<>();
+    private static final Logger LOGGER = Logger.getLogger(SPPTransport.class.getName());
+    // Error strings
+    private static final String ILLEGAL_NULL_ARGUMENT = "Argument may not be null.";
+    private static final String IDENTIFIER_UNAVAILABLE = "Source or destination identifier not available.";
+    private static final String TRANSPORT_CLOSED = "Trying to interact with a closed transport.";
+    private static final String SPP_ERROR = "Error in Space Packet Protocol library.";
+    private static final String SOCKET_ERROR = "Space Packet Socket error (ignore if socket closed on purpose).";
+    private static final String THREAD_INTERRUPTED = "The Space Packet receive thread has been interrupted.";
+    // Numeric constants
+    private static final short SEQUENCE_COUNTER_WRAP = 16384;
+    private static final long SEGMENT_COUNTER_WRAP = 4294967296L;
+    protected static final byte MALSPP_VERSION = 0;
+    protected static final byte SPP_VERSION = 0;
+    protected static final int MAX_SPACE_PACKET_SIZE = 65536;
+    // Member variables
+    private final String protocol;
+    private final Map properties;
+    private final SPPSocket sppSocket;
+    private final Map<String, SPPEndpoint> endpointsByName = new HashMap<>();
+    private final Map<URI, SPPEndpoint> endpointsByURI = new HashMap<>();
+    private final ShortList apids = new ShortList();
+    private boolean isClosed;
+    private Thread receiveThread = null; // is assigned on first endpoint creation
+    private Thread messageHandlerThread = null; // is assigned on first endpoint creation
 
-	private HashMap<Long, LinkedBlockingQueue<MALMessage>> transMap = new HashMap<Long, LinkedBlockingQueue<MALMessage>>();
-        
-        private final Map<SequenceCounterId, SPPCounter> sequenceCounters = new HashMap<>();
-	private final Map<SequenceCounterId, Queue<Short>> identifiers = new HashMap<>();
-	private final Map<SegmentCounterId, SPPCounter> segmentCounters = new HashMap<>();
-        private final ExecutorService executor = Executors.newFixedThreadPool(6);
-        private final Object MUTEX = new Object();
+    // We need to set the initial capacity to have the MAL mixing messages from
+    // different sources.
+    // For example, if I do a heavy query, I don't want to have the queue full of
+    // those messages,
+    // but instead, a mix of those combined with other messages. This let's them
+    // work in parallel.
+    private LinkedBlockingQueue<MALMessage> receivedMessages = new LinkedBlockingQueue<>(15);
+    // private LinkedBlockingQueue<MALMessage> receivedMessages = new
+    // LinkedBlockingQueue<>();
 
-	public SPPTransport(final String protocol, final Map properties) throws MALException {
-		try {
-			sppSocket = SPPSocketFactory.newInstance().createSocket(properties);
-		} catch (Exception ex) {
-			LOGGER.log(Level.WARNING, SPP_ERROR + " " + ex.getMessage(), ex);
-			throw new MALException(SPP_ERROR + " " + ex.getMessage(), ex);
-		}
-		this.protocol = protocol;
-		this.properties = properties;
-		this.isClosed = false;
-	}
+    private HashMap<Long, LinkedBlockingQueue<MALMessage>> transMap = new HashMap<Long, LinkedBlockingQueue<MALMessage>>();
 
-	@Override
-	public MALEndpoint createEndpoint(final String localName, final Map qosProperties) throws MALException {
-		if (isClosed) {
-			throw new MALException(TRANSPORT_CLOSED);
-		}
-		if (endpointsByName.containsKey(localName)) {
-			SPPEndpoint ep = endpointsByName.get(localName);
-			if (ep.isClosed()) {
-				ep.reopen();
-			}
-			return ep;
-		}
+    private final Map<SequenceCounterId, SPPCounter> sequenceCounters = new HashMap<>();
+    private final Map<SequenceCounterId, Queue<Short>> identifiers = new HashMap<>();
+    private final Map<SegmentCounterId, SPPCounter> segmentCounters = new HashMap<>();
+    private final ExecutorService executor = Executors.newFixedThreadPool(6);
+    private final Object MUTEX = new Object();
 
-		// PENDING: Not all needed endpoint QoS properties seem to be present in qosProperties. As
-		// it seems all properties read from the configuration file are put into the transport QoS
-		// property map. Passing of per-message QoS properties is unclear. Here: Merge transport and
-		// endpoint QoS properties for creation of new endpoint and message receiving and handling.
-		// Per-message QoS properties are defined in the per-transport properties as well and
-		// therefore merged as well. If a property is present in the per-transport and in the
-		// per-endpoint map, the latter will override the former.
-		Map props = Configuration.mix(properties, qosProperties);
-		Configuration config = new Configuration(props);
+    public SPPTransport(final String protocol, final Map properties) throws MALException {
+        try {
+            sppSocket = SPPSocketFactory.newInstance().createSocket(properties);
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, SPP_ERROR + " " + ex.getMessage(), ex);
+            throw new MALException(SPP_ERROR + " " + ex.getMessage(), ex);
+        }
+        this.protocol = protocol;
+        this.properties = properties;
+        this.isClosed = false;
+    }
 
-		// PENDING: appendIdToUri property not yet in specification.
-		Short identifier = config.appendIdToUri()
-				? claimIdentifier(config.qualifier(), config.apid(), config.numIdentifiers(), config.startIdentifier())
-				: null;
-                
-                SPPURI uri = null;
-                
-                if(localName != null){
-                    try{
-                        uri = new SPPURI(new URI(localName));
-                    }catch(java.lang.IllegalArgumentException ex){
-                        // Do nothing!
+    @Override
+    public MALEndpoint createEndpoint(final String localName, final Map qosProperties) throws MALException {
+        if (isClosed) {
+            throw new MALException(TRANSPORT_CLOSED);
+        }
+        if (endpointsByName.containsKey(localName)) {
+            SPPEndpoint ep = endpointsByName.get(localName);
+            if (ep.isClosed()) {
+                ep.reopen();
+            }
+            return ep;
+        }
+
+        // PENDING: Not all needed endpoint QoS properties seem to be present in
+        // qosProperties. As
+        // it seems all properties read from the configuration file are put into the
+        // transport QoS
+        // property map. Passing of per-message QoS properties is unclear. Here: Merge
+        // transport and
+        // endpoint QoS properties for creation of new endpoint and message receiving
+        // and handling.
+        // Per-message QoS properties are defined in the per-transport properties as
+        // well and
+        // therefore merged as well. If a property is present in the per-transport and
+        // in the
+        // per-endpoint map, the latter will override the former.
+        Map props = Configuration.mix(properties, qosProperties);
+        Configuration config = new Configuration(props);
+
+        // PENDING: appendIdToUri property not yet in specification.
+        Short identifier = config.appendIdToUri()
+                ? claimIdentifier(config.qualifier(), config.apid(), config.numIdentifiers(), config.startIdentifier())
+                : null;
+
+        SPPURI uri = null;
+
+        if (localName != null) {
+            try {
+                uri = new SPPURI(new URI(localName));
+            } catch (java.lang.IllegalArgumentException ex) {
+                // Do nothing!
+            }
+        }
+
+        if (uri == null) {
+            uri = new SPPURI(config.qualifier(), config.apid(), identifier);
+        }
+
+        synchronized (apids) {
+            apids.add(config.apid());
+        }
+
+        // SPPURI uri = new SPPURI(config.qualifier(), config.apid(), identifier);
+
+        SPPEndpoint endpoint = new SPPEndpoint(protocol, this, localName, uri.getURI(), qosProperties, sppSocket);
+        if (localName != null) {
+            endpointsByName.put(localName, endpoint);
+        }
+        endpointsByURI.put(endpoint.getURI(), endpoint);
+
+        synchronized (this) { // No need to make this more efficient; createEndpoint() is not called often.
+            if (null == messageHandlerThread) {
+                messageHandlerThread = constructMessageHandlerThread(props);
+                messageHandlerThread.start();
+            }
+            if (null == receiveThread) {
+                receiveThread = constructReceiveThread(sppSocket, props);
+                receiveThread.start();
+            }
+        }
+        return endpoint;
+    }
+
+    @Override
+    public MALEndpoint getEndpoint(final String localName) throws IllegalArgumentException, MALException {
+        if (isClosed) {
+            throw new MALException(TRANSPORT_CLOSED);
+        }
+        if (null == localName) {
+            throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
+        }
+        return endpointsByName.get(localName);
+    }
+
+    @Override
+    public MALEndpoint getEndpoint(final URI uri) throws IllegalArgumentException, MALException {
+        if (isClosed) {
+            throw new MALException(TRANSPORT_CLOSED);
+        }
+        if (null == uri) {
+            throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
+        }
+        return endpointsByURI.get(uri);
+    }
+
+    @Override
+    public void deleteEndpoint(final String localName) throws IllegalArgumentException, MALException {
+        if (isClosed) {
+            throw new MALException(TRANSPORT_CLOSED);
+        }
+        if (null == localName) {
+            throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
+        }
+        SPPEndpoint endpoint = endpointsByName.get(localName);
+        if (null != endpoint) {
+            endpointsByName.remove(localName);
+            endpoint.close();
+            invalidateURI(endpoint.getURI());
+        }
+    }
+
+    /**
+     * Invalidates a URI by deleting references to an endpoint and freeing up its
+     * identifier. References by its local name won't be deleted. If this is desired
+     * it should be done before calling this method.
+     *
+     * @param uri The URI to be invalidated.
+     * @throws MALException
+     */
+    protected void invalidateURI(URI uri) throws MALException {
+        endpointsByURI.remove(uri);
+        SPPURI sppURI = new SPPURI(uri);
+        freeIdentifier(sppURI.getAPID(), sppURI.getQualifier(), sppURI.getIdentifier());
+    }
+
+    @Override
+    public MALBrokerBinding createBroker(final String localName, final Blob authenticationId,
+            final QoSLevel[] expectedQos, final UInteger priorityLevelNumber, final Map defaultQosProperties)
+            throws IllegalArgumentException, MALException {
+        if (isClosed) {
+            throw new MALException(TRANSPORT_CLOSED);
+        }
+        // Tansport level broker is not supoorted.
+        return null;
+    }
+
+    @Override
+    public MALBrokerBinding createBroker(final MALEndpoint endpoint, final Blob authenticationId,
+            final QoSLevel[] expectedQos, final UInteger priorityLevelNumber, final Map defaultQosProperties)
+            throws IllegalArgumentException, MALException {
+        if (isClosed) {
+            throw new MALException(TRANSPORT_CLOSED);
+        }
+        // Tansport level broker is not supoorted.
+        return null;
+    }
+
+    @Override
+    public boolean isSupportedQoSLevel(final QoSLevel qos) {
+        // PENDING: SPP implementation: Get the supported QoS levels from the underlying
+        // transport
+        // layer. This should be implemented in the SPP socket layer. Here: Return true
+        // for all
+        // QoS levels.
+        return true;
+    }
+
+    @Override
+    public boolean isSupportedInteractionType(final InteractionType type) {
+        return type.getOrdinal() != InteractionType._PUBSUB_INDEX;
+    }
+
+    @Override
+    synchronized public void close() throws MALException {
+        for (SPPEndpoint endpoint : new ArrayList<>(endpointsByURI.values())) {
+            String localName = endpoint.getLocalName();
+            if (localName != null) {
+                deleteEndpoint(localName);
+            } else {
+                endpoint.close();
+            }
+        }
+        isClosed = true;
+        endpointsByName.clear();
+        endpointsByURI.clear();
+        if (null != receiveThread) {
+            receiveThread.interrupt();
+            receiveThread = null;
+        }
+        if (null != messageHandlerThread) {
+            messageHandlerThread.interrupt();
+            messageHandlerThread = null;
+        }
+        try {
+            sppSocket.close();
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, SOCKET_ERROR, ex);
+            throw new MALException(SOCKET_ERROR, ex);
+        }
+    }
+
+    protected boolean isClosed() {
+        return isClosed;
+    }
+
+    protected Map getProperties() {
+        return properties;
+    }
+
+    /**
+     * Like claimIdentifier(apid, qualifier, id, numIdentifiers, startIdentifier)
+     * with id == null, i.e. an arbitrary available identifier is returned.
+     *
+     * @param qualifier
+     * @param apid
+     * @param numIdentifiers
+     * @param startIdentifier
+     * @return
+     * @throws org.ccsds.moims.mo.mal.MALException
+     */
+    private short claimIdentifier(final int qualifier, final short apid, final short numIdentifiers,
+            final short startIdentifier) throws MALException {
+        return claimIdentifier(qualifier, apid, null, numIdentifiers, startIdentifier);
+    }
+
+    /**
+     * Claims an unused identifier for usage in URIs as source or destination
+     * identifier.
+     *
+     * @param qualifier       APID qualifier for identification of the correct
+     *                        identifier queue.
+     * @param apid            APID for identification of the correct identifier
+     *                        queue.
+     * @param id              The specific identifier to claim. Pass null if an
+     *                        aribtrary unused identifier between 0 and
+     *                        numIdentifiers - 1 shall be claimed. For each
+     *                        combination of APID and APID qualifier the identifier
+     *                        to be returned when null is passed in is 0 upon first
+     *                        invocation of this method.
+     * @param numIdentifiers  Number of adjacent identifiers that will be put in the
+     *                        identifier pool. This parameter is only used to fill
+     *                        the identifier pool upon first use for each APID and
+     *                        APID qualifier, it is ignored for subseqeuent calls.
+     * @param startIdentifier The first identifier that is allowed to be claimed.
+     *                        Like numbIdentifiers this parameter is used to fill
+     *                        the pool upon first invocation for each APID and APID
+     *                        qualifier.
+     * @return The specified identifier or an arbitrary unused identifier between 0
+     *         and numIdentifiers - 1 if none was specified. For each combination of
+     *         APID and APID qualifier the identifier to be returned when none was
+     *         specified is 0 upon first invocation of this method. If the specified
+     *         one/none is available a MALException is thrown. The claimed
+     *         identifier is not available for further claims except it is freed
+     *         with freeIdentifier(). Each combination of APID and APID qualifier
+     *         holds its own queue of possible identifiers.
+     * @throws MALException
+     */
+    private short claimIdentifier(final int qualifier, final short apid, final Short id, final short numIdentifiers,
+            final short startIdentifier) throws MALException {
+        SequenceCounterId counterId = new SequenceCounterId(qualifier, apid);
+        Queue<Short> ids = identifiers.get(counterId);
+        if (null == ids) {
+            Short[] pool = new Short[numIdentifiers];
+            for (int i = 0; i < numIdentifiers; i++) { // create pool of valid identifiers
+                pool[i] = (short) (i + startIdentifier);
+            }
+            ids = new ArrayBlockingQueue<>(numIdentifiers, false, Arrays.asList(pool));
+            identifiers.put(counterId, ids);
+        }
+        if (null == id) {
+            try {
+                return ids.remove();
+            } catch (java.util.NoSuchElementException ex) {
+                throw new MALException(IDENTIFIER_UNAVAILABLE, ex);
+            }
+        }
+        if (!ids.remove(id)) {
+            throw new MALException(IDENTIFIER_UNAVAILABLE);
+        }
+        return id;
+    }
+
+    /**
+     * Frees a previously claimed identifier and makes it availabe for future
+     * claims. If the id was not in use before, the method does nothing.
+     *
+     * @param apid      APID for identification of the correct identifier queue.
+     * @param qualifier APID qualifier for identification of the correct identifier
+     *                  queue.
+     * @param id        The identifier to free.
+     */
+    private void freeIdentifier(final short apid, final Integer qualifier, final short id) {
+        SequenceCounterId counterId = new SequenceCounterId(qualifier, apid);
+        Queue<Short> ids = identifiers.get(counterId);
+        if (null != ids && !ids.contains(id)) {
+            ids.add(id);
+        }
+    }
+
+    /**
+     * Listens to an SPPSocket and delivers the received messages to the appropriate
+     * endpoint's listener. This method is executed in loop for each receive thread.
+     *
+     * @param sppSocket     SPP socket to listen to.
+     * @param qosProperties QoS properties.
+     * @param segmenters    Segmenters responsible for reconstructing segmented
+     *                      Space qosProperties.
+     * @param currentThread Current thread, in which the receive() method is
+     *                      executed.
+     */
+    private MALMessage receive(final SPPSocket sppSocket, final Map qosProperties,
+            final Map<SegmentCounterId, SPPSegmenter> segmenters, final Thread currentThread) {
+        // TODO: Queue receviced messages for stopped delivery and QoS level QUEUED.
+
+        try {
+            SpacePacket spacePacket = sppSocket.receive(); // blocks until a space packet has been received
+            if (spacePacket == null) {
+                LOGGER.log(Level.FINE, "Discarding message as it is not inside the whitelist.");
+                return null;
+            }
+            // PENDING: SPP TCP implementation allocates a new Space Packet with a body size
+            // of
+            // 65536 bytes. If the received Space Packet is smaller, the body byte array is
+            // not
+            // trimmed to fit. Here: Create new byte array of right size, copy contents, and
+            // set
+            // array as new body of the Space Packet.
+
+            /*
+             * byte[] trimmedBody = new byte[spacePacket.getLength()];
+             * System.arraycopy(spacePacket.getBody(), 0, trimmedBody, 0,
+             * spacePacket.getLength()); spacePacket.setBody(trimmedBody);
+             */
+
+            // retrieve effective QoS properties resolving per-application parameters
+            Configuration config = new Configuration(qosProperties);
+            // short apid = config.apid();
+
+            short apid;
+
+            Map effectiveProperties = config.getEffectiveProperties(spacePacket.getApidQualifier(),
+                    (short) spacePacket.getHeader().getApid());
+            // Selection of correct segment counter needs MAL header information.
+            MALElementStreamFactory esf = MALElementStreamFactory.newFactory(protocol, effectiveProperties);
+            SPPMessageHeader messageHeader = new SPPMessageHeader(spacePacket, esf, effectiveProperties);
+
+            // We need to iterate between all the available endpoints before discarding
+            // it...
+            boolean discard = true;
+
+            short from = messageHeader.getSPPURIFrom().getAPID();
+            short to = messageHeader.getSPPURITo().getAPID();
+
+            // Iterate through all the endpoints
+            /*
+             * for (Map.Entry<URI, SPPEndpoint> entry : endpointsByURI.entrySet()) { URI key
+             * = entry.getKey(); // SPPEndpoint value = entry.getValue();
+             * 
+             * // Get the APID from the key: String[] strs = key.getValue().split("/"); apid
+             * = Short.parseShort(strs[1]);
+             * 
+             * // Don't discard if one of the enpoint apids is the from or to apid if(from
+             * == apid || to == apid){ discard = false; break; } }
+             */
+            // Iterate through all the apids
+            synchronized (apids) {
+                for (int i = 0; i < apids.size(); i++) {
+                    apid = apids.get(i);
+
+                    // Don't discard if one of the enpoint apids is the from or to apid
+                    if (from == apid || to == apid) {
+                        discard = false;
+                        break;
                     }
                 }
-                
-                if(uri == null){
-                    uri = new SPPURI(config.qualifier(), config.apid(), identifier);
+            }
+
+            if (discard) {
+                LOGGER.log(Level.FINE, "Discarding message...");
+                return null;
+            }
+
+            SegmentCounterId segmentCounterId = new SegmentCounterId(messageHeader);
+            SPPSegmenter segmenter;
+
+            segmenter = segmenters.get(segmentCounterId);
+            if (null == segmenter) {
+                segmenter = new SPPSegmenter(config.timeout());
+                segmenters.put(segmentCounterId, segmenter);
+                // TODO: Delete segmenter when it is no longer needed, otherwise memory runs
+                // full.
+            }
+
+            segmenter.process(spacePacket);
+            if (!segmenter.hasNext()) {
+                return null;
+            }
+
+            return new SPPMessage(messageHeader, segmenter.next(), effectiveProperties, qosProperties, esf, this);
+        } catch (SocketException ex) {
+            LOGGER.log(Level.SEVERE, SOCKET_ERROR, ex);
+            currentThread.interrupt();
+        } catch (InterruptedException ex) {
+            LOGGER.log(Level.INFO, THREAD_INTERRUPTED);
+            currentThread.interrupt();
+        } catch (MALException ex) {
+            // TODO: Is there any other way of handling reception exceptions?
+            LOGGER.log(Level.WARNING, SPP_ERROR, ex);
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, SPP_ERROR, ex);
+        }
+        return null;
+    }
+
+    private void handleReceivedMessage(final MALMessage msg, final Map qosProperties) {
+        try {
+            URI uriTo = msg.getHeader().getURITo();
+            final SPPEndpoint targetEndpoint = (SPPEndpoint) getEndpoint(uriTo);
+            if (targetEndpoint == null) {
+                // Endpoint referenced in message not known. Choose a different endpoint for the
+                // sole purpose of returning an error message.
+                Collection<SPPEndpoint> possibleEPs = endpointsByURI.values();
+                if (null != possibleEPs && !possibleEPs.isEmpty()) {
+                    // TODO: EP could be closed. Should we choose a different one?
+                    SPPEndpoint alternativeEndpoint = possibleEPs.iterator().next();
+                    MALStandardError error = new MALStandardError(MALHelper.DESTINATION_UNKNOWN_ERROR_NUMBER, null);
+                    sendErrorMessage(alternativeEndpoint, msg, error, uriTo);
+                } else {
+                    // No endpoint exists, thus error cannot be returned. Just log it instead.
+                    // One could investigate the possibility to temporarily create an endpoint.
+                    LOGGER.log(Level.WARNING, IDENTIFIER_UNAVAILABLE);
                 }
-                
-                synchronized(apids){
-                        apids.add(config.apid());
+                return;
+            }
+
+            final MALMessageListener listener = targetEndpoint.getMessageListener();
+            if (listener == null) {
+                MALStandardError error = new MALStandardError(MALHelper.DELIVERY_FAILED_ERROR_NUMBER, null);
+                sendErrorMessage(targetEndpoint, msg, error, null);
+                return;
+            }
+            if (targetEndpoint.isDeliveryStopped()) {
+                MALStandardError error = new MALStandardError(MALHelper.DELIVERY_FAILED_ERROR_NUMBER, null);
+                sendErrorMessage(targetEndpoint, msg, error, null);
+            } else {
+                /*
+                 * LOGGER.log(Level.INFO, "\n" + "Local Name: " + targetEndpoint.getLocalName()
+                 * + "\nURI: " + targetEndpoint.getURI() + "\n\nInteractionType: " +
+                 * msg.getHeader().getInteractionType().toString() + "\nDomain: " +
+                 * msg.getHeader().getDomain() + "\nInteractionStage: " +
+                 * msg.getHeader().getInteractionStage().toString() + "\nIsErrorMessage: " +
+                 * msg.getHeader().getIsErrorMessage() + "\nNetworkZone: " +
+                 * msg.getHeader().getNetworkZone() + "\nTransactionId: " +
+                 * msg.getHeader().getTransactionId() + "\nTimestamp: " +
+                 * msg.getHeader().getTimestamp() + "\n");
+                 */
+
+                /*
+                 * Thread thread = new Thread() {
+                 * 
+                 * @Override public void run() { this.setName("ListenerThread_malspp");
+                 * listener.onMessage(targetEndpoint, msg); } }; thread.start();
+                 */
+
+                /*
+                 * Logger.getLogger(SPPTransport.class.getName()).log(Level.INFO, "Body:\n" +
+                 * Arrays.toString(msg.getBody().getEncodedBody().getEncodedBody().getValue()));
+                 */
+
+                // targetEndpoint.shipMessage(msg);
+                listener.onMessage(targetEndpoint, msg);
+                /*
+                 * executor.submit(new Runnable(){
+                 * 
+                 * @Override public void run() { targetEndpoint.shipMessage(msg); } });
+                 */
+            }
+        } catch (MALException ex) {
+            // TODO: Is there any other way of handling reception exceptions?
+            LOGGER.log(Level.WARNING, SPP_ERROR, ex);
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, SPP_ERROR, ex);
+        }
+    }
+
+    /**
+     * Creates and send an error message in reply to another MAL message. If
+     * returning an error message is not allowed by the interaction type and stage
+     * of the original MAL message, then no message is sent and a warning is written
+     * to the log.
+     *
+     * @param targetEndpoint The endpoint to use for sending the error message.
+     * @param replyToMsg     The original MAL message, on which the error message is
+     *                       a reply. The sender of this message is the destination
+     *                       of the error message.
+     * @param error          The error object with the extraInformation field being
+     *                       of one of the MAL element types.
+     * @param uriFrom        The URI used for the sender. If null, the URI of the
+     *                       endpoint is used, otherwise the endpoint URI won't be
+     *                       considered for this error message and is overwritten.
+     * @throws MALException
+     * @throws MALTransmitErrorException
+     */
+    private void sendErrorMessage(final SPPEndpoint targetEndpoint, final MALMessage replyToMsg,
+            final MALStandardError error, final URI uriFrom) throws MALException, MALTransmitErrorException {
+        MALMessage errMsg = targetEndpoint.createErrorMessage(replyToMsg, error, uriFrom);
+        if (errMsg != null) {
+            targetEndpoint.sendMessage(errMsg);
+        } else {
+            LOGGER.log(Level.WARNING, "Error: {0} could not answer to {1}",
+                    new Object[] { error.toString(), replyToMsg.getHeader() });
+        }
+    }
+
+    /**
+     * Constructs a receive thread associated with the socket, when a new socket
+     * needs to be created. The thread is not started.
+     *
+     * @param socket        The SPP socket the receive thread shall listen to.
+     * @param qosProperties QoS properties.
+     * @return The newly created receive thread.
+     */
+    private Thread constructReceiveThread(final SPPSocket socket, final Map qosProperties) throws MALException {
+        Thread thread = new Thread() {
+            private final Map<SegmentCounterId, SPPSegmenter> segmenters = new HashMap<>();
+
+            @Override
+            public void run() {
+                this.setName("ReceiveThread_malspp");
+                while (!isInterrupted()) {
+                    final MALMessage msg = receive(socket, qosProperties, segmenters, this);
+                    if (null != msg) {
+                        try {
+                            receivedMessages.put(msg);
+                        } catch (InterruptedException ex) {
+                            LOGGER.log(Level.INFO, THREAD_INTERRUPTED, ex);
+                            break;
+                        }
+                    }
                 }
-                
-//		SPPURI uri = new SPPURI(config.qualifier(), config.apid(), identifier);
+            }
+        };
+        return thread;
+    }
 
-		SPPEndpoint endpoint = new SPPEndpoint(protocol, this, localName, uri.getURI(), qosProperties, sppSocket);
-		if (localName != null) {
-			endpointsByName.put(localName, endpoint);
-		}
-		endpointsByURI.put(endpoint.getURI(), endpoint);
+    /**
+     * Constructs a message handler thread working through the list of received and
+     * injected messages. The thread is not started.
+     *
+     * @param qosProperties QoS properties.
+     * @return The newly created message handler thread.
+     * @throws MALException
+     */
+    private Thread constructMessageHandlerThread(final Map qosProperties) throws MALException {
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                this.setName("MessageHandlerThread_malspp");
+                while (!isInterrupted()) {
+                    try {
+                        MALMessage msg = receivedMessages.take();
 
-		synchronized (this) { // No need to make this more efficient; createEndpoint() is not called often.
-			if (null == messageHandlerThread) {
-				messageHandlerThread = constructMessageHandlerThread(props);
-				messageHandlerThread.start();
-			}
-			if (null == receiveThread) {
-				receiveThread = constructReceiveThread(sppSocket, props);
-				receiveThread.start();
-			}
-		}
-		return endpoint;
-	}
+                        final Long transId = msg.getHeader().getTransactionId();
 
-	@Override
-	public MALEndpoint getEndpoint(final String localName) throws IllegalArgumentException, MALException {
-		if (isClosed) {
-			throw new MALException(TRANSPORT_CLOSED);
-		}
-		if (null == localName) {
-			throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
-		}
-		return endpointsByName.get(localName);
-	}
+                        LinkedBlockingQueue<MALMessage> msgs = null;
 
-	@Override
-	public MALEndpoint getEndpoint(final URI uri) throws IllegalArgumentException, MALException {
-		if (isClosed) {
-			throw new MALException(TRANSPORT_CLOSED);
-		}
-		if (null == uri) {
-			throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
-		}
-		return endpointsByURI.get(uri);
-	}
+                        synchronized (MUTEX) {
+                            msgs = transMap.get(transId);
 
-	@Override
-	public void deleteEndpoint(final String localName) throws IllegalArgumentException, MALException {
-		if (isClosed) {
-			throw new MALException(TRANSPORT_CLOSED);
-		}
-		if (null == localName) {
-			throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
-		}
-		SPPEndpoint endpoint = endpointsByName.get(localName);
-		if (null != endpoint) {
-			endpointsByName.remove(localName);
-			endpoint.close();
-			invalidateURI(endpoint.getURI());
-		}
-	}
-
-	/**
-	 * Invalidates a URI by deleting references to an endpoint and freeing up its identifier.
-	 * References by its local name won't be deleted. If this is desired it should be done before
-	 * calling this method.
-	 *
-	 * @param uri The URI to be invalidated.
-	 * @throws MALException
-	 */
-	protected void invalidateURI(URI uri) throws MALException {
-		endpointsByURI.remove(uri);
-		SPPURI sppURI = new SPPURI(uri);
-		freeIdentifier(sppURI.getAPID(), sppURI.getQualifier(), sppURI.getIdentifier());
-	}
-
-	@Override
-	public MALBrokerBinding createBroker(
-			final String localName,
-			final Blob authenticationId,
-			final QoSLevel[] expectedQos,
-			final UInteger priorityLevelNumber,
-			final Map defaultQosProperties)
-			throws IllegalArgumentException, MALException {
-		if (isClosed) {
-			throw new MALException(TRANSPORT_CLOSED);
-		}
-		// Tansport level broker is not supoorted.
-		return null;
-	}
-
-	@Override
-	public MALBrokerBinding createBroker(
-			final MALEndpoint endpoint,
-			final Blob authenticationId,
-			final QoSLevel[] expectedQos,
-			final UInteger priorityLevelNumber,
-			final Map defaultQosProperties)
-			throws IllegalArgumentException, MALException {
-		if (isClosed) {
-			throw new MALException(TRANSPORT_CLOSED);
-		}
-		// Tansport level broker is not supoorted.
-		return null;
-	}
-
-	@Override
-	public boolean isSupportedQoSLevel(final QoSLevel qos) {
-		// PENDING: SPP implementation: Get the supported QoS levels from the underlying transport
-		// layer. This should be implemented in the SPP socket layer. Here: Return true for all
-		// QoS levels.
-		return true;
-	}
-
-	@Override
-	public boolean isSupportedInteractionType(final InteractionType type) {
-		return type.getOrdinal() != InteractionType._PUBSUB_INDEX;
-	}
-
-	@Override
-	synchronized public void close() throws MALException {
-		for (SPPEndpoint endpoint : new ArrayList<>(endpointsByURI.values())) {
-			String localName = endpoint.getLocalName();
-			if (localName != null) {
-				deleteEndpoint(localName);
-			} else {
-				endpoint.close();
-			}
-		}
-		isClosed = true;
-		endpointsByName.clear();
-		endpointsByURI.clear();
-		if (null != receiveThread) {
-			receiveThread.interrupt();
-			receiveThread = null;
-		}
-		if (null != messageHandlerThread) {
-			messageHandlerThread.interrupt();
-			messageHandlerThread = null;
-		}
-		try {
-			sppSocket.close();
-		} catch (Exception ex) {
-			LOGGER.log(Level.WARNING, SOCKET_ERROR, ex);
-			throw new MALException(SOCKET_ERROR, ex);
-		}
-	}
-
-	protected boolean isClosed() {
-		return isClosed;
-	}
-	
-	protected Map getProperties() {
-		return properties;
-	}
-
-	/**
-	 * Like claimIdentifier(apid, qualifier, id, numIdentifiers, startIdentifier) with id == null,
-	 * i.e. an arbitrary available identifier is returned.
-	 *
-	 * @param qualifier
-	 * @param apid
-	 * @param numIdentifiers
-	 * @param startIdentifier
-	 * @return
-	 * @throws org.ccsds.moims.mo.mal.MALException
-	 */
-	private short claimIdentifier(final int qualifier, final short apid, final short numIdentifiers, final short startIdentifier) throws MALException {
-		return claimIdentifier(qualifier, apid, null, numIdentifiers, startIdentifier);
-	}
-
-	/**
-	 * Claims an unused identifier for usage in URIs as source or destination identifier.
-	 *
-	 * @param qualifier APID qualifier for identification of the correct identifier queue.
-	 * @param apid APID for identification of the correct identifier queue.
-	 * @param id The specific identifier to claim. Pass null if an aribtrary unused identifier
-	 * between 0 and numIdentifiers - 1 shall be claimed. For each combination of APID and APID
-	 * qualifier the identifier to be returned when null is passed in is 0 upon first invocation of
-	 * this method.
-	 * @param numIdentifiers Number of adjacent identifiers that will be put in the identifier pool.
-	 * This parameter is only used to fill the identifier pool upon first use for each APID and APID
-	 * qualifier, it is ignored for subseqeuent calls.
-	 * @param startIdentifier The first identifier that is allowed to be claimed. Like
-	 * numbIdentifiers this parameter is used to fill the pool upon first invocation for each APID
-	 * and APID qualifier.
-	 * @return The specified identifier or an arbitrary unused identifier between 0 and
-	 * numIdentifiers - 1 if none was specified. For each combination of APID and APID qualifier the
-	 * identifier to be returned when none was specified is 0 upon first invocation of this method.
-	 * If the specified one/none is available a MALException is thrown. The claimed identifier is
-	 * not available for further claims except it is freed with freeIdentifier(). Each combination
-	 * of APID and APID qualifier holds its own queue of possible identifiers.
-	 * @throws MALException
-	 */
-	private short claimIdentifier(
-			final int qualifier,
-			final short apid,
-			final Short id,
-			final short numIdentifiers,
-			final short startIdentifier) throws MALException {
-		SequenceCounterId counterId = new SequenceCounterId(qualifier, apid);
-		Queue<Short> ids = identifiers.get(counterId);
-		if (null == ids) {
-			Short[] pool = new Short[numIdentifiers];
-			for (int i = 0; i < numIdentifiers; i++) { // create pool of valid identifiers
-				pool[i] = (short) (i + startIdentifier);
-			}
-			ids = new ArrayBlockingQueue<>(numIdentifiers, false, Arrays.asList(pool));
-			identifiers.put(counterId, ids);
-		}
-		if (null == id) {
-			try {
-				return ids.remove();
-			} catch (java.util.NoSuchElementException ex) {
-				throw new MALException(IDENTIFIER_UNAVAILABLE, ex);
-			}
-		}
-		if (!ids.remove(id)) {
-			throw new MALException(IDENTIFIER_UNAVAILABLE);
-		}
-		return id;
-	}
-
-	/**
-	 * Frees a previously claimed identifier and makes it availabe for future claims. If the id was
-	 * not in use before, the method does nothing.
-	 *
-	 * @param apid APID for identification of the correct identifier queue.
-	 * @param qualifier APID qualifier for identification of the correct identifier queue.
-	 * @param id The identifier to free.
-	 */
-	private void freeIdentifier(final short apid, final Integer qualifier, final short id) {
-		SequenceCounterId counterId = new SequenceCounterId(qualifier, apid);
-		Queue<Short> ids = identifiers.get(counterId);
-		if (null != ids && !ids.contains(id)) {
-			ids.add(id);
-		}
-	}
-
-	/**
-	 * Listens to an SPPSocket and delivers the received messages to the appropriate endpoint's
-	 * listener. This method is executed in loop for each receive thread.
-	 *
-	 * @param sppSocket SPP socket to listen to.
-	 * @param qosProperties QoS properties.
-	 * @param segmenters Segmenters responsible for reconstructing segmented Space qosProperties.
-	 * @param currentThread Current thread, in which the receive() method is executed.
-	 */
-	private MALMessage receive(
-			final SPPSocket sppSocket,
-			final Map qosProperties,
-			final Map<SegmentCounterId, SPPSegmenter> segmenters,
-			final Thread currentThread) {
-		// TODO: Queue receviced messages for stopped delivery and QoS level QUEUED.
-
-		try {
-			SpacePacket spacePacket = sppSocket.receive(); // blocks until a space packet has been received
-                        if(spacePacket == null){
-                          LOGGER.log(Level.FINE, "Discarding message as it is not inside the whitelist.");
-                          return null;
-                        }
-                        // PENDING: SPP TCP implementation allocates a new Space Packet with a body size of
-			// 65536 bytes. If the received Space Packet is smaller, the body byte array is not
-			// trimmed to fit. Here: Create new byte array of right size, copy contents, and set
-			// array as new body of the Space Packet.
-                        
-                        /*
-			byte[] trimmedBody = new byte[spacePacket.getLength()];
-			System.arraycopy(spacePacket.getBody(), 0, trimmedBody, 0, spacePacket.getLength());
-			spacePacket.setBody(trimmedBody);
-                        */
-
-                        // retrieve effective QoS properties resolving per-application parameters
-			Configuration config = new Configuration(qosProperties);                        
-//                        short apid = config.apid();
-                        
-                        short apid;
-
-        
-			Map effectiveProperties = config.getEffectiveProperties(
-					spacePacket.getApidQualifier(),
-					(short) spacePacket.getHeader().getApid()
-			);
-			// Selection of correct segment counter needs MAL header information.
-			MALElementStreamFactory esf = MALElementStreamFactory.newFactory(protocol, effectiveProperties);
-			SPPMessageHeader messageHeader = new SPPMessageHeader(spacePacket, esf, effectiveProperties);
-
-                        // We need to iterate between all the available endpoints before discarding it...
-                        boolean discard = true;
-                        
-                        short from = messageHeader.getSPPURIFrom().getAPID();
-                        short to = messageHeader.getSPPURITo().getAPID();
-                        
-                        // Iterate through all the endpoints
-                        /*
-                        for (Map.Entry<URI, SPPEndpoint> entry : endpointsByURI.entrySet()) {
-                                URI key = entry.getKey();
-//                                SPPEndpoint value = entry.getValue();
-                                
-                                // Get the APID from the key:
-                                String[] strs = key.getValue().split("/");
-                                apid = Short.parseShort(strs[1]);
-                                
-                                 // Don't discard if one of the enpoint apids is the from or to apid
-                                if(from == apid || to == apid){
-                                        discard = false;
-                                        break;
-                                }
-                        }
-                        */
-                        // Iterate through all the apids
-                        synchronized(apids){
-                                for (int i = 0; i < apids.size(); i++) {
-                                        apid = apids.get(i);
-                                
-                                        // Don't discard if one of the enpoint apids is the from or to apid
-                                        if(from == apid || to == apid){
-                                                discard = false;
-                                                break;
-                                        }
-                                }
-                        }
-                        
-                        
-
-                        if(discard){
-                                LOGGER.log(Level.FINE, "Discarding message...");
-                                return null;
-                        }
-                                
-                        
-                        
-			SegmentCounterId segmentCounterId = new SegmentCounterId(messageHeader);
-                        SPPSegmenter segmenter;
-                        
-                            segmenter = segmenters.get(segmentCounterId);
-                            if (null == segmenter) {
-                                    segmenter = new SPPSegmenter(config.timeout());
-                                    segmenters.put(segmentCounterId, segmenter);
-                                    // TODO: Delete segmenter when it is no longer needed, otherwise memory runs full.
+                            if (msgs != null) {
+                                msgs.add(msg);
+                                continue;
                             }
-
-                        segmenter.process(spacePacket);
-                        if (!segmenter.hasNext()) {
-                                return null;
                         }
 
-			return new SPPMessage(messageHeader, segmenter.next(), effectiveProperties, qosProperties, esf, this);
-		} catch (SocketException ex) {
-			LOGGER.log(Level.SEVERE, SOCKET_ERROR, ex);
-			currentThread.interrupt();
-		} catch (InterruptedException ex) {
-			LOGGER.log(Level.INFO, THREAD_INTERRUPTED);
-			currentThread.interrupt();
-		} catch (MALException ex) {
-			// TODO: Is there any other way of handling reception exceptions?
-			LOGGER.log(Level.WARNING, SPP_ERROR, ex);
-		} catch (Exception ex) {
-			LOGGER.log(Level.WARNING, SPP_ERROR, ex);
-		}
-		return null;
-	}
+                        msgs = new LinkedBlockingQueue<MALMessage>();
+                        msgs.add(msg);
+                        transMap.put(transId, msgs);
 
-	private void handleReceivedMessage(final MALMessage msg, final Map qosProperties) {
-		try {
-			URI uriTo = msg.getHeader().getURITo();
-			final SPPEndpoint targetEndpoint = (SPPEndpoint) getEndpoint(uriTo);
-			if (targetEndpoint == null) {
-				// Endpoint referenced in message not known. Choose a different endpoint for the
-				// sole purpose of returning an error message.
-				Collection<SPPEndpoint> possibleEPs = endpointsByURI.values();
-				if (null != possibleEPs && !possibleEPs.isEmpty()) {
-					// TODO: EP could be closed. Should we choose a different one?
-					SPPEndpoint alternativeEndpoint = possibleEPs.iterator().next();
-					MALStandardError error = new MALStandardError(MALHelper.DESTINATION_UNKNOWN_ERROR_NUMBER, null);
-					sendErrorMessage(alternativeEndpoint, msg, error, uriTo);
-				} else {
-					// No endpoint exists, thus error cannot be returned. Just log it instead.
-					// One could investigate the possibility to temporarily create an endpoint.
-					LOGGER.log(Level.WARNING, IDENTIFIER_UNAVAILABLE);
-				}
-				return;
-			}
+                        executor.submit(new Runnable() {
+                            @Override
+                            public void run() {
+                                LinkedBlockingQueue<MALMessage> msgsIn = transMap.get(transId);
 
-			final MALMessageListener listener = targetEndpoint.getMessageListener();
-			if (listener == null) {
-				MALStandardError error = new MALStandardError(MALHelper.DELIVERY_FAILED_ERROR_NUMBER, null);
-				sendErrorMessage(targetEndpoint, msg, error, null);
-				return;
-			}
-			if (targetEndpoint.isDeliveryStopped()) {
-				MALStandardError error = new MALStandardError(MALHelper.DELIVERY_FAILED_ERROR_NUMBER, null);
-				sendErrorMessage(targetEndpoint, msg, error, null);
-			} else {
-                            /*
-                                LOGGER.log(Level.INFO, "\n"
-                                + "Local Name: " + targetEndpoint.getLocalName()
-                                + "\nURI: " + targetEndpoint.getURI()
-                                + "\n\nInteractionType: " + msg.getHeader().getInteractionType().toString()
-                                + "\nDomain: " + msg.getHeader().getDomain()
-                                + "\nInteractionStage: " + msg.getHeader().getInteractionStage().toString()
-                                + "\nIsErrorMessage: " + msg.getHeader().getIsErrorMessage()
-                                + "\nNetworkZone: " + msg.getHeader().getNetworkZone()
-                                + "\nTransactionId: " + msg.getHeader().getTransactionId()
-                                + "\nTimestamp: " + msg.getHeader().getTimestamp()
-                                + "\n");
-                            */
+                                MALMessage msg = msgsIn.poll();
+                                while (msg != null) {
+                                    handleReceivedMessage(msg, qosProperties);
 
-                                /*
-                            Thread thread = new Thread() {
-					@Override
-					public void run() {
-						this.setName("ListenerThread_malspp");
-						listener.onMessage(targetEndpoint, msg);
-					}
-				};
-				thread.start();
-                              */
-                                
-                            /*
-                            Logger.getLogger(SPPTransport.class.getName()).log(Level.INFO,
-                                    "Body:\n"
-                                    + Arrays.toString(msg.getBody().getEncodedBody().getEncodedBody().getValue()));
-                            */                              
-                                
-//                            targetEndpoint.shipMessage(msg);
-                            listener.onMessage(targetEndpoint, msg);
-/*                            
-                            executor.submit(new Runnable(){
-                                    @Override
-                                    public void run() {
-                                        targetEndpoint.shipMessage(msg);
+                                    synchronized (MUTEX) {
+                                        msg = msgsIn.poll();
+
+                                        if (msg == null) {
+                                            transMap.remove(transId);
+                                        }
                                     }
-                            });
-*/
-                        }
-		} catch (MALException ex) {
-			// TODO: Is there any other way of handling reception exceptions?
-			LOGGER.log(Level.WARNING, SPP_ERROR, ex);
-		} catch (Exception ex) {
-			LOGGER.log(Level.WARNING, SPP_ERROR, ex);
-		}
-	}
+                                }
+                            }
+                        });
 
-	/**
-	 * Creates and send an error message in reply to another MAL message. If returning an error
-	 * message is not allowed by the interaction type and stage of the original MAL message, then no
-	 * message is sent and a warning is written to the log.
-	 *
-	 * @param targetEndpoint The endpoint to use for sending the error message.
-	 * @param replyToMsg The original MAL message, on which the error message is a reply. The sender
-	 * of this message is the destination of the error message.
-	 * @param error The error object with the extraInformation field being of one of the MAL element
-	 * types.
-	 * @param uriFrom The URI used for the sender. If null, the URI of the endpoint is used,
-	 * otherwise the endpoint URI won't be considered for this error message and is overwritten.
-	 * @throws MALException
-	 * @throws MALTransmitErrorException
-	 */
-	private void sendErrorMessage(final SPPEndpoint targetEndpoint,
-			final MALMessage replyToMsg,
-			final MALStandardError error,
-			final URI uriFrom) throws MALException, MALTransmitErrorException {
-		MALMessage errMsg = targetEndpoint.createErrorMessage(replyToMsg, error, uriFrom);
-		if (errMsg != null) {
-			targetEndpoint.sendMessage(errMsg);
-		} else {
-			LOGGER.log(Level.WARNING, error.toString());
-		}
-	}
+                    } catch (InterruptedException ex) {
+                        LOGGER.log(Level.INFO, THREAD_INTERRUPTED);
+                        break;
+                    }
+                }
+            }
+        };
+        return thread;
+    }
 
-	/**
-	 * Constructs a receive thread associated with the socket, when a new socket needs to be
-	 * created. The thread is not started.
-	 *
-	 * @param socket The SPP socket the receive thread shall listen to.
-	 * @param qosProperties QoS properties.
-	 * @return The newly created receive thread.
-	 */
-	private Thread constructReceiveThread(final SPPSocket socket, final Map qosProperties) throws MALException {
-		Thread thread = new Thread() {
-			private final Map<SegmentCounterId, SPPSegmenter> segmenters = new HashMap<>();
+    /**
+     * Injects a message in the list of received messages. This is useful if a
+     * message is not received on the SPP socket but shall be put in the message
+     * queue by some other means (e.g. because it has been dispatched in the same
+     * process). You need to make sure the message is usable in the same way as if
+     * it was received on the socket.
+     *
+     * @param msg The MAL message to be injected.
+     * @throws InterruptedException
+     */
+    protected void injectReceivedMessage(final MALMessage msg) throws InterruptedException {
+        receivedMessages.put(msg);
+    }
 
-			@Override
-			public void run() {
-				this.setName("ReceiveThread_malspp");
-				while (!isInterrupted()) {
-					final MALMessage msg = receive(socket, qosProperties, segmenters, this);
-					if (null != msg) {
-						try {
-							receivedMessages.put(msg);
-						} catch (InterruptedException ex) {
-							LOGGER.log(Level.INFO, THREAD_INTERRUPTED, ex);
-							break;
-						}
-					}
-				}
-			}
-		};
-		return thread;
-	}
+    /**
+     * Finds the sequence counter belonging to a specific APID/APID qualifier
+     * combination.
+     *
+     * Each APID for each each APID qualifier has its own sequence counter
+     * associated. If the counter does not exist, it will be created, starting from
+     * 0. Once a counter is created, it won't be deleted unless the transport is
+     * deleted. This should not pose a memory issue as the number of these counters
+     * is expected to be low and stay rather constant during the transport
+     * lifecycle.
+     *
+     * @param qualifier The API qualifier which together with the APID uniquely
+     *                  identifies the counter.
+     * @param apid      The APID which together with the qualifier will uniquely
+     *                  identify the counter.
+     * @return The sequence counter associated with the APID/APID qualifier
+     *         combination. A new sequence counter starting from 0 is created, if
+     *         none exists.
+     */
+    protected SPPCounter getSequenceCounter(final int qualifier, final short apid) {
+        SequenceCounterId counterId = new SequenceCounterId(qualifier, apid);
+        SPPCounter counter;
+        synchronized (sequenceCounters) {
+            counter = sequenceCounters.get(counterId);
+            if (null == counter) {
+                counter = new SPPCounter(SEQUENCE_COUNTER_WRAP);
+                sequenceCounters.put(counterId, counter);
+            }
+        }
+        return counter;
+    }
 
-	/**
-	 * Constructs a message handler thread working through the list of received and injected
-	 * messages.
-	 * The thread is not started.
-	 *
-	 * @param qosProperties QoS properties.
-	 * @return The newly created message handler thread.
-	 * @throws MALException
-	 */
-	private Thread constructMessageHandlerThread(final Map qosProperties) throws MALException {
-		Thread thread = new Thread() {
-			@Override
-			public void run() {
-				this.setName("MessageHandlerThread_malspp");
-				while (!isInterrupted()) {
-					try {
-						MALMessage msg = receivedMessages.take();
-                                                
-                                                final Long transId = msg.getHeader().getTransactionId();
-                                                
-                                                LinkedBlockingQueue<MALMessage> msgs = null;
+    /**
+     * Finds the segment counter belonging to a specific combination of MAL message
+     * header fields.
+     *
+     * Each combination of 'Interaction Type', 'Transaction Id', 'URI From', 'URI
+     * To', 'Session', 'Session Name', 'Domain', 'Network', 'Service Area',
+     * 'Service' and 'Operation' has its own segment counter associated. If the
+     * counter does not exist, it will be created, starting from 0. The counter is
+     * only incremented for messages that need to be split because they are too
+     * large for a single Space Packet.
+     *
+     * This means for each new interaction a new counter will be created, possibly
+     * leading to running out of memory. One way to fix this would be to delete the
+     * counter after completion of the interaction. However, this is not implemented
+     * at the moment.
+     *
+     * @param header The MAL message header used to derive a unique identifier for
+     *               the segment counter from.
+     * @return The segment counter associated with the unique header fields
+     *         combination. A new segment counter starting from 0 is created, if
+     *         none exists.
+     */
+    protected SPPCounter getSegmentCounter(final MALMessageHeader header) {
+        // TODO: Delete counter after completion of the interaction to prevent high
+        // memory usage.
+        SegmentCounterId counterId = new SegmentCounterId(header);
+        SPPCounter counter;
+        synchronized (segmentCounters) {
+            counter = segmentCounters.get(counterId);
+            if (null == counter) {
+                counter = new SPPCounter(SEGMENT_COUNTER_WRAP);
+                segmentCounters.put(counterId, counter);
+            }
+        }
+        return counter;
+    }
 
-                                                synchronized(MUTEX){
-                                                    msgs = transMap.get(transId);
-                                                    
-                                                    if(msgs != null){
-                                                        msgs.add(msg);
-                                                        continue;
-                                                    }
-                                                }
-                                                
-                                                    msgs = new LinkedBlockingQueue<MALMessage>();
-                                                    msgs.add(msg);
-                                                    transMap.put(transId, msgs);
-                                                    
-                                                    executor.submit(new Runnable(){
-                                                            @Override
-                                                            public void run() {
-                                                                LinkedBlockingQueue<MALMessage> msgsIn = transMap.get(transId);
-                                                                
-                                                                MALMessage msg = msgsIn.poll();
-                                                                while(msg != null){
-                                                                    handleReceivedMessage(msg, qosProperties);
-                                                                    
-                                                                    synchronized(MUTEX){
-                                                                        msg = msgsIn.poll();
-    
-                                                                        if(msg == null){
-                                                                            transMap.remove(transId);
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                    });
-                                                
-                                                
-					} catch (InterruptedException ex) {
-						LOGGER.log(Level.INFO, THREAD_INTERRUPTED);
-						break;
-					}
-				}
-			}
-		};
-		return thread;
-	}
+    /**
+     * Class for uniquely identifying a sequence counter through a URI.
+     *
+     * The policy is to have one sequence counter for each APID for each APID
+     * qualifier.
+     */
+    protected static class SequenceCounterId {
 
-	/**
-	 * Injects a message in the list of received messages. This is useful if a message is not
-	 * received on the SPP socket but shall be put in the message queue by some other means (e.g.
-	 * because it has been dispatched in the same process). You need to make sure the message is
-	 * usable in the same way as if it was received on the socket.
-	 *
-	 * @param msg The MAL message to be injected.
-	 * @throws InterruptedException
-	 */
-	protected void injectReceivedMessage(final MALMessage msg) throws InterruptedException {
-		receivedMessages.put(msg);
-	}
+        private final short apid;
+        private final int qualifier;
 
-	/**
-	 * Finds the sequence counter belonging to a specific APID/APID qualifier combination.
-	 *
-	 * Each APID for each each APID qualifier has its own sequence counter associated. If the
-	 * counter does not exist, it will be created, starting from 0. Once a counter is created, it
-	 * won't be deleted unless the transport is deleted. This should not pose a memory issue as the
-	 * number of these counters is expected to be low and stay rather constant during the transport
-	 * lifecycle.
-	 *
-	 * @param qualifier The API qualifier which together with the APID uniquely identifies the
-	 * counter.
-	 * @param apid The APID which together with the qualifier will uniquely identify the counter.
-	 * @return The sequence counter associated with the APID/APID qualifier combination. A new
-	 * sequence counter starting from 0 is created, if none exists.
-	 */
-	protected SPPCounter getSequenceCounter(final int qualifier, final short apid) {
-		SequenceCounterId counterId = new SequenceCounterId(qualifier, apid);
-		SPPCounter counter;
-		synchronized (sequenceCounters) {
-			counter = sequenceCounters.get(counterId);
-			if (null == counter) {
-				counter = new SPPCounter(SEQUENCE_COUNTER_WRAP);
-				sequenceCounters.put(counterId, counter);
-			}
-		}
-		return counter;
-	}
+        SequenceCounterId(final SPPURI uri) {
+            this.apid = uri.getAPID();
+            this.qualifier = uri.getQualifier();
+        }
 
-	/**
-	 * Finds the segment counter belonging to a specific combination of MAL message header fields.
-	 *
-	 * Each combination of 'Interaction Type', 'Transaction Id', 'URI From', 'URI To', 'Session',
-	 * 'Session Name', 'Domain', 'Network', 'Service Area', 'Service' and 'Operation' has its own
-	 * segment counter associated. If the counter does not exist, it will be created, starting from
-	 * 0. The counter is only incremented for messages that need to be split because they are too
-	 * large for a single Space Packet.
-	 *
-	 * This means for each new interaction a new counter will be created, possibly leading to
-	 * running out of memory. One way to fix this would be to delete the counter after completion of
-	 * the interaction. However, this is not implemented at the moment.
-	 *
-	 * @param header The MAL message header used to derive a unique identifier for the segment
-	 * counter from.
-	 * @return The segment counter associated with the unique header fields combination. A new
-	 * segment counter starting from 0 is created, if none exists.
-	 */
-	protected SPPCounter getSegmentCounter(final MALMessageHeader header) {
-		// TODO: Delete counter after completion of the interaction to prevent high memory usage.
-		SegmentCounterId counterId = new SegmentCounterId(header);
-		SPPCounter counter;
-		synchronized (segmentCounters) {
-			counter = segmentCounters.get(counterId);
-			if (null == counter) {
-				counter = new SPPCounter(SEGMENT_COUNTER_WRAP);
-				segmentCounters.put(counterId, counter);
-			}
-		}
-		return counter;
-	}
+        SequenceCounterId(final int qualifier, final short apid) {
+            this.apid = apid;
+            this.qualifier = qualifier;
+        }
 
-	/**
-	 * Class for uniquely identifying a sequence counter through a URI.
-	 *
-	 * The policy is to have one sequence counter for each APID for each APID qualifier.
-	 */
-	protected static class SequenceCounterId {
+        @Override
+        public int hashCode() {
+            int hash = 3;
+            hash = 89 * hash + this.apid;
+            hash = 89 * hash + this.qualifier;
+            return hash;
+        }
 
-		private final short apid;
-		private final int qualifier;
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final SequenceCounterId other = (SequenceCounterId) obj;
+            if (this.apid != other.apid) {
+                return false;
+            }
+            if (this.qualifier != other.qualifier) {
+                return false;
+            }
+            return true;
+        }
 
-		SequenceCounterId(final SPPURI uri) {
-			this.apid = uri.getAPID();
-			this.qualifier = uri.getQualifier();
-		}
+    }
 
-		SequenceCounterId(final int qualifier, final short apid) {
-			this.apid = apid;
-			this.qualifier = qualifier;
-		}
+    /**
+     * Class for uniquely identifying a segment counter through a URI.
+     *
+     * The policy is to have one segment counter for each combination of Interaction
+     * Type, Transaction Id, URI From, URI To, Session, Session Name, Domain,
+     * Network, Service Area, Service, Operation.
+     */
+    protected static class SegmentCounterId {
 
-		@Override
-		public int hashCode() {
-			int hash = 3;
-			hash = 89 * hash + this.apid;
-			hash = 89 * hash + this.qualifier;
-			return hash;
-		}
+        private final InteractionType interactionType;
+        private final Long transactionId;
+        private final URI uriFrom;
+        private final URI uriTo;
+        private final SessionType session;
+        private final Identifier sessionName;
+        private final IdentifierList domain;
+        private final Identifier network;
+        private final UShort serviceArea;
+        private final UShort service;
+        private final UShort operation;
 
-		@Override
-		public boolean equals(Object obj) {
-			if (obj == null) {
-				return false;
-			}
-			if (getClass() != obj.getClass()) {
-				return false;
-			}
-			final SequenceCounterId other = (SequenceCounterId) obj;
-			if (this.apid != other.apid) {
-				return false;
-			}
-			if (this.qualifier != other.qualifier) {
-				return false;
-			}
-			return true;
-		}
+        SegmentCounterId(final MALMessageHeader header) {
+            interactionType = header.getInteractionType();
+            transactionId = header.getTransactionId();
+            uriFrom = header.getURIFrom();
+            uriTo = header.getURITo();
+            session = header.getSession();
+            sessionName = header.getSessionName();
+            domain = header.getDomain();
+            network = header.getNetworkZone();
+            serviceArea = header.getServiceArea();
+            service = header.getService();
+            operation = header.getOperation();
+        }
 
-	}
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 53 * hash + Objects.hashCode(this.interactionType);
+            hash = 53 * hash + Objects.hashCode(this.transactionId);
+            hash = 53 * hash + Objects.hashCode(this.uriFrom);
+            hash = 53 * hash + Objects.hashCode(this.uriTo);
+            hash = 53 * hash + Objects.hashCode(this.session);
+            hash = 53 * hash + Objects.hashCode(this.sessionName);
+            hash = 53 * hash + Objects.hashCode(this.domain);
+            hash = 53 * hash + Objects.hashCode(this.network);
+            hash = 53 * hash + Objects.hashCode(this.serviceArea);
+            hash = 53 * hash + Objects.hashCode(this.service);
+            hash = 53 * hash + Objects.hashCode(this.operation);
+            return hash;
+        }
 
-	/**
-	 * Class for uniquely identifying a segment counter through a URI.
-	 *
-	 * The policy is to have one segment counter for each combination of Interaction Type,
-	 * Transaction Id, URI From, URI To, Session, Session Name, Domain, Network, Service Area,
-	 * Service, Operation.
-	 */
-	protected static class SegmentCounterId {
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final SegmentCounterId other = (SegmentCounterId) obj;
+            if (!Objects.equals(this.interactionType, other.interactionType)) {
+                return false;
+            }
+            if (!Objects.equals(this.transactionId, other.transactionId)) {
+                return false;
+            }
+            if (!Objects.equals(this.uriFrom, other.uriFrom)) {
+                return false;
+            }
+            if (!Objects.equals(this.uriTo, other.uriTo)) {
+                return false;
+            }
+            if (!Objects.equals(this.session, other.session)) {
+                return false;
+            }
+            if (!Objects.equals(this.sessionName, other.sessionName)) {
+                return false;
+            }
+            if (!Objects.equals(this.domain, other.domain)) {
+                return false;
+            }
+            if (!Objects.equals(this.network, other.network)) {
+                return false;
+            }
+            if (!Objects.equals(this.serviceArea, other.serviceArea)) {
+                return false;
+            }
+            if (!Objects.equals(this.service, other.service)) {
+                return false;
+            }
+            if (!Objects.equals(this.operation, other.operation)) {
+                return false;
+            }
+            return true;
+        }
 
-		private final InteractionType interactionType;
-		private final Long transactionId;
-		private final URI uriFrom;
-		private final URI uriTo;
-		private final SessionType session;
-		private final Identifier sessionName;
-		private final IdentifierList domain;
-		private final Identifier network;
-		private final UShort serviceArea;
-		private final UShort service;
-		private final UShort operation;
-
-		SegmentCounterId(final MALMessageHeader header) {
-			interactionType = header.getInteractionType();
-			transactionId = header.getTransactionId();
-			uriFrom = header.getURIFrom();
-			uriTo = header.getURITo();
-			session = header.getSession();
-			sessionName = header.getSessionName();
-			domain = header.getDomain();
-			network = header.getNetworkZone();
-			serviceArea = header.getServiceArea();
-			service = header.getService();
-			operation = header.getOperation();
-		}
-
-		@Override
-		public int hashCode() {
-			int hash = 7;
-			hash = 53 * hash + Objects.hashCode(this.interactionType);
-			hash = 53 * hash + Objects.hashCode(this.transactionId);
-			hash = 53 * hash + Objects.hashCode(this.uriFrom);
-			hash = 53 * hash + Objects.hashCode(this.uriTo);
-			hash = 53 * hash + Objects.hashCode(this.session);
-			hash = 53 * hash + Objects.hashCode(this.sessionName);
-			hash = 53 * hash + Objects.hashCode(this.domain);
-			hash = 53 * hash + Objects.hashCode(this.network);
-			hash = 53 * hash + Objects.hashCode(this.serviceArea);
-			hash = 53 * hash + Objects.hashCode(this.service);
-			hash = 53 * hash + Objects.hashCode(this.operation);
-			return hash;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj == null) {
-				return false;
-			}
-			if (getClass() != obj.getClass()) {
-				return false;
-			}
-			final SegmentCounterId other = (SegmentCounterId) obj;
-			if (!Objects.equals(this.interactionType, other.interactionType)) {
-				return false;
-			}
-			if (!Objects.equals(this.transactionId, other.transactionId)) {
-				return false;
-			}
-			if (!Objects.equals(this.uriFrom, other.uriFrom)) {
-				return false;
-			}
-			if (!Objects.equals(this.uriTo, other.uriTo)) {
-				return false;
-			}
-			if (!Objects.equals(this.session, other.session)) {
-				return false;
-			}
-			if (!Objects.equals(this.sessionName, other.sessionName)) {
-				return false;
-			}
-			if (!Objects.equals(this.domain, other.domain)) {
-				return false;
-			}
-			if (!Objects.equals(this.network, other.network)) {
-				return false;
-			}
-			if (!Objects.equals(this.serviceArea, other.serviceArea)) {
-				return false;
-			}
-			if (!Objects.equals(this.service, other.service)) {
-				return false;
-			}
-			if (!Objects.equals(this.operation, other.operation)) {
-				return false;
-			}
-			return true;
-		}
-
-	}
+    }
 }

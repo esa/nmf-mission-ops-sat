@@ -43,267 +43,250 @@ import org.ccsds.moims.mo.testbed.util.spp.SpacePacketHeader;
 
 public class SPPMessage implements MALMessage {
 
-	// Error string
-	private static final String TRANSACTION_ID_IS_NULL = "'Transaction Id' may not be null.";
-	// Member variables
-	private final SPPMessageHeader header;
-	private final SPPMessageBody body;
-	private final Map qosProperties;
-	private final Map endpointQosProperties;
-	private final MALElementStreamFactory esf;
+    // Error string
+    private static final String TRANSACTION_ID_IS_NULL = "'Transaction Id' may not be null.";
+    // Member variables
+    private final SPPMessageHeader header;
+    private final SPPMessageBody body;
+    private final Map qosProperties;
+    private final Map endpointQosProperties;
+    private final MALElementStreamFactory esf;
 
-	public SPPMessage(
-			final SPPMessageHeader header,
-			final SPPMessageBody body,
-			final Map qosProperties,
-			final Map endpointQosProperties,
-			final MALElementStreamFactory esf,
-			final SPPTransport transport) {
-		this.header = header;
-		this.body = body;
-		this.qosProperties = qosProperties;
-		this.endpointQosProperties = endpointQosProperties;
-		this.esf = esf;
-	}
+    public SPPMessage(final SPPMessageHeader header, final SPPMessageBody body, final Map qosProperties,
+            final Map endpointQosProperties, final MALElementStreamFactory esf, final SPPTransport transport) {
+        this.header = header;
+        this.body = body;
+        this.qosProperties = qosProperties;
+        this.endpointQosProperties = endpointQosProperties;
+        this.esf = esf;
+    }
 
-	public SPPMessage(
-			final SPPMessageHeader header,
-			final SpacePacket[] spacePackets,
-			final Map qosProperties,
-			final Map endpointQosProperties,
-			final MALElementStreamFactory esf,
-			final SPPTransport transport) throws MALException {
-		this.qosProperties = qosProperties;
-		this.endpointQosProperties = endpointQosProperties;
-		this.esf = esf;
-		this.header = header;
+    public SPPMessage(final SPPMessageHeader header, final SpacePacket[] spacePackets, final Map qosProperties,
+            final Map endpointQosProperties, final MALElementStreamFactory esf, final SPPTransport transport)
+            throws MALException {
+        this.qosProperties = qosProperties;
+        this.endpointQosProperties = endpointQosProperties;
+        this.esf = esf;
+        this.header = header;
 
-		// combine user (*not* packet) data fields of (segmented) Space Packets
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		for (SpacePacket sp : spacePackets) {
-			baos.write(sp.getBody(), header.getOffset(), sp.getBody().length - header.getOffset());
-		}
-		byte[] userDataField = baos.toByteArray();
+        // combine user (*not* packet) data fields of (segmented) Space Packets
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        for (SpacePacket sp : spacePackets) {
+            baos.write(sp.getBody(), header.getOffset(), sp.getBody().length - header.getOffset());
+        }
+        byte[] userDataField = baos.toByteArray();
 
-		MALOperation op;
-		try {
-				op = MALContextFactory
-				.lookupArea(header.getServiceArea(), header.getAreaVersion())
-				.getServiceByNumber(header.getService())
-				.getOperationByNumber(header.getOperation());
-		}
-		catch (NullPointerException npe)
-		{
-				throw new MALException("Could not resolve operation. " + header);
-		}
-		MALEncodingContext ctx = new MALEncodingContext(header, op, -1, null, this.qosProperties);
-		MALEncodedBody encodedBody = userDataField.length == 0 ? null : new MALEncodedBody(new Blob(userDataField));
-		body = SPPEndpoint.createMessageBody(encodedBody, esf, ctx);
-	}
+        MALOperation op;
+        try {
+            op = MALContextFactory.lookupArea(header.getServiceArea(), header.getAreaVersion())
+                    .getServiceByNumber(header.getService()).getOperationByNumber(header.getOperation());
+        } catch (NullPointerException npe) {
+            throw new MALException("Could not resolve operation. " + header);
+        }
+        MALEncodingContext ctx = new MALEncodingContext(header, op, -1, null, this.qosProperties);
+        MALEncodedBody encodedBody = userDataField.length == 0 ? null : new MALEncodedBody(new Blob(userDataField));
+        body = SPPEndpoint.createMessageBody(encodedBody, esf, ctx);
+    }
 
-	/**
-	 * Create Space Packet(s) from the MAL message according to CCSDS 524.1.
-	 *
-	 * @param sequenceCounter The sequence counter to be used for creating the Space Packet.
-	 * @param segmentCounter The segment counter to be used for creating the Space Packet.
-	 * @param packetDataFieldSizeLimit Limit of the packet data field size in octets. 0 for maximum.
-	 * @return An array of valid Space Packets encapsulating the MAL message.
-	 * @throws MALException
-	 */
-	protected SpacePacket[] createSpacePackets(
-			final SPPCounter sequenceCounter,
-			final SPPCounter segmentCounter,
-			final int packetDataFieldSizeLimit) throws MALException {
-		// create secondary header in 2 parts: before and after the segment counter
-		ByteArrayOutputStream encSecondaryHeaderPart1 = new ByteArrayOutputStream();
-		ByteArrayOutputStream encSecondaryHeaderPart2 = new ByteArrayOutputStream();
-		boolean isTCpacket = new Configuration(qosProperties).isTCpacket();
+    /**
+     * Create Space Packet(s) from the MAL message according to CCSDS 524.1.
+     *
+     * @param sequenceCounter          The sequence counter to be used for creating
+     *                                 the Space Packet.
+     * @param segmentCounter           The segment counter to be used for creating
+     *                                 the Space Packet.
+     * @param packetDataFieldSizeLimit Limit of the packet data field size in
+     *                                 octets. 0 for maximum.
+     * @return An array of valid Space Packets encapsulating the MAL message.
+     * @throws MALException
+     */
+    protected SpacePacket[] createSpacePackets(final SPPCounter sequenceCounter, final SPPCounter segmentCounter,
+            final int packetDataFieldSizeLimit) throws MALException {
+        // create secondary header in 2 parts: before and after the segment counter
+        ByteArrayOutputStream encSecondaryHeaderPart1 = new ByteArrayOutputStream();
+        ByteArrayOutputStream encSecondaryHeaderPart2 = new ByteArrayOutputStream();
+        boolean isTCpacket = new Configuration(qosProperties).isTCpacket();
 
-		writeSecondaryHeader(encSecondaryHeaderPart1, encSecondaryHeaderPart2, isTCpacket);
+        writeSecondaryHeader(encSecondaryHeaderPart1, encSecondaryHeaderPart2, isTCpacket);
 
-		// create encoded MAL message body
-		byte[] encBody;
-		MALEncodedBody malEncodedBody = body.getEncodedBody();
-		if (malEncodedBody == null || malEncodedBody.getEncodedBody() == null) {
-			encBody = new byte[]{};
-		} else {
-			Blob wholeBody = malEncodedBody.getEncodedBody();
-			encBody = new byte[wholeBody.getLength()];
-			System.arraycopy(wholeBody.getValue(), wholeBody.getOffset(), encBody, 0, wholeBody.getLength());
-		}
+        // create encoded MAL message body
+        byte[] encBody;
+        MALEncodedBody malEncodedBody = body.getEncodedBody();
+        if (malEncodedBody == null || malEncodedBody.getEncodedBody() == null) {
+            encBody = new byte[] {};
+        } else {
+            Blob wholeBody = malEncodedBody.getEncodedBody();
+            encBody = new byte[wholeBody.getLength()];
+            System.arraycopy(wholeBody.getValue(), wholeBody.getOffset(), encBody, 0, wholeBody.getLength());
+        }
 
-		SPPURI primarySPPURI = new SPPURI(isTCpacket ? header.getURITo() : header.getURIFrom());
-		int primaryApidQualifier = primarySPPURI.getQualifier();
-		int primaryApid = primarySPPURI.getAPID();
+        SPPURI primarySPPURI = new SPPURI(isTCpacket ? header.getURITo() : header.getURIFrom());
+        int primaryApidQualifier = primarySPPURI.getQualifier();
+        int primaryApid = primarySPPURI.getAPID();
 
-		// Create template Space Packet header. Sequence flags and packet sequence count will be
-		// handled and set correctly in SPPSegmenter.split().
-		SpacePacketHeader spHeader = new SpacePacketHeader(
-				SPPTransport.SPP_VERSION,
-				isTCpacket ? 1 : 0,
-				1,
-				primaryApid,
-				0b11,
-				0
-		);
+        // Create template Space Packet header. Sequence flags and packet sequence count
+        // will be
+        // handled and set correctly in SPPSegmenter.split().
+        SpacePacketHeader spHeader = new SpacePacketHeader(SPPTransport.SPP_VERSION, isTCpacket ? 1 : 0, 1, primaryApid,
+                0b11, 0);
 
-		SpacePacket[] spacePackets = SPPSegmenter.split(
-				packetDataFieldSizeLimit,
-				primaryApidQualifier,
-				spHeader,
-				encSecondaryHeaderPart1.toByteArray(),
-				encSecondaryHeaderPart2.toByteArray(),
-				encBody,
-				sequenceCounter,
-				segmentCounter);
+        SpacePacket[] spacePackets = SPPSegmenter.split(packetDataFieldSizeLimit, primaryApidQualifier, spHeader,
+                encSecondaryHeaderPart1.toByteArray(), encSecondaryHeaderPart2.toByteArray(), encBody, sequenceCounter,
+                segmentCounter);
 
-		for (SpacePacket sp: spacePackets) {
-			// PENDING: Testbed assumes endpoint QoS properties to be delivered to the TRANSMIT
-			// request.
-			sp.setQosProperties(endpointQosProperties);
-		}
-		return spacePackets;
-	}
+        for (SpacePacket sp : spacePackets) {
+            // PENDING: Testbed assumes endpoint QoS properties to be delivered to the
+            // TRANSMIT
+            // request.
+            sp.setQosProperties(endpointQosProperties);
+        }
+        return spacePackets;
+    }
 
-	/**
-	 * Encodes the secondary header of the Space Packet to two stream. The first stream will contain
-	 * all bytes up to (but excluding) the segment counter, the second stream will contain all bytes
-	 * starting from the segment counter (excluding the counter) to the end of the header.
-	 *
-	 * @param os1 Output stream where the first part of the secondary Space Packet header is written
-	 * to.
-	 * @param os2 Output stream where the second part of the secondary Space Packet header is
-	 * written to.
-	 * @param isTCpacket True, if packet type is telecommand, false if telemetry.
-	 * @throws MALException
-	 */
-	private void writeSecondaryHeader(final OutputStream os1, final OutputStream os2, boolean isTCpacket) throws MALException {
-		MALElementOutputStream eos1 = esf.createOutputStream(os1);
-		byte sdu = header.getSDU();
-		eos1.writeElement(new UOctet((short) (SPPTransport.MALSPP_VERSION << 5 | sdu)), null);
-		writeUShort(header.getServiceArea(), eos1);
-		writeUShort(header.getService(), eos1);
-		writeUShort(header.getOperation(), eos1);
-		eos1.writeElement(header.getAreaVersion(), null);
-		SPPURI sppURIFrom = new SPPURI(header.getURIFrom());
-		SPPURI sppURITo = new SPPURI(header.getURITo());
-		short secondaryAPID = isTCpacket ? sppURIFrom.getAPID() : sppURITo.getAPID();
-		int secondaryQualifier = isTCpacket ? sppURIFrom.getQualifier() : sppURITo.getQualifier();
-		int error_qos_session_scndapid = ((header.getIsErrorMessage() ? 1 : 0) << 15)
-				| ((byte) (header.getQoSlevel().getNumericValue().getValue() - 1) << 13)
-				| ((byte) (header.getSession().getNumericValue().getValue() - 1) << 11)
-				| (secondaryAPID);
-		writeUShort(new UShort(error_qos_session_scndapid), eos1);
-		writeUShort(new UShort(secondaryQualifier), eos1);
-		// NOTE: According to 4.4.2 Transaction id is required to be provided by the MAL also for
-		// SEND interactions. This is a constraint imposed by the MAL/SPP binding on the MAL (in its
-		// most general form, the MAL does not require a Transaction id for SEND interactions).
-		Long transactionId = header.getTransactionId();
-		if (transactionId == null) {
-			throw new MALException(TRANSACTION_ID_IS_NULL);
-		}
-		writeLong(transactionId, eos1);
+    /**
+     * Encodes the secondary header of the Space Packet to two stream. The first
+     * stream will contain all bytes up to (but excluding) the segment counter, the
+     * second stream will contain all bytes starting from the segment counter
+     * (excluding the counter) to the end of the header.
+     *
+     * @param os1        Output stream where the first part of the secondary Space
+     *                   Packet header is written to.
+     * @param os2        Output stream where the second part of the secondary Space
+     *                   Packet header is written to.
+     * @param isTCpacket True, if packet type is telecommand, false if telemetry.
+     * @throws MALException
+     */
+    private void writeSecondaryHeader(final OutputStream os1, final OutputStream os2, boolean isTCpacket)
+            throws MALException {
+        MALElementOutputStream eos1 = esf.createOutputStream(os1);
+        byte sdu = header.getSDU();
+        eos1.writeElement(new UOctet((short) (SPPTransport.MALSPP_VERSION << 5 | sdu)), null);
+        writeUShort(header.getServiceArea(), eos1);
+        writeUShort(header.getService(), eos1);
+        writeUShort(header.getOperation(), eos1);
+        eos1.writeElement(header.getAreaVersion(), null);
+        SPPURI sppURIFrom = new SPPURI(header.getURIFrom());
+        SPPURI sppURITo = new SPPURI(header.getURITo());
+        short secondaryAPID = isTCpacket ? sppURIFrom.getAPID() : sppURITo.getAPID();
+        int secondaryQualifier = isTCpacket ? sppURIFrom.getQualifier() : sppURITo.getQualifier();
+        int error_qos_session_scndapid = ((header.getIsErrorMessage() ? 1 : 0) << 15)
+                | ((byte) (header.getQoSlevel().getNumericValue().getValue() - 1) << 13)
+                | ((byte) (header.getSession().getNumericValue().getValue() - 1) << 11) | (secondaryAPID);
+        writeUShort(new UShort(error_qos_session_scndapid), eos1);
+        writeUShort(new UShort(secondaryQualifier), eos1);
+        // NOTE: According to 4.4.2 Transaction id is required to be provided by the MAL
+        // also for
+        // SEND interactions. This is a constraint imposed by the MAL/SPP binding on the
+        // MAL (in its
+        // most general form, the MAL does not require a Transaction id for SEND
+        // interactions).
+        Long transactionId = header.getTransactionId();
+        if (transactionId == null) {
+            throw new MALException(TRANSACTION_ID_IS_NULL);
+        }
+        writeLong(transactionId, eos1);
 
-		Short sourceIdentifier = sppURIFrom.getIdentifier();
-		Short destinationIdentifier = sppURITo.getIdentifier();
+        Short sourceIdentifier = sppURIFrom.getIdentifier();
+        Short destinationIdentifier = sppURITo.getIdentifier();
 
-		Configuration config = new Configuration(qosProperties);
-		boolean priorityFlag = config.priorityFlag();
-		boolean timestampFlag = config.timestampFlag();
-		boolean networkZoneFlag = config.networkZoneFlag();
-		boolean sessionNameFlag = config.sessionNameFlag();
-		boolean domainFlag = config.domainFlag();
-		boolean authenticationIdFlag = config.authenticationIdFlag();
+        Configuration config = new Configuration(qosProperties);
+        boolean priorityFlag = config.priorityFlag();
+        boolean timestampFlag = config.timestampFlag();
+        boolean networkZoneFlag = config.networkZoneFlag();
+        boolean sessionNameFlag = config.sessionNameFlag();
+        boolean domainFlag = config.domainFlag();
+        boolean authenticationIdFlag = config.authenticationIdFlag();
 
-		BitSet bs = new BitSet(8);
-		// Bits in BitSet are numbered right to left.
-		bs.set(7, null != sourceIdentifier);
-		bs.set(6, null != destinationIdentifier);
-		bs.set(5, priorityFlag);
-		bs.set(4, timestampFlag);
-		bs.set(3, networkZoneFlag);
-		bs.set(2, sessionNameFlag);
-		bs.set(1, domainFlag);
-		bs.set(0, authenticationIdFlag);
-		eos1.writeElement(new UOctet((short) bs.toLongArray()[0]), null);
+        BitSet bs = new BitSet(8);
+        // Bits in BitSet are numbered right to left.
+        bs.set(7, null != sourceIdentifier);
+        bs.set(6, null != destinationIdentifier);
+        bs.set(5, priorityFlag);
+        bs.set(4, timestampFlag);
+        bs.set(3, networkZoneFlag);
+        bs.set(2, sessionNameFlag);
+        bs.set(1, domainFlag);
+        bs.set(0, authenticationIdFlag);
+        eos1.writeElement(new UOctet((short) bs.toLongArray()[0]), null);
 
-		if (null != sourceIdentifier) {
-			eos1.writeElement(new UOctet(sourceIdentifier), null);
-		}
-		if (null != destinationIdentifier) {
-			eos1.writeElement(new UOctet(destinationIdentifier), null);
-		}
+        if (null != sourceIdentifier) {
+            eos1.writeElement(new UOctet(sourceIdentifier), null);
+        }
+        if (null != destinationIdentifier) {
+            eos1.writeElement(new UOctet(destinationIdentifier), null);
+        }
 
-		// Second stream starts here; segment counter is encoded separately in SPPSegmenter.split().
-		MALElementOutputStream eos2 = esf.createOutputStream(os2);
-		if (priorityFlag) {
-			eos2.writeElement(header.getPriority(), null);
-		}
-		if (timestampFlag) {
-			eos2.writeElement(header.getTimestamp(), null);
-		}
-		if (networkZoneFlag) {
-			eos2.writeElement(header.getNetworkZone(), null);
-		}
-		if (sessionNameFlag) {
-			eos2.writeElement(header.getSessionName(), null);
-		}
-		if (domainFlag) {
-			eos2.writeElement(header.getDomain(), null);
-		}
-		if (authenticationIdFlag) {
-			eos2.writeElement(header.getAuthenticationId(), null);
-		}
-	}
+        // Second stream starts here; segment counter is encoded separately in
+        // SPPSegmenter.split().
+        MALElementOutputStream eos2 = esf.createOutputStream(os2);
+        if (priorityFlag) {
+            eos2.writeElement(header.getPriority(), null);
+        }
+        if (timestampFlag) {
+            eos2.writeElement(header.getTimestamp(), null);
+        }
+        if (networkZoneFlag) {
+            eos2.writeElement(header.getNetworkZone(), null);
+        }
+        if (sessionNameFlag) {
+            eos2.writeElement(header.getSessionName(), null);
+        }
+        if (domainFlag) {
+            eos2.writeElement(header.getDomain(), null);
+        }
+        if (authenticationIdFlag) {
+            eos2.writeElement(header.getAuthenticationId(), null);
+        }
+    }
 
-	/**
-	 * Helper method for writing an unsigned short value to a MALElementOutputStream using a fixed
-	 * encoding length of two bytes.
-	 *
-	 * @param value Unsigned short value to be written.
-	 * @param os Stream to write the value to.
-	 * @throws MALException
-	 */
-	private static void writeUShort(final UShort value, final MALElementOutputStream os) throws MALException {
-		int v = value.getValue();
-		for (int i = 1; i >= 0; i--) {
-			short b = (short) ((v >>> (i * 8)) & 255);
-			os.writeElement(new UOctet(b), null);
-		}
-	}
+    /**
+     * Helper method for writing an unsigned short value to a MALElementOutputStream
+     * using a fixed encoding length of two bytes.
+     *
+     * @param value Unsigned short value to be written.
+     * @param os    Stream to write the value to.
+     * @throws MALException
+     */
+    private static void writeUShort(final UShort value, final MALElementOutputStream os) throws MALException {
+        int v = value.getValue();
+        for (int i = 1; i >= 0; i--) {
+            short b = (short) ((v >>> (i * 8)) & 255);
+            os.writeElement(new UOctet(b), null);
+        }
+    }
 
-	/**
-	 * Helper method for writing a signed long value to a MALElementOutputStream using a fixed
-	 * encoding length of eight bytes.
-	 *
-	 * @param value Signed long value to be written.
-	 * @param os Stream to write the value to.
-	 * @throws MALException
-	 */
-	private static void writeLong(final Long value, final MALElementOutputStream os) throws MALException {
-		for (int i = 7; i >= 0; i--) {
-			short b = (short) ((value >>> (i * 8)) & 255);
-			os.writeElement(new UOctet(b), null);
-		}
-	}
+    /**
+     * Helper method for writing a signed long value to a MALElementOutputStream
+     * using a fixed encoding length of eight bytes.
+     *
+     * @param value Signed long value to be written.
+     * @param os    Stream to write the value to.
+     * @throws MALException
+     */
+    private static void writeLong(final Long value, final MALElementOutputStream os) throws MALException {
+        for (int i = 7; i >= 0; i--) {
+            short b = (short) ((value >>> (i * 8)) & 255);
+            os.writeElement(new UOctet(b), null);
+        }
+    }
 
-	@Override
-	public MALMessageHeader getHeader() {
-		return header;
-	}
+    @Override
+    public MALMessageHeader getHeader() {
+        return header;
+    }
 
-	@Override
-	public MALMessageBody getBody() {
-		return body;
-	}
+    @Override
+    public MALMessageBody getBody() {
+        return body;
+    }
 
-	@Override
-	public Map getQoSProperties() {
-		return qosProperties;
-	}
+    @Override
+    public Map getQoSProperties() {
+        return qosProperties;
+    }
 
-	@Override
-	public void free() throws MALException {
-		// nothing to do
-	}
+    @Override
+    public void free() throws MALException {
+        // nothing to do
+    }
 }
