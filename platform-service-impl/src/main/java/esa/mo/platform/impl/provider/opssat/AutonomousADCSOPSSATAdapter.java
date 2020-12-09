@@ -477,8 +477,8 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       SEPP_IADCS_API_DETUMBLING_MODE_PARAMETERS params =
           new SEPP_IADCS_API_DETUMBLING_MODE_PARAMETERS();
       adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
-      params.setSTART_EPOCH_TIME(BigInteger.valueOf(System.currentTimeMillis()));
-      params.setSTOP_EPOCH_TIME(BigInteger.valueOf(Long.MAX_VALUE));
+      params.setSTART_EPOCH_TIME_MSEC(BigInteger.valueOf(System.currentTimeMillis()));
+      params.setSTOP_EPOCH_TIME_MSEC(BigInteger.valueOf(Long.MAX_VALUE));
       adcsApi.Start_Operation_Mode_Detumbling(params);
       activeAttitudeMode = a;
     } else if (attitude instanceof AttitudeModeNadirPointing) {
@@ -492,12 +492,12 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       // Set parameters
       params.setLOS_VECTOR_BF(losVector);
       params.setFLIGHT_VECTOR_BF(flightVector);
-      params.setUPDATE_INTERVAL(BigInteger.valueOf(500));
-      params.setMODE(
+      params.setUPDATE_INTERVAL_MSEC(BigInteger.valueOf(500));
+      params.setDETERMINATION_MODE(
           SEPP_IADCS_API_TARGET_POINTING_ATTITUDE_DETERMINATION_MODES.IADCS_ATTITUDE_DETERMINATION_STARTRACKER_ONLY);
 
       params.setTOLERANCE_PARAMETERS(tolerance);
-      params.setOFFSET_TIME(.0f);
+      params.setOFFSET_TIME_MSEC(BigInteger.valueOf(0));
       adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
       adcsApi.Init_Orbit_Module(readTLEFile());
       adcsApi.Start_Target_Pointing_Nadir_Mode(params);
@@ -525,8 +525,8 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       AttitudeModeSunPointing sunPointing = (AttitudeModeSunPointing) attitude;
       SEPP_IADCS_API_SUN_POINTING_MODE_PARAMETERS params =
           new SEPP_IADCS_API_SUN_POINTING_MODE_PARAMETERS();
-      params.setSTART_EPOCH_TIME(BigInteger.valueOf(0));
-      params.setSTOP_EPOCH_TIME(BigInteger.valueOf(Long.MAX_VALUE));
+      params.setSTART_EPOCH_TIME_MSEC(BigInteger.valueOf(0));
+      params.setSTOP_EPOCH_TIME_MSEC(BigInteger.valueOf(Long.MAX_VALUE));
       params.setTARGET_VECTOR_BF(targetVector);
       adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
       adcsApi.Init_Orbit_Module(readTLEFile());
@@ -537,18 +537,18 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
         throw new IOException("LOS or flight vector not set.");
       }
 
-      SEPP_IADCS_API_EARTH_TARGET_POINTING_FIXED_MODE_PARAMETERS params =
-          new SEPP_IADCS_API_EARTH_TARGET_POINTING_FIXED_MODE_PARAMETERS();
+      SEPP_IADCS_API_TARGET_POINTING_FIXED_MODE_PARAMETERS params =
+          new SEPP_IADCS_API_TARGET_POINTING_FIXED_MODE_PARAMETERS();
 
-      params.setMODE(
+      params.setDETERMINATION_MODE(
           SEPP_IADCS_API_TARGET_POINTING_ATTITUDE_DETERMINATION_MODES.IADCS_ATTITUDE_DETERMINATION_STARTRACKER_ONLY);
       params.setTOLERANCE_PARAMETERS(tolerance);
       params.setFLIGHT_VECTOR_BF(flightVector);
       params.setLOS_VECTOR_BF(losVector);
-      params.setUPDATE_INTERVAL(BigInteger.valueOf(500));
+      params.setUPDATE_INTERVAL_MSEC(BigInteger.valueOf(500));
       AttitudeModeTargetTracking a = (AttitudeModeTargetTracking) attitude;
-      params.setTARGET_LATITUDE(a.getLatitude());
-      params.setTARGET_LONGITUDE(a.getLongitude());
+      params.setTARGET_LATITUDE_RAD((float)FastMath.toRadians(a.getLatitude()));
+      params.setTARGET_LONGITUDE_RAD((float)FastMath.toRadians(a.getLongitude()));
       adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
       adcsApi.Init_Orbit_Module(readTLEFile());
       adcsApi.Start_Target_Pointing_Earth_Fix_Mode(params);
@@ -558,22 +558,22 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
         throw new IOException("LOS or flight vector not set.");
       }
 
-      SEPP_IADCS_API_EARTH_TARGET_POINTING_CONST_VELOCITY_MODE_PARAMETERS params =
-          new SEPP_IADCS_API_EARTH_TARGET_POINTING_CONST_VELOCITY_MODE_PARAMETERS();
+      SEPP_IADCS_API_TARGET_POINTING_CONST_VELOCITY_MODE_PARAMETERS params =
+          new SEPP_IADCS_API_TARGET_POINTING_CONST_VELOCITY_MODE_PARAMETERS();
       params.setFLIGHT_VECTOR_BF(flightVector);
       params.setLOS_VECTOR_BF(losVector);
-      params.setMODE(
+      params.setDETERMINATION_MODE(
           SEPP_IADCS_API_TARGET_POINTING_ATTITUDE_DETERMINATION_MODES.IADCS_ATTITUDE_DETERMINATION_STARTRACKER_ONLY);
-      params.setOFFSET_TIME(BigInteger.valueOf(0));
+      params.setOFFSET_TIME_MSEC(BigInteger.valueOf(0));
       AttitudeModeTargetTrackingLinear a = (AttitudeModeTargetTrackingLinear) attitude;
-      params.setSTART_EPOCH_TIME(BigInteger.valueOf(a.getStartEpoch()));
-      params.setSTOP_EPOCH_TIME(BigInteger.valueOf(a.getEndEpoch()));
-      params.setSTART_LATITUDE(a.getLatitudeStart());
-      params.setSTART_LONGITUDE(a.getLongitudeStart());
-      params.setSTOP_LATITUDE(a.getLatitudeEnd());
-      params.setSTOP_LONGITUDE(a.getLongitudeEnd());
+      params.setSTART_EPOCH_TIME_MSEC(BigInteger.valueOf(a.getStartEpoch()));
+      params.setSTOP_EPOCH_TIME_MSEC(BigInteger.valueOf(a.getEndEpoch()));
+      params.setSTART_LATITUDE_RAD((float)FastMath.toRadians(a.getLatitudeStart()));
+      params.setSTART_LONGITUDE_RAD((float)FastMath.toRadians(a.getLongitudeStart()));
+      params.setSTOP_LATITUDE_RAD((float)FastMath.toRadians(a.getLatitudeEnd()));
+      params.setSTOP_LONGITUDE_RAD((float)FastMath.toRadians(a.getLongitudeEnd()));
       params.setTOLERANCE_PARAMETERS(tolerance);
-      params.setUPDATE_INTERVAL(BigInteger.valueOf(500));
+      params.setUPDATE_INTERVAL_MSEC(BigInteger.valueOf(500));
       adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
       adcsApi.Init_Orbit_Module(readTLEFile());
       adcsApi.Start_Target_Pointing_Earth_Const_Velocity_Mode(params);
@@ -649,32 +649,32 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     }
 
     if (parameters.getMaxSpeed() < MAX_REACTION_WHEEL_SPEED) {
-      params.setMAX_SPEED(parameters.getMaxSpeed());
+      params.setMAX_SPEED_RADPS(parameters.getMaxSpeed());
     } else {
       if (parameters.getMaxSpeed() < 0) {
         LOGGER.log(Level.WARNING,
             "Negative maximum speed is not allowed! Max speed will not be changed");
-        params.setMAX_SPEED(oldParams.getMaxSpeed());
+        params.setMAX_SPEED_RADPS(oldParams.getMaxSpeed());
       } else {
         LOGGER.log(Level.WARNING,
             "Maximum speed is not allowed to exceed {0}! Max speed will be set to {0}",
             MAX_REACTION_WHEEL_SPEED);
-        params.setMAX_SPEED(MAX_REACTION_WHEEL_SPEED);
+        params.setMAX_SPEED_RADPS(MAX_REACTION_WHEEL_SPEED);
       }
     }
 
-    if (params.getMAX_TORQUE() < MAX_REACTION_WHEEL_TORQUE) {
-      params.setMAX_SPEED(parameters.getMaxSpeed());
+    if (params.getMAX_TORQUE_NM() < MAX_REACTION_WHEEL_TORQUE) {
+      params.setMAX_SPEED_RADPS(parameters.getMaxSpeed());
     } else {
       if (parameters.getMaxTorque() < 0) {
         LOGGER.log(Level.WARNING,
             "Negative maximum torque is not allowed! Max torque will not be changed");
-        params.setMAX_TORQUE(oldParams.getMaxTorque());
+        params.setMAX_TORQUE_NM(oldParams.getMaxTorque());
       } else {
         LOGGER.log(Level.WARNING,
             "Maximum torque is not allowed to exceed {0}! Max torque will be set to {0}",
             MAX_REACTION_WHEEL_TORQUE);
-        params.setMAX_TORQUE(MAX_REACTION_WHEEL_TORQUE);
+        params.setMAX_TORQUE_NM(MAX_REACTION_WHEEL_TORQUE);
       }
     }
     adcsApi.Set_ReactionWheel_All_Parameters(params);
@@ -696,9 +696,9 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   public ReactionWheelParameters getAllReactionWheelParameters()
   {
     SEPP_IADCS_API_REACTIONWHEEL_ARRAY_PARAMETERS param = adcsApi.Get_ReactionWheel_All_Parameters();
-    return new ReactionWheelParameters((int) param.getCONTROL_MODE(), param.getMAX_SPEED(),
-        param.getMAX_TORQUE(),
-        param.getMOMENT_OF_INERTIA(), param.getMOTOR_CONSTANT());
+    return new ReactionWheelParameters((int) param.getCONTROL_MODE(), param.getMAX_SPEED_RADPS(),
+        param.getMAX_TORQUE_NM(),
+        param.getMOMENT_OF_INERTIA_KGM2(), param.getMOTOR_CONSTANT());
   }
 
   @Override
