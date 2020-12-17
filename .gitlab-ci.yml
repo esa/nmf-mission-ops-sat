@@ -68,6 +68,7 @@ build_space:
 
 deploy_target1:
   stage: deploy
+  when: manual
   only:
     variables:
       - $DEPLOY == "1"
