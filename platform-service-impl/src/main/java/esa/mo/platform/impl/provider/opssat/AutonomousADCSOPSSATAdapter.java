@@ -625,8 +625,8 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       params.setLOS_VECTOR_BF(losVector);
       params.setUPDATE_INTERVAL_MSEC(BigInteger.valueOf(500));
       AttitudeModeTargetTracking a = (AttitudeModeTargetTracking) attitude;
-      params.setTARGET_LATITUDE_RAD(a.getLatitude());
-      params.setTARGET_LONGITUDE_RAD(a.getLongitude());
+      params.setTARGET_LATITUDE_RAD((float)FastMath.toRadians(a.getLatitude()));
+      params.setTARGET_LONGITUDE_RAD((float)FastMath.toRadians(a.getLongitude()));
       adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
       adcsApi.Init_Orbit_Module(readTLEFile());
       adcsApi.Start_Target_Pointing_Earth_Fix_Mode(params);
@@ -645,10 +645,10 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       AttitudeModeTargetTrackingLinear a = (AttitudeModeTargetTrackingLinear) attitude;
       params.setSTART_EPOCH_TIME_MSEC(BigInteger.valueOf(a.getStartEpoch()));
       params.setSTOP_EPOCH_TIME_MSEC(BigInteger.valueOf(a.getEndEpoch()));
-      params.setSTART_LATITUDE_RAD(a.getLatitudeStart());
-      params.setSTART_LONGITUDE_RAD(a.getLongitudeStart());
-      params.setSTOP_LATITUDE_RAD(a.getLatitudeEnd());
-      params.setSTOP_LONGITUDE_RAD(a.getLongitudeEnd());
+      params.setSTART_LATITUDE_RAD((float)FastMath.toRadians(a.getLatitudeStart()));
+      params.setSTART_LONGITUDE_RAD((float)FastMath.toRadians(a.getLongitudeStart()));
+      params.setSTOP_LATITUDE_RAD((float)FastMath.toRadians(a.getLatitudeEnd()));
+      params.setSTOP_LONGITUDE_RAD((float)FastMath.toRadians(a.getLongitudeEnd()));
       params.setTOLERANCE_PARAMETERS(tolerance);
       params.setUPDATE_INTERVAL_MSEC(BigInteger.valueOf(500));
       adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
