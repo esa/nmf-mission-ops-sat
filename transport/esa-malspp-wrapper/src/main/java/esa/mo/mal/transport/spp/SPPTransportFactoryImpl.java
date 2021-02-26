@@ -32,7 +32,7 @@ import org.ccsds.moims.mo.mal.transport.MALTransportFactory;
 public class SPPTransportFactoryImpl extends MALTransportFactory
 {
   private static final Object MUTEX = new Object();
-  private SPPTransport transport = null;
+  private SPPTransport transport;
 
   /**
    * Constructor.

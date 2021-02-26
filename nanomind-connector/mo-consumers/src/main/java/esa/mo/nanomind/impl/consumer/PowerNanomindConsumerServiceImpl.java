@@ -41,10 +41,10 @@ import esa.opssat.nanomind.opssat_pf.power.consumer.PowerStub;
  */
 public class PowerNanomindConsumerServiceImpl extends ConsumerServiceImpl {
 
-    private PowerStub powerNanomindService = null;
+    private final PowerStub powerNanomindService;
 
     @Override
-    public Object generateServiceStub(MALConsumer tmConsumer) {
+    public Object generateServiceStub(final MALConsumer tmConsumer) {
         return new PowerStub(tmConsumer);
     }
 
@@ -57,7 +57,7 @@ public class PowerNanomindConsumerServiceImpl extends ConsumerServiceImpl {
         return getPowerNanomindStub();
     }
 
-    public PowerNanomindConsumerServiceImpl(SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
+    public PowerNanomindConsumerServiceImpl(final SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
 
         if (MALContextFactory.lookupArea(MALHelper.MAL_AREA_NAME, MALHelper.MAL_AREA_VERSION) == null) {
             MALHelper.init(MALContextFactory.getElementFactoryRegistry());
@@ -73,7 +73,7 @@ public class PowerNanomindConsumerServiceImpl extends ConsumerServiceImpl {
 
         try {
             PowerHelper.init(MALContextFactory.getElementFactoryRegistry());
-        } catch (MALException ex) {
+        } catch (final MALException ex) {
         }
 
         connection = new ConnectionConsumer();
@@ -83,7 +83,7 @@ public class PowerNanomindConsumerServiceImpl extends ConsumerServiceImpl {
         if (tmConsumer != null) {
             try {
                 tmConsumer.close();
-            } catch (MALException ex) {
+            } catch (final MALException ex) {
                 Logger.getLogger(PowerNanomindConsumerServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
             }
         }

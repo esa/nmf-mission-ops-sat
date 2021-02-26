@@ -33,10 +33,10 @@ import org.ccsds.moims.mo.mal.structures.UShort;
  */
 public class COMService extends MALService
 {
-  private final Map<Integer, COMObject> objectsByNumber = new HashMap<Integer, COMObject>();
-  private final Map<String, COMObject> objectsByName = new HashMap<String, COMObject>();
+  private final Map<Integer, COMObject> objectsByNumber = new HashMap<>();
+  private final Map<String, COMObject> objectsByName = new HashMap<>();
   
-  public COMService(UShort number, Identifier name)
+  public COMService(final UShort number, final Identifier name)
   {
     super(number, name);
   }
@@ -48,7 +48,7 @@ public class COMService extends MALService
    * @throws java.lang.IllegalArgumentException If the argument is null.
    */
   @Proposed
-  public void addCOMObject(COMObject object) throws java.lang.IllegalArgumentException
+  public void addCOMObject(final COMObject object) throws java.lang.IllegalArgumentException
   {
     objectsByNumber.put(object.getObjectType().getNumber().getValue(), object);
     objectsByName.put(object.getObjectName().getValue(), object);

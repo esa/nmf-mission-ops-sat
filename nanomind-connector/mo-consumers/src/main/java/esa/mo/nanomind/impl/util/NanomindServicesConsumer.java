@@ -71,14 +71,14 @@ public class NanomindServicesConsumer {
         System.setProperty("org.ccsds.moims.mo.malspp.sessionNameFlag", "false");
         System.setProperty("org.ccsds.moims.mo.malspp.timestampFlag", "false");
 
-        SingleConnectionDetails details;
+        final SingleConnectionDetails details;
 
         try {
             // Connection settings to the GPS Nanomind service
             details = new SingleConnectionDetails();
-            IdentifierList domain = new IdentifierList();
+            final IdentifierList domain = new IdentifierList();
             domain.add(new Identifier("OPSSAT"));
-            URI brokerURI = null;
+            final URI brokerURI = null;
             details.setBrokerURI(brokerURI);
             details.setProviderURI(MAL_SPP_BINDINDING + ":247/" + NANOMIND_APID + "/" + SOURCE_ID);
             details.setDomain(domain);
@@ -92,7 +92,7 @@ public class NanomindServicesConsumer {
 
             // Add the other services!!
             
-        } catch (MALException | MalformedURLException |
+        } catch (final MALException | MalformedURLException |
             MALInteractionException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         }
@@ -115,24 +115,24 @@ public class NanomindServicesConsumer {
     }
 
     public void setServices(
-            GPSNanomindConsumerServiceImpl gpsNanomindService,
-            PowerNanomindConsumerServiceImpl powerNanomindService,
-            ExperimentWDNanomindConsumerServiceImpl experimentWDNanomindService
+            final GPSNanomindConsumerServiceImpl gpsNanomindService,
+            final PowerNanomindConsumerServiceImpl powerNanomindService,
+            final ExperimentWDNanomindConsumerServiceImpl experimentWDNanomindService
     ) {
         this.gpsNanomindService = gpsNanomindService;
         this.powerNanomindService = powerNanomindService;
         this.experimentWDNanomindService = experimentWDNanomindService;
     }
 
-    public void setGPSNanomindService(GPSNanomindConsumerServiceImpl gpsNanomindService) {
+    public void setGPSNanomindService(final GPSNanomindConsumerServiceImpl gpsNanomindService) {
         this.gpsNanomindService = gpsNanomindService;
     }
 
-    public void setPowerNanomindService(PowerNanomindConsumerServiceImpl powerNanomindService) {
+    public void setPowerNanomindService(final PowerNanomindConsumerServiceImpl powerNanomindService) {
         this.powerNanomindService = powerNanomindService;
     }
 
-    public void setExperimentWDNanomindService(ExperimentWDNanomindConsumerServiceImpl experimentWDNanomindService) {
+    public void setExperimentWDNanomindService(final ExperimentWDNanomindConsumerServiceImpl experimentWDNanomindService) {
         this.experimentWDNanomindService = experimentWDNanomindService;
     }
 

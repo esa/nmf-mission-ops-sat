@@ -44,15 +44,15 @@ public class TCPSPPSocketFactory extends SPPSocketFactory {
     public static final String IS_SERVER = "org.ccsds.moims.mo.malspp.test.sppimpl.tcp.isServer";
 
     @Override
-    public SPPSocket createSocket(Map properties) throws Exception {
-        String isServerS = (String) properties.get(IS_SERVER);
-        boolean isServer = Boolean.parseBoolean(isServerS);
+    public SPPSocket createSocket(final Map properties) throws Exception {
+        final String isServerS = (String) properties.get(IS_SERVER);
+        final boolean isServer = Boolean.parseBoolean(isServerS);
         if (isServer) {
-            ServerTCPSPPSocket socket = new ServerTCPSPPSocket();
+            final ServerTCPSPPSocket socket = new ServerTCPSPPSocket();
             socket.init(properties);
             return socket;
         } else {
-            ClientTCPSPPSocket socket = new ClientTCPSPPSocket();
+            final ClientTCPSPPSocket socket = new ClientTCPSPPSocket();
             socket.init(properties);
             return socket;
         }

@@ -73,8 +73,8 @@ public class Configuration {
 	 * @return Multiplier which denotes the number of time units that make up a second. Defaults to
 	 * 1.
 	 */
-	private int getUnit(String propertyName) {
-		String unitProperty = (String) properties.get(propertyName);
+	private int getUnit(final String propertyName) {
+		final String unitProperty = (String) properties.get(propertyName);
 		if (null == unitProperty) {
 			// time unit standard is one second if not specified otherwise
 			return 1;
@@ -117,6 +117,6 @@ public class Configuration {
 	}
 
 	public boolean varintSupported() {
-		return Boolean.valueOf((String) properties.get(PROPERTY_VARINT_SUPPORTED));
+		return Boolean.parseBoolean((String) properties.get(PROPERTY_VARINT_SUPPORTED));
 	}
 }

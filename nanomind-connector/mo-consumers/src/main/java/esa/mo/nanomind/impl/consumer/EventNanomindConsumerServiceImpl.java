@@ -20,7 +20,6 @@
  */
 package esa.mo.nanomind.impl.consumer;
 
-import esa.mo.helpertools.connections.ConnectionConsumer;
 import esa.mo.helpertools.connections.SingleConnectionDetails;
 import esa.mo.helpertools.helpers.HelperAttributes;
 import esa.mo.helpertools.misc.ConsumerServiceImpl;
@@ -61,11 +60,11 @@ public class EventNanomindConsumerServiceImpl extends ConsumerServiceImpl
   private static final Logger LOGGER
       = Logger.getLogger(EventNanomindConsumerServiceImpl.class.getName());
 
-  private EventStub eventService = null;
-  private SubscriptionList subs = new SubscriptionList();
+  private final EventStub eventService;
+  private final SubscriptionList subs = new SubscriptionList();
 
   @Override
-  public Object generateServiceStub(MALConsumer tmConsumer)
+  public Object generateServiceStub(final MALConsumer tmConsumer)
   {
     return new EventStub(tmConsumer);
   }
@@ -81,7 +80,7 @@ public class EventNanomindConsumerServiceImpl extends ConsumerServiceImpl
     return eventService;
   }
 
-  public EventNanomindConsumerServiceImpl(SingleConnectionDetails connectionDetails) throws
+  public EventNanomindConsumerServiceImpl(final SingleConnectionDetails connectionDetails) throws
       MALException, MalformedURLException
   {
     if (MALContextFactory.lookupArea(MALHelper.MAL_AREA_NAME, MALHelper.MAL_AREA_VERSION) == null) {
@@ -94,7 +93,7 @@ public class EventNanomindConsumerServiceImpl extends ConsumerServiceImpl
 
     try {
       EventHelper.init(MALContextFactory.getElementFactoryRegistry());
-    } catch (MALException ex) {
+    } catch (final MALException ex) {
       // nothing to be done..
     }
 
@@ -104,7 +103,7 @@ public class EventNanomindConsumerServiceImpl extends ConsumerServiceImpl
     if (tmConsumer != null) {
       try {
         tmConsumer.close();
-      } catch (MALException ex) {
+      } catch (final MALException ex) {
         LOGGER.log(Level.SEVERE, null, ex);
       }
     }
@@ -127,28 +126,28 @@ public class EventNanomindConsumerServiceImpl extends ConsumerServiceImpl
 
       @Override
       public void monitorEventNotifyReceived(final MALMessageHeader msgHeader,
-          final Identifier lIdentifier, final UpdateHeaderList lUpdateHeaderList,
-          final ObjectDetailsList objectDetailsList, final ElementList elementList,
-          Map qosProperties)
+                                             final Identifier lIdentifier, final UpdateHeaderList lUpdateHeaderList,
+                                             final ObjectDetailsList objectDetailsList, final ElementList elementList,
+                                             final Map qosProperties)
       {
         if (objectDetailsList.size() == lUpdateHeaderList.size()) {
           for (int i = 0; i < lUpdateHeaderList.size(); i++) {
 
-            Identifier entityKey1 = lUpdateHeaderList.get(i).getKey().getFirstSubKey();
-            Long entityKey2 = lUpdateHeaderList.get(i).getKey().getSecondSubKey();
-            Long entityKey3 = lUpdateHeaderList.get(i).getKey().getThirdSubKey();
-            Long entityKey4 = lUpdateHeaderList.get(i).getKey().getFourthSubKey(); // ObjType of the source
+            final Identifier entityKey1 = lUpdateHeaderList.get(i).getKey().getFirstSubKey();
+            final Long entityKey2 = lUpdateHeaderList.get(i).getKey().getSecondSubKey();
+            final Long entityKey3 = lUpdateHeaderList.get(i).getKey().getThirdSubKey();
+            final Long entityKey4 = lUpdateHeaderList.get(i).getKey().getFourthSubKey(); // ObjType of the source
 
             // (UShort area, UShort service, UOctet version, UShort number)
             // (UShort area, UShort service, UOctet version, 0)
-            ObjectType objType = HelperCOM.objectTypeId2objectType(entityKey2);
+            final ObjectType objType = HelperCOM.objectTypeId2objectType(entityKey2);
             objType.setNumber(new UShort(Integer.parseInt(entityKey1.toString())));
 
-            Object nativeBody = ((elementList == null) ? null : elementList.get(i));
-            Element body = (Element) HelperAttributes.javaType2Attribute(nativeBody);
+            final Object nativeBody = ((elementList == null) ? null : elementList.get(i));
+            final Element body = (Element) HelperAttributes.javaType2Attribute(nativeBody);
 
             // ----
-            EventCOMObject newEvent = new EventCOMObject();
+            final EventCOMObject newEvent = new EventCOMObject();
 //                        newEvent.setDomain(msgHeader.getDomain());
             newEvent.setDomain(connectionDetails.getDomain());
             newEvent.setObjType(objType);
@@ -184,21 +183,21 @@ public class EventNanomindConsumerServiceImpl extends ConsumerServiceImpl
       try {
         final IdentifierList subLst = new IdentifierList();
 
-        for (Subscription sub : subs) {
+        for (final Subscription sub : subs) {
           subLst.add(sub.getSubscriptionId());
         }
 
         if (eventService != null) {
           try {
             eventService.monitorEventDeregister(subLst);
-          } catch (MALInteractionException ex) {
+          } catch (final MALInteractionException ex) {
             LOGGER.log(Level.SEVERE,
                 null, ex);
           }
         }
 
         tmConsumer.close();
-      } catch (MALException ex) {
+      } catch (final MALException ex) {
         Logger.getLogger(ConsumerServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
       }
     }

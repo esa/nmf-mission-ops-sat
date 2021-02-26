@@ -35,7 +35,7 @@ public class SPPMessageReceiver implements esa.mo.mal.transport.gen.util.GENMess
    *
    * @param socket the socket.
    */
-  public SPPMessageReceiver(SPPSocket socket)
+  public SPPMessageReceiver(final SPPSocket socket)
   {
     this.socket = socket;
   }
@@ -45,19 +45,19 @@ public class SPPMessageReceiver implements esa.mo.mal.transport.gen.util.GENMess
   {
     try
     {
-      SpacePacket spacePacket = socket.receive();
+      final SpacePacket spacePacket = socket.receive();
 
       // PENDING: SPP TCP implementation allocates a new Space Packet with a body size of
       // 65536 bytes. If the received Space Packet is smaller, the body byte array is not
       // trimmed to fit. Here: Create new byte array of right size, copy contents, and set
       // array as new body of the Space Packet.
-      byte[] trimmedBody = new byte[spacePacket.getLength()];
+      final byte[] trimmedBody = new byte[spacePacket.getLength()];
       System.arraycopy(spacePacket.getBody(), 0, trimmedBody, 0, spacePacket.getLength());
       spacePacket.setBody(trimmedBody);
 
       return spacePacket;
     }
-    catch (Exception ex)
+    catch (final Exception ex)
     {
       // socket has been closed to throw EOF exception higher
       throw new java.io.EOFException();
@@ -71,7 +71,7 @@ public class SPPMessageReceiver implements esa.mo.mal.transport.gen.util.GENMess
     {
       socket.close();
     }
-    catch (Exception ex)
+    catch (final Exception ex)
     {
       ex.printStackTrace();
     }

@@ -45,7 +45,6 @@ import fr.dyade.aaa.common.Daemon;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import org.objectweb.util.monolog.api.Logger;
 
 public class ServerTCPSPPSocket implements SPPSocket
 {
@@ -69,14 +68,14 @@ public class ServerTCPSPPSocket implements SPPSocket
     super();
   }
 
-  public void init(Map properties) throws Exception
+  public void init(final Map properties) throws Exception
   {
-    String portS = (String) properties.get(PORT_PROP);
+    final String portS = (String) properties.get(PORT_PROP);
     port = Integer.parseInt(portS);
     listen(port);
   }
 
-  private void listen(int port) throws Exception
+  private void listen(final int port) throws Exception
   {
     LOGGER.log(Level.FINE, "listen({0})", new Object[]{port});
     listenerSocket = new ServerSocket(port);
@@ -96,7 +95,7 @@ public class ServerTCPSPPSocket implements SPPSocket
   private void closeClientChannels()
   {
     synchronized (channels) {
-      for (SPPChannel channel : channels) {
+      for (final SPPChannel channel : channels) {
         if (channel != null) {
           channel.close();
         }
@@ -107,20 +106,20 @@ public class ServerTCPSPPSocket implements SPPSocket
   @Override
   public SpacePacket receive() throws Exception
   {
-    SpacePacket packet = input.take();
+    final SpacePacket packet = input.take();
     LOGGER.log(Level.FINE, "Received: {0}", packet);
     return packet;
   }
 
   @Override
-  public void send(SpacePacket packet) throws IOException
+  public void send(final SpacePacket packet) throws IOException
   {
     LOGGER.log(Level.FINE, "send({0})", packet);
     synchronized (channels) {
       if (channels.isEmpty()) {
         throw new IOException("SPP send called, but no connection established!");
       }
-      for (SPPChannel channel : channels) {
+      for (final SPPChannel channel : channels) {
         if (channel != null) {
           channel.send(packet);
         }
@@ -161,7 +160,7 @@ public class ServerTCPSPPSocket implements SPPSocket
           LOGGER.log(Level.INFO, "Listening for a client connection on {0}",
               listenerSocket.getLocalSocketAddress());
           clientSocket = listenerSocket.accept();
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
           LOGGER.log(Level.SEVERE, "Error when accepting the client connection", ex);
           errorCount++;
           continue;
@@ -171,7 +170,7 @@ public class ServerTCPSPPSocket implements SPPSocket
           clientSocket.setTcpNoDelay(tcpNoDelay);
           clientSocket.setSoLinger(true, 1000);
           newChannel = new SPPChannel(clientSocket);
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
           LOGGER.log(Level.SEVERE, "Error when configuring the client connection", ex);
           if (newChannel != null) {
             newChannel.close();
@@ -197,7 +196,7 @@ public class ServerTCPSPPSocket implements SPPSocket
 
       protected SPPChannel channel;
 
-      public ClientThread(SPPChannel channel)
+      public ClientThread(final SPPChannel channel)
       {
         this.channel = channel;
       }
@@ -213,7 +212,7 @@ public class ServerTCPSPPSocket implements SPPSocket
             }
             input.offer(packet);
           }
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
           LOGGER.log(Level.WARNING,
               this.getName() + ", error during packet receive. Closing the client connection.", ex);
 
@@ -235,7 +234,7 @@ public class ServerTCPSPPSocket implements SPPSocket
       if (listenerSocket != null) {
         try {
           listenerSocket.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
         }
       }
     }

@@ -31,7 +31,7 @@ public class OpticalRxOPSSATAdapter implements OpticalDataReceiverAdapterInterfa
 
   private static final Logger LOGGER = Logger.getLogger(OpticalRxOPSSATAdapter.class.getName());
   private SEPP_OPT_RX_API optRxApi;
-  private boolean initalized = false;
+  private final boolean initalized;
 
   public OpticalRxOPSSATAdapter()
   {
@@ -39,7 +39,7 @@ public class OpticalRxOPSSATAdapter implements OpticalDataReceiverAdapterInterfa
     try {
       System.loadLibrary("opt_rx_api_jni");
       optRxApi = new SEPP_OPT_RX_API();
-    } catch (Exception ex) {
+    } catch (final Exception ex) {
       LOGGER.log(Level.SEVERE,
           "OPT RX API could not be initialized!", ex);
       initalized = false;
@@ -50,7 +50,7 @@ public class OpticalRxOPSSATAdapter implements OpticalDataReceiverAdapterInterfa
   }
 
   @Override
-  public byte[] recordOpticalReceiverData(Duration duration)
+  public byte[] recordOpticalReceiverData(final Duration duration)
   {
     if (duration == null) {
       return null;
@@ -62,7 +62,7 @@ public class OpticalRxOPSSATAdapter implements OpticalDataReceiverAdapterInterfa
     optRxApi.Set_SharedMemory_IF_Switch(1);
     try {
       Thread.sleep((long) (duration.getValue() * 1000));
-    } catch (InterruptedException e) {
+    } catch (final InterruptedException e) {
       return null;
     }
     optRxApi.Set_SharedMemory_IF_Switch(0);

@@ -37,17 +37,17 @@ public class COMObject
   private final ObjectType sourceType;
   private final boolean event;
 
-  public COMObject(org.ccsds.moims.mo.mal.structures.UShort area,
-          org.ccsds.moims.mo.mal.structures.UShort service,
-          org.ccsds.moims.mo.mal.structures.UOctet version,
-          org.ccsds.moims.mo.mal.structures.UShort number,
-          Identifier name,
-          Object bodyShortForm,
-          boolean hasRelated,
-          ObjectType relatedType,
-          boolean hasSource,
-          ObjectType sourceType,
-          boolean isEvent)
+  public COMObject(final org.ccsds.moims.mo.mal.structures.UShort area,
+                   final org.ccsds.moims.mo.mal.structures.UShort service,
+                   final org.ccsds.moims.mo.mal.structures.UOctet version,
+                   final org.ccsds.moims.mo.mal.structures.UShort number,
+                   final Identifier name,
+                   final Object bodyShortForm,
+                   final boolean hasRelated,
+                   final ObjectType relatedType,
+                   final boolean hasSource,
+                   final ObjectType sourceType,
+                   final boolean isEvent)
   {
     this.objectType = new ObjectType(area, service, version, number);
     this.objectName = name;
@@ -59,14 +59,14 @@ public class COMObject
     this.event = isEvent;
   }
 
-  public COMObject(ObjectType objectType,
-          Identifier name,
-          Object bodyShortForm,
-          boolean hasRelated,
-          ObjectType relatedType,
-          boolean hasSource,
-          ObjectType sourceType,
-          boolean isEvent)
+  public COMObject(final ObjectType objectType,
+                   final Identifier name,
+                   final Object bodyShortForm,
+                   final boolean hasRelated,
+                   final ObjectType relatedType,
+                   final boolean hasSource,
+                   final ObjectType sourceType,
+                   final boolean isEvent)
   {
     this.objectType = objectType;
     this.objectName = name;

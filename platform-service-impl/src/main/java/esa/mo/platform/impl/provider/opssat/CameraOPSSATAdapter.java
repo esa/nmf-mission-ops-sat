@@ -70,7 +70,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   private int nativeImageWidth;
   private bst_ims100_img_config_t imageConfig;
   private final PictureFormatList supportedFormats = new PictureFormatList();
-  private boolean unitAvailable = false;
+  private final boolean unitAvailable;
 
   private static final Logger LOGGER = Logger.getLogger(CameraOPSSATAdapter.class.getName());
 
@@ -84,7 +84,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     LOGGER.log(Level.INFO, "Initialisation");
     try {
       System.loadLibrary("ims100_api_jni");
-    } catch (Exception ex) {
+    } catch (final Exception ex) {
       LOGGER.log(Level.SEVERE,
           "Camera library could not be loaded!", ex);
       unitAvailable = false;
@@ -93,7 +93,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     imageConfig = new bst_ims100_img_config_t();
     try {
       this.initBSTCamera();
-    } catch (IOException ex) {
+    } catch (final IOException ex) {
       LOGGER.log(Level.SEVERE,
           "BST Camera adapter could not be initialized!", ex);
       unitAvailable = false;
@@ -115,7 +115,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     blockDevice = System.getProperty(BLOCK_DEVICE_ATTRIBUTE, BLOCK_DEVICE_DEFAULT);
     useWatchdog = Boolean.parseBoolean(System.getProperty(USE_WATCHDOG_ATTRIBUTE,
         USE_WATCHDOG_DEFAULT));
-    bst_ret_t ret = ims100_api.bst_ims100_init(serialPort, blockDevice, useWatchdog ? 1 : 0);
+    final bst_ret_t ret = ims100_api.bst_ims100_init(serialPort, blockDevice, useWatchdog ? 1 : 0);
     // FIXME: For now it always returns false?!?!?
     /*if (ret != bst_ret_t.BST_RETURN_SUCCESS) {
       throw new IOException("Failed to initialise BST camera (return: " + ret.toString() + ")");
@@ -129,7 +129,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
 
   private synchronized void dumpHKTelemetry()
   {
-    bst_ims100_tele_std_t stdTM = new bst_ims100_tele_std_t();
+    final bst_ims100_tele_std_t stdTM = new bst_ims100_tele_std_t();
     ims100_api.bst_ims100_get_tele_std(stdTM);
     LOGGER.log(Level.INFO,
         String.format("Dumping HK Telemetry...\n"
@@ -151,7 +151,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   @Override
   public PixelResolutionList getAvailableResolutions()
   {
-    PixelResolutionList availableResolutions = new PixelResolutionList();
+    final PixelResolutionList availableResolutions = new PixelResolutionList();
     availableResolutions.add(new PixelResolution(new UInteger(nativeImageWidth), new UInteger(
         nativeImageLength)));
 
@@ -169,30 +169,30 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   }
 
   @Override
-  public synchronized Picture takeAutoExposedPicture(CameraSettings settings) throws IOException,
+  public synchronized Picture takeAutoExposedPicture(final CameraSettings settings) throws IOException,
       MALException
   {
-    Duration defaultExposure = new Duration(0.1);
+    final Duration defaultExposure = new Duration(0.1);
     final double F = 4;// f^2 value of ops-sat camera
-    double EV = Math.log(F / defaultExposure.getValue()) / Math.log(2);
+    final double EV = Math.log(F / defaultExposure.getValue()) / Math.log(2);
 
-    CameraSettings tmpSettings = new CameraSettings(settings.getResolution(), PictureFormat.RAW,
+    final CameraSettings tmpSettings = new CameraSettings(settings.getResolution(), PictureFormat.RAW,
         defaultExposure, 1.0f, 1.0f, 1.0f);
     LOGGER.log(Level.INFO, "take sample picture");
-    Picture initialPicture = takePicture(tmpSettings);
+    final Picture initialPicture = takePicture(tmpSettings);
 
-    BufferedImage image = OPSSATCameraDebayering.getDebayeredImage(
+    final BufferedImage image = OPSSATCameraDebayering.getDebayeredImage(
         initialPicture.getContent().getValue());
 
-    int w = (int) settings.getResolution().getWidth().getValue();
-    int h = (int) settings.getResolution().getHeight().getValue();
-    int[] rgb = image.getRGB(0, 0, w, h, null, 0, w);
+    final int w = (int) settings.getResolution().getWidth().getValue();
+    final int h = (int) settings.getResolution().getHeight().getValue();
+    final int[] rgb = image.getRGB(0, 0, w, h, null, 0, w);
 
     double luminanceSum = 0;
-    for (int color : rgb) {
-      int red = (color >>> 16) & 0xFF;
-      int green = (color >>> 8) & 0xFF;
-      int blue = color & 0xFF; // shift by 0
+    for (final int color : rgb) {
+      final int red = (color >>> 16) & 0xFF;
+      final int green = (color >>> 8) & 0xFF;
+      final int blue = color & 0xFF; // shift by 0
 
       //calc luminance using sRGB luminance constants
       luminanceSum += (red * 0.2126 + green * 0.7152 + blue * 0.0722) / 255;
@@ -201,12 +201,12 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     LOGGER.log(Level.INFO, "Luminance = {0}", luminanceSum);
     luminanceSum /= w * h;
 
-    double optimal_EV =
+    final double optimal_EV =
         EV
         + (Math.log(luminanceSum) / Math.log(2))
         - (Math.log(0.5) / Math.log(2));
 
-    double optimalExposureTime = F * Math.pow(2, -optimal_EV);
+    final double optimalExposureTime = F * Math.pow(2, -optimal_EV);
     LOGGER.log(Level.INFO, "normalised Luminance = {0}", luminanceSum);
     LOGGER.log(Level.INFO, "Exposure = {0}", optimalExposureTime);
 
@@ -216,9 +216,9 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   }
 
   @Override
-  public synchronized Picture takePicture(CameraSettings settings) throws IOException
+  public synchronized Picture takePicture(final CameraSettings settings) throws IOException
   {
-    bst_ims100_img_t image = new bst_ims100_img_t();
+    final bst_ims100_img_t image = new bst_ims100_img_t();
     ims100_api.bst_ims100_img_config_default(imageConfig);
     // TODO this is not scaling but cropping the picture
     imageConfig.setCol_start(0);
@@ -233,10 +233,10 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     ims100_api.bst_ims100_set_img_config(imageConfig);
     // Each pixel of raw image is encoded as uint16
     LOGGER.log(Level.INFO, String.format("Allocating native buffer"));
-    int dataN
+    final int dataN
         = (int) (settings.getResolution().getHeight().getValue() * settings.getResolution().getWidth().getValue());
-    ByteBuffer imageData = ByteBuffer.allocateDirect(
-        (int) (dataN * 2));
+    final ByteBuffer imageData = ByteBuffer.allocateDirect(
+            dataN * 2);
     image.setData(imageData);
     image.setData_n(dataN);
 
@@ -248,8 +248,8 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     byte[] rawData = new byte[imageData.capacity()];
 
     LOGGER.log(Level.INFO, String.format("Copying from native buffer"));
-    ((ByteBuffer) (imageData.duplicate().clear())).get(rawData);
-    CameraSettings replySettings = new CameraSettings();
+    imageData.duplicate().clear().get(rawData);
+    final CameraSettings replySettings = new CameraSettings();
     replySettings.setResolution(settings.getResolution());
     replySettings.setExposureTime(settings.getExposureTime());
     replySettings.setGainRed(settings.getGainRed());
@@ -263,8 +263,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       rawData = convertImage(rawData, settings.getFormat());
     }
     replySettings.setFormat(settings.getFormat());
-    Picture picture = new Picture(timestamp, replySettings, new Blob(rawData));
-    return picture;
+    return new Picture(timestamp, replySettings, new Blob(rawData));
   }
 
   @Override
@@ -279,18 +278,18 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     return supportedFormats;
   }
 
-  private byte[] convertImage(byte[] rawImage, final PictureFormat targetFormat) throws
+  private byte[] convertImage(final byte[] rawImage, final PictureFormat targetFormat) throws
       IOException
   {
-    BufferedImage image = OPSSATCameraDebayering.getDebayeredImage(rawImage);
+    final BufferedImage image = OPSSATCameraDebayering.getDebayeredImage(rawImage);
     byte[] ret = null;
 
-    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    final ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
     if (targetFormat.equals(PictureFormat.RGB24)) {
-      int w = image.getWidth();
-      int h = image.getHeight();
-      int[] rgba = image.getRGB(0, 0, w, h, null, 0, w);
+      final int w = image.getWidth();
+      final int h = image.getHeight();
+      final int[] rgba = image.getRGB(0, 0, w, h, null, 0, w);
       ret = new byte[rgba.length * 3];
       for (int i = 0; i < rgba.length; ++i) {
         final int pixelval = rgba[i];
