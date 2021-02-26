@@ -335,8 +335,7 @@ public class CCSDSTime {
 	/**
 	 * Encodes a time as CCSDS Segmented Time Code.
 	 *
-	 * @param coarseTime Time to encode as AbsoluteDate, needs to represent a whole second.
-	 * @param fineTime (Fractional) seconds from coarseTime as AbsoluteDate to encode.
+	 * @param time (Fractional) seconds from coarseTime as AbsoluteDate to encode.
 	 * @return T-field as byte array with encoded time value.
 	 * @throws MALException
 	 */
