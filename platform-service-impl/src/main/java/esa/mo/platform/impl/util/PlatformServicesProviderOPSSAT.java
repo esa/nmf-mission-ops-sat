@@ -58,11 +58,11 @@ public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderI
       = new SoftwareDefinedRadioProviderServiceImpl();
 
   @Override
-  public void init(COMServicesProvider comServices) throws
+  public void init(final COMServicesProvider comServices) throws
       MALException
   {
     try {
-      NanomindServicesConsumer obcServicesConsumer = new NanomindServicesConsumer();
+      final NanomindServicesConsumer obcServicesConsumer = new NanomindServicesConsumer();
         obcServicesConsumer.init();
       powerService.init(new PowerControlOPSSATAdapter(obcServicesConsumer));
       gpsService.init(comServices, new GPSOPSSATAdapter(obcServicesConsumer));
@@ -70,7 +70,7 @@ public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderI
       cameraService.init(comServices, new CameraOPSSATAdapter());
       optrxService.init(new OpticalRxOPSSATAdapter());
       sdrService.init(new SDROPSSATAdapter());
-    } catch (UnsatisfiedLinkError | NoClassDefFoundError | NoSuchMethodError error) {
+    } catch (final UnsatisfiedLinkError | NoClassDefFoundError | NoSuchMethodError error) {
       LOGGER.log(Level.SEVERE,
           "Could not load platform adapters (check for missing JARs and libraries)", error);
     }

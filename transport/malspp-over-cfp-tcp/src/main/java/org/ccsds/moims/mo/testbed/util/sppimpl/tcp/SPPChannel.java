@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import org.ccsds.moims.mo.mal.MALException;
 
 import org.ccsds.moims.mo.testbed.util.spp.SpacePacket;
 import org.ccsds.moims.mo.testbed.util.sppimpl.util.SPPReader;
@@ -57,7 +56,7 @@ public class SPPChannel
 
   private final SPPWriter writer;
 
-  public SPPChannel(Socket socket) throws IOException
+  public SPPChannel(final Socket socket) throws IOException
   {
     this.socket = socket;
     is = new BufferedInputStream(socket.getInputStream());
@@ -68,11 +67,10 @@ public class SPPChannel
 
   public SpacePacket receive() throws IOException
   {
-    SpacePacket packet = reader.receive();
-    return packet;
+    return reader.receive();
   }
 
-  public void send(SpacePacket packet) throws IOException
+  public void send(final SpacePacket packet) throws IOException
   {
     writer.send(packet);
   }
@@ -83,21 +81,21 @@ public class SPPChannel
       if (is != null) {
         is.close();
       }
-    } catch (IOException exc) {
+    } catch (final IOException exc) {
     }
 
     try {
       if (os != null) {
         os.close();
       }
-    } catch (IOException exc) {
+    } catch (final IOException exc) {
     }
 
     try {
       if (socket != null) {
         socket.close();
       }
-    } catch (IOException exc) {
+    } catch (final IOException exc) {
     }
   }
 }

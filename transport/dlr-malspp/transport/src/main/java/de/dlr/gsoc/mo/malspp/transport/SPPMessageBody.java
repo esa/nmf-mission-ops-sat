@@ -42,7 +42,7 @@ public class SPPMessageBody implements MALMessageBody {
     private MALEncodedBody encodedBody;
     private boolean isEncoded;
     private boolean isDecoded;
-    protected MALEncodingContext ctx;
+    protected final MALEncodingContext ctx;
     private final MALElementStreamFactory esf;
     protected Object[] shortForms;
 
@@ -50,8 +50,8 @@ public class SPPMessageBody implements MALMessageBody {
         if (bodyElements == null) {
             this.bodyElements = null;
         } else if (bodyElements.length == 1 && bodyElements[0] instanceof MALStandardError) {
-            MALStandardError err = (MALStandardError) bodyElements[0];
-            this.bodyElements = Arrays.asList(new Object[]{err.getErrorNumber(), err.getExtraInformation()});
+            final MALStandardError err = (MALStandardError) bodyElements[0];
+            this.bodyElements = Arrays.asList(err.getErrorNumber(), err.getExtraInformation());
         } else {
             this.bodyElements = Arrays.asList(bodyElements);
         }
@@ -89,12 +89,12 @@ public class SPPMessageBody implements MALMessageBody {
             // service provided list of short forms instead.
             if (getElementCount() != 0) {
                 bodyElements = new ArrayList<>(getElementCount());
-                MALElementFactoryRegistry elementFactoryRegistry = MALContextFactory.getElementFactoryRegistry();
-                MALElementInputStream is = esf.createInputStream(
+                final MALElementFactoryRegistry elementFactoryRegistry = MALContextFactory.getElementFactoryRegistry();
+                final MALElementInputStream is = esf.createInputStream(
                         encodedBody.getEncodedBody().getValue(),
                         encodedBody.getEncodedBody().getOffset());
                 for (int i = 0; i < shortForms.length; i++) {
-                    Object shortForm = shortForms[i];
+                    final Object shortForm = shortForms[i];
                     Object e = null;
                     if (shortForm != null) {
                         e = elementFactoryRegistry.lookupElementFactory(shortForm).createElement();
@@ -102,7 +102,7 @@ public class SPPMessageBody implements MALMessageBody {
                     ctx.setBodyElementIndex(i);
                                         try{
                             bodyElements.add(is.readElement(e, ctx));
-                                        }catch(org.ccsds.moims.mo.mal.MALException ex){
+                                        }catch(final org.ccsds.moims.mo.mal.MALException ex){
 //                                                Logger.getLogger(SPPMessageBody.class.getName()).log(Level.INFO, "Unable to decode element with index: " + i, ex);
                                                 throw new MALException("Unable to decode element with index: " + i, ex);
                                         }
@@ -127,7 +127,7 @@ public class SPPMessageBody implements MALMessageBody {
             if (getElementCount() == 0) {
                 encodedBody = null;
             } else {
-                                Blob encodedStuff = esf.encode(bodyElements.toArray(), ctx);
+                                final Blob encodedStuff = esf.encode(bodyElements.toArray(), ctx);
                 encodedBody = new MALEncodedBody(encodedStuff);
             }
             isEncoded = true;

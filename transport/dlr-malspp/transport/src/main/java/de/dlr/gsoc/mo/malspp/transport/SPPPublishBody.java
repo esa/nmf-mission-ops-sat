@@ -51,7 +51,7 @@ public class SPPPublishBody extends SPPMessageBody implements MALPublishBody {
 
     @Override
     public List[] getUpdateLists(final List... updateLists) throws MALException {
-        List[] lists = new List[getElementCount() - 1 - idx]; // Subtract 1 for UpdateHeaderList; subtract idx for Identifier in SPPNotifyBody.
+        final List[] lists = new List[getElementCount() - 1 - idx]; // Subtract 1 for UpdateHeaderList; subtract idx for Identifier in SPPNotifyBody.
         for (int i = 0; i < lists.length; i++) {
             lists[i] = getUpdateList(i, updateLists == null ? null : updateLists[i]);
         }
@@ -74,7 +74,7 @@ public class SPPPublishBody extends SPPMessageBody implements MALPublishBody {
     public Object getUpdate(final int listIndex, final int updateIndex) throws MALException {
         try {
             return getUpdateList(listIndex, null).get(updateIndex);
-        } catch (IndexOutOfBoundsException ex) {
+        } catch (final IndexOutOfBoundsException ex) {
             throw new MALException(ex.getMessage(), ex);
         }
     }

@@ -29,7 +29,7 @@ public class SPPTransportFactory extends MALTransportFactory {
 
     private static final String SUPPORTED_PROTOCOL = "malspp";
     private static final String PROTOCOL_NOT_SUPPORTED = "Protocol not supported: ";
-    private static SPPTransport transport = null;
+    private static SPPTransport transport;
 
     public SPPTransportFactory(final String protocol) throws IllegalArgumentException {
         super(protocol);

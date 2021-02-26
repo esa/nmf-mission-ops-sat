@@ -40,33 +40,31 @@ class ServiceInfo {
 	private final Boolean isError;
 	private final Boolean isDeclaredAbstract;
 	private Boolean isDeclaredAttribute;
-	private static final Collection<Long> attributeShortForms = Arrays.asList(new Long[]{
-		Attribute.BOOLEAN_SHORT_FORM,
-		Attribute.FLOAT_SHORT_FORM,
-		Attribute.DOUBLE_SHORT_FORM,
-		Attribute.OCTET_SHORT_FORM,
-		Attribute.SHORT_SHORT_FORM,
-		Attribute.INTEGER_SHORT_FORM,
-		Attribute.LONG_SHORT_FORM,
-		Attribute.STRING_SHORT_FORM,
-		Attribute.BLOB_SHORT_FORM,
-		Attribute.DURATION_SHORT_FORM,
-		Attribute.IDENTIFIER_SHORT_FORM,
-		Attribute.TIME_SHORT_FORM,
-		Attribute.FINETIME_SHORT_FORM,
-		Attribute.UINTEGER_SHORT_FORM,
-		Attribute.ULONG_SHORT_FORM,
-		Attribute.UOCTET_SHORT_FORM,
-		Attribute.USHORT_SHORT_FORM,
-		Attribute.URI_SHORT_FORM
-	});
+	private static final Collection<Long> attributeShortForms = Arrays.asList(Attribute.BOOLEAN_SHORT_FORM,
+			Attribute.FLOAT_SHORT_FORM,
+			Attribute.DOUBLE_SHORT_FORM,
+			Attribute.OCTET_SHORT_FORM,
+			Attribute.SHORT_SHORT_FORM,
+			Attribute.INTEGER_SHORT_FORM,
+			Attribute.LONG_SHORT_FORM,
+			Attribute.STRING_SHORT_FORM,
+			Attribute.BLOB_SHORT_FORM,
+			Attribute.DURATION_SHORT_FORM,
+			Attribute.IDENTIFIER_SHORT_FORM,
+			Attribute.TIME_SHORT_FORM,
+			Attribute.FINETIME_SHORT_FORM,
+			Attribute.UINTEGER_SHORT_FORM,
+			Attribute.ULONG_SHORT_FORM,
+			Attribute.UOCTET_SHORT_FORM,
+			Attribute.USHORT_SHORT_FORM,
+			Attribute.URI_SHORT_FORM);
 
 	/**
 	 * Retrieve service information by evaluating the encoding context.
 	 *
 	 * @param ctx The encoding context, which holds all relevant service information.
 	 */
-	protected ServiceInfo(MALEncodingContext ctx) {
+	protected ServiceInfo(final MALEncodingContext ctx) {
 		// How to find out, if we are about to encode an element declared abstract by the service:
 		// 1. Check, if we are at the last body element, because only the last one is allowed to be
 		//    declared abstract.
@@ -92,7 +90,7 @@ class ServiceInfo {
 		if (isDeclaredAbstract && !isError) {
 			// Declared type is abstract. Now check, if an Attribute was declared or some other
 			// abstract type (like Element, Composite or an abstract composite).
-			Object[] allowedShortForms = operationStage.getLastElementShortForms();
+			final Object[] allowedShortForms = operationStage.getLastElementShortForms();
 			if (onlyAttributeTypesAllowed(allowedShortForms)) {
 				isDeclaredAttribute = true;
 			}
@@ -105,7 +103,7 @@ class ServiceInfo {
 	 * @param allowedShortForms Array of short forms to be checked.
 	 * @return (True, if all elements in the array are attribute short forms, false if not.)
 	 */
-	private static boolean onlyAttributeTypesAllowed(Object[] allowedShortForms) {
+	private static boolean onlyAttributeTypesAllowed(final Object[] allowedShortForms) {
 		return attributeShortForms.size() == allowedShortForms.length
 				&& attributeShortForms.containsAll(Arrays.asList(allowedShortForms));
 	}

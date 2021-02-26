@@ -48,8 +48,8 @@ public class SpacePacketHeader {
   
   public SpacePacketHeader() {}
 
-  public SpacePacketHeader(int packetVersionNumber, int packetType,
-      int secondaryHeaderFlag, int apid, int sequenceFlags, int sequenceCount) {
+  public SpacePacketHeader(final int packetVersionNumber, final int packetType,
+                           final int secondaryHeaderFlag, final int apid, final int sequenceFlags, final int sequenceCount) {
     super();
     this.packetVersionNumber = packetVersionNumber;
     this.packetType = packetType;
@@ -69,7 +69,7 @@ public class SpacePacketHeader {
   /**
    * @param packetVersionNumber the packetVersionNumber to set
    */
-  public void setPacketVersionNumber(int packetVersionNumber) {
+  public void setPacketVersionNumber(final int packetVersionNumber) {
     this.packetVersionNumber = packetVersionNumber;
   }
 
@@ -83,7 +83,7 @@ public class SpacePacketHeader {
   /**
    * @param secondaryHeaderFlag the secondaryHeaderFlag to set
    */
-  public void setSecondaryHeaderFlag(int secondaryHeaderFlag) {
+  public void setSecondaryHeaderFlag(final int secondaryHeaderFlag) {
     this.secondaryHeaderFlag = secondaryHeaderFlag;
   }
 
@@ -97,7 +97,7 @@ public class SpacePacketHeader {
   /**
    * @param apid the apid to set
    */
-  public void setApid(int apid) {
+  public void setApid(final int apid) {
     this.apid = apid;
   }
 
@@ -111,7 +111,7 @@ public class SpacePacketHeader {
   /**
    * @param packetType the packetType to set
    */
-  public void setPacketType(int packetType) {
+  public void setPacketType(final int packetType) {
     this.packetType = packetType;
   }
   
@@ -125,7 +125,7 @@ public class SpacePacketHeader {
   /**
    * @param sequenceFlags the sequenceFlags to set
    */
-  public void setSequenceFlags(int sequenceFlags) {
+  public void setSequenceFlags(final int sequenceFlags) {
     this.sequenceFlags = sequenceFlags;
   }
 
@@ -139,7 +139,7 @@ public class SpacePacketHeader {
   /**
    * @param sequenceCount the sequenceCount to set
    */
-  public void setSequenceCount(int sequenceCount) {
+  public void setSequenceCount(final int sequenceCount) {
     this.sequenceCount = sequenceCount;
   }
   /*
@@ -149,7 +149,7 @@ public class SpacePacketHeader {
   }*/
  
   public String toString() {
-    StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     buf.append(super.toString());
     buf.append(",packetVersionNumber=" + packetVersionNumber);
     buf.append(",packetType=" + packetType);
