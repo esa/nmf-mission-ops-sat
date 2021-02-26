@@ -109,7 +109,7 @@ public class SpacePacketHeader {
   }
 
   /**
-   * @param spType the spType to set
+   * @param packetType the packetType to set
    */
   public void setPacketType(int packetType) {
     this.packetType = packetType;
@@ -123,7 +123,7 @@ public class SpacePacketHeader {
   }
 
   /**
-   * @param sequenceFlag the sequenceFlag to set
+   * @param sequenceFlags the sequenceFlags to set
    */
   public void setSequenceFlags(int sequenceFlags) {
     this.sequenceFlags = sequenceFlags;
