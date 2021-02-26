@@ -82,16 +82,16 @@ public class SPPTransport implements MALTransport {
 	private final Map<URI, SPPEndpoint> endpointsByURI = new HashMap<>();
         private final ShortList apids = new ShortList();
 	private boolean isClosed;
-	private Thread receiveThread = null; // is assigned on first endpoint creation
-	private Thread messageHandlerThread = null; // is assigned on first endpoint creation
+	private Thread receiveThread; // is assigned on first endpoint creation
+	private Thread messageHandlerThread; // is assigned on first endpoint creation
         
         // We need to set the initial capacity to have the MAL mixing messages from different sources.
         // For example, if I do a heavy query, I don't want to have the queue full of those messages, 
         // but instead, a mix of those combined with other messages. This let's them work in parallel.
-	private LinkedBlockingQueue<MALMessage> receivedMessages = new LinkedBlockingQueue<>(15);
+	private final LinkedBlockingQueue<MALMessage> receivedMessages = new LinkedBlockingQueue<>(15);
 //	private LinkedBlockingQueue<MALMessage> receivedMessages = new LinkedBlockingQueue<>();
 
-	private HashMap<Long, LinkedBlockingQueue<MALMessage>> transMap = new HashMap<Long, LinkedBlockingQueue<MALMessage>>();
+	private final HashMap<Long, LinkedBlockingQueue<MALMessage>> transMap = new HashMap<>();
         
         private final Map<SequenceCounterId, SPPCounter> sequenceCounters = new HashMap<>();
 	private final Map<SequenceCounterId, Queue<Short>> identifiers = new HashMap<>();
@@ -102,7 +102,7 @@ public class SPPTransport implements MALTransport {
 	public SPPTransport(final String protocol, final Map properties) throws MALException {
 		try {
 			sppSocket = SPPSocketFactory.newInstance().createSocket(properties);
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			LOGGER.log(Level.WARNING, SPP_ERROR + " " + ex.getMessage(), ex);
 			throw new MALException(SPP_ERROR + " " + ex.getMessage(), ex);
 		}
@@ -117,7 +117,7 @@ public class SPPTransport implements MALTransport {
 			throw new MALException(TRANSPORT_CLOSED);
 		}
 		if (endpointsByName.containsKey(localName)) {
-			SPPEndpoint ep = endpointsByName.get(localName);
+			final SPPEndpoint ep = endpointsByName.get(localName);
 			if (ep.isClosed()) {
 				ep.reopen();
 			}
@@ -131,11 +131,11 @@ public class SPPTransport implements MALTransport {
 		// Per-message QoS properties are defined in the per-transport properties as well and
 		// therefore merged as well. If a property is present in the per-transport and in the
 		// per-endpoint map, the latter will override the former.
-		Map props = Configuration.mix(properties, qosProperties);
-		Configuration config = new Configuration(props);
+		final Map props = Configuration.mix(properties, qosProperties);
+		final Configuration config = new Configuration(props);
 
 		// PENDING: appendIdToUri property not yet in specification.
-		Short identifier = config.appendIdToUri()
+		final Short identifier = config.appendIdToUri()
 				? claimIdentifier(config.qualifier(), config.apid(), config.numIdentifiers(), config.startIdentifier())
 				: null;
                 
@@ -144,7 +144,7 @@ public class SPPTransport implements MALTransport {
                 if(localName != null){
                     try{
                         uri = new SPPURI(new URI(localName));
-                    }catch(java.lang.IllegalArgumentException ex){
+                    }catch(final java.lang.IllegalArgumentException ex){
                         // Do nothing!
                     }
                 }
@@ -159,7 +159,7 @@ public class SPPTransport implements MALTransport {
                 
 //		SPPURI uri = new SPPURI(config.qualifier(), config.apid(), identifier);
 
-		SPPEndpoint endpoint = new SPPEndpoint(protocol, this, localName, uri.getURI(), qosProperties, sppSocket);
+		final SPPEndpoint endpoint = new SPPEndpoint(protocol, this, localName, uri.getURI(), qosProperties, sppSocket);
 		if (localName != null) {
 			endpointsByName.put(localName, endpoint);
 		}
@@ -208,7 +208,7 @@ public class SPPTransport implements MALTransport {
 		if (null == localName) {
 			throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
 		}
-		SPPEndpoint endpoint = endpointsByName.get(localName);
+		final SPPEndpoint endpoint = endpointsByName.get(localName);
 		if (null != endpoint) {
 			endpointsByName.remove(localName);
 			endpoint.close();
@@ -224,9 +224,9 @@ public class SPPTransport implements MALTransport {
 	 * @param uri The URI to be invalidated.
 	 * @throws MALException
 	 */
-	protected void invalidateURI(URI uri) throws MALException {
+	protected void invalidateURI(final URI uri) throws MALException {
 		endpointsByURI.remove(uri);
-		SPPURI sppURI = new SPPURI(uri);
+		final SPPURI sppURI = new SPPURI(uri);
 		freeIdentifier(sppURI.getAPID(), sppURI.getQualifier(), sppURI.getIdentifier());
 	}
 
@@ -275,8 +275,8 @@ public class SPPTransport implements MALTransport {
 
 	@Override
 	synchronized public void close() throws MALException {
-		for (SPPEndpoint endpoint : new ArrayList<>(endpointsByURI.values())) {
-			String localName = endpoint.getLocalName();
+		for (final SPPEndpoint endpoint : new ArrayList<>(endpointsByURI.values())) {
+			final String localName = endpoint.getLocalName();
 			if (localName != null) {
 				deleteEndpoint(localName);
 			} else {
@@ -296,7 +296,7 @@ public class SPPTransport implements MALTransport {
 		}
 		try {
 			sppSocket.close();
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			LOGGER.log(Level.WARNING, SOCKET_ERROR, ex);
 			throw new MALException(SOCKET_ERROR, ex);
 		}
@@ -354,10 +354,10 @@ public class SPPTransport implements MALTransport {
 			final Short id,
 			final short numIdentifiers,
 			final short startIdentifier) throws MALException {
-		SequenceCounterId counterId = new SequenceCounterId(qualifier, apid);
+		final SequenceCounterId counterId = new SequenceCounterId(qualifier, apid);
 		Queue<Short> ids = identifiers.get(counterId);
 		if (null == ids) {
-			Short[] pool = new Short[numIdentifiers];
+			final Short[] pool = new Short[numIdentifiers];
 			for (int i = 0; i < numIdentifiers; i++) { // create pool of valid identifiers
 				pool[i] = (short) (i + startIdentifier);
 			}
@@ -367,7 +367,7 @@ public class SPPTransport implements MALTransport {
 		if (null == id) {
 			try {
 				return ids.remove();
-			} catch (java.util.NoSuchElementException ex) {
+			} catch (final java.util.NoSuchElementException ex) {
 				throw new MALException(IDENTIFIER_UNAVAILABLE, ex);
 			}
 		}
@@ -386,8 +386,8 @@ public class SPPTransport implements MALTransport {
 	 * @param id The identifier to free.
 	 */
 	private void freeIdentifier(final short apid, final Integer qualifier, final short id) {
-		SequenceCounterId counterId = new SequenceCounterId(qualifier, apid);
-		Queue<Short> ids = identifiers.get(counterId);
+		final SequenceCounterId counterId = new SequenceCounterId(qualifier, apid);
+		final Queue<Short> ids = identifiers.get(counterId);
 		if (null != ids && !ids.contains(id)) {
 			ids.add(id);
 		}
@@ -410,7 +410,7 @@ public class SPPTransport implements MALTransport {
 		// TODO: Queue receviced messages for stopped delivery and QoS level QUEUED.
 
 		try {
-			SpacePacket spacePacket = sppSocket.receive(); // blocks until a space packet has been received
+			final SpacePacket spacePacket = sppSocket.receive(); // blocks until a space packet has been received
                         if(spacePacket == null){
                           LOGGER.log(Level.FINE, "Discarding message as it is not inside the whitelist.");
                           return null;
@@ -427,25 +427,25 @@ public class SPPTransport implements MALTransport {
                         */
 
                         // retrieve effective QoS properties resolving per-application parameters
-			Configuration config = new Configuration(qosProperties);                        
+			final Configuration config = new Configuration(qosProperties);
 //                        short apid = config.apid();
                         
                         short apid;
 
         
-			Map effectiveProperties = config.getEffectiveProperties(
+			final Map effectiveProperties = config.getEffectiveProperties(
 					spacePacket.getApidQualifier(),
 					(short) spacePacket.getHeader().getApid()
 			);
 			// Selection of correct segment counter needs MAL header information.
-			MALElementStreamFactory esf = MALElementStreamFactory.newFactory(protocol, effectiveProperties);
-			SPPMessageHeader messageHeader = new SPPMessageHeader(spacePacket, esf, effectiveProperties);
+			final MALElementStreamFactory esf = MALElementStreamFactory.newFactory(protocol, effectiveProperties);
+			final SPPMessageHeader messageHeader = new SPPMessageHeader(spacePacket, esf, effectiveProperties);
 
                         // We need to iterate between all the available endpoints before discarding it...
                         boolean discard = true;
                         
-                        short from = messageHeader.getSPPURIFrom().getAPID();
-                        short to = messageHeader.getSPPURITo().getAPID();
+                        final short from = messageHeader.getSPPURIFrom().getAPID();
+                        final short to = messageHeader.getSPPURITo().getAPID();
                         
                         // Iterate through all the endpoints
                         /*
@@ -486,7 +486,7 @@ public class SPPTransport implements MALTransport {
                                 
                         
                         
-			SegmentCounterId segmentCounterId = new SegmentCounterId(messageHeader);
+			final SegmentCounterId segmentCounterId = new SegmentCounterId(messageHeader);
                         SPPSegmenter segmenter;
                         
                             segmenter = segmenters.get(segmentCounterId);
@@ -502,33 +502,31 @@ public class SPPTransport implements MALTransport {
                         }
 
 			return new SPPMessage(messageHeader, segmenter.next(), effectiveProperties, qosProperties, esf, this);
-		} catch (SocketException ex) {
+		} catch (final SocketException ex) {
 			LOGGER.log(Level.SEVERE, SOCKET_ERROR, ex);
 			currentThread.interrupt();
-		} catch (InterruptedException ex) {
+		} catch (final InterruptedException ex) {
 			LOGGER.log(Level.INFO, THREAD_INTERRUPTED);
 			currentThread.interrupt();
-		} catch (MALException ex) {
+		} catch (final Exception ex) {
 			// TODO: Is there any other way of handling reception exceptions?
 			LOGGER.log(Level.WARNING, SPP_ERROR, ex);
-		} catch (Exception ex) {
-			LOGGER.log(Level.WARNING, SPP_ERROR, ex);
 		}
-		return null;
+        return null;
 	}
 
 	private void handleReceivedMessage(final MALMessage msg, final Map qosProperties) {
 		try {
-			URI uriTo = msg.getHeader().getURITo();
+			final URI uriTo = msg.getHeader().getURITo();
 			final SPPEndpoint targetEndpoint = (SPPEndpoint) getEndpoint(uriTo);
 			if (targetEndpoint == null) {
 				// Endpoint referenced in message not known. Choose a different endpoint for the
 				// sole purpose of returning an error message.
-				Collection<SPPEndpoint> possibleEPs = endpointsByURI.values();
+				final Collection<SPPEndpoint> possibleEPs = endpointsByURI.values();
 				if (null != possibleEPs && !possibleEPs.isEmpty()) {
 					// TODO: EP could be closed. Should we choose a different one?
-					SPPEndpoint alternativeEndpoint = possibleEPs.iterator().next();
-					MALStandardError error = new MALStandardError(MALHelper.DESTINATION_UNKNOWN_ERROR_NUMBER, null);
+					final SPPEndpoint alternativeEndpoint = possibleEPs.iterator().next();
+					final MALStandardError error = new MALStandardError(MALHelper.DESTINATION_UNKNOWN_ERROR_NUMBER, null);
 					sendErrorMessage(alternativeEndpoint, msg, error, uriTo);
 				} else {
 					// No endpoint exists, thus error cannot be returned. Just log it instead.
@@ -540,12 +538,12 @@ public class SPPTransport implements MALTransport {
 
 			final MALMessageListener listener = targetEndpoint.getMessageListener();
 			if (listener == null) {
-				MALStandardError error = new MALStandardError(MALHelper.DELIVERY_FAILED_ERROR_NUMBER, null);
+				final MALStandardError error = new MALStandardError(MALHelper.DELIVERY_FAILED_ERROR_NUMBER, null);
 				sendErrorMessage(targetEndpoint, msg, error, null);
 				return;
 			}
 			if (targetEndpoint.isDeliveryStopped()) {
-				MALStandardError error = new MALStandardError(MALHelper.DELIVERY_FAILED_ERROR_NUMBER, null);
+				final MALStandardError error = new MALStandardError(MALHelper.DELIVERY_FAILED_ERROR_NUMBER, null);
 				sendErrorMessage(targetEndpoint, msg, error, null);
 			} else {
                             /*
@@ -590,13 +588,11 @@ public class SPPTransport implements MALTransport {
                             });
 */
                         }
-		} catch (MALException ex) {
+		} catch (final Exception ex) {
 			// TODO: Is there any other way of handling reception exceptions?
 			LOGGER.log(Level.WARNING, SPP_ERROR, ex);
-		} catch (Exception ex) {
-			LOGGER.log(Level.WARNING, SPP_ERROR, ex);
 		}
-	}
+    }
 
 	/**
 	 * Creates and send an error message in reply to another MAL message. If returning an error
@@ -617,7 +613,7 @@ public class SPPTransport implements MALTransport {
 			final MALMessage replyToMsg,
 			final MALStandardError error,
 			final URI uriFrom) throws MALException, MALTransmitErrorException {
-		MALMessage errMsg = targetEndpoint.createErrorMessage(replyToMsg, error, uriFrom);
+		final MALMessage errMsg = targetEndpoint.createErrorMessage(replyToMsg, error, uriFrom);
 		if (errMsg != null) {
 			targetEndpoint.sendMessage(errMsg);
 		} else {
@@ -634,26 +630,25 @@ public class SPPTransport implements MALTransport {
 	 * @return The newly created receive thread.
 	 */
 	private Thread constructReceiveThread(final SPPSocket socket, final Map qosProperties) throws MALException {
-		Thread thread = new Thread() {
-			private final Map<SegmentCounterId, SPPSegmenter> segmenters = new HashMap<>();
+        return new Thread() {
+            private final Map<SegmentCounterId, SPPSegmenter> segmenters = new HashMap<>();
 
-			@Override
-			public void run() {
-				this.setName("ReceiveThread_malspp");
-				while (!isInterrupted()) {
-					final MALMessage msg = receive(socket, qosProperties, segmenters, this);
-					if (null != msg) {
-						try {
-							receivedMessages.put(msg);
-						} catch (InterruptedException ex) {
-							LOGGER.log(Level.INFO, THREAD_INTERRUPTED, ex);
-							break;
-						}
-					}
-				}
-			}
-		};
-		return thread;
+            @Override
+            public void run() {
+                this.setName("ReceiveThread_malspp");
+                while (!isInterrupted()) {
+                    final MALMessage msg = receive(socket, qosProperties, segmenters, this);
+                    if (null != msg) {
+                        try {
+                            receivedMessages.put(msg);
+                        } catch (final InterruptedException ex) {
+                            LOGGER.log(Level.INFO, THREAD_INTERRUPTED, ex);
+                            break;
+                        }
+                    }
+                }
+            }
+        };
 	}
 
 	/**
@@ -666,60 +661,59 @@ public class SPPTransport implements MALTransport {
 	 * @throws MALException
 	 */
 	private Thread constructMessageHandlerThread(final Map qosProperties) throws MALException {
-		Thread thread = new Thread() {
-			@Override
-			public void run() {
-				this.setName("MessageHandlerThread_malspp");
-				while (!isInterrupted()) {
-					try {
-						MALMessage msg = receivedMessages.take();
-                                                
-                                                final Long transId = msg.getHeader().getTransactionId();
-                                                
-                                                LinkedBlockingQueue<MALMessage> msgs = null;
+        return new Thread() {
+            @Override
+            public void run() {
+                this.setName("MessageHandlerThread_malspp");
+                while (!isInterrupted()) {
+                    try {
+                        final MALMessage msg = receivedMessages.take();
 
-                                                synchronized(MUTEX){
-                                                    msgs = transMap.get(transId);
-                                                    
-                                                    if(msgs != null){
-                                                        msgs.add(msg);
-                                                        continue;
-                                                    }
-                                                }
-                                                
-                                                    msgs = new LinkedBlockingQueue<MALMessage>();
-                                                    msgs.add(msg);
-                                                    transMap.put(transId, msgs);
-                                                    
-                                                    executor.submit(new Runnable(){
-                                                            @Override
-                                                            public void run() {
-                                                                LinkedBlockingQueue<MALMessage> msgsIn = transMap.get(transId);
-                                                                
-                                                                MALMessage msg = msgsIn.poll();
-                                                                while(msg != null){
-                                                                    handleReceivedMessage(msg, qosProperties);
-                                                                    
-                                                                    synchronized(MUTEX){
-                                                                        msg = msgsIn.poll();
-    
-                                                                        if(msg == null){
-                                                                            transMap.remove(transId);
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                    });
-                                                
-                                                
-					} catch (InterruptedException ex) {
-						LOGGER.log(Level.INFO, THREAD_INTERRUPTED);
-						break;
-					}
-				}
-			}
-		};
-		return thread;
+final Long transId = msg.getHeader().getTransactionId();
+
+LinkedBlockingQueue<MALMessage> msgs = null;
+
+synchronized(MUTEX){
+msgs = transMap.get(transId);
+
+if(msgs != null){
+msgs.add(msg);
+continue;
+}
+}
+
+msgs = new LinkedBlockingQueue<MALMessage>();
+msgs.add(msg);
+transMap.put(transId, msgs);
+
+executor.submit(new Runnable(){
+@Override
+public void run() {
+final LinkedBlockingQueue<MALMessage> msgsIn = transMap.get(transId);
+
+MALMessage msg = msgsIn.poll();
+while(msg != null){
+handleReceivedMessage(msg, qosProperties);
+
+synchronized(MUTEX){
+msg = msgsIn.poll();
+
+if(msg == null){
+transMap.remove(transId);
+}
+}
+}
+}
+});
+
+
+                    } catch (final InterruptedException ex) {
+                        LOGGER.log(Level.INFO, THREAD_INTERRUPTED);
+                        break;
+                    }
+                }
+            }
+        };
 	}
 
 	/**
@@ -751,7 +745,7 @@ public class SPPTransport implements MALTransport {
 	 * sequence counter starting from 0 is created, if none exists.
 	 */
 	protected SPPCounter getSequenceCounter(final int qualifier, final short apid) {
-		SequenceCounterId counterId = new SequenceCounterId(qualifier, apid);
+		final SequenceCounterId counterId = new SequenceCounterId(qualifier, apid);
 		SPPCounter counter;
 		synchronized (sequenceCounters) {
 			counter = sequenceCounters.get(counterId);
@@ -783,7 +777,7 @@ public class SPPTransport implements MALTransport {
 	 */
 	protected SPPCounter getSegmentCounter(final MALMessageHeader header) {
 		// TODO: Delete counter after completion of the interaction to prevent high memory usage.
-		SegmentCounterId counterId = new SegmentCounterId(header);
+		final SegmentCounterId counterId = new SegmentCounterId(header);
 		SPPCounter counter;
 		synchronized (segmentCounters) {
 			counter = segmentCounters.get(counterId);
@@ -824,7 +818,7 @@ public class SPPTransport implements MALTransport {
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(final Object obj) {
 			if (obj == null) {
 				return false;
 			}
@@ -896,7 +890,7 @@ public class SPPTransport implements MALTransport {
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(final Object obj) {
 			if (obj == null) {
 				return false;
 			}

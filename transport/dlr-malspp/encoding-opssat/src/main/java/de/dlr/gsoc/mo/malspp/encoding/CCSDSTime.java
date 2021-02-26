@@ -46,18 +46,18 @@ public class CCSDSTime {
 	private AbsoluteDate epoch;
 	private int nOctets;
 	private TimeCode timeCode;
-	private int unitMultiplier;
-	private Map<String, Object> properties;
+	private final int unitMultiplier;
+	private final Map<String, Object> properties;
 
-	public static enum TimeCode {
+	public enum TimeCode {
 
 		CUC, CDS, CCS
-	};
+	}
 
 	static {
 		try {
 			org.orekit.data.DataProvidersManager.getInstance().addProvider(new org.orekit.data.ClasspathCrawler(OREKIT_UTC_TAI_FILE));
-		} catch (OrekitException ex) {
+		} catch (final OrekitException ex) {
 			throw new java.lang.ExceptionInInitializerError(ex.getMessage());
 		}
 	}
@@ -194,8 +194,8 @@ public class CCSDSTime {
 				nOctets = nBasicOctets + nFractionalOctets;
 				break;
 			case CDS:
-				int nDayOctets = ((pField[0] & 0b00000100) >>> 2) == 0 ? 2 : 3;
-				int nSubMilliOctets = (pField[0] & 0b00000011) << 1;
+				final int nDayOctets = ((pField[0] & 0b00000100) >>> 2) == 0 ? 2 : 3;
+				final int nSubMilliOctets = (pField[0] & 0b00000011) << 1;
 				if (nSubMilliOctets == 6) {
 					// reserved for future use
 					throw new MALException(WRONG_TIME_FORMAT);
@@ -205,8 +205,8 @@ public class CCSDSTime {
 				nOctets = nDayOctets + nSubMilliOctets + 4;
 				break;
 			case CCS:
-				boolean isDOY = ((pField[0] & 0b00001000) >>> 3) == 1;
-				int nResOctets = pField[0] & 0b00000111;
+				final boolean isDOY = ((pField[0] & 0b00001000) >>> 3) == 1;
+				final int nResOctets = pField[0] & 0b00000111;
 				if (nResOctets == 7) {
 					// not used
 					throw new MALException(WRONG_TIME_FORMAT);
@@ -231,10 +231,10 @@ public class CCSDSTime {
 	 * @throws MALException
 	 */
 	private void parseEpoch(final String epoch, final String timeScale) throws MALException {
-		AbsoluteDate parsedEpoch;
+		final AbsoluteDate parsedEpoch;
 		try {
 			parsedEpoch = new AbsoluteDate(epoch, getTimeScale(timeScale));
-		} catch (IllegalArgumentException ex) {
+		} catch (final IllegalArgumentException ex) {
 			throw new MALException(ex.getMessage(), ex);
 		}
 		if (this.epoch != null && !this.epoch.equals(parsedEpoch)) {
@@ -259,21 +259,21 @@ public class CCSDSTime {
 					// TODO: A bit dirty because time unit first is taken to be one second and
 					// afterwards corrected for the real time unit used. This can be made prettier
 					// by implementing parseCCSDSUnsegmentedTimeCode that respechts the time unit.
-					AbsoluteDate possiblyWrongTime = AbsoluteDate.parseCCSDSUnsegmentedTimeCode(pField[0], pField.length == 2 ? pField[1] : 0, tField, epoch);
+					final AbsoluteDate possiblyWrongTime = AbsoluteDate.parseCCSDSUnsegmentedTimeCode(pField[0], pField.length == 2 ? pField[1] : 0, tField, epoch);
 					if (1 == unitMultiplier) {
 						// time unit is one second, i.e. no correction necessary
 						return possiblyWrongTime;
 					}
 					return new AbsoluteDate(epoch, possiblyWrongTime.durationFrom(epoch) / unitMultiplier);
 				case CDS:
-					DateComponents dEpoch = epoch.getComponents(TimeScalesFactory.getUTC()).getDate(); // CDS is a UTC-based timecode
+					final DateComponents dEpoch = epoch.getComponents(TimeScalesFactory.getUTC()).getDate(); // CDS is a UTC-based timecode
 					return AbsoluteDate.parseCCSDSDaySegmentedTimeCode(pField[0], tField, dEpoch);
 				case CCS:
 					return AbsoluteDate.parseCCSDSCalendarSegmentedTimeCode(pField[0], tField);
 				default:
 					throw new MALException(WRONG_TIME_FORMAT);
 			}
-		} catch (OrekitException ex) {
+		} catch (final OrekitException ex) {
 			throw new MALException(ex.getMessage(), ex);
 		}
 	}
@@ -292,7 +292,7 @@ public class CCSDSTime {
 	 * @return T-field as byte array with encoded time value.
 	 * @throws MALException
 	 */
-	public byte[] getEncodedTime(final AbsoluteDate coarseTime, final AbsoluteDate fineTime, boolean mayBeNegative) throws MALException {
+	public byte[] getEncodedTime(final AbsoluteDate coarseTime, final AbsoluteDate fineTime, final boolean mayBeNegative) throws MALException {
 		if (!mayBeNegative && fineTime.compareTo(epoch) < 0) {
 			throw new MALException(NEGATIVE_TIME);
 		}
@@ -319,10 +319,10 @@ public class CCSDSTime {
 	private byte[] encodeCUC(final AbsoluteDate coarseTime, final AbsoluteDate fineTime) throws MALException {
 		final int nBasicOctets = (Integer) properties.get("nBasicOctets");
 		final int nFractionalOctets = (Integer) properties.get("nFractionalOctets");
-		ByteArrayOutputStream tField = new ByteArrayOutputStream(nOctets);
+		final ByteArrayOutputStream tField = new ByteArrayOutputStream(nOctets);
 
-		long coarseSeconds = (long) coarseTime.durationFrom(epoch) * unitMultiplier;
-		long fineSeconds = Math.round(fineTime.durationFrom(coarseTime) * unitMultiplier * (1L << (8 * nFractionalOctets)));
+		final long coarseSeconds = (long) coarseTime.durationFrom(epoch) * unitMultiplier;
+		final long fineSeconds = Math.round(fineTime.durationFrom(coarseTime) * unitMultiplier * (1L << (8 * nFractionalOctets)));
 		for (int i = nBasicOctets; i > 0; i--) {
 			tField.write((byte) (coarseSeconds >> (8 * (i - 1))));
 		}
@@ -343,23 +343,23 @@ public class CCSDSTime {
 	private byte[] encodeCDS(final AbsoluteDate time) throws MALException {
 		final int nDayOctets = (Integer) properties.get("nDayOctets");
 		final int nSubMilliOctets = (Integer) properties.get("nSubMilliOctets");
-		ByteArrayOutputStream tField = new ByteArrayOutputStream(nOctets);
+		final ByteArrayOutputStream tField = new ByteArrayOutputStream(nOctets);
 
-		TimeScale utc;
+		final TimeScale utc;
 		try {
 			utc = TimeScalesFactory.getUTC();
-		} catch (OrekitException ex) {
+		} catch (final OrekitException ex) {
 			throw new MALException(ex.getMessage(), ex);
 		}
-		DateTimeComponents dateTime = time.getComponents(utc);
+		final DateTimeComponents dateTime = time.getComponents(utc);
 
-		int days = dateTime.getDate().getJ2000Day() - epoch.getComponents(utc).getDate().getJ2000Day();
+		final int days = dateTime.getDate().getJ2000Day() - epoch.getComponents(utc).getDate().getJ2000Day();
 		for (int i = nDayOctets; i > 0; i--) {
 			tField.write((byte) (days >> (8 * (i - 1))));
 		}
 
-		double seconds = dateTime.getTime().getSecondsInUTCDay();
-		long millisecs = (long) (seconds * 1000);
+		final double seconds = dateTime.getTime().getSecondsInUTCDay();
+		final long millisecs = (long) (seconds * 1000);
 		for (int i = 4; i > 0; i--) {
 			tField.write((byte) (millisecs >> (8 * (i - 1))));
 		}
@@ -378,7 +378,7 @@ public class CCSDSTime {
 				throw new MALException(WRONG_TIME_FORMAT);
 		}
 		// Don't calculate subMilliSecs from seconds in day due to possible loss of precision.
-		long subMilliSecs = (long) ((dateTime.getTime().getSecond() * 1000 % 1) * resFactor);
+		final long subMilliSecs = (long) ((dateTime.getTime().getSecond() * 1000 % 1) * resFactor);
 		for (int i = nSubMilliOctets; i > 0; i--) {
 			tField.write((byte) (subMilliSecs >> (8 * (i - 1))));
 		}
@@ -395,23 +395,23 @@ public class CCSDSTime {
 	private byte[] encodeCCS(final AbsoluteDate time) throws MALException {
 		final boolean isDOY = (Boolean) properties.get("isDOY");
 		final int nResOctets = (Integer) properties.get("nResOctets");
-		ByteArrayOutputStream tField = new ByteArrayOutputStream(nOctets);
+		final ByteArrayOutputStream tField = new ByteArrayOutputStream(nOctets);
 
-		TimeScale utc;
+		final TimeScale utc;
 		try {
 			utc = TimeScalesFactory.getUTC();
-		} catch (OrekitException ex) {
+		} catch (final OrekitException ex) {
 			throw new MALException(ex.getMessage(), ex);
 		}
-		DateTimeComponents dateTime = time.getComponents(utc);
-		DateComponents date = dateTime.getDate();
-		TimeComponents t = dateTime.getTime();
+		final DateTimeComponents dateTime = time.getComponents(utc);
+		final DateComponents date = dateTime.getDate();
+		final TimeComponents t = dateTime.getTime();
 
-		int year = date.getYear();
+		final int year = date.getYear();
 		tField.write(year >> 8);
 		tField.write(year);
 		if (isDOY) {
-			int doy = date.getDayOfYear();
+			final int doy = date.getDayOfYear();
 			tField.write(doy >> 8);
 			tField.write(doy);
 		} else {
@@ -420,7 +420,7 @@ public class CCSDSTime {
 		}
 		tField.write(t.getHour());
 		tField.write(t.getMinute());
-		double second = t.getSecond();
+		final double second = t.getSecond();
 		tField.write((byte) second);
 		// Convert to long value here to preserve picosecond accuracy.
 		long picoSecond = (long) (second * 1000000000000L) % 1000000000000L;
@@ -494,7 +494,7 @@ public class CCSDSTime {
 					return TimeScalesFactory.getTT();
 			}
 			return TimeScalesFactory.getUTC();
-		} catch (OrekitException ex) {
+		} catch (final OrekitException ex) {
 			throw new MALException(ex.getMessage(), ex);
 		}
 	}
@@ -506,7 +506,7 @@ public class CCSDSTime {
 	 * @return Byte array converted from the binary number in the String.
 	 */
 	private static byte[] binaryStringToByteArray(final String s) {
-		byte[] ba = new byte[s.length() / 8];
+		final byte[] ba = new byte[s.length() / 8];
 		for (int i = 0; i < s.length() / 8; i++) {
 			ba[i] = (byte) Short.parseShort(s.substring(i * 8, (i + 1) * 8), 2);
 		}

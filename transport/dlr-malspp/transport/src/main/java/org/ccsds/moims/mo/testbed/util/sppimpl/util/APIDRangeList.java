@@ -18,8 +18,8 @@ public class APIDRangeList extends ArrayList<APIDRange>
    * @param apid The APID to check.
    * @return True iff there exists a <i>range</i> in <b>this</b> with range.inRange(apid).
    */
-  public boolean inRange(int apid){
-    for(APIDRange r : this){
+  public boolean inRange(final int apid){
+    for(final APIDRange r : this){
       if(r.inRange(apid)){
         return true;
       }

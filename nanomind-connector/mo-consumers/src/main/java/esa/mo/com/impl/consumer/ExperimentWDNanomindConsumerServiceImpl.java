@@ -41,10 +41,10 @@ import esa.opssat.nanomind.opssat_pf.experimentwd.consumer.ExperimentWDStub;
  */
 public class ExperimentWDNanomindConsumerServiceImpl extends ConsumerServiceImpl {
 
-    private ExperimentWDStub experimentWDNanomindService = null;
+    private final ExperimentWDStub experimentWDNanomindService;
 
     @Override
-    public Object generateServiceStub(MALConsumer tmConsumer) {
+    public Object generateServiceStub(final MALConsumer tmConsumer) {
         return new ExperimentWDStub(tmConsumer);
     }
 
@@ -57,7 +57,7 @@ public class ExperimentWDNanomindConsumerServiceImpl extends ConsumerServiceImpl
         return getExperimentWDNanomindStub();
     }
 
-    public ExperimentWDNanomindConsumerServiceImpl(SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
+    public ExperimentWDNanomindConsumerServiceImpl(final SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
 
         if (MALContextFactory.lookupArea(MALHelper.MAL_AREA_NAME, MALHelper.MAL_AREA_VERSION) == null) {
             MALHelper.init(MALContextFactory.getElementFactoryRegistry());
@@ -73,7 +73,7 @@ public class ExperimentWDNanomindConsumerServiceImpl extends ConsumerServiceImpl
 
         try {
             ExperimentWDHelper.init(MALContextFactory.getElementFactoryRegistry());
-        } catch (MALException ex) {
+        } catch (final MALException ex) {
         }
 
         connection = new ConnectionConsumer();
@@ -83,7 +83,7 @@ public class ExperimentWDNanomindConsumerServiceImpl extends ConsumerServiceImpl
         if (tmConsumer != null) {
             try {
                 tmConsumer.close();
-            } catch (MALException ex) {
+            } catch (final MALException ex) {
                 Logger.getLogger(ExperimentWDNanomindConsumerServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
             }
         }

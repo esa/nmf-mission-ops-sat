@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import org.ccsds.moims.mo.mal.MALEncoder;
@@ -88,7 +89,7 @@ public class SPPEncoder implements MALEncoder, MALListEncoder {
 			throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
 		}
 
-		int b = Float.floatToRawIntBits(att);
+		final int b = Float.floatToRawIntBits(att);
 		for (int i = 3; i >= 0; i--) {
 			write(b >> (8 * i));
 		}
@@ -108,7 +109,7 @@ public class SPPEncoder implements MALEncoder, MALListEncoder {
 			throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
 		}
 
-		long b = Double.doubleToRawLongBits(att);
+		final long b = Double.doubleToRawLongBits(att);
 		for (int i = 7; i >= 0; i--) {
 			// casting long to int and losing information is explicitly wanted here
 			write((int) (b >> (8 * i)));
@@ -256,14 +257,10 @@ public class SPPEncoder implements MALEncoder, MALListEncoder {
 		if (att == null) {
 			throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
 		}
-		try {
-			byte[] bytes = att.getBytes("UTF-8");
+		final byte[] bytes = att.getBytes(StandardCharsets.UTF_8);
 //			encodeUInteger(new UInteger(bytes.length));
-                        encodeUShort(new UShort(bytes.length));
-                        write(bytes);
-		} catch (UnsupportedEncodingException ex) {
-			// UTF-8 is required by the Java Standard, this exception cannot be thrown
-		}
+		encodeUShort(new UShort(bytes.length));
+		write(bytes);
 	}
 
 	@Override
@@ -281,9 +278,9 @@ public class SPPEncoder implements MALEncoder, MALListEncoder {
 		}
 		// PENDING: Bug in MAL Java API: If the Blob is URL based, getLength() returns 0. Here:
 		// Workaround by directly querying the length of the value byte array in this case.
-		int length = att.isURLBased() ? att.getValue().length : att.getLength();
+		final int length = att.isURLBased() ? att.getValue().length : att.getLength();
 		encodeUInteger(new UInteger(length));
-		byte[] value = att.getValue();
+		final byte[] value = att.getValue();
 		if (null != value) {
 			write(value);
 		}
@@ -302,20 +299,20 @@ public class SPPEncoder implements MALEncoder, MALListEncoder {
 		if (att == null) {
 			throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
 		}
-		AbsoluteDate epoch = CCSDSTime.createEpoch(Configuration.DURATION_EPOCH, Configuration.DURATION_EPOCH_TIMESCALE);
+		final AbsoluteDate epoch = CCSDSTime.createEpoch(Configuration.DURATION_EPOCH, Configuration.DURATION_EPOCH_TIMESCALE);
 		// PENDING: Error in MAL Java API Magenta Book, Duration should contain fractional seconds,
 		// but contains integer seconds. There is nothing we can do except to wait for an updated
 		// book and implementation.
 //		long ct = att.getValue();
-		double ct = att.getValue();
-		CCSDSTime tf = getDurationFormatter();
+		final double ct = att.getValue();
+		final CCSDSTime tf = getDurationFormatter();
 		if (tf.getTimeCode() != CCSDSTime.TimeCode.CUC) {
 			throw new MALException(WRONG_TIME_FORMAT);
 		}
 		// Split into coarseTime and fineTime in order to minimize rounding errors.
-		AbsoluteDate coarseTime = new AbsoluteDate(epoch, ct);
-		AbsoluteDate fineTime = coarseTime.shiftedBy(0);
-		byte[] tField = tf.getEncodedTime(coarseTime, fineTime, true);
+		final AbsoluteDate coarseTime = new AbsoluteDate(epoch, ct);
+		final AbsoluteDate fineTime = coarseTime.shiftedBy(0);
+		final byte[] tField = tf.getEncodedTime(coarseTime, fineTime, true);
 		write(tField);
 	}
 
@@ -332,13 +329,13 @@ public class SPPEncoder implements MALEncoder, MALListEncoder {
 		if (att == null) {
 			throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
 		}
-		AbsoluteDate epoch = CCSDSTime.createEpoch(Configuration.MAL_FINE_TIME_EPOCH, Configuration.MAL_FINE_TIME_EPOCH_TIMESCALE);
+		final AbsoluteDate epoch = CCSDSTime.createEpoch(Configuration.MAL_FINE_TIME_EPOCH, Configuration.MAL_FINE_TIME_EPOCH_TIMESCALE);
 		// Split into coarseTime and fineTime in order to minimize rounding errors.
-		long ct = att.getValue() / 1000000000000L;
-		double ft = (att.getValue() - ct * 1000000000000L) / 1000000000000.0;
-		AbsoluteDate coarseTime = new AbsoluteDate(epoch, ct);
-		AbsoluteDate fineTime = coarseTime.shiftedBy(ft);
-		byte[] tField = getFineTimeFormatter().getEncodedTime(coarseTime, fineTime, false);
+		final long ct = att.getValue() / 1000000000000L;
+		final double ft = (att.getValue() - ct * 1000000000000L) / 1000000000000.0;
+		final AbsoluteDate coarseTime = new AbsoluteDate(epoch, ct);
+		final AbsoluteDate fineTime = coarseTime.shiftedBy(ft);
+		final byte[] tField = getFineTimeFormatter().getEncodedTime(coarseTime, fineTime, false);
 		write(tField);
 	}
 
@@ -393,13 +390,13 @@ public class SPPEncoder implements MALEncoder, MALListEncoder {
 		}
 		// PENDING: Epoch for Time in MAL Java API unclear. Here: Use Java epoch.
 		// Construct our own Java epoch due to bug in Orekit library (https://www.orekit.org/forge/issues/142).
-		AbsoluteDate epoch = CCSDSTime.createEpoch(Configuration.JAVA_EPOCH, Configuration.JAVA_EPOCH_TIMESCALE);
+		final AbsoluteDate epoch = CCSDSTime.createEpoch(Configuration.JAVA_EPOCH, Configuration.JAVA_EPOCH_TIMESCALE);
 		// Split into coarseTime and fineTime in order to minimize rounding errors.
-		long ct = att.getValue() / 1000;
-		double ft = (att.getValue() - ct * 1000) / 1000.0;
-		AbsoluteDate coarseTime = new AbsoluteDate(epoch, ct);
-		AbsoluteDate fineTime = coarseTime.shiftedBy(ft);
-		byte[] tField = getTimeFormatter().getEncodedTime(coarseTime, fineTime, false);
+		final long ct = att.getValue() / 1000;
+		final double ft = (att.getValue() - ct * 1000) / 1000.0;
+		final AbsoluteDate coarseTime = new AbsoluteDate(epoch, ct);
+		final AbsoluteDate fineTime = coarseTime.shiftedBy(ft);
+		final byte[] tField = getTimeFormatter().getEncodedTime(coarseTime, fineTime, false);
 		write(tField);
 	}
 
@@ -483,7 +480,7 @@ public class SPPEncoder implements MALEncoder, MALListEncoder {
 	protected void write(final byte[] b) throws MALException {
 		try {
 			outputStream.write(b);
-		} catch (IOException ex) {
+		} catch (final IOException ex) {
 			throw new MALException(ex.getMessage(), ex);
 		}
 	}
@@ -497,7 +494,7 @@ public class SPPEncoder implements MALEncoder, MALListEncoder {
 	protected void write(final int b) throws MALException {
 		try {
 			outputStream.write(b);
-		} catch (IOException ex) {
+		} catch (final IOException ex) {
 			throw new MALException(ex.getMessage(), ex);
 		}
 	}
@@ -562,7 +559,7 @@ public class SPPEncoder implements MALEncoder, MALListEncoder {
 	 */
 	private CCSDSTime getTimeFormatter() throws MALException {
 		if (timeFormatter == null) {
-			Configuration config = new Configuration(properties);
+			final Configuration config = new Configuration(properties);
 			timeFormatter = new CCSDSTime(config.timeCodeFormat(), config.timeEpoch(), config.timeEpochTimescale(), config.timeUnit());
 		}
 		return timeFormatter;
@@ -576,7 +573,7 @@ public class SPPEncoder implements MALEncoder, MALListEncoder {
 	 */
 	private CCSDSTime getFineTimeFormatter() throws MALException {
 		if (fineTimeFormatter == null) {
-			Configuration config = new Configuration(properties);
+			final Configuration config = new Configuration(properties);
 			fineTimeFormatter = new CCSDSTime(config.fineTimeCodeFormat(), config.fineTimeEpoch(), config.fineTimeEpochTimescale(), config.fineTimeUnit());
 		}
 		return fineTimeFormatter;
@@ -593,7 +590,7 @@ public class SPPEncoder implements MALEncoder, MALListEncoder {
 	 */
 	private CCSDSTime getDurationFormatter() throws MALException {
 		if (durationFormatter == null) {
-			Configuration config = new Configuration(properties);
+			final Configuration config = new Configuration(properties);
 			durationFormatter = new CCSDSTime(config.durationCodeFormat(), Configuration.DURATION_EPOCH, Configuration.DURATION_EPOCH_TIMESCALE, config.durationUnit());
 		}
 		return durationFormatter;

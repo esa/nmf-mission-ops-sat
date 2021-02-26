@@ -48,13 +48,13 @@ public class SpacePacket {
   
   private Map qosProperties;
   
-  public SpacePacket(SpacePacketHeader header, byte[] body, int offset,
-      int length) {
+  public SpacePacket(final SpacePacketHeader header, final byte[] body, final int offset,
+                     final int length) {
     this(header, -1, body, offset, length);
   }
   
-  public SpacePacket(SpacePacketHeader header, int apidQualifier, byte[] body, int offset,
-      int length) {
+  public SpacePacket(final SpacePacketHeader header, final int apidQualifier, final byte[] body, final int offset,
+                     final int length) {
     super();
     this.header = header;
     this.apidQualifier = apidQualifier;
@@ -63,7 +63,7 @@ public class SpacePacket {
     this.length = length;
   }
 
-  public void setQosProperties(Map qosProperties) {
+  public void setQosProperties(final Map qosProperties) {
     this.qosProperties = qosProperties;
   }
 
@@ -81,7 +81,7 @@ public class SpacePacket {
   /**
    * @param header the header to set
    */
-  public void setHeader(SpacePacketHeader header) {
+  public void setHeader(final SpacePacketHeader header) {
     this.header = header;
   }
 
@@ -89,7 +89,7 @@ public class SpacePacket {
   	return apidQualifier;
   }
 
-  public void setApidQualifier(int apidQualifier) {
+  public void setApidQualifier(final int apidQualifier) {
   	this.apidQualifier = apidQualifier;
   }
 
@@ -103,7 +103,7 @@ public class SpacePacket {
   /**
    * @param body the body to set
    */
-  public void setBody(byte[] body) {
+  public void setBody(final byte[] body) {
     this.body = body;
   }
 
@@ -117,7 +117,7 @@ public class SpacePacket {
   /**
    * @param offset the offset to set
    */
-  public void setOffset(int offset) {
+  public void setOffset(final int offset) {
     this.offset = offset;
   }
 
@@ -131,7 +131,7 @@ public class SpacePacket {
   /**
    * @param length the length to set
    */
-  public void setLength(int length) {
+  public void setLength(final int length) {
     this.length = length;
   }
   

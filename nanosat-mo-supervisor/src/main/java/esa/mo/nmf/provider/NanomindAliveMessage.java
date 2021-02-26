@@ -37,7 +37,7 @@ public class NanomindAliveMessage {
     private final GMVServicesConsumer gmvServicesConsumer;
     private final TaskScheduler timer;
     private static final int PERIOD = 10000;  // 10 seconds
-    private boolean active = false;
+    private boolean active;
     private final int apid;
 
     public NanomindAliveMessage(final GMVServicesConsumer gmvServicesConsumer, final int apid) {
@@ -57,9 +57,9 @@ public class NanomindAliveMessage {
                 if (active) {
                     try {
                         gmvServicesConsumer.getExperimentWDNanomindService().getExperimentWDNanomindStub().alive();
-                    } catch (MALInteractionException ex) {
+                    } catch (final MALInteractionException ex) {
                         Logger.getLogger(NanomindAliveMessage.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (MALException ex) {
+                    } catch (final MALException ex) {
                         Logger.getLogger(NanomindAliveMessage.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
@@ -68,7 +68,7 @@ public class NanomindAliveMessage {
 
     }
     
-    public void setActive(boolean active){
+    public void setActive(final boolean active){
         this.active = active;
     }
     

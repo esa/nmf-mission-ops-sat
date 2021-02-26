@@ -44,8 +44,8 @@ public class SPPErrorBody extends SPPMessageBody implements MALErrorBody {
 
 	@Override
 	public MALStandardError getError() throws MALException {
-		UInteger errorNumber = (UInteger) getBodyElement(0, new UInteger());
-		Object extraInformation = getBodyElement(1, null);
+		final UInteger errorNumber = (UInteger) getBodyElement(0, new UInteger());
+		final Object extraInformation = getBodyElement(1, null);
 		return new MALStandardError(errorNumber, extraInformation);
 	}
 }

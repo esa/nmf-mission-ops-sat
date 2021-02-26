@@ -142,16 +142,16 @@ public class SPPMessageHeader implements MALMessageHeader {
 			final SpacePacket spacePacket,
 			final MALElementStreamFactory esf,
 			final Map msgQosProperties) throws MALException {
-		SpacePacketHeader sppHeader = spacePacket.getHeader();
+		final SpacePacketHeader sppHeader = spacePacket.getHeader();
 		if (sppHeader.getPacketVersionNumber() != SPPTransport.SPP_VERSION
 				|| sppHeader.getSecondaryHeaderFlag() != 1) {
 			throw new MALException(MALFORMED_SPACE_PACKET);
 		}
-		short primaryApid = (short) sppHeader.getApid();
-		int primaryApidQualifier = spacePacket.getApidQualifier();
-		boolean isTCpacket = sppHeader.getPacketType() == 1;
+		final short primaryApid = (short) sppHeader.getApid();
+		final int primaryApidQualifier = spacePacket.getApidQualifier();
+		final boolean isTCpacket = sppHeader.getPacketType() == 1;
 
-		ByteArrayInputStream is = new ByteArrayInputStream(spacePacket.getBody());
+		final ByteArrayInputStream is = new ByteArrayInputStream(spacePacket.getBody());
 		offset = initMessageHeader(is, isTCpacket, sppHeader.getSequenceFlags(), primaryApid, primaryApidQualifier, esf, msgQosProperties);
 	}
 
@@ -163,12 +163,12 @@ public class SPPMessageHeader implements MALMessageHeader {
 			final int primaryApidQualifier,
 			final MALElementStreamFactory esf,
 			final Map msgQosProperties) throws MALException {
-		int size = is.available();
-		MALElementInputStream eis = esf.createInputStream(is);
+		final int size = is.available();
+		final MALElementInputStream eis = esf.createInputStream(is);
 
-		short version_sdu = ((UOctet) eis.readElement(new UOctet(), null)).getValue();
-		int version = version_sdu >>> 5;
-		byte sdu = (byte) (version_sdu & 0x1F);
+		final short version_sdu = ((UOctet) eis.readElement(new UOctet(), null)).getValue();
+		final int version = version_sdu >>> 5;
+		final byte sdu = (byte) (version_sdu & 0x1F);
 		if (version != SPPTransport.MALSPP_VERSION) {
 			throw new MALException(VERSION_NOT_SUPPORTED);
 		}
@@ -178,27 +178,27 @@ public class SPPMessageHeader implements MALMessageHeader {
 		setOperation(readUShort(eis));
 		setAreaVersion((UOctet) eis.readElement(new UOctet(), null));
 
-		int error_qos_session_scndapid = readUShort(eis).getValue();
-		int isErrorMessage = error_qos_session_scndapid >>> 15;
-		int qosLevel = (error_qos_session_scndapid >>> 13) & 0b11;
-		int session = (error_qos_session_scndapid >>> 11) & 0b11;
-		short secondaryApid = (short) (error_qos_session_scndapid & 0b0000011111111111);
+		final int error_qos_session_scndapid = readUShort(eis).getValue();
+		final int isErrorMessage = error_qos_session_scndapid >>> 15;
+		final int qosLevel = (error_qos_session_scndapid >>> 13) & 0b11;
+		final int session = (error_qos_session_scndapid >>> 11) & 0b11;
+		final short secondaryApid = (short) (error_qos_session_scndapid & 0b0000011111111111);
 		setIsErrorMessage(isErrorMessage == 1);
 		setQoSlevel(QoSLevel.fromOrdinal(qosLevel));
 		setSession(SessionType.fromOrdinal(session));
-		int secondaryApidQualifier = readUShort(eis).getValue();
+		final int secondaryApidQualifier = readUShort(eis).getValue();
 		// MAL/SPP always specifies a transaction id, also for SEND interactions.
 		setTransactionId(readLong(eis));
 
-		byte flags = (byte) ((UOctet) eis.readElement(new UOctet(), null)).getValue();
-		BitSet bs = BitSet.valueOf(new byte[]{flags});
+		final byte flags = (byte) ((UOctet) eis.readElement(new UOctet(), null)).getValue();
+		final BitSet bs = BitSet.valueOf(new byte[]{flags});
 
 		// Bits in BitSet are numbered right to left.
-		Short sourceIdentifier = bs.get(7)
+		final Short sourceIdentifier = bs.get(7)
 				? ((UOctet) eis.readElement(new UOctet(), null)).getValue()
 				: null;
 
-		Short destinationIdentifier = bs.get(6)
+		final Short destinationIdentifier = bs.get(6)
 				? ((UOctet) eis.readElement(new UOctet(), null)).getValue()
 				: null;
 
@@ -221,33 +221,33 @@ public class SPPMessageHeader implements MALMessageHeader {
 			}
 		}
 
-		Configuration config = new Configuration(msgQosProperties);
-		UInteger priority = bs.get(5)
+		final Configuration config = new Configuration(msgQosProperties);
+		final UInteger priority = bs.get(5)
 				? (UInteger) eis.readElement(new UInteger(), null)
 				: config.priority();
 		setPriority(priority);
 
-		Time timestamp = bs.get(4)
+		final Time timestamp = bs.get(4)
 				? (Time) eis.readElement(new Time(), null)
 				: Configuration.DEFAULT_TIMESTAMP;
 		setTimestamp(timestamp);
 
-		Identifier networkZone = bs.get(3)
+		final Identifier networkZone = bs.get(3)
 				? (Identifier) eis.readElement(new Identifier(), null)
 				: config.networkZone();
 		setNetworkZone(networkZone);
 
-		Identifier sessionName = bs.get(2)
+		final Identifier sessionName = bs.get(2)
 				? (Identifier) eis.readElement(new Identifier(), null)
 				: config.sessionName();
 		setSessionName(sessionName);
 
-		IdentifierList domain = bs.get(1)
+		final IdentifierList domain = bs.get(1)
 				? (IdentifierList) eis.readElement(new IdentifierList(), null)
 				: config.domain();
 		setDomain(domain);
 
-		Blob authenticationId = bs.get(0)
+		final Blob authenticationId = bs.get(0)
 				? (Blob) eis.readElement(new Blob(), null)
 				: config.authenticationId();
 		setAuthenticationId(authenticationId);
@@ -263,7 +263,7 @@ public class SPPMessageHeader implements MALMessageHeader {
 	 * @throws MALException
 	 */
 	protected byte getSDU() throws MALException {
-		short stage = interactionStage.getValue();
+		final short stage = interactionStage.getValue();
 		switch (interactionType.getOrdinal()) {
 			case InteractionType._SEND_INDEX:
 				return 0;
@@ -349,7 +349,7 @@ public class SPPMessageHeader implements MALMessageHeader {
 	private static UShort readUShort(final MALElementInputStream is) throws MALException {
 		int v = 0;
 		for (int i = 0; i < 2; i++) {
-			short b = ((UOctet) is.readElement(new UOctet(), null)).getValue();
+			final short b = ((UOctet) is.readElement(new UOctet(), null)).getValue();
 			v <<= 8;
 			v |= b;
 		}
@@ -367,7 +367,7 @@ public class SPPMessageHeader implements MALMessageHeader {
 	private static Long readLong(final MALElementInputStream is) throws MALException {
 		long v = 0;
 		for (int i = 0; i < 8; i++) {
-			short b = ((UOctet) is.readElement(new UOctet(), null)).getValue();
+			final short b = ((UOctet) is.readElement(new UOctet(), null)).getValue();
 			v <<= 8;
 			v |= b;
 		}

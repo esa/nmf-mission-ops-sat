@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import org.ccsds.moims.mo.mal.MALDecoder;
@@ -65,7 +66,7 @@ public class SPPDecoder implements MALDecoder {
 
 	@Override
 	public Boolean decodeBoolean() throws MALException {
-		byte b = read();
+		final byte b = read();
 		switch (b) {
 			case 0:
 				return Boolean.FALSE;
@@ -84,7 +85,7 @@ public class SPPDecoder implements MALDecoder {
 
 	@Override
 	public Float decodeFloat() throws MALException {
-		byte[] b = read(4);
+		final byte[] b = read(4);
 		int ret = 0;
 		for (int i = 0; i < 4; i++) {
 			ret <<= 8;
@@ -100,7 +101,7 @@ public class SPPDecoder implements MALDecoder {
 
 	@Override
 	public Double decodeDouble() throws MALException {
-		byte[] b = read(8);
+		final byte[] b = read(8);
 		long ret = 0;
 		for (int i = 0; i < 8; i++) {
 			ret <<= 8;
@@ -197,16 +198,12 @@ public class SPPDecoder implements MALDecoder {
 	@Override
 	public String decodeString() throws MALException {
 //		long length = decodeUInteger().getValue();
-		long length = decodeUShort().getValue();
+		final long length = decodeUShort().getValue();
 		if (length > Integer.MAX_VALUE) {
 			throw new MALException(LENGTH_NOT_SUPPORTED);
 		}
 		String ret = null;
-		try {
-			ret = new String(read((int) length), "UTF-8");
-		} catch (UnsupportedEncodingException ex) {
-			// UTF-8 is required by the Java Standard, this exception cannot be thrown
-		}
+		ret = new String(read((int) length), StandardCharsets.UTF_8);
 		return ret;
 	}
 
@@ -217,7 +214,7 @@ public class SPPDecoder implements MALDecoder {
 
 	@Override
 	public Blob decodeBlob() throws MALException {
-		long length = decodeUInteger().getValue();
+		final long length = decodeUInteger().getValue();
 		if (length > Integer.MAX_VALUE) {
 			throw new MALException(LENGTH_NOT_SUPPORTED);
 		}
@@ -231,24 +228,24 @@ public class SPPDecoder implements MALDecoder {
 
 	@Override
 	public Duration decodeDuration() throws MALException {
-		CCSDSTime tf = getDurationFormatter();
+		final CCSDSTime tf = getDurationFormatter();
 		if (tf.getTimeCode() != CCSDSTime.TimeCode.CUC) {
 			throw new MALException(WRONG_TIME_FORMAT);
 		}
-		byte[] tField = read(tf.getDataLength());
-		AbsoluteDate time = tf.getDecodedTime(tField);
-		AbsoluteDate epoch = CCSDSTime.createEpoch(Configuration.DURATION_EPOCH, Configuration.DURATION_EPOCH_TIMESCALE);
+		final byte[] tField = read(tf.getDataLength());
+		final AbsoluteDate time = tf.getDecodedTime(tField);
+		final AbsoluteDate epoch = CCSDSTime.createEpoch(Configuration.DURATION_EPOCH, Configuration.DURATION_EPOCH_TIMESCALE);
 		double seconds = time.durationFrom(epoch);
 
 		// check sign bit of tField
 		if ((tField[0] & 0x80) != 0) {
 			// negative duration, undo 2's complement by constructing T field with every bit set
-			byte[] minNegativeTimeField = new byte[tf.getDataLength()];
+			final byte[] minNegativeTimeField = new byte[tf.getDataLength()];
 			for (int i = 0; i < minNegativeTimeField.length; i++) {
 				minNegativeTimeField[i] = -1;
 			}
-			AbsoluteDate minNegativeTime = tf.getDecodedTime(minNegativeTimeField);
-			double minNegativeSeconds = minNegativeTime.durationFrom(epoch);
+			final AbsoluteDate minNegativeTime = tf.getDecodedTime(minNegativeTimeField);
+			final double minNegativeSeconds = minNegativeTime.durationFrom(epoch);
 			seconds -= minNegativeSeconds + 1;
 		}
 
@@ -267,13 +264,13 @@ public class SPPDecoder implements MALDecoder {
 
 	@Override
 	public FineTime decodeFineTime() throws MALException {
-		CCSDSTime tf = getFineTimeFormatter();
-		byte[] tField = read(tf.getDataLength());
-		AbsoluteDate time = tf.getDecodedTime(tField);
-		AbsoluteDate epoch = CCSDSTime.createEpoch(Configuration.MAL_FINE_TIME_EPOCH, Configuration.MAL_FINE_TIME_EPOCH_TIMESCALE);
-		long coarseSeconds = (long) time.durationFrom(epoch);
-		AbsoluteDate coarseTime = epoch.shiftedBy(coarseSeconds);
-		long picoSeconds = coarseSeconds * 1000000000000L + Math.round(time.durationFrom(coarseTime) * 1000000000000L);
+		final CCSDSTime tf = getFineTimeFormatter();
+		final byte[] tField = read(tf.getDataLength());
+		final AbsoluteDate time = tf.getDecodedTime(tField);
+		final AbsoluteDate epoch = CCSDSTime.createEpoch(Configuration.MAL_FINE_TIME_EPOCH, Configuration.MAL_FINE_TIME_EPOCH_TIMESCALE);
+		final long coarseSeconds = (long) time.durationFrom(epoch);
+		final AbsoluteDate coarseTime = epoch.shiftedBy(coarseSeconds);
+		final long picoSeconds = coarseSeconds * 1000000000000L + Math.round(time.durationFrom(coarseTime) * 1000000000000L);
 		return new FineTime(picoSeconds);
 	}
 
@@ -294,13 +291,13 @@ public class SPPDecoder implements MALDecoder {
 
 	@Override
 	public Time decodeTime() throws MALException {
-		CCSDSTime tf = getTimeFormatter();
-		byte[] tField = read(tf.getDataLength());
-		AbsoluteDate time = tf.getDecodedTime(tField);
+		final CCSDSTime tf = getTimeFormatter();
+		final byte[] tField = read(tf.getDataLength());
+		final AbsoluteDate time = tf.getDecodedTime(tField);
 		// PENDING: Epoch for Time in MAL Java API unclear. Here: Use Java epoch.
 		// Construct our own Java epoch due to bug in Orekit library (https://www.orekit.org/forge/issues/142).
-		AbsoluteDate epoch = CCSDSTime.createEpoch(Configuration.JAVA_EPOCH, Configuration.JAVA_EPOCH_TIMESCALE);
-		double seconds = time.durationFrom(epoch);
+		final AbsoluteDate epoch = CCSDSTime.createEpoch(Configuration.JAVA_EPOCH, Configuration.JAVA_EPOCH_TIMESCALE);
+		final double seconds = time.durationFrom(epoch);
 		return new Time(Math.round(seconds * 1000));
 	}
 
@@ -334,7 +331,7 @@ public class SPPDecoder implements MALDecoder {
 
 	@Override
 	public Attribute decodeAttribute() throws MALException {
-		int shortForm = decodeUOctet().getValue() + 1;
+		final int shortForm = decodeUOctet().getValue() + 1;
 		switch (shortForm) {
 			case Attribute._BLOB_TYPE_SHORT_FORM:
 				return decodeBlob();
@@ -423,13 +420,13 @@ public class SPPDecoder implements MALDecoder {
 	protected byte[] read(final int n) throws MALException {
 		try {
 			if (inputStream.available() >= n) {
-				byte[] bytes = new byte[n];
+				final byte[] bytes = new byte[n];
 				if (n == 0 || inputStream.read(bytes, 0, n) == n) {
 					return bytes;
 				}
 			}
 			throw new MALException(INSUFFICIENT_DATA);
-		} catch (IOException ex) {
+		} catch (final IOException ex) {
 			throw new MALException(ex.getMessage(), ex);
 		}
 	}
@@ -447,7 +444,7 @@ public class SPPDecoder implements MALDecoder {
 	 */
 	private BigInteger decodeVarint(final int nOctets, final boolean signed) throws MALException {
 		if (!varintSupported) {
-			byte[] b = read(nOctets);
+			final byte[] b = read(nOctets);
 			if (signed) {
 				return new BigInteger(b);
 			}
@@ -455,7 +452,7 @@ public class SPPDecoder implements MALDecoder {
 		}
 
 		BigInteger ret = BigInteger.ZERO;
-		int maxOctets = (int) Math.ceil(nOctets * 8.0 / 7.0);
+		final int maxOctets = (int) Math.ceil(nOctets * 8.0 / 7.0);
 		int i = 0;
 		byte b;
 		do {
@@ -486,7 +483,7 @@ public class SPPDecoder implements MALDecoder {
 	 */
 	private CCSDSTime getTimeFormatter() throws MALException {
 		if (timeFormatter == null) {
-			Configuration config = new Configuration(properties);
+			final Configuration config = new Configuration(properties);
 			timeFormatter = new CCSDSTime(config.timeCodeFormat(), config.timeEpoch(), config.timeEpochTimescale(), config.timeUnit());
 		}
 		return timeFormatter;
@@ -500,7 +497,7 @@ public class SPPDecoder implements MALDecoder {
 	 */
 	private CCSDSTime getFineTimeFormatter() throws MALException {
 		if (fineTimeFormatter == null) {
-			Configuration config = new Configuration(properties);
+			final Configuration config = new Configuration(properties);
 			fineTimeFormatter = new CCSDSTime(config.fineTimeCodeFormat(), config.fineTimeEpoch(), config.fineTimeEpochTimescale(), config.fineTimeUnit());
 		}
 		return fineTimeFormatter;
@@ -517,7 +514,7 @@ public class SPPDecoder implements MALDecoder {
 	 */
 	private CCSDSTime getDurationFormatter() throws MALException {
 		if (durationFormatter == null) {
-			Configuration config = new Configuration(properties);
+			final Configuration config = new Configuration(properties);
 			durationFormatter = new CCSDSTime(config.durationCodeFormat(), Configuration.DURATION_EPOCH, Configuration.DURATION_EPOCH_TIMESCALE, config.durationUnit());
 		}
 		return durationFormatter;

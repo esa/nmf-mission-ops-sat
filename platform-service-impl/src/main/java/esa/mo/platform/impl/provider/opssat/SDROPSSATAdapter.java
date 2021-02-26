@@ -47,8 +47,8 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
   private ByteBuffer sampleBuffer;
   private int bufferSize, bufferLength;
 
-  private boolean initialized = false;
-  private boolean configured = false;
+  private final boolean initialized;
+  private boolean configured;
 
   public SDROPSSATAdapter()
   {
@@ -99,7 +99,7 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
       sdrApi.Print_Info();
       sdrApi.Set_RF_Frontend_Input(eSDR_RFFE_INPUT.RFFE_INPUT_1);
       sdrApi.Enable_Receiver();
-    } catch (Exception ex) {
+    } catch (final Exception ex) {
       LOGGER.log(Level.SEVERE, "SDR API could not be initialized!", ex);
       this.initialized = false;
       return;
@@ -113,11 +113,11 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
     return initialized;
   }
 
-  private eSDR_RFFE_RX_SAMPLING_FREQ getSamplingFreqFromFloat(float input)
+  private eSDR_RFFE_RX_SAMPLING_FREQ getSamplingFreqFromFloat(final float input)
   {
-    Iterator it = samplingFreqsMap.entrySet().iterator();
+    final Iterator it = samplingFreqsMap.entrySet().iterator();
     while (it.hasNext()) {
-      Map.Entry<Float, eSDR_RFFE_RX_SAMPLING_FREQ> pair = (Map.Entry) it.next();
+      final Map.Entry<Float, eSDR_RFFE_RX_SAMPLING_FREQ> pair = (Map.Entry) it.next();
       if (Math.abs(pair.getKey() - input) < FREQ_MATCH_EPSILON) {
         return pair.getValue();
       }
@@ -125,11 +125,11 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
     return null;
   }
 
-  private eSDR_RFFE_RX_LPF_BW getLPFFreqFromFloat(float input)
+  private eSDR_RFFE_RX_LPF_BW getLPFFreqFromFloat(final float input)
   {
-    Iterator it = lpfFreqsMap.entrySet().iterator();
+    final Iterator it = lpfFreqsMap.entrySet().iterator();
     while (it.hasNext()) {
-      Map.Entry<Float, eSDR_RFFE_RX_LPF_BW> pair = (Map.Entry) it.next();
+      final Map.Entry<Float, eSDR_RFFE_RX_LPF_BW> pair = (Map.Entry) it.next();
       if (Math.abs(pair.getKey() - input) < FREQ_MATCH_EPSILON) {
         return pair.getValue();
       }
@@ -138,12 +138,12 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
   }
 
   @Override
-  public boolean setConfiguration(SDRConfiguration configuration)
+  public boolean setConfiguration(final SDRConfiguration configuration)
   {
     LOGGER.log(Level.INFO, "Setting SDR configuration: {0}", configuration);
-    eSDR_RFFE_RX_SAMPLING_FREQ samplingFreq = getSamplingFreqFromFloat(
+    final eSDR_RFFE_RX_SAMPLING_FREQ samplingFreq = getSamplingFreqFromFloat(
         configuration.getRxSamplingFrequency());
-    eSDR_RFFE_RX_LPF_BW lpfBw = getLPFFreqFromFloat(configuration.getRxLowPassBW());
+    final eSDR_RFFE_RX_LPF_BW lpfBw = getLPFFreqFromFloat(configuration.getRxLowPassBW());
     if (samplingFreq == null) {
       LOGGER.log(Level.WARNING, "Unsupported sampling frequency provided: {0} MHz",
           configuration.getRxSamplingFrequency());
@@ -157,9 +157,9 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
       sdrApi.Calibrate_RF_Frontend();
       // This will allocate plenty of memory, allowing to store samples from 0.1 second. Each sample pair is 2 x uint32
       bufferLength = (int) (configuration.getRxSamplingFrequency() * 100000);
-      bufferSize = (int) (bufferLength * 8);
+      bufferSize = bufferLength * 8;
       sampleBuffer = ByteBuffer.allocateDirect(bufferSize);
-    } catch (Exception ex) {
+    } catch (final Exception ex) {
       LOGGER.log(Level.WARNING, "Setting SDR configuration " + configuration + " failed", ex);
       return false;
     }
@@ -168,7 +168,7 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
   }
 
   @Override
-  public boolean enableSDR(Boolean enable)
+  public boolean enableSDR(final Boolean enable)
   {
     LOGGER.log(Level.INFO, "EnableSDR: {0}", enable);
     if (!configured) {
@@ -176,7 +176,7 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
     }
     try {
       sdrApi.Enable_RX_Sampling_Clock();
-    } catch (Exception ex) {
+    } catch (final Exception ex) {
       LOGGER.log(Level.SEVERE, "Enabling the SDR failed", ex);
       return false;
     }
@@ -189,12 +189,12 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
     if (!configured) {
       return null;
     }
-    FloatList iList = new FloatList(bufferLength);
-    FloatList qList = new FloatList(bufferLength);
+    final FloatList iList = new FloatList(bufferLength);
+    final FloatList qList = new FloatList(bufferLength);
 
-    int[] ints = new int[bufferLength];
+    final int[] ints = new int[bufferLength];
     sdrApi.Receive_IQ_Samples(ints, bufferSize);
-    IntBuffer tempBuffer = sampleBuffer.asIntBuffer();
+    final IntBuffer tempBuffer = sampleBuffer.asIntBuffer();
     tempBuffer.put(ints);
     for (int i = 0; i < bufferLength; ++i) {
       iList.add((float) (sampleBuffer.getInt() & 0xFFFFFFFFL)); // remove sign extension

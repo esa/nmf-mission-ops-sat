@@ -45,7 +45,7 @@ public class SPPElementOutputStream implements MALElementOutputStream {
 	private final SPPEncoder encoder;
 	protected static final String INVALID_ELEMENT_TYPE = "Supplied element type cannot be handled by the transport layer.";
 
-	private static enum ElementType {
+	private enum ElementType {
 
 		ELEMENT, JAVA_MAPPED, ENCODED_ELEMENT, ENCODED_LIST, NULL
 	}
@@ -62,7 +62,7 @@ public class SPPElementOutputStream implements MALElementOutputStream {
 			return;
 		}
 
-		ServiceInfo service = new ServiceInfo(ctx);
+		final ServiceInfo service = new ServiceInfo(ctx);
 		final boolean isPubSub = service.getInteraction().equals(InteractionType.PUBSUB);
 
 		// Element of type List< <<Update Value Type>> > means it is not of type Identifier or
@@ -107,10 +107,10 @@ public class SPPElementOutputStream implements MALElementOutputStream {
 				encoder.write(((MALEncodedElement) element).getEncodedElement().getValue());
 				break;
 			case ENCODED_LIST:
-				MALEncodedElementList encodedList = (MALEncodedElementList) element;
+				final MALEncodedElementList encodedList = (MALEncodedElementList) element;
 				// listEncoder only needed for implicitly encoding the list size
-				MALListEncoder listEncoder = encoder.createListEncoder(encodedList);
-				for (MALEncodedElement encodedElement : encodedList) {
+				final MALListEncoder listEncoder = encoder.createListEncoder(encodedList);
+				for (final MALEncodedElement encodedElement : encodedList) {
 					encoder.encodeNulltag(encodedElement);
 					if (encodedElement != null) {
 						encoder.write(encodedElement.getEncodedElement().getValue());
@@ -131,14 +131,14 @@ public class SPPElementOutputStream implements MALElementOutputStream {
 				break;
 			case ELEMENT:
 				// the element in question here is the update list 
-				ElementList<Element> updateList = (ElementList<Element>) element;
+				final ElementList<Element> updateList = (ElementList<Element>) element;
 				if (service.isDeclaredAbstract()) {
 					encodeShortForm(updateList.getShortForm());
 				}
 				// listEncoder only needed for implicitly encoding the list size
-				MALListEncoder listEncoder = encoder.createListEncoder(updateList);
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				SPPEncoder updateEncoder = new SPPEncoder(baos, encoder.getProperties());
+				final MALListEncoder listEncoder = encoder.createListEncoder(updateList);
+				final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				final SPPEncoder updateEncoder = new SPPEncoder(baos, encoder.getProperties());
 				for (Object e : updateList) {
 					encoder.encodeNulltag(e);
 					switch (getElementType(e)) {
@@ -177,19 +177,19 @@ public class SPPElementOutputStream implements MALElementOutputStream {
 			case NULL:
 				break;
 			case ENCODED_LIST:
-				MALEncodedElementList encodedList = (MALEncodedElementList) element;
+				final MALEncodedElementList encodedList = (MALEncodedElementList) element;
 				final Long updateValueShortForm = (Long) encodedList.getShortForm();
 				// updateValueShortForm denotes the element type, the corresponding list type is
 				// sign flipped. Exchange the last 24 bits of the absolute short form with the sign
 				// flipped type.
-				final Long updateListShortForm = (updateValueShortForm & ~0xFFFFFF)
+				final long updateListShortForm = (updateValueShortForm & ~0xFFFFFF)
 						| (-(updateValueShortForm & 0xFFFFFF) & 0xFFFFFF);
 				if (service.isDeclaredAbstract()) {
 					encodeShortForm(updateListShortForm);
 				}
 				// listEncoder only needed for implicitly encoding the list size
-				MALListEncoder listEncoder = encoder.createListEncoder(encodedList);
-				for (MALEncodedElement encodedElement : encodedList) {
+				final MALListEncoder listEncoder = encoder.createListEncoder(encodedList);
+				for (final MALEncodedElement encodedElement : encodedList) {
 					encoder.encodeNulltag(encodedElement);
 					if (encodedElement != null) {
 						encoder.write(encodedElement.getEncodedElement().getValue());
@@ -278,7 +278,7 @@ public class SPPElementOutputStream implements MALElementOutputStream {
 	public void flush() throws MALException {
 		try {
 			os.flush();
-		} catch (IOException ex) {
+		} catch (final IOException ex) {
 			throw new MALException(ex.getMessage(), ex);
 		}
 	}
@@ -287,7 +287,7 @@ public class SPPElementOutputStream implements MALElementOutputStream {
 	public void close() throws MALException {
 		try {
 			os.close();
-		} catch (IOException ex) {
+		} catch (final IOException ex) {
 			throw new MALException(ex.getMessage(), ex);
 		}
 	}

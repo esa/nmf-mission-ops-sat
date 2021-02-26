@@ -176,7 +176,7 @@ public class SPPEndpoint implements MALEndpoint {
 		if (isClosed) {
 			throw new MALException(ENDPOINT_CLOSED);
 		}
-		SPPMessageHeader msgHeader = new SPPMessageHeader(
+		final SPPMessageHeader msgHeader = new SPPMessageHeader(
 				uri,
 				authenticationId,
 				uriTo,
@@ -195,7 +195,7 @@ public class SPPEndpoint implements MALEndpoint {
 				operation,
 				areaVersion,
 				isErrorMessage);
-		MALOperation op = MALContextFactory.lookupArea(serviceArea, areaVersion).getServiceByNumber(service).getOperationByNumber(operation);
+		final MALOperation op = MALContextFactory.lookupArea(serviceArea, areaVersion).getServiceByNumber(service).getOperationByNumber(operation);
 		return createMessage(uri, uriTo, msgHeader, op, body, null, false, qosProperties);
 	}
 
@@ -224,7 +224,7 @@ public class SPPEndpoint implements MALEndpoint {
 		if (isClosed) {
 			throw new MALException(ENDPOINT_CLOSED);
 		}
-		SPPMessageHeader msgHeader = new SPPMessageHeader(
+		final SPPMessageHeader msgHeader = new SPPMessageHeader(
 				uri,
 				authenticationId,
 				uriTo,
@@ -243,7 +243,7 @@ public class SPPEndpoint implements MALEndpoint {
 				operation,
 				areaVersion,
 				isErrorMessage);
-		MALOperation op = MALContextFactory.lookupArea(serviceArea, areaVersion).getServiceByNumber(service).getOperationByNumber(operation);
+		final MALOperation op = MALContextFactory.lookupArea(serviceArea, areaVersion).getServiceByNumber(service).getOperationByNumber(operation);
 		return createMessage(uri, uriTo, msgHeader, op, null, encodedBody, true, qosProperties);
 	}
 
@@ -271,7 +271,7 @@ public class SPPEndpoint implements MALEndpoint {
 		if (isClosed) {
 			throw new MALException(ENDPOINT_CLOSED);
 		}
-		SPPMessageHeader msgHeader = new SPPMessageHeader(
+		final SPPMessageHeader msgHeader = new SPPMessageHeader(
 				uri,
 				authenticationId,
 				uriTo,
@@ -317,7 +317,7 @@ public class SPPEndpoint implements MALEndpoint {
 		if (isClosed) {
 			throw new MALException(ENDPOINT_CLOSED);
 		}
-		SPPMessageHeader msgHeader = new SPPMessageHeader(
+		final SPPMessageHeader msgHeader = new SPPMessageHeader(
 				uri,
 				authenticationId,
 				uriTo,
@@ -340,22 +340,22 @@ public class SPPEndpoint implements MALEndpoint {
 	}
 
 	private MALMessage createMessage(
-			URI uriFrom,
-			URI uriTo,
-			SPPMessageHeader msgHeader,
-			MALOperation op,
-			Object[] body,
-			MALEncodedBody encBody,
-			boolean isEncoded,
-			Map qosProperties
+            final URI uriFrom,
+            final URI uriTo,
+            final SPPMessageHeader msgHeader,
+            final MALOperation op,
+            final Object[] body,
+            final MALEncodedBody encBody,
+            final boolean isEncoded,
+            final Map qosProperties
 	) throws IllegalArgumentException, MALException {
 		// get effective properties, resolving per-application parameters
-		Configuration config = new Configuration(Configuration.mix(this.effectiveQosProperties, qosProperties));
-		SPPURI primarySPPURI = new SPPURI(config.isTCpacket() ? uriTo : uriFrom);
-		Map props = config.getEffectiveProperties(primarySPPURI.getQualifier(), primarySPPURI.getAPID());
-		MALEncodingContext ctx = new MALEncodingContext(msgHeader, op, -1, this.effectiveQosProperties, props);
-		MALElementStreamFactory esf = MALElementStreamFactory.newFactory(protocol, props);
-		SPPMessageBody msgBody = isEncoded
+		final Configuration config = new Configuration(Configuration.mix(this.effectiveQosProperties, qosProperties));
+		final SPPURI primarySPPURI = new SPPURI(config.isTCpacket() ? uriTo : uriFrom);
+		final Map props = config.getEffectiveProperties(primarySPPURI.getQualifier(), primarySPPURI.getAPID());
+		final MALEncodingContext ctx = new MALEncodingContext(msgHeader, op, -1, this.effectiveQosProperties, props);
+		final MALElementStreamFactory esf = MALElementStreamFactory.newFactory(protocol, props);
+		final SPPMessageBody msgBody = isEncoded
 				? createMessageBody(encBody, esf, ctx)
 				: createMessageBody(body, esf, ctx);
 		return new SPPMessage(msgHeader, msgBody, props, this.qosProperties, esf, transport);
@@ -379,12 +379,12 @@ public class SPPEndpoint implements MALEndpoint {
 	 * @throws MALException
 	 */
 	protected MALMessage createErrorMessage(final MALMessage replyToMsg, final MALStandardError error, final URI uriFrom) throws MALException {
-		MALMessageHeader header = replyToMsg.getHeader();
-		int type = header.getInteractionType().getOrdinal();
-		short stage = header.getInteractionStage().getValue();
+		final MALMessageHeader header = replyToMsg.getHeader();
+		final int type = header.getInteractionType().getOrdinal();
+		final short stage = header.getInteractionStage().getValue();
 
 		// Find out if current interaction allows returning an error message.
-		boolean isErrorAllowed = ((type == InteractionType._SUBMIT_INDEX && stage == MALSubmitOperation._SUBMIT_STAGE)
+		final boolean isErrorAllowed = ((type == InteractionType._SUBMIT_INDEX && stage == MALSubmitOperation._SUBMIT_STAGE)
 				|| (type == InteractionType._REQUEST_INDEX && stage == MALRequestOperation._REQUEST_STAGE)
 				|| (type == InteractionType._INVOKE_INDEX && stage == MALInvokeOperation._INVOKE_STAGE)
 				|| (type == InteractionType._PROGRESS_INDEX && stage == MALProgressOperation._PROGRESS_STAGE)
@@ -396,7 +396,7 @@ public class SPPEndpoint implements MALEndpoint {
 			return null;
 		}
 
-		MALMessage errMsg = createMessage(
+		final MALMessage errMsg = createMessage(
 				header.getAuthenticationId(),
 				header.getURIFrom(), // Reply to message sender.
 				new Time(System.currentTimeMillis()), // PENDING: Epoch for Time in MAL Java API unclear. Here: Use Java epoch. 
@@ -428,7 +428,7 @@ public class SPPEndpoint implements MALEndpoint {
 	 */
 	protected static SPPMessageBody createMessageBody(final MALEncodedBody encodedBody,
 			final MALElementStreamFactory esf, final MALEncodingContext ctx) {
-		MALMessageHeader header = ctx.getHeader();
+		final MALMessageHeader header = ctx.getHeader();
 		if (header.getIsErrorMessage()) {
 			return new SPPErrorBody(encodedBody, esf, ctx);
 		}
@@ -454,7 +454,7 @@ public class SPPEndpoint implements MALEndpoint {
 	 */
 	protected static SPPMessageBody createMessageBody(final Object[] body,
 			final MALElementStreamFactory esf, final MALEncodingContext ctx) {
-		MALMessageHeader header = ctx.getHeader();
+		final MALMessageHeader header = ctx.getHeader();
 		if (header.getIsErrorMessage()) {
 			return new SPPErrorBody(body, esf, ctx);
 		}
@@ -483,7 +483,7 @@ public class SPPEndpoint implements MALEndpoint {
 		if (msg == null) {
 			throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
 		}
-		MALMessageHeader header = msg.getHeader();
+		final MALMessageHeader header = msg.getHeader();
 		if (null == header.getURIFrom()
 				|| null == header.getURITo()
 				|| null == header.getQoSlevel()
@@ -496,7 +496,7 @@ public class SPPEndpoint implements MALEndpoint {
 				|| null == header.getOperation()
 				|| null == header.getAreaVersion()
 				|| null == header.getIsErrorMessage()) {
-			MALStandardError error = new MALStandardError(MALHelper.INTERNAL_ERROR_NUMBER, HEADER_FIELD_IS_NULL);
+			final MALStandardError error = new MALStandardError(MALHelper.INTERNAL_ERROR_NUMBER, HEADER_FIELD_IS_NULL);
 			throw new MALTransmitErrorException(header, error, msg.getQoSProperties());
 		}
 
@@ -506,14 +506,14 @@ public class SPPEndpoint implements MALEndpoint {
 			// Check validity of URIs here by creating SPPURI objects.
 			sppURIFrom = new SPPURI(header.getURIFrom());
 			sppURITo = new SPPURI(header.getURITo());
-		} catch (IllegalArgumentException ex) {
-			MALStandardError error = new MALStandardError(MALHelper.INTERNAL_ERROR_NUMBER, INVALID_URI);
+		} catch (final IllegalArgumentException ex) {
+			final MALStandardError error = new MALStandardError(MALHelper.INTERNAL_ERROR_NUMBER, INVALID_URI);
 			throw new MALTransmitErrorException(header, error, msg.getQoSProperties());
 		}
 
 		final SPPURI epURI = new SPPURI(uri);
 		// boolean isLocalDestination = (sppURITo.getQualifier() == epURI.getQualifier()) && (sppURITo.getAPID() == epURI.getAPID());
-		boolean isLocalDestination = null != transport.getEndpoint(header.getURITo());
+		final boolean isLocalDestination = null != transport.getEndpoint(header.getURITo());
 
 		try {
 			if (isLocalDestination) {
@@ -521,15 +521,15 @@ public class SPPEndpoint implements MALEndpoint {
                         		((SPPMessageBody) msg.getBody()).prepareInProcessBody();
                                 	transport.injectReceivedMessage(msg);
                                         return;
-                                } catch (Exception ex) {
+                                } catch (final Exception ex) {
                                         Logger.getLogger(SPPEndpoint.class.getName()).log(Level.SEVERE, "Maybe the configuration file is not being read!", ex);
-                                        MALStandardError error = new MALStandardError(MALHelper.INTERNAL_ERROR_NUMBER, ex.getMessage());
+                                        final MALStandardError error = new MALStandardError(MALHelper.INTERNAL_ERROR_NUMBER, ex.getMessage());
                                         throw new MALTransmitErrorException(msg.getHeader(), error, msg.getQoSProperties());
                                 }
 			}
 
-			Configuration config = new Configuration(msg.getQoSProperties());
-			boolean isTCpacket = config.isTCpacket();
+			final Configuration config = new Configuration(msg.getQoSProperties());
+			final boolean isTCpacket = config.isTCpacket();
 			final int primaryQualifier = isTCpacket ? sppURITo.getQualifier() : sppURIFrom.getQualifier();
 			final short primaryApid = isTCpacket ? sppURITo.getAPID() : sppURIFrom.getAPID();
 
@@ -540,17 +540,17 @@ public class SPPEndpoint implements MALEndpoint {
                         	final int packetDataFieldSizeLimit = config.packetDataFieldSizeLimit();
                         
                                 // Line hitting the exception is below!!
-        			SpacePacket[] spacePackets = ((SPPMessage) msg).createSpacePackets(sequenceCounter, segmentCounter, packetDataFieldSizeLimit);
+        			final SpacePacket[] spacePackets = ((SPPMessage) msg).createSpacePackets(sequenceCounter, segmentCounter, packetDataFieldSizeLimit);
 
 //                                this.outgoingQueue.put(spacePackets);
                                 
-                                for (SpacePacket sp : spacePackets) {
+                                for (final SpacePacket sp : spacePackets) {
 					sppSocket.send(sp);
 				}
                                 
 			}
-		} catch (Exception ex) {
-			MALStandardError error = new MALStandardError(MALHelper.INTERNAL_ERROR_NUMBER, ex.getMessage());
+		} catch (final Exception ex) {
+			final MALStandardError error = new MALStandardError(MALHelper.INTERNAL_ERROR_NUMBER, ex.getMessage());
 			throw new MALTransmitErrorException(msg.getHeader(), error, msg.getQoSProperties());
 		}
 	}
@@ -565,17 +565,17 @@ public class SPPEndpoint implements MALEndpoint {
 			throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
 		}
 
-		List<MALTransmitErrorException> transmitErrors = new LinkedList<>();
-		for (MALMessage msg : msgList) {
+		final List<MALTransmitErrorException> transmitErrors = new LinkedList<>();
+		for (final MALMessage msg : msgList) {
 			try {
 				sendMessage(msg);
-			} catch (MALTransmitErrorException ex) {
+			} catch (final MALTransmitErrorException ex) {
 				transmitErrors.add(ex);
 			}
 		}
 		if (!transmitErrors.isEmpty()) {
 			throw new MALTransmitMultipleErrorException(
-					transmitErrors.toArray(new MALTransmitErrorException[transmitErrors.size()]));
+					transmitErrors.toArray(new MALTransmitErrorException[0]));
 		}
 	}
 

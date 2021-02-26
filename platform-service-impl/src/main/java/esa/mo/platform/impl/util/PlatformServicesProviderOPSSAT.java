@@ -57,7 +57,7 @@ public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderI
   private final SoftwareDefinedRadioProviderServiceImpl sdrService
       = new SoftwareDefinedRadioProviderServiceImpl();
 
-  public void init(COMServicesProvider comServices, GMVServicesConsumer gmvServicesConsumer) throws
+  public void init(final COMServicesProvider comServices, final GMVServicesConsumer gmvServicesConsumer) throws
       MALException
   {
     try {
@@ -67,7 +67,7 @@ public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderI
       optrxService.init(new OpticalRxOPSSATAdapter());
       powerService.init(new PowerControlOPSSATAdapter(gmvServicesConsumer));
       sdrService.init(new SDROPSSATAdapter());
-    } catch (UnsatisfiedLinkError | NoClassDefFoundError | NoSuchMethodError error) {
+    } catch (final UnsatisfiedLinkError | NoClassDefFoundError | NoSuchMethodError error) {
       LOGGER.log(Level.SEVERE,
           "Could not load platform adapters (check for missing JARs and libraries)", error);
     }

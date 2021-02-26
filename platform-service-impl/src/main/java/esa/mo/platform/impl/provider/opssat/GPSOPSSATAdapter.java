@@ -39,16 +39,16 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
 
     private final GMVServicesConsumer gmvServicesConsumer;
 
-    public GPSOPSSATAdapter(GMVServicesConsumer gmvServicesConsumer) {
+    public GPSOPSSATAdapter(final GMVServicesConsumer gmvServicesConsumer) {
         this.gmvServicesConsumer = gmvServicesConsumer;
     }
 
     @Override
-    public String getNMEASentence(String identifier) throws IOException {
-        GPSHandler gpsHandler = new GPSHandler();
+    public String getNMEASentence(final String identifier) throws IOException {
+        final GPSHandler gpsHandler = new GPSHandler();
         try {
             gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData(new Blob(identifier.getBytes()), gpsHandler);
-        } catch (IllegalArgumentException | MALException | MALInteractionException e) {
+        } catch (final IllegalArgumentException | MALException | MALInteractionException e) {
             throw new IOException("Error when retrieving GPS NMEA response from Nanomind", e);
         }
         return gpsHandler.response;
@@ -62,11 +62,11 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
     private class GPSHandler extends GPSAdapter {
         String response = "";
         @Override
-        public void getGPSDataResponseReceived(org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader,
-                org.ccsds.moims.mo.mal.structures.Blob data, java.util.Map qosProperties) {
+        public void getGPSDataResponseReceived(final org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader,
+                                               final org.ccsds.moims.mo.mal.structures.Blob data, final java.util.Map qosProperties) {
             try {
                 response = Arrays.toString(data.getValue());
-            } catch (MALException ex) {
+            } catch (final MALException ex) {
                 Logger.getLogger(GPSHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
         }

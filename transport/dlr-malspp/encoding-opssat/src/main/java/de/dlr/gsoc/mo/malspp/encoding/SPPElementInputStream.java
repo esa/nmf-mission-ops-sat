@@ -53,7 +53,7 @@ public class SPPElementInputStream implements MALElementInputStream {
 			return decoder.decodeElement(getUnionizedElement(element));
 		}
 
-		ServiceInfo service = new ServiceInfo(ctx);
+		final ServiceInfo service = new ServiceInfo(ctx);
 		final boolean isPubSub = service.getInteraction().equals(InteractionType.PUBSUB);
 
 		// Element of type List< <<Update Value Type>> > means it is not of type Identifier or
@@ -99,8 +99,8 @@ public class SPPElementInputStream implements MALElementInputStream {
 		// flipped. Exchange the last 24 bits of the absolute short form with the sign flipped type.
 		final Long updateValueShortForm = (updateListShortForm & ~0xFFFFFF)
 				| (-(updateListShortForm & 0xFFFFFF) & 0xFFFFFF);
-		MALEncodedElementList encElemList = new MALEncodedElementList(updateValueShortForm, 10); // initial list size set arbitrarily
-		MALListDecoder listDecoder = decoder.createListDecoder(encElemList);
+		final MALEncodedElementList encElemList = new MALEncodedElementList(updateValueShortForm, 10); // initial list size set arbitrarily
+		final MALListDecoder listDecoder = decoder.createListDecoder(encElemList);
 		// Treat each list element as nullable Blob. This is compatible with 3.5.3.5.1 MALSPP.
 		Blob b;
 		while (listDecoder.hasNext()) {
@@ -114,7 +114,7 @@ public class SPPElementInputStream implements MALElementInputStream {
 		if (service.isDeclaredAttribute()) {
 			return decoder.decodeAttribute();
 		}
-		Element e = getPrototype(element);
+		final Element e = getPrototype(element);
 		return decoder.decodeElement(e);
 	}
 
@@ -129,7 +129,7 @@ public class SPPElementInputStream implements MALElementInputStream {
 	public void close() throws MALException {
 		try {
 			is.close();
-		} catch (IOException ex) {
+		} catch (final IOException ex) {
 			throw new MALException(ex.getMessage(), ex);
 		}
 	}
@@ -150,7 +150,7 @@ public class SPPElementInputStream implements MALElementInputStream {
 		}
 		try {
 			return (Element) element;
-		} catch (ClassCastException ex) {
+		} catch (final ClassCastException ex) {
 			throw new MALException(ex.getMessage(), ex);
 		}
 	}
@@ -171,7 +171,7 @@ public class SPPElementInputStream implements MALElementInputStream {
 		// Absolute short form can be read directly from input stream because encoding defined in
 		// MALSPP Book (5.2.3) coincides with absolute short form definition in MAL Java API
 		// (4.5.5.2.1).
-		byte[] b = decoder.read(8);
+		final byte[] b = decoder.read(8);
 		long shortForm = 0;
 		for (int i = 0; i < 8; i++) {
 			shortForm <<= 8;
@@ -180,7 +180,7 @@ public class SPPElementInputStream implements MALElementInputStream {
 		try {
 			return getUnionizedElement(MALContextFactory.getElementFactoryRegistry()
 					.lookupElementFactory(shortForm).createElement());
-		} catch (NullPointerException ex) {
+		} catch (final NullPointerException ex) {
 			throw new MALException(ex.getMessage(), ex);
 		}
 	}

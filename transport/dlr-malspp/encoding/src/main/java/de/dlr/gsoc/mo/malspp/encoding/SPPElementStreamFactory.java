@@ -78,25 +78,22 @@ public class SPPElementStreamFactory extends MALElementStreamFactory {
 			throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
 		}
 
-                ByteArrayOutputStream os = new ByteArrayOutputStream();
-		MALElementOutputStream eos = createOutputStream(os);
+                final ByteArrayOutputStream os = new ByteArrayOutputStream();
+		final MALElementOutputStream eos = createOutputStream(os);
 
 		for (int i = 0; i < elements.length; i++) {
 			ctx.setBodyElementIndex(i);
                     try {
                         eos.writeElement(elements[i], ctx);
-                    } catch (IllegalArgumentException ex) {
+                    } catch (final IllegalArgumentException | MALException ex) {
                         Logger.getLogger(SPPElementStreamFactory.class.getName()).log(Level.SEVERE, "The Element is type: " + elements[i].getClass().getName() + " - " + elements[i].toString(), ex);
                         throw ex;
-                    } catch (MALException ex1) {
-                        Logger.getLogger(SPPElementStreamFactory.class.getName()).log(Level.SEVERE, "The Element is type: " + elements[i].getClass().getName() + " - " + elements[i].toString(), ex1);
-                        throw ex1;
                     }
 		}
 
 		try {
 			os.flush();
-		} catch (IOException ex) {
+		} catch (final IOException ex) {
 			throw new MALException(ex.getMessage(), ex);
 		}
 		return new Blob(os.toByteArray());

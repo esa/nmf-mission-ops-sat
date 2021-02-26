@@ -78,12 +78,12 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
     private GMVServicesConsumer gmvServicesConsumer;
 
     @Override
-    public void initialRegistrations(MCRegistration registration) {
+    public void initialRegistrations(final MCRegistration registration) {
         registration.setMode(MCRegistration.RegistrationMode.DONT_UPDATE_IF_EXISTS);
 
         // ------------------ Parameters ------------------
-        ParameterDefinitionDetailsList defs = new ParameterDefinitionDetailsList();
-        IdentifierList paramIdentifiers = new IdentifierList();
+        final ParameterDefinitionDetailsList defs = new ParameterDefinitionDetailsList();
+        final IdentifierList paramIdentifiers = new IdentifierList();
 
         defs.add(new ParameterDefinitionDetails(
                 "The Current partition where the OS is running.",
@@ -109,48 +109,48 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
 
         registration.registerParameters(paramIdentifiers, defs);
 
-        ActionDefinitionDetailsList actionDefs = new ActionDefinitionDetailsList();
-        IdentifierList actionIdentifiers = new IdentifierList();
+        final ActionDefinitionDetailsList actionDefs = new ActionDefinitionDetailsList();
+        final IdentifierList actionIdentifiers = new IdentifierList();
 
-        ArgumentDefinitionDetailsList arguments1 = new ArgumentDefinitionDetailsList();
+        final ArgumentDefinitionDetailsList arguments1 = new ArgumentDefinitionDetailsList();
         {
-            Byte rawType = Attribute._STRING_TYPE_SHORT_FORM;
-            String rawUnit = "NMEA sentence identifier";
-            ConditionalConversionList conditionalConversions = null;
-            Byte convertedType = null;
-            String convertedUnit = null;
+            final Byte rawType = Attribute._STRING_TYPE_SHORT_FORM;
+            final String rawUnit = "NMEA sentence identifier";
+            final ConditionalConversionList conditionalConversions = null;
+            final Byte convertedType = null;
+            final String convertedUnit = null;
 
             arguments1.add(new ArgumentDefinitionDetails(new Identifier("0"), null,
                     rawType, rawUnit, conditionalConversions, convertedType, convertedUnit));
         }
 
-        ActionDefinitionDetails actionDef1 = new ActionDefinitionDetails(
+        final ActionDefinitionDetails actionDef1 = new ActionDefinitionDetails(
                 "Injects the NMEA sentence identifier into the CAN bus.",
                 new UOctet((short) 0),
                 new UShort(0),
                 arguments1
         );
 
-        ArgumentDefinitionDetailsList arguments2 = new ArgumentDefinitionDetailsList();
+        final ArgumentDefinitionDetailsList arguments2 = new ArgumentDefinitionDetailsList();
         {
-            Byte rawType = Attribute._LONG_TYPE_SHORT_FORM;
-            String rawUnit = "milliseconds";
-            ConditionalConversionList conditionalConversions = null;
-            Byte convertedType = null;
-            String convertedUnit = null;
+            final Byte rawType = Attribute._LONG_TYPE_SHORT_FORM;
+            final String rawUnit = "milliseconds";
+            final ConditionalConversionList conditionalConversions = null;
+            final Byte convertedType = null;
+            final String convertedUnit = null;
 
             arguments2.add(new ArgumentDefinitionDetails(new Identifier("0"), null,
                     rawType, rawUnit, conditionalConversions, convertedType, convertedUnit));
         }
 
-        ActionDefinitionDetails actionDef2 = new ActionDefinitionDetails(
+        final ActionDefinitionDetails actionDef2 = new ActionDefinitionDetails(
                 "Sets the clock using a diff between the on-board time and the desired time.",
                 new UOctet((short) 0),
                 new UShort(0),
                 arguments2
         );
 
-        ActionDefinitionDetails actionDef3 = new ActionDefinitionDetails(
+        final ActionDefinitionDetails actionDef3 = new ActionDefinitionDetails(
                 "Reboots the mityArm.",
                 new UOctet((short) 0),
                 new UShort(0),
@@ -164,7 +164,7 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         actionIdentifiers.add(new Identifier(ACTION_CLOCK_SET_TIME));
         actionIdentifiers.add(new Identifier(ACTION_REBOOT));
 
-        LongList actionObjIds = registration.registerActions(actionIdentifiers, actionDefs);
+        final LongList actionObjIds = registration.registerActions(actionIdentifiers, actionDefs);
 
         // Start the GMV consumer
         gmvServicesConsumer = new GMVServicesConsumer();
@@ -324,33 +324,33 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
     }
 
     @Override
-    public Attribute onGetValue(Identifier identifier, Byte rawType) {
+    public Attribute onGetValue(final Identifier identifier, final Byte rawType) {
         if (PARAMETER_CURRENT_PARTITION.equals(identifier.getValue())) {
-            String msg = shellCommander.runCommandAndGetOutputMessage(CMD_CURRENT_PARTITION);
+            final String msg = shellCommander.runCommandAndGetOutputMessage(CMD_CURRENT_PARTITION);
             return (Attribute) HelperAttributes.javaType2Attribute(msg);
         }
 
         else if (PARAMETER_LINUX_VERSION.equals(identifier.getValue())) {
-            String msg = shellCommander.runCommandAndGetOutputMessage(CMD_LINUX_VERSION);
+            final String msg = shellCommander.runCommandAndGetOutputMessage(CMD_LINUX_VERSION);
             return (Attribute) HelperAttributes.javaType2Attribute(msg);
         }
         return null;
     }
 
     @Override
-    public Boolean onSetValue(IdentifierList identifiers, ParameterRawValueList values) {
+    public Boolean onSetValue(final IdentifierList identifiers, final ParameterRawValueList values) {
         return false;  // to confirm that no variable was set
     }
 
     @Override
-    public UInteger actionArrived(Identifier name, AttributeValueList attributeValues,
-            Long actionInstanceObjId, boolean reportProgress, MALInteraction interaction) {
+    public UInteger actionArrived(final Identifier name, final AttributeValueList attributeValues,
+                                  final Long actionInstanceObjId, final boolean reportProgress, final MALInteraction interaction) {
         if (ACTION_GPS_SENTENCE.equals(name.getValue())) {
             try {
                 gmvServicesConsumer.getGPSNanomindService().getGPSNanomindStub().asyncGetGPSData(new Blob("GPGGALONG".getBytes()), new MCGPSAdapter());
-            } catch (MALInteractionException ex) {
+            } catch (final MALInteractionException ex) {
                 LOGGER.log(Level.SEVERE, null, ex);
-            } catch (MALException ex) {
+            } catch (final MALException ex) {
                 LOGGER.log(Level.SEVERE, null, ex);
             }
 
@@ -358,8 +358,8 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
         }
 
         if (ACTION_REBOOT.equals(name.getValue())) {
-            ShellCommander shell = new ShellCommander();
-            String output = shell.runCommandAndGetOutputMessage(CMD_LINUX_REBOOT);
+            final ShellCommander shell = new ShellCommander();
+            final String output = shell.runCommandAndGetOutputMessage(CMD_LINUX_REBOOT);
             LOGGER.log(Level.INFO, "Output: " + output);
 
             return null; // Success!
@@ -370,12 +370,12 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
                 return new UInteger(0); // Error!
             }
 
-            AttributeValue aVal = attributeValues.get(0); // Extract the delta!
-            long delta = (Long) HelperAttributes.attribute2JavaType(aVal.getValue());
+            final AttributeValue aVal = attributeValues.get(0); // Extract the delta!
+            final long delta = (Long) HelperAttributes.attribute2JavaType(aVal.getValue());
 
-            String str = (new SimpleDateFormat(DATE_PATTERN)).format(new Date(System.currentTimeMillis() + delta));
+            final String str = (new SimpleDateFormat(DATE_PATTERN)).format(new Date(System.currentTimeMillis() + delta));
 
-            ShellCommander shell = new ShellCommander();
+            final ShellCommander shell = new ShellCommander();
             shell.runCommand("date -s \"" + str + " UTC\" | hwclock --systohc");
 
             return null; // Success!
@@ -387,32 +387,32 @@ public class MCOPSSATAdapter extends MonitorAndControlNMFAdapter {
     private class MCGPSAdapter extends GPSAdapter {
 
         @Override
-        public void getGPSDataAckReceived(org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader, java.util.Map qosProperties) {
+        public void getGPSDataAckReceived(final org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader, final java.util.Map qosProperties) {
             LOGGER.log(Level.INFO, "1. getGPSDataAckReceived()");
         }
 
         @Override
-        public void getGPSDataResponseReceived(org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader,
-                org.ccsds.moims.mo.mal.structures.Blob data, java.util.Map qosProperties) {
+        public void getGPSDataResponseReceived(final org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader,
+                                               final org.ccsds.moims.mo.mal.structures.Blob data, final java.util.Map qosProperties) {
             try {
                 LOGGER.log(Level.INFO,
                         "2. getGPSDataResponseReceived() Data: "
                         + Arrays.toString(data.getValue()));
-            } catch (MALException ex) {
+            } catch (final MALException ex) {
                 LOGGER.log(Level.SEVERE, null, ex);
             }
         }
 
         @Override
-        public void getGPSDataAckErrorReceived(org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader,
-                org.ccsds.moims.mo.mal.MALStandardError error, java.util.Map qosProperties) {
+        public void getGPSDataAckErrorReceived(final org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader,
+                                               final org.ccsds.moims.mo.mal.MALStandardError error, final java.util.Map qosProperties) {
             LOGGER.log(Level.INFO,
                     "3. getGPSDataAckErrorReceived()");
         }
 
         @Override
-        public void getGPSDataResponseErrorReceived(org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader,
-                org.ccsds.moims.mo.mal.MALStandardError error, java.util.Map qosProperties) {
+        public void getGPSDataResponseErrorReceived(final org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader,
+                                                    final org.ccsds.moims.mo.mal.MALStandardError error, final java.util.Map qosProperties) {
             LOGGER.log(Level.INFO,
                     "4. getGPSDataResponseErrorReceived(): " + error.toString());
         }

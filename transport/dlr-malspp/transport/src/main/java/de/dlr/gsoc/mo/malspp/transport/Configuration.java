@@ -25,8 +25,6 @@ import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -127,10 +125,10 @@ public class Configuration {
 	}
 
 	public IdentifierList domain() {
-		IdentifierList domain;
+		final IdentifierList domain;
 		if (properties.get(PROPERTY_DOMAIN) != null) {
 			domain = new IdentifierList();
-			for (String domainPart : ((String) properties.get(PROPERTY_DOMAIN)).split("\\.")) {
+			for (final String domainPart : ((String) properties.get(PROPERTY_DOMAIN)).split("\\.")) {
 				domain.add(new Identifier(domainPart));
 			}
 		} else {
@@ -146,7 +144,7 @@ public class Configuration {
 	}
 
 	public int packetDataFieldSizeLimit() {
-		int sizeLimitFromConfig = (new UShort(Integer.parseInt((String) properties.get(PROPERTY_PACKET_DATA_FIELD_SIZE_LIMIT)))).getValue();
+		final int sizeLimitFromConfig = (new UShort(Integer.parseInt((String) properties.get(PROPERTY_PACKET_DATA_FIELD_SIZE_LIMIT)))).getValue();
 		return sizeLimitFromConfig == 0 ? MAX_SPACE_PACKET_SIZE : sizeLimitFromConfig;
 	}
 
@@ -185,7 +183,7 @@ public class Configuration {
 	}
 	
 	public short apid() {
-		Object o = properties.get(PROPERTY_APID);
+		final Object o = properties.get(PROPERTY_APID);
 		if (o instanceof Integer) {
 			return ((Integer) o).shortValue();
 		}
@@ -193,11 +191,11 @@ public class Configuration {
 	}
 
 	public int qualifier() {
-		Object o = properties.get(PROPERTY_APID_QUALIFIER);
+		final Object o = properties.get(PROPERTY_APID_QUALIFIER);
 		if (o instanceof Integer) {
 			return (Integer) o;
 		}
-		return Integer.valueOf((String) o);
+		return Integer.parseInt((String) o);
 	}
 
 	public boolean authenticationIdFlag() {
@@ -236,7 +234,7 @@ public class Configuration {
 	 * @return
 	 */
 	private boolean getBooleanProperty(final String flagProperty) {
-		Object propertyObject = properties == null ? null : properties.get(flagProperty);
+		final Object propertyObject = properties == null ? null : properties.get(flagProperty);
 		return (null == propertyObject) || (propertyObject instanceof Boolean ? (Boolean) propertyObject : Boolean.valueOf((String) propertyObject));
 	}
 
@@ -252,15 +250,15 @@ public class Configuration {
 	protected synchronized Map getEffectiveProperties(final int primaryQualifier, final short primaryApid) throws MALException {
 		// Read config file only once. If different configurations are needed for multiple
 		// transports, they can be told apart by the different config filename.
-		String fn = mappingConfigurationFile();
+		final String fn = mappingConfigurationFile();
 		if (!mappingConfigurations.containsKey(fn)) {
 			try {
 				mappingConfigurations.put(fn, loadMappingConf(fn));
-			} catch (XMLStreamException | FileNotFoundException ex) {
+			} catch (final XMLStreamException | FileNotFoundException ex) {
 				throw new MALException(ex.getMessage(), ex);
 			}
 		}
-		Map<AppId, Map> mappingConfs = mappingConfigurations.get(fn);
+		final Map<AppId, Map> mappingConfs = mappingConfigurations.get(fn);
 		// Mix it in this order so it is possible to dynamically reconfigure the mapping
 		// configuration parameters.
 		AppId appId = new AppId(primaryQualifier, primaryApid);
@@ -277,31 +275,31 @@ public class Configuration {
 	}
 
 	private static Map<AppId, Map> loadMappingConf(final String filename) throws XMLStreamException, FileNotFoundException {
-		XMLInputFactory xif = XMLInputFactory.newInstance();
-		XMLEventReader xer = xif.createXMLEventReader(new FileInputStream(filename));
-		LinkedList<Scope> scope = new LinkedList<>();
+		final XMLInputFactory xif = XMLInputFactory.newInstance();
+		final XMLEventReader xer = xif.createXMLEventReader(new FileInputStream(filename));
+		final LinkedList<Scope> scope = new LinkedList<>();
 		Map<AppId, Map> config = null;
 		Map<String, String> appConfig = null;
 		while (xer.hasNext()) {
-			XMLEvent e = xer.nextEvent();
-			Scope s = scope.peekLast();
+			final XMLEvent e = xer.nextEvent();
+			final Scope s = scope.peekLast();
 			switch (e.getEventType()) {
 				case XMLEvent.START_DOCUMENT:
 					scope.add(Scope.START);
 					break;
 				case XMLEvent.START_ELEMENT:
-					String name = e.asStartElement().getName().getLocalPart();
+					final String name = e.asStartElement().getName().getLocalPart();
 					if (Scope.START == s && Scope.CONFIG.getName().equals(name)) {
 						config = new HashMap<>();
 						scope.add(Scope.CONFIG);
 					} else if (Scope.CONFIG == s && Scope.APP.getName().equals(name)) {
 						try {
-							int qualifier = Integer.parseInt(e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_APID_QUALIFIER)).getValue());
-							short apid = Short.parseShort(e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_APID)).getValue());
+							final int qualifier = Integer.parseInt(e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_APID_QUALIFIER)).getValue());
+							final short apid = Short.parseShort(e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_APID)).getValue());
 							appConfig = new HashMap<>();
 							config.put(new AppId(qualifier, apid), appConfig);
 							scope.add(Scope.APP);
-						} catch (NumberFormatException | NullPointerException ex) {
+						} catch (final NumberFormatException | NullPointerException ex) {
 							throw new XMLStreamException(MALFORMED_XML + " @ " + e.getLocation().toString(), ex);
 						}
 					} else if (Scope.APP == s) {
@@ -328,34 +326,34 @@ public class Configuration {
 						}
 					} else if (Scope.TIME == s) {
 						if (Scope.FORMAT.getName().equals(name)) {
-							String v = e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_TIME_UNIT)).getValue();
+							final String v = e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_TIME_UNIT)).getValue();
 							appConfig.put(PROPERTY_TIME_UNIT, v);
 							scope.add(Scope.FORMAT);
 						} else if (Scope.EPOCH.getName().equals(name)) {
-							String v = e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_TIME_SCALE)).getValue();
+							final String v = e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_TIME_SCALE)).getValue();
 							appConfig.put(PROPERTY_TIME_EPOCH_TIMESCALE, v);
 							scope.add(Scope.EPOCH);
 						}
 					} else if (Scope.FINETIME == s) {
 						if (Scope.FORMAT.getName().equals(name)) {
-							String v = e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_TIME_UNIT)).getValue();
+							final String v = e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_TIME_UNIT)).getValue();
 							appConfig.put(PROPERTY_FINE_TIME_UNIT, v);
 							scope.add(Scope.FORMAT);
 						} else if (Scope.EPOCH.getName().equals(name)) {
-							String v = e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_TIME_SCALE)).getValue();
+							final String v = e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_TIME_SCALE)).getValue();
 							appConfig.put(PROPERTY_FINE_TIME_EPOCH_TIMESCALE, v);
 							scope.add(Scope.EPOCH);
 						}
 					} else if (Scope.DURATION == s) {
 						if (Scope.FORMAT.getName().equals(name)) {
-							String v = e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_TIME_UNIT)).getValue();
+							final String v = e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_TIME_UNIT)).getValue();
 							appConfig.put(PROPERTY_DURATION_UNIT, v);
 							scope.add(Scope.FORMAT);
 						}
 					}
 					break;
 				case XMLEvent.CHARACTERS:
-					String data = e.asCharacters().getData().trim();
+					final String data = e.asCharacters().getData().trim();
 					if (Scope.AUTHENTICATION_ID == s) {
 						appConfig.put(PROPERTY_AUTHENTICATION_ID, data);
 					} else if (Scope.DOMAIN == s) {
@@ -371,10 +369,10 @@ public class Configuration {
 					} else if (Scope.VARINT_SUPPORTED == s) {
 						appConfig.put(PROPERTY_VARINT_SUPPORTED, data);
 					} else if (Scope.FORMAT == s || Scope.EPOCH == s) {
-						Scope parentScope;
+						final Scope parentScope;
 						try {
 							parentScope = scope.get(scope.size() - 2);
-						} catch (IndexOutOfBoundsException ex) {
+						} catch (final IndexOutOfBoundsException ex) {
 							throw new XMLStreamException(MALFORMED_XML + " @ " + e.getLocation().toString());
 						}
 						if (Scope.FORMAT == s) {
@@ -413,11 +411,11 @@ public class Configuration {
 	 * @return Byte array represented by the hex digits.
 	 */
 	private static byte[] hexToByte(final String s) {
-		int len = s.length();
+		final int len = s.length();
 		if (len % 2 != 0) {
 			throw new IllegalArgumentException();
 		}
-		byte[] data = new byte[len / 2];
+		final byte[] data = new byte[len / 2];
 		for (int i = 0; i < data.length; i++) {
 			data[i] = (byte) Short.parseShort(s.substring(i * 2, (i + 1) * 2), 16);
 		}
@@ -433,7 +431,7 @@ public class Configuration {
 	 * @return A new Map containing a mixture of baseProperties and newProperties.
 	 */
 	protected static Map mix(final Map baseProperties, final Map newProperties) {
-		Map props = null == baseProperties ? new HashMap() : new HashMap(baseProperties);
+		final Map props = null == baseProperties ? new HashMap() : new HashMap(baseProperties);
 		if (null != newProperties) {
 			props.putAll(newProperties);
 		}
@@ -445,19 +443,18 @@ public class Configuration {
 		public int qualifier;
 		public short apid;
 
-		AppId(int qualifier, short apid) {
+		AppId(final int qualifier, final short apid) {
 			this.qualifier = qualifier;
 			this.apid = apid;
 		}
 
 		@Override
 		public int hashCode() {
-			int hash = 5;
-			return hash;
+			return 5;
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(final Object obj) {
 			if (obj == null) {
 				return false;
 			}
@@ -495,7 +492,7 @@ public class Configuration {
 
 		private final String elementName;
 
-		Scope(String elementName) {
+		Scope(final String elementName) {
 			this.elementName = elementName;
 		}
 

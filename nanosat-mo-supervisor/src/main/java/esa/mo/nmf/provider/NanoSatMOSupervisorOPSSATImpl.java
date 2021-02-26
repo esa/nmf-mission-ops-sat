@@ -47,7 +47,7 @@ public final class NanoSatMOSupervisorOPSSATImpl extends NanoSatMOSupervisor {
     }
 
     @Override
-    public void initPlatformServices(COMServicesProvider comServices) {
+    public void initPlatformServices(final COMServicesProvider comServices) {
         // Initialize the consumers to the Nanomind
         gmvServicesConsumer = new GMVServicesConsumer();
         gmvServicesConsumer.init();
@@ -55,7 +55,7 @@ public final class NanoSatMOSupervisorOPSSATImpl extends NanoSatMOSupervisor {
         try {
             platformServicesOPSSAT = new PlatformServicesProviderOPSSAT();
             platformServicesOPSSAT.init(comServices, gmvServicesConsumer);
-        } catch (MALException ex) {
+        } catch (final MALException ex) {
             Logger.getLogger(NanoSatMOSupervisorOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -67,7 +67,7 @@ public final class NanoSatMOSupervisorOPSSATImpl extends NanoSatMOSupervisor {
      * @throws java.lang.Exception If there is an error
      */
     public static void main(final String args[]) throws Exception {
-        NanoSatMOSupervisorOPSSATImpl supervisor = new NanoSatMOSupervisorOPSSATImpl();
+        final NanoSatMOSupervisorOPSSATImpl supervisor = new NanoSatMOSupervisorOPSSATImpl();
         supervisor.init(new MCOPSSATAdapter());
     }
 

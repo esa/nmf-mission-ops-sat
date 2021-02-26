@@ -43,8 +43,8 @@ public abstract class SPPSocketFactory {
     "org.ccsds.moims.mo.testbed.util.sppimpl.tcp.TCPSPPSocketFactory";
   
   public static SPPSocketFactory newInstance() throws Exception {
-      String factoryClassName = System.getProperty(FACTORY_CLASS, DEFAULT_FACTORY_CLASS_NAME);
-      Class factoryClass = Class.forName(factoryClassName);
+      final String factoryClassName = System.getProperty(FACTORY_CLASS, DEFAULT_FACTORY_CLASS_NAME);
+      final Class factoryClass = Class.forName(factoryClassName);
       return (SPPSocketFactory) factoryClass.newInstance();
   }
   

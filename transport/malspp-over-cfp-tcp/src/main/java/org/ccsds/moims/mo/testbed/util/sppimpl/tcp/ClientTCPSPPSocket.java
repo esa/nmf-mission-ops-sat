@@ -65,13 +65,13 @@ public class ClientTCPSPPSocket implements SPPSocket
     super();
   }
 
-  public void init(Map properties) throws Exception
+  public void init(final Map properties) throws Exception
   {
     LOGGER.log(Level.FINE, "ClientTCPSPPSocket.init({0})", properties);
     host = (String) properties.get(HOSTNAME);
-    String portS = (String) properties.get(PORT);
+    final String portS = (String) properties.get(PORT);
     port = Integer.parseInt(portS);
-    String retryTimeS = (String) properties.get(RETRYTIME);
+    final String retryTimeS = (String) properties.get(RETRYTIME);
     if (retryTimeS != null) {
       retryTime = Integer.parseInt(retryTimeS);
     } else {
@@ -79,10 +79,10 @@ public class ClientTCPSPPSocket implements SPPSocket
     }
   }
 
-  public void connect(String host, int port) throws IOException
+  public void connect(final String host, final int port) throws IOException
   {
     LOGGER.log(Level.FINE, "ClientTCPSPPSocket.connect({0},{1})", new Object[]{host, port});
-    Socket socket = new Socket(host, port);
+    final Socket socket = new Socket(host, port);
     channel = new SPPChannel(socket);
   }
 
@@ -98,13 +98,13 @@ public class ClientTCPSPPSocket implements SPPSocket
     while (true) {
       if (channel != null) {
         try {
-          SpacePacket packet = channel.receive();
+          final SpacePacket packet = channel.receive();
 
           if(packet == null){ // return null if packet is not NMF relevant
             return packet;
           }
 
-          int packetAPID = packet.getHeader().getApid();
+          final int packetAPID = packet.getHeader().getApid();
           final int sequenceCount = packet.getHeader().getSequenceCount();
           final int previous = (lastSPPsMap.get(packetAPID) != null) ? lastSPPsMap.get(packetAPID)
               : -1;
@@ -123,12 +123,12 @@ public class ClientTCPSPPSocket implements SPPSocket
 
           LOGGER.log(Level.FINE, "Received: {0}", packet);
           return packet;
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
           LOGGER.log(Level.WARNING, "Failed socket receive - restarting the channel...", ex);
           channel.close();
           try {
             connect(host, port);
-          } catch (IOException ex2) {
+          } catch (final IOException ex2) {
             LOGGER.log(Level.WARNING, "Couldn't connect - sleeping for " + retryTime + " ms", ex2);
             Thread.sleep(DEFAULT_RETRY_TIME);
           }
@@ -136,7 +136,7 @@ public class ClientTCPSPPSocket implements SPPSocket
       } else {
         try {
           connect(host, port);
-        } catch (IOException ex2) {
+        } catch (final IOException ex2) {
           LOGGER.log(Level.WARNING, "Couldn't connect - sleeping for " + retryTime + " ms", ex2);
           Thread.sleep(DEFAULT_RETRY_TIME);
         }
@@ -145,7 +145,7 @@ public class ClientTCPSPPSocket implements SPPSocket
   }
 
   @Override
-  public void send(SpacePacket packet) throws Exception
+  public void send(final SpacePacket packet) throws Exception
   {
     LOGGER.log(Level.FINE, "send({0})", packet);
 
@@ -154,12 +154,12 @@ public class ClientTCPSPPSocket implements SPPSocket
         try {
           channel.send(packet);
           return;
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
           LOGGER.log(Level.WARNING, "Failed socket send - restarting the channel...", ex);
           channel.close();
           try {
             connect(host, port);
-          } catch (IOException ex2) {
+          } catch (final IOException ex2) {
             LOGGER.log(Level.WARNING, "Couldn't connect - sleeping for " + retryTime + " ms", ex2);
             Thread.sleep(DEFAULT_RETRY_TIME);
           }
@@ -167,7 +167,7 @@ public class ClientTCPSPPSocket implements SPPSocket
       } else {
         try {
           connect(host, port);
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
           LOGGER.log(Level.WARNING, "Couldn't connect - sleeping for " + retryTime + " ms", ex);
           Thread.sleep(DEFAULT_RETRY_TIME);
         }

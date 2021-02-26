@@ -50,7 +50,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
 
   private AttitudeMode activeAttitudeMode;
   private SEPP_IADCS_API adcsApi;
-  private boolean initialized = false;
+  private final boolean initialized;
 
   // Additional parameters which need to be used for attitude mode changes.
   private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT losVector;
@@ -63,7 +63,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     LOGGER.log(Level.INFO, "Initialisation");
     try {
       System.loadLibrary("iadcs_api_jni");
-    } catch (Exception ex) {
+    } catch (final Exception ex) {
       LOGGER.log(Level.SEVERE, "iADCS library could not be loaded!", ex);
       initialized = false;
       return;
@@ -73,14 +73,14 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     try {
       // Try running a short command as a ping
       adcsApi.Get_Epoch_Time();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       LOGGER.log(Level.SEVERE, "Failed to initialize iADCS", e);
       initialized = false;
       return;
     }
     try {
       dumpHKTelemetry();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       LOGGER.log(Level.WARNING, "Failed to dump iADCS TM", e);
     }
     initialized = true;
@@ -94,20 +94,20 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
 
   private SEPP_IADCS_API_ORBIT_TLE_DATA readTLEFile() throws IOException, FileNotFoundException
   {
-    File f = new File("/etc/tle");
-    BufferedReader br = new BufferedReader(new FileReader(f));
+    final File f = new File("/etc/tle");
+    final BufferedReader br = new BufferedReader(new FileReader(f));
     String s;
-    List<String> lines = new ArrayList<String>();
+    final List<String> lines = new ArrayList<>();
     while ((s = br.readLine()) != null) {
-      String l = new String(s);
+      final String l = s;
       lines.add(l);
     }
     if (lines.size() == 3) {
       lines.remove(0);
     }
-    SEPP_IADCS_API_ORBIT_TLE_DATA tle = new SEPP_IADCS_API_ORBIT_TLE_DATA();
-    byte[] l1 = lines.get(0).getBytes();
-    byte[] l2 = lines.get(1).getBytes();
+    final SEPP_IADCS_API_ORBIT_TLE_DATA tle = new SEPP_IADCS_API_ORBIT_TLE_DATA();
+    final byte[] l1 = lines.get(0).getBytes();
+    final byte[] l2 = lines.get(1).getBytes();
     
     LOGGER.log(Level.INFO,
         "Successfully loaded " + l1.length + " bytes of line 1.");
@@ -124,11 +124,11 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
    * @param los Line of sight unit vector in body frame of the satellite.
    * @throws IllegalArgumentException Thrown when the vector does not have length 1.
    */
-  public void setLOSVector(Vector3D los) throws IllegalArgumentException
+  public void setLOSVector(final Vector3D los) throws IllegalArgumentException
   {
-    double x2 = (double) los.getX() * (double) los.getX();
-    double y2 = (double) los.getY() * (double) los.getY();
-    double z2 = (double) los.getZ() * (double) los.getZ();
+    final double x2 = (double) los.getX() * (double) los.getX();
+    final double y2 = (double) los.getY() * (double) los.getY();
+    final double z2 = (double) los.getZ() * (double) los.getZ();
     if (!isUnity(los)) {
       throw new IllegalArgumentException("The provided line of sight vector needs to have length 1.");
     }
@@ -141,7 +141,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
    * @param flight Flight vector as unit vector in body frame of the satellite.
    * @throws IllegalArgumentException Thrown when the vector does not have length 1.
    */
-  public void setFlightVector(Vector3D flight) throws IllegalArgumentException
+  public void setFlightVector(final Vector3D flight) throws IllegalArgumentException
   {
     if (!isUnity(flight)) {
       throw new IllegalArgumentException("The provided flight vector needs to have length 1.");
@@ -155,7 +155,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
    * @param target Target vector as unit vector in body frame of the satellite.
    * @throws IllegalArgumentException Thrown when the vector is not a unit vector.
    */
-  public void setTargetVector(Vector3D target) throws IllegalArgumentException
+  public void setTargetVector(final Vector3D target) throws IllegalArgumentException
   {
     if (!isUnity(target)) {
       throw new IllegalArgumentException("The provided target vector needs to have length 1.");
@@ -169,11 +169,11 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
    * @param vec The vector to be checked.
    * @return True iff length is 1.
    */
-  private boolean isUnity(Vector3D vec)
+  private boolean isUnity(final Vector3D vec)
   {
-    double x2 = (double) vec.getX() * (double) vec.getX();
-    double y2 = (double) vec.getY() * (double) vec.getY();
-    double z2 = (double) vec.getZ() * (double) vec.getZ();
+    final double x2 = (double) vec.getX() * (double) vec.getX();
+    final double y2 = (double) vec.getY() * (double) vec.getY();
+    final double z2 = (double) vec.getZ() * (double) vec.getZ();
     return Math.sqrt(x2 + y2 + z2) == 1.0;
   }
 
@@ -181,7 +181,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   {
     LOGGER.log(Level.INFO, "Dumping HK Telemetry...");
     //SEPP_IADCS_API_STANDARD_TELEMETRY stdTM = adcsApi.Get_Standard_Telemetry();
-    SEPP_IADCS_API_POWER_STATUS_TELEMETRY powerTM = adcsApi.Get_Power_Status_Telemetry();
+    final SEPP_IADCS_API_POWER_STATUS_TELEMETRY powerTM = adcsApi.Get_Power_Status_Telemetry();
     //SEPP_IADCS_API_INFO_TELEMETRY infoTM = adcsApi.Get_Info_Telemetry();
     /*Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.INFO,
         String.format("Standard TM:\n"
@@ -252,14 +252,14 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
             infoTM.getCOMPILER_VERSION()));*/
   }
 
-  static private Quaternion convertAdcsApiQuaternion(SEPP_IADCS_API_QUATERNION_FLOAT in)
+  static private Quaternion convertAdcsApiQuaternion(final SEPP_IADCS_API_QUATERNION_FLOAT in)
   {
     return new Quaternion(in.getQ(), in.getQ_I(), in.getQ_J(), in.getQ_K());
   }
 
-  static private MagnetorquersState convertAdcsApiMtqState(long in)
+  static private MagnetorquersState convertAdcsApiMtqState(final long in)
   {
-    int mappedOrdinal;
+    final int mappedOrdinal;
     switch ((int) in) {
       case 1:
         mappedOrdinal = MagnetorquersState._ACTIVE_INDEX;
@@ -275,30 +275,30 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     return MagnetorquersState.fromOrdinal(mappedOrdinal);
   }
 
-  static private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT convertToAdcsApiVector(Vector3D vec)
+  static private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT convertToAdcsApiVector(final Vector3D vec)
   {
-    SEPP_IADCS_API_VECTOR3_XYZ_FLOAT sepp = new SEPP_IADCS_API_VECTOR3_XYZ_FLOAT();
+    final SEPP_IADCS_API_VECTOR3_XYZ_FLOAT sepp = new SEPP_IADCS_API_VECTOR3_XYZ_FLOAT();
     sepp.setX(vec.getX());
     sepp.setY(vec.getY());
     sepp.setZ(vec.getZ());
     return sepp;
   }
 
-  static private Vector3D convertAdcsApiVector(SEPP_IADCS_API_VECTOR3_XYZ_FLOAT in)
+  static private Vector3D convertAdcsApiVector(final SEPP_IADCS_API_VECTOR3_XYZ_FLOAT in)
   {
     return new Vector3D(in.getX(), in.getY(), in.getZ());
   }
 
-  static private Vector3D convertAdcsApiMagMoment(SEPP_IADCS_API_VECTOR3_XYZ_FLOAT in)
+  static private Vector3D convertAdcsApiMagMoment(final SEPP_IADCS_API_VECTOR3_XYZ_FLOAT in)
   {
     // Moment is provided in A*m^2
     return new Vector3D((float) in.getX(), (float) in.getY(), (float) in.getZ());
   }
 
-  static private WheelsSpeed convertAdcsApiWheelSpeed(SEPP_IADCS_API_VECTOR3_XYZ_FLOAT in1,
-      SEPP_IADCS_API_VECTOR3_UVW_FLOAT in2)
+  static private WheelsSpeed convertAdcsApiWheelSpeed(final SEPP_IADCS_API_VECTOR3_XYZ_FLOAT in1,
+                                                      final SEPP_IADCS_API_VECTOR3_UVW_FLOAT in2)
   {
-    FloatList list = new FloatList(6);
+    final FloatList list = new FloatList(6);
     list.add((float) in1.getX());
     list.add((float) in1.getY());
     list.add((float) in1.getZ());
@@ -309,12 +309,12 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   }
 
   @Override
-  public void setDesiredAttitude(AttitudeMode attitude) throws IOException,
+  public void setDesiredAttitude(final AttitudeMode attitude) throws IOException,
       UnsupportedOperationException
   {
     if (attitude instanceof AttitudeModeBDot) {
-      AttitudeModeBDot a = (AttitudeModeBDot) attitude;
-      SEPP_IADCS_API_DETUMBLING_MODE_PARAMETERS params
+      final AttitudeModeBDot a = (AttitudeModeBDot) attitude;
+      final SEPP_IADCS_API_DETUMBLING_MODE_PARAMETERS params
           = new SEPP_IADCS_API_DETUMBLING_MODE_PARAMETERS();
       adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
       params.setSTART_EPOCH_TIME(BigInteger.valueOf(System.currentTimeMillis()));
@@ -326,8 +326,8 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
         throw new IOException(
             "LOS vector or flight vector not set. Call setLOSVector and setFlightVector before calling setDesiredAttitudeMode.");
       }
-      AttitudeModeNadirPointing a = (AttitudeModeNadirPointing) attitude;
-      SEPP_IADCS_API_TARGET_POINTING_NADIR_MODE_PARAMETERS params
+      final AttitudeModeNadirPointing a = (AttitudeModeNadirPointing) attitude;
+      final SEPP_IADCS_API_TARGET_POINTING_NADIR_MODE_PARAMETERS params
           = new SEPP_IADCS_API_TARGET_POINTING_NADIR_MODE_PARAMETERS();
       // Set parameters
       params.setLOS_VECTOR_BF(losVector);
@@ -343,9 +343,9 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       adcsApi.Start_Target_Pointing_Nadir_Mode(params);
       activeAttitudeMode = a;
     } else if (attitude instanceof AttitudeModeSingleSpinning) {
-      AttitudeModeSingleSpinning a = (AttitudeModeSingleSpinning) attitude;
-      Vector3D target = a.getBodyAxis();
-      SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS vec;
+      final AttitudeModeSingleSpinning a = (AttitudeModeSingleSpinning) attitude;
+      final Vector3D target = a.getBodyAxis();
+      final SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS vec;
       if (target.equals(new Vector3D(1.0f, 0f, 0f))) {
         vec = SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X;
       } else if (target.equals(new Vector3D(0f, 1.0f, 0f))) {
@@ -362,8 +362,8 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
         throw new IOException(
             "Target vector is not set. Call setTargetVector before calling setDesiredAttitudeMode.");
       }
-      AttitudeModeSunPointing sunPointing = (AttitudeModeSunPointing) attitude;
-      SEPP_IADCS_API_SUN_POINTING_MODE_PARAMETERS params
+      final AttitudeModeSunPointing sunPointing = (AttitudeModeSunPointing) attitude;
+      final SEPP_IADCS_API_SUN_POINTING_MODE_PARAMETERS params
           = new SEPP_IADCS_API_SUN_POINTING_MODE_PARAMETERS();
       params.setSTART_EPOCH_TIME(BigInteger.valueOf(0));
       params.setSTOP_EPOCH_TIME(BigInteger.valueOf(Long.MAX_VALUE));
@@ -377,7 +377,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
         throw new IOException("LOS or flight vector not set.");
       }
 
-      SEPP_IADCS_API_EARTH_TARGET_POINTING_FIXED_MODE_PARAMETERS params
+      final SEPP_IADCS_API_EARTH_TARGET_POINTING_FIXED_MODE_PARAMETERS params
           = new SEPP_IADCS_API_EARTH_TARGET_POINTING_FIXED_MODE_PARAMETERS();
 
       params.setMODE(
@@ -386,7 +386,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       params.setFLIGHT_VECTOR_BF(flightVector);
       params.setLOS_VECTOR_BF(losVector);
       params.setUPDATE_INTERVAL(BigInteger.valueOf(500));
-      AttitudeModeTargetTracking a = (AttitudeModeTargetTracking) attitude;
+      final AttitudeModeTargetTracking a = (AttitudeModeTargetTracking) attitude;
       params.setTARGET_LATITUDE(a.getLatitude());
       params.setTARGET_LONGITUDE(a.getLongitude());
       adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
@@ -398,14 +398,14 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
         throw new IOException("LOS or flight vector not set.");
       }
 
-      SEPP_IADCS_API_EARTH_TARGET_POINTING_CONST_VELOCITY_MODE_PARAMETERS params
+      final SEPP_IADCS_API_EARTH_TARGET_POINTING_CONST_VELOCITY_MODE_PARAMETERS params
           = new SEPP_IADCS_API_EARTH_TARGET_POINTING_CONST_VELOCITY_MODE_PARAMETERS();
       params.setFLIGHT_VECTOR_BF(flightVector);
       params.setLOS_VECTOR_BF(losVector);
       params.setMODE(
           SEPP_IADCS_API_TARGET_POINTING_ATTITUDE_DETERMINATION_MODES.IADCS_ATTITUDE_DETERMINATION_STARTRACKER_ONLY);
       params.setOFFSET_TIME(BigInteger.valueOf(0));
-      AttitudeModeTargetTrackingLinear a = (AttitudeModeTargetTrackingLinear) attitude;
+      final AttitudeModeTargetTrackingLinear a = (AttitudeModeTargetTrackingLinear) attitude;
       params.setSTART_EPOCH_TIME(BigInteger.valueOf(a.getStartEpoch()));
       params.setSTOP_EPOCH_TIME(BigInteger.valueOf(a.getEndEpoch()));
       params.setSTART_LATITUDE(a.getLatitudeStart());
@@ -457,35 +457,35 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   @Override
   public AttitudeTelemetry getAttitudeTelemetry() throws IOException
   {
-    SEPP_IADCS_API_ATTITUDE_TELEMETRY attitudeTm = adcsApi.Get_Attitude_Telemetry();
+    final SEPP_IADCS_API_ATTITUDE_TELEMETRY attitudeTm = adcsApi.Get_Attitude_Telemetry();
     attitudeTm.getATTITUDE_QUATERNION_BF();
-    Quaternion attitude = convertAdcsApiQuaternion(attitudeTm.getATTITUDE_QUATERNION_BF());
-    Vector3D angularVel = convertAdcsApiVector(attitudeTm.getANGULAR_VELOCITY_VECTOR_RADPS());
-    Vector3D magneticField = convertAdcsApiVector(
+    final Quaternion attitude = convertAdcsApiQuaternion(attitudeTm.getATTITUDE_QUATERNION_BF());
+    final Vector3D angularVel = convertAdcsApiVector(attitudeTm.getANGULAR_VELOCITY_VECTOR_RADPS());
+    final Vector3D magneticField = convertAdcsApiVector(
         attitudeTm.getMEASURED_MAGNETIC_FIELD_VECTOR_BF_T());
-    Vector3D sunVector = convertAdcsApiVector(attitudeTm.getMEASURED_SUN_VECTOR_BF());
+    final Vector3D sunVector = convertAdcsApiVector(attitudeTm.getMEASURED_SUN_VECTOR_BF());
     return new AttitudeTelemetry(attitude, angularVel, sunVector, magneticField);
   }
 
   @Override
   public ActuatorsTelemetry getActuatorsTelemetry() throws IOException
   {
-    SEPP_IADCS_API_ACTUATOR_TELEMETRY actuatorTm = adcsApi.Get_Actuator_Telemetry();
-    WheelsSpeed targetSpeed = convertAdcsApiWheelSpeed(
+    final SEPP_IADCS_API_ACTUATOR_TELEMETRY actuatorTm = adcsApi.Get_Actuator_Telemetry();
+    final WheelsSpeed targetSpeed = convertAdcsApiWheelSpeed(
         actuatorTm.getREACTIONWHEEL_TARGET_SPEED_VECTOR_XYZ_RADPS(),
         actuatorTm.getREACTIONWHEEL_TARGET_SPEED_VECTOR_UVW_RADPS());
-    WheelsSpeed currentSpeed = convertAdcsApiWheelSpeed(
+    final WheelsSpeed currentSpeed = convertAdcsApiWheelSpeed(
         actuatorTm.getREACTIONWHEEL_CURRENT_SPEED_VECTOR_XYZ_RADPS(),
         actuatorTm.getREACTIONWHEEL_CURRENT_SPEED_VECTOR_UVW_RADPS());
-    Vector3D mtqDipoleMoment = convertAdcsApiMagMoment(
+    final Vector3D mtqDipoleMoment = convertAdcsApiMagMoment(
         actuatorTm.getMAGNETORQUERS_TARGET_DIPOLE_MOMENT_VECTOR_AM2());
-    MagnetorquersState mtqState
+    final MagnetorquersState mtqState
         = convertAdcsApiMtqState(actuatorTm.getMAGNETORQUERS_CURRENT_STATE());
     return new ActuatorsTelemetry(targetSpeed, currentSpeed, mtqDipoleMoment, mtqState);
   }
 
   @Override
-  public String validateAttitudeDescriptor(AttitudeMode attitude)
+  public String validateAttitudeDescriptor(final AttitudeMode attitude)
   {
     return ""; //Return no error for now
   }

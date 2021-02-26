@@ -23,8 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.BitSet;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import org.ccsds.moims.mo.mal.MALContextFactory;
 import org.ccsds.moims.mo.mal.MALException;
 import org.ccsds.moims.mo.mal.MALOperation;
@@ -80,17 +79,17 @@ public class SPPMessage implements MALMessage {
 
 		// combine user (*not* packet) data fields of (segmented) Space Packets
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		for (SpacePacket sp : spacePackets) {
+		for (final SpacePacket sp : spacePackets) {
 			baos.write(sp.getBody(), header.getOffset(), sp.getBody().length - header.getOffset());
 		}
-		byte[] userDataField = baos.toByteArray();
+		final byte[] userDataField = baos.toByteArray();
 
-		MALOperation op = MALContextFactory
+		final MALOperation op = MALContextFactory
 				.lookupArea(header.getServiceArea(), header.getAreaVersion())
 				.getServiceByNumber(header.getService())
 				.getOperationByNumber(header.getOperation());
-		MALEncodingContext ctx = new MALEncodingContext(header, op, -1, null, this.qosProperties);
-		MALEncodedBody encodedBody = userDataField.length == 0 ? null : new MALEncodedBody(new Blob(userDataField));
+		final MALEncodingContext ctx = new MALEncodingContext(header, op, -1, null, this.qosProperties);
+		final MALEncodedBody encodedBody = userDataField.length == 0 ? null : new MALEncodedBody(new Blob(userDataField));
 		body = SPPEndpoint.createMessageBody(encodedBody, esf, ctx);
 	}
 
@@ -108,30 +107,30 @@ public class SPPMessage implements MALMessage {
 			final SPPCounter segmentCounter,
 			final int packetDataFieldSizeLimit) throws MALException {
 		// create secondary header in 2 parts: before and after the segment counter
-		ByteArrayOutputStream encSecondaryHeaderPart1 = new ByteArrayOutputStream();
-		ByteArrayOutputStream encSecondaryHeaderPart2 = new ByteArrayOutputStream();
-		boolean isTCpacket = new Configuration(qosProperties).isTCpacket();
+		final ByteArrayOutputStream encSecondaryHeaderPart1 = new ByteArrayOutputStream();
+		final ByteArrayOutputStream encSecondaryHeaderPart2 = new ByteArrayOutputStream();
+		final boolean isTCpacket = new Configuration(qosProperties).isTCpacket();
 
 		writeSecondaryHeader(encSecondaryHeaderPart1, encSecondaryHeaderPart2, isTCpacket);
 
 		// create encoded MAL message body
-		byte[] encBody;
-		MALEncodedBody malEncodedBody = body.getEncodedBody();
+		final byte[] encBody;
+		final MALEncodedBody malEncodedBody = body.getEncodedBody();
 		if (malEncodedBody == null || malEncodedBody.getEncodedBody() == null) {
 			encBody = new byte[]{};
 		} else {
-			Blob wholeBody = malEncodedBody.getEncodedBody();
+			final Blob wholeBody = malEncodedBody.getEncodedBody();
 			encBody = new byte[wholeBody.getLength()];
 			System.arraycopy(wholeBody.getValue(), wholeBody.getOffset(), encBody, 0, wholeBody.getLength());
 		}
 
-		SPPURI primarySPPURI = new SPPURI(isTCpacket ? header.getURITo() : header.getURIFrom());
-		int primaryApidQualifier = primarySPPURI.getQualifier();
-		int primaryApid = primarySPPURI.getAPID();
+		final SPPURI primarySPPURI = new SPPURI(isTCpacket ? header.getURITo() : header.getURIFrom());
+		final int primaryApidQualifier = primarySPPURI.getQualifier();
+		final int primaryApid = primarySPPURI.getAPID();
 
 		// Create template Space Packet header. Sequence flags and packet sequence count will be
 		// handled and set correctly in SPPSegmenter.split().
-		SpacePacketHeader spHeader = new SpacePacketHeader(
+		final SpacePacketHeader spHeader = new SpacePacketHeader(
 				SPPTransport.SPP_VERSION,
 				isTCpacket ? 1 : 0,
 				1,
@@ -140,7 +139,7 @@ public class SPPMessage implements MALMessage {
 				0
 		);
 
-		SpacePacket[] spacePackets = SPPSegmenter.split(
+		final SpacePacket[] spacePackets = SPPSegmenter.split(
 				packetDataFieldSizeLimit,
 				primaryApidQualifier,
 				spHeader,
@@ -150,7 +149,7 @@ public class SPPMessage implements MALMessage {
 				sequenceCounter,
 				segmentCounter);
 
-		for (SpacePacket sp: spacePackets) {
+		for (final SpacePacket sp: spacePackets) {
 			// PENDING: Testbed assumes endpoint QoS properties to be delivered to the TRANSMIT
 			// request.
 			sp.setQosProperties(endpointQosProperties);
@@ -170,19 +169,19 @@ public class SPPMessage implements MALMessage {
 	 * @param isTCpacket True, if packet type is telecommand, false if telemetry.
 	 * @throws MALException
 	 */
-	private void writeSecondaryHeader(final OutputStream os1, final OutputStream os2, boolean isTCpacket) throws MALException {
-		MALElementOutputStream eos1 = esf.createOutputStream(os1);
-		byte sdu = header.getSDU();
+	private void writeSecondaryHeader(final OutputStream os1, final OutputStream os2, final boolean isTCpacket) throws MALException {
+		final MALElementOutputStream eos1 = esf.createOutputStream(os1);
+		final byte sdu = header.getSDU();
 		eos1.writeElement(new UOctet((short) (SPPTransport.MALSPP_VERSION << 5 | sdu)), null);
 		writeUShort(header.getServiceArea(), eos1);
 		writeUShort(header.getService(), eos1);
 		writeUShort(header.getOperation(), eos1);
 		eos1.writeElement(header.getAreaVersion(), null);
-		SPPURI sppURIFrom = new SPPURI(header.getURIFrom());
-		SPPURI sppURITo = new SPPURI(header.getURITo());
-		short secondaryAPID = isTCpacket ? sppURIFrom.getAPID() : sppURITo.getAPID();
-		int secondaryQualifier = isTCpacket ? sppURIFrom.getQualifier() : sppURITo.getQualifier();
-		int error_qos_session_scndapid = ((header.getIsErrorMessage() ? 1 : 0) << 15)
+		final SPPURI sppURIFrom = new SPPURI(header.getURIFrom());
+		final SPPURI sppURITo = new SPPURI(header.getURITo());
+		final short secondaryAPID = isTCpacket ? sppURIFrom.getAPID() : sppURITo.getAPID();
+		final int secondaryQualifier = isTCpacket ? sppURIFrom.getQualifier() : sppURITo.getQualifier();
+		final int error_qos_session_scndapid = ((header.getIsErrorMessage() ? 1 : 0) << 15)
 				| ((byte) (header.getQoSlevel().getNumericValue().getValue() - 1) << 13)
 				| ((byte) (header.getSession().getNumericValue().getValue() - 1) << 11)
 				| (secondaryAPID);
@@ -191,24 +190,24 @@ public class SPPMessage implements MALMessage {
 		// NOTE: According to 4.4.2 Transaction id is required to be provided by the MAL also for
 		// SEND interactions. This is a constraint imposed by the MAL/SPP binding on the MAL (in its
 		// most general form, the MAL does not require a Transaction id for SEND interactions).
-		Long transactionId = header.getTransactionId();
+		final Long transactionId = header.getTransactionId();
 		if (transactionId == null) {
 			throw new MALException(TRANSACTION_ID_IS_NULL);
 		}
 		writeLong(transactionId, eos1);
 
-		Short sourceIdentifier = sppURIFrom.getIdentifier();
-		Short destinationIdentifier = sppURITo.getIdentifier();
+		final Short sourceIdentifier = sppURIFrom.getIdentifier();
+		final Short destinationIdentifier = sppURITo.getIdentifier();
 
-		Configuration config = new Configuration(qosProperties);
-		boolean priorityFlag = config.priorityFlag();
-		boolean timestampFlag = config.timestampFlag();
-		boolean networkZoneFlag = config.networkZoneFlag();
-		boolean sessionNameFlag = config.sessionNameFlag();
-		boolean domainFlag = config.domainFlag();
-		boolean authenticationIdFlag = config.authenticationIdFlag();
+		final Configuration config = new Configuration(qosProperties);
+		final boolean priorityFlag = config.priorityFlag();
+		final boolean timestampFlag = config.timestampFlag();
+		final boolean networkZoneFlag = config.networkZoneFlag();
+		final boolean sessionNameFlag = config.sessionNameFlag();
+		final boolean domainFlag = config.domainFlag();
+		final boolean authenticationIdFlag = config.authenticationIdFlag();
 
-		BitSet bs = new BitSet(8);
+		final BitSet bs = new BitSet(8);
 		// Bits in BitSet are numbered right to left.
 		bs.set(7, null != sourceIdentifier);
 		bs.set(6, null != destinationIdentifier);
@@ -228,7 +227,7 @@ public class SPPMessage implements MALMessage {
 		}
 
 		// Second stream starts here; segment counter is encoded separately in SPPSegmenter.split().
-		MALElementOutputStream eos2 = esf.createOutputStream(os2);
+		final MALElementOutputStream eos2 = esf.createOutputStream(os2);
 		if (priorityFlag) {
 			eos2.writeElement(header.getPriority(), null);
 		}
@@ -258,9 +257,9 @@ public class SPPMessage implements MALMessage {
 	 * @throws MALException
 	 */
 	private static void writeUShort(final UShort value, final MALElementOutputStream os) throws MALException {
-		int v = value.getValue();
+		final int v = value.getValue();
 		for (int i = 1; i >= 0; i--) {
-			short b = (short) ((v >>> (i * 8)) & 255);
+			final short b = (short) ((v >>> (i * 8)) & 255);
 			os.writeElement(new UOctet(b), null);
 		}
 	}
@@ -275,7 +274,7 @@ public class SPPMessage implements MALMessage {
 	 */
 	private static void writeLong(final Long value, final MALElementOutputStream os) throws MALException {
 		for (int i = 7; i >= 0; i--) {
-			short b = (short) ((value >>> (i * 8)) & 255);
+			final short b = (short) ((value >>> (i * 8)) & 255);
 			os.writeElement(new UOctet(b), null);
 		}
 	}

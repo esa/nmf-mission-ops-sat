@@ -50,7 +50,7 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
   private final Map<Long, PayloadDevice> payloadIdByObjInstId;
   private static final Logger LOGGER = Logger.getLogger(PowerControlOPSSATAdapter.class.getName());
 
-  public PowerControlOPSSATAdapter(GMVServicesConsumer gmvServicesConsumer)
+  public PowerControlOPSSATAdapter(final GMVServicesConsumer gmvServicesConsumer)
   {
     this.gmvServicesConsumer = gmvServicesConsumer;
     LOGGER.log(Level.INFO, "Initialisation");
@@ -63,25 +63,25 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
 
   private void initDevices()
   {
-    addDevice(new Device(true, new Long(0), new Identifier(
+    addDevice(new Device(true, 0L, new Identifier(
         "Attitude Determination and Control System"), DeviceType.ADCS), PayloadDevice.FineADCS);
-    addDevice(new Device(true, new Long(10), new Identifier(
+    addDevice(new Device(true, 10L, new Identifier(
         "Satellite Experimental Processing Platform 1"), DeviceType.OBC), PayloadDevice.SEPP1);
-    addDevice(new Device(true, new Long(11), new Identifier(
+    addDevice(new Device(true, 11L, new Identifier(
         "Satellite Experimental Processing Platform 2"), DeviceType.OBC), PayloadDevice.SEPP2);
-    addDevice(new Device(false, new Long(2), new Identifier("S-Band Transceiver"), DeviceType.SBAND),
+    addDevice(new Device(false, 2L, new Identifier("S-Band Transceiver"), DeviceType.SBAND),
         PayloadDevice.SBandTRX);
-    addDevice(new Device(false, new Long(3), new Identifier("X-Band Transmitter"), DeviceType.XBAND),
+    addDevice(new Device(false, 3L, new Identifier("X-Band Transmitter"), DeviceType.XBAND),
         PayloadDevice.XBandTRX);
-    addDevice(new Device(false, new Long(4), new Identifier("Software Defined Radio"),
+    addDevice(new Device(false, 4L, new Identifier("Software Defined Radio"),
         DeviceType.SDR), PayloadDevice.SDR);
-    addDevice(new Device(false, new Long(5), new Identifier("Optical Receiver"), DeviceType.OPTRX),
+    addDevice(new Device(false, 5L, new Identifier("Optical Receiver"), DeviceType.OPTRX),
         PayloadDevice.OpticalRX);
-    addDevice(new Device(false, new Long(6), new Identifier("HD Camera"), DeviceType.CAMERA),
+    addDevice(new Device(false, 6L, new Identifier("HD Camera"), DeviceType.CAMERA),
         PayloadDevice.HDCamera);
   }
 
-  private void addDevice(Device device, PayloadDevice payloadId)
+  private void addDevice(final Device device, final PayloadDevice payloadId)
   {
     devices.add(device);
     deviceByName.put(device.getName(), device);
@@ -95,9 +95,9 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
     return Collections.unmodifiableMap(deviceByName);
   }
 
-  private Device findByType(DeviceType type)
+  private Device findByType(final DeviceType type)
   {
-    for (Device device : devices) {
+    for (final Device device : devices) {
       if (device.getDeviceType() == type) {
         return device;
       }
@@ -106,15 +106,15 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
   }
 
   @Override
-  public void enableDevices(DeviceList inputList) throws IOException
+  public void enableDevices(final DeviceList inputList) throws IOException
   {
-    for (Device device : inputList) {
+    for (final Device device : inputList) {
       LOGGER.log(Level.INFO, "Looking up Device {0}", new Object[]{device});
       PayloadDevice payloadId = payloadIdByObjInstId.get(device.getUnitObjInstId());
       if (device.getUnitObjInstId() != null) {
         payloadId = payloadIdByObjInstId.get(device.getUnitObjInstId());
       } else {
-        Device found = findByType(device.getDeviceType());
+        final Device found = findByType(device.getDeviceType());
         if (found != null) {
           payloadId = payloadIdByObjInstId.get(found.getUnitObjInstId());
         } else {
@@ -129,18 +129,18 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
     }
   }
 
-  private void switchDevice(PayloadDevice device, Boolean enabled) throws IOException
+  private void switchDevice(final PayloadDevice device, final Boolean enabled) throws IOException
   {
     // TODO: Track status of the device in the device list
-    PayloadDeviceList deviceList = new PayloadDeviceList();
-    BooleanList powerStates = new BooleanList();
+    final PayloadDeviceList deviceList = new PayloadDeviceList();
+    final BooleanList powerStates = new BooleanList();
     deviceList.add(device);
     powerStates.add(enabled);
     LOGGER.log(Level.INFO, "Switching device {0} to enabled: {1}", new Object[]{device, enabled});
     try {
       gmvServicesConsumer.getPowerNanomindService().getPowerNanomindStub().setPowerState(deviceList,
           powerStates);
-    } catch (MALInteractionException | MALException ex) {
+    } catch (final MALInteractionException | MALException ex) {
       throw new IOException("Cannot switch device through OBC", ex);
     }
   }

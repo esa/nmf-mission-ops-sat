@@ -34,12 +34,12 @@ package org.ccsds.moims.mo.testbed.util.spp;
 
 public interface SPPSocket {
   
-  public void send(SpacePacket packet) throws Exception;
+  void send(SpacePacket packet) throws Exception;
   
-  public SpacePacket receive() throws Exception;
+  SpacePacket receive() throws Exception;
   
-  public void close() throws Exception;
+  void close() throws Exception;
   
-  public String getDescription();
+  String getDescription();
 
 }

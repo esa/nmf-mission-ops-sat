@@ -41,10 +41,10 @@ import esa.opssat.nanomind.mc.aggregation.consumer.AggregationStub;
  */
 public class AggregationNanomindConsumerServiceImpl extends ConsumerServiceImpl {
 
-    private AggregationStub aggregationService = null;
+    private final AggregationStub aggregationService;
 
     @Override
-    public Object generateServiceStub(MALConsumer tmConsumer) {
+    public Object generateServiceStub(final MALConsumer tmConsumer) {
         return new AggregationStub(tmConsumer);
     }
 
@@ -57,7 +57,7 @@ public class AggregationNanomindConsumerServiceImpl extends ConsumerServiceImpl 
         return getAggregationNanomindStub();
     }
 
-    public AggregationNanomindConsumerServiceImpl(SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
+    public AggregationNanomindConsumerServiceImpl(final SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
 
         if (MALContextFactory.lookupArea(MALHelper.MAL_AREA_NAME, MALHelper.MAL_AREA_VERSION) == null) {
             MALHelper.init(MALContextFactory.getElementFactoryRegistry());
@@ -73,7 +73,7 @@ public class AggregationNanomindConsumerServiceImpl extends ConsumerServiceImpl 
 
         try {
             AggregationHelper.init(MALContextFactory.getElementFactoryRegistry());
-        } catch (MALException ex) {
+        } catch (final MALException ex) {
         }
 
         connection = new ConnectionConsumer();
@@ -83,7 +83,7 @@ public class AggregationNanomindConsumerServiceImpl extends ConsumerServiceImpl 
         if (tmConsumer != null) {
             try {
                 tmConsumer.close();
-            } catch (MALException ex) {
+            } catch (final MALException ex) {
                 Logger.getLogger(AggregationNanomindConsumerServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
             }
         }

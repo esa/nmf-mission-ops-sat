@@ -11,10 +11,10 @@ package org.ccsds.moims.mo.testbed.util.sppimpl.util;
  */
 public class APIDRange
 {
-  private int min;
-  private int max;
+  private final int min;
+  private final int max;
 
-  public APIDRange(int min, int max){
+  public APIDRange(final int min, final int max){
     this.min = min;
     this.max = max;
   }
@@ -24,7 +24,7 @@ public class APIDRange
    * @param apid The APID to check.
    * @return True iff apid in [min, max].
    */
-  public boolean inRange(int apid){
+  public boolean inRange(final int apid){
     return apid >= min && apid <= max;
   }
 }

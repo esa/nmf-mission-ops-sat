@@ -46,40 +46,40 @@ public class SPPMessageSender implements GENMessageSender<List<ByteBuffer>>
    *
    * @param socket the TCPIP socket.
    */
-  public SPPMessageSender(SPPSocket socket)
+  public SPPMessageSender(final SPPSocket socket)
   {
     this.socket = socket;
   }
 
   @Override
-  public void sendEncodedMessage(GENOutgoingMessageHolder<List<ByteBuffer>> packetData) throws IOException
+  public void sendEncodedMessage(final GENOutgoingMessageHolder<List<ByteBuffer>> packetData) throws IOException
   {
     // write packet
-    List<ByteBuffer> msgs = packetData.getEncodedMessage();
+    final List<ByteBuffer> msgs = packetData.getEncodedMessage();
 
-    SPPMessage msg = (SPPMessage) packetData.getOriginalMessage();
-    SPPMessageHeader malhdr = (SPPMessageHeader) msg.getHeader();
+    final SPPMessage msg = (SPPMessage) packetData.getOriginalMessage();
+    final SPPMessageHeader malhdr = (SPPMessageHeader) msg.getHeader();
     
 //    int count = 0;
-    for (ByteBuffer buf : msgs)
+    for (final ByteBuffer buf : msgs)
     {
-      int sequenceFlags = (buf.get(buf.position() + 2) & 0xC0) >> 6;
-      short shortVal = buf.getShort(buf.position() + 4);
+      final int sequenceFlags = (buf.get(buf.position() + 2) & 0xC0) >> 6;
+      final short shortVal = buf.getShort(buf.position() + 4);
       int bodyLength = shortVal >= 0 ? shortVal : 0x10000 + shortVal;
       ++bodyLength;
 
-      SpacePacketHeader hdr = new SpacePacketHeader(0,
+      final SpacePacketHeader hdr = new SpacePacketHeader(0,
               0 == malhdr.getPacketType() ? 0 : 1,
               1, malhdr.getApid(), sequenceFlags, sscGenerator.getNextSourceSequenceCount());
 
-      SpacePacket pkt = new SpacePacket(hdr, malhdr.getApidQualifier(), buf.array(), buf.position() + 6, bodyLength);
+      final SpacePacket pkt = new SpacePacket(hdr, malhdr.getApidQualifier(), buf.array(), buf.position() + 6, bodyLength);
       pkt.setQosProperties(packetData.getOriginalMessage().getQoSProperties());
       
       try
       {
         socket.send(pkt);
       }
-      catch (Exception ex)
+      catch (final Exception ex)
       {
         ex.printStackTrace();
         throw new IOException("Unable to send SPP message", ex);

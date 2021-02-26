@@ -66,7 +66,7 @@ class ServiceInfo {
 	 *
 	 * @param ctx The encoding context, which holds all relevant service information.
 	 */
-	protected ServiceInfo(MALEncodingContext ctx) {
+	protected ServiceInfo(final MALEncodingContext ctx) {
 		// How to find out, if we are about to encode an element declared abstract by the service:
 		// 1. Check, if we are at the last body element, because only the last one is allowed to be
 		//    declared abstract.
@@ -92,7 +92,7 @@ class ServiceInfo {
 		if (isDeclaredAbstract && !isError) {
 			// Declared type is abstract. Now check, if an Attribute was declared or some other
 			// abstract type (like Element, Composite or an abstract composite).
-			Object[] allowedShortForms = operationStage.getLastElementShortForms();
+			final Object[] allowedShortForms = operationStage.getLastElementShortForms();
 			if (onlyAttributeTypesAllowed(allowedShortForms)) {
 				isDeclaredAttribute = true;
 			}
@@ -105,7 +105,7 @@ class ServiceInfo {
 	 * @param allowedShortForms Array of short forms to be checked.
 	 * @return (True, if all elements in the array are attribute short forms, false if not.)
 	 */
-	private static boolean onlyAttributeTypesAllowed(Object[] allowedShortForms) {
+	private static boolean onlyAttributeTypesAllowed(final Object[] allowedShortForms) {
 		return attributeShortForms.size() == allowedShortForms.length
 				&& attributeShortForms.containsAll(Arrays.asList(allowedShortForms));
 	}

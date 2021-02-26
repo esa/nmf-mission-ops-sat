@@ -41,10 +41,10 @@ import esa.opssat.nanomind.opssat_pf.gps.consumer.GPSStub;
  */
 public class GPSNanomindConsumerServiceImpl extends ConsumerServiceImpl {
 
-    private GPSStub gpsNanomindService = null;
+    private final GPSStub gpsNanomindService;
 
     @Override
-    public Object generateServiceStub(MALConsumer tmConsumer) {
+    public Object generateServiceStub(final MALConsumer tmConsumer) {
         return new GPSStub(tmConsumer);
     }
 
@@ -57,7 +57,7 @@ public class GPSNanomindConsumerServiceImpl extends ConsumerServiceImpl {
         return getGPSNanomindStub();
     }
 
-    public GPSNanomindConsumerServiceImpl(SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
+    public GPSNanomindConsumerServiceImpl(final SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
 
         if (MALContextFactory.lookupArea(MALHelper.MAL_AREA_NAME, MALHelper.MAL_AREA_VERSION) == null) {
             MALHelper.init(MALContextFactory.getElementFactoryRegistry());
@@ -73,7 +73,7 @@ public class GPSNanomindConsumerServiceImpl extends ConsumerServiceImpl {
 
         try {
             GPSHelper.init(MALContextFactory.getElementFactoryRegistry());
-        } catch (MALException ex) {
+        } catch (final MALException ex) {
         }
         
         connection = new ConnectionConsumer();
@@ -83,7 +83,7 @@ public class GPSNanomindConsumerServiceImpl extends ConsumerServiceImpl {
         if (tmConsumer != null) {
             try {
                 tmConsumer.close();
-            } catch (MALException ex) {
+            } catch (final MALException ex) {
                 Logger.getLogger(GPSNanomindConsumerServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
             }
         }

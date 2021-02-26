@@ -43,11 +43,11 @@ public class SPPSegmenter implements Iterator {
 	private final SortedMap<Long, SpacePacket> packetStore = new TreeMap<>();
 	private final SortedSet<Long> startPacketCounters = new TreeSet<>();
 	private final SortedSet<Long> endPacketCounters = new TreeSet<>();
-	private Long unsegmentedPacketCounter = null;
+	private Long unsegmentedPacketCounter;
 	private final SortedMap<Long, Long> timeouts = new TreeMap<>();
 	private final long timeout;
 
-	public SPPSegmenter(long timeout) {
+	public SPPSegmenter(final long timeout) {
 		this.timeout = timeout;
 	}
 
@@ -62,9 +62,9 @@ public class SPPSegmenter implements Iterator {
 	 * @return Value of the 'Segment Counter' field.
 	 */
 	private static long getSegmentCounter(final SpacePacket spacePacket) {
-		byte[] body = spacePacket.getBody();
-		byte flags = body[FLAG_IDX];
-		int counter_pos = FLAG_IDX + 1 + ((flags & 0b10000000) >>> 7) + ((flags & 0b01000000) >>> 6);
+		final byte[] body = spacePacket.getBody();
+		final byte flags = body[FLAG_IDX];
+		final int counter_pos = FLAG_IDX + 1 + ((flags & 0b10000000) >>> 7) + ((flags & 0b01000000) >>> 6);
 
 		long counter = 0;
 		for (int i = 0; i < COUNTER_LENGTH; i++) {
@@ -79,33 +79,33 @@ public class SPPSegmenter implements Iterator {
 		// present and the correct number of packets in-between has been received. Returns all
 		// packets belonging to a complete sequence, null otherwise.
 		if (null != unsegmentedPacketCounter) {
-			SpacePacket[] ret = new SpacePacket[]{packetStore.remove(unsegmentedPacketCounter)};
+			final SpacePacket[] ret = new SpacePacket[]{packetStore.remove(unsegmentedPacketCounter)};
 			unsegmentedPacketCounter = null;
 			return ret;
 		}
 		if (startPacketCounters.isEmpty() || endPacketCounters.isEmpty()) {
 			return null;
 		}
-		long startCounter = startPacketCounters.first();
-		long endCounter = endPacketCounters.first();
-		long counterDiff = endCounter - startCounter;
+		final long startCounter = startPacketCounters.first();
+		final long endCounter = endPacketCounters.first();
+		final long counterDiff = endCounter - startCounter;
 		if (counterDiff < 0) {
 			return null;
 		}
-		SortedMap<Long, SpacePacket> subMap = packetStore.subMap(startCounter, endCounter + 1);
+		final SortedMap<Long, SpacePacket> subMap = packetStore.subMap(startCounter, endCounter + 1);
 		if (subMap.size() == counterDiff + 1) {
 			startPacketCounters.remove(startCounter);
 			endPacketCounters.remove(endCounter);
-			SpacePacket[] ret = subMap.values().toArray(new SpacePacket[1]);
+			final SpacePacket[] ret = subMap.values().toArray(new SpacePacket[1]);
 			subMap.clear(); // writes through to packetStore
 			return ret;
 		}
 		return null;
 	}
 
-	private void storePacket(SpacePacket spacePacket) {
+	private void storePacket(final SpacePacket spacePacket) {
 		long counter = -1;
-		int seq = spacePacket.getHeader().getSequenceFlags();
+		final int seq = spacePacket.getHeader().getSequenceFlags();
 		if (seq != 0b11) { // packet is segmented and has a counter
 			counter = getSegmentCounter(spacePacket);
 		}
@@ -125,10 +125,10 @@ public class SPPSegmenter implements Iterator {
 	}
 
 	private void deleteTimedOutPackets() {
-		long now = System.currentTimeMillis();
-		SortedMap<Long, Long> timedOut = timeouts.headMap(now - timeout);
-		Collection<Long> timedOutCounters = timedOut.values();
-		for (long counter : timedOutCounters) {
+		final long now = System.currentTimeMillis();
+		final SortedMap<Long, Long> timedOut = timeouts.headMap(now - timeout);
+		final Collection<Long> timedOutCounters = timedOut.values();
+		for (final long counter : timedOutCounters) {
 			packetStore.remove(counter);
 			startPacketCounters.remove(counter);
 			endPacketCounters.remove(counter);
@@ -144,7 +144,7 @@ public class SPPSegmenter implements Iterator {
 			deleteTimedOutPackets();
 		}
 		storePacket(spacePacket);
-		SpacePacket[] ready = getCompleteSequence();
+		final SpacePacket[] ready = getCompleteSequence();
 		if (null != ready) {
 			readyMessages.add(ready);
 		}
@@ -175,7 +175,7 @@ public class SPPSegmenter implements Iterator {
 			final byte[] body,
 			final SPPCounter sequenceCounter,
 			final SPPCounter segmentCounter) throws MALException {
-		Queue<SpacePacket> spacePackets = new LinkedList<>();
+		final Queue<SpacePacket> spacePackets = new LinkedList<>();
 
 		final int sndHdrLength = secondaryHeaderPart1.length + secondaryHeaderPart2.length;
 		final int userDataFieldSizeLimit;
@@ -204,19 +204,19 @@ public class SPPSegmenter implements Iterator {
 		final Iterator<Long> segmentCounterIter = (numberOfPackets > 1) ? segmentCounter.increment(numberOfPackets) : null;
 
 		int offset = 0;
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		final ByteArrayOutputStream os = new ByteArrayOutputStream();
 		do {
 			// combine secondary header and MAL message body to space packet body
 			os.write(secondaryHeaderPart1, 0, secondaryHeaderPart1.length);
 			// only write segment counter if message does not fit in a single packet
 			if (numberOfPackets > 1) {
-				long c = segmentCounterIter.next(); // segmentCounterIter cannot be null here
+				final long c = segmentCounterIter.next(); // segmentCounterIter cannot be null here
 				for (int i = COUNTER_LENGTH - 1; i >= 0; i--) {
 					os.write((byte) (c >>> (i * 8)));
 				}
 			}
 			os.write(secondaryHeaderPart2, 0, secondaryHeaderPart2.length);
-			int segmentLength = java.lang.Math.min(userDataFieldSizeLimit, remaining);
+			final int segmentLength = java.lang.Math.min(userDataFieldSizeLimit, remaining);
 			os.write(body, offset, segmentLength);
 			remaining -= segmentLength;
 
@@ -232,7 +232,7 @@ public class SPPSegmenter implements Iterator {
 			offset += segmentLength;
 
 			// clone template primary header and change relevant values
-			SpacePacketHeader spHeader = new SpacePacketHeader(
+			final SpacePacketHeader spHeader = new SpacePacketHeader(
 					primaryHeader.getPacketVersionNumber(),
 					primaryHeader.getPacketType(),
 					primaryHeader.getSecondaryHeaderFlag(),
@@ -242,7 +242,7 @@ public class SPPSegmenter implements Iterator {
 			);
 
 			// create space packet
-			SpacePacket spacePacket = new SpacePacket(spHeader, primaryApidQualifier, os.toByteArray(), 0, os.size());
+			final SpacePacket spacePacket = new SpacePacket(spHeader, primaryApidQualifier, os.toByteArray(), 0, os.size());
 			spacePackets.add(spacePacket);
 			os.reset();
 		} while (remaining > 0);
