@@ -45,6 +45,7 @@ import esa.opssat.nanomind.opssat_pf.gps.consumer.GPSAdapter;
  */
 public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
   private static final int GET_GPS_TIMEOUT_MS = 2000;
+  private static final Logger LOGGER = Logger.getLogger(GPSOPSSATAdapter.class.getName());
   private final NanomindServicesConsumer obcServicesConsumer;
   private final String TLE_LOCATION = File.separator + "etc" + File.separator + "tle";
   private String currentTleSentence = "";
@@ -56,16 +57,14 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
 
   @Override
   public synchronized String getNMEASentence(String identifier) throws IOException {
-    Logger.getLogger(GPSOPSSATAdapter.class.getName()).log(Level.FINE, "run getNMEASentence with \"{0}\"", identifier);
+    LOGGER.log(Level.FINE, "run getNMEASentence with \"{0}\"", identifier);
     GPSHandler gpsHandler = new GPSHandler();
     try {
       obcServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData(new Blob(identifier.getBytes()),
           gpsHandler);
     } catch (MALInteractionException ex) {
-      Logger.getLogger(GPSOPSSATAdapter.class.getName()).log(Level.SEVERE, "MALInteractionException {0}", ex);
       throw new IOException("Error when retrieving GPS NMEA response from Nanomind", ex);
     } catch (MALException ex) {
-      Logger.getLogger(GPSOPSSATAdapter.class.getName()).log(Level.SEVERE, "MALException {0}", ex.getMessage());
       throw new IOException("Error when retrieving GPS NMEA response from Nanomind", ex);
     }
     try {
@@ -108,7 +107,7 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
     try {
       content = this.getTLESentence();
     } catch (IOException ex) {
-      Logger.getLogger(GPSOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
+      LOGGER.log(Level.SEVERE, null, ex);
     }
     String[] lines = content.split(System.lineSeparator());
     String line1;
@@ -126,7 +125,7 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
         line2 = lines[1];
         break;
       default:
-        Logger.getLogger(GPSOPSSATAdapter.class.getName()).log(Level.SEVERE,
+        LOGGER.log(Level.SEVERE,
             "TLE is empty or wrongly formatet. TLE:{0}{1}", new Object[]{System.lineSeparator(),
               Arrays.toString(lines)});
         return null;
