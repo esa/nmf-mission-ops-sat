@@ -60,7 +60,7 @@
   </developers>
 
   <properties>
-    <esa.nmf.mission.opssat.assembly.outputdir>${project.build.directory}/nmf-opssat-${esa.nmf.version}</esa.nmf.mission.opssat.assembly.outputdir>
+    <esa.nmf.mission.opssat.assembly.outputdir>${project.build.directory}/nmf-ops-sat-${esa.nmf.version}</esa.nmf.mission.opssat.assembly.outputdir>
   </properties>
   <profiles>
     <profile>
@@ -116,8 +116,10 @@
       <id>exp</id>
       <properties>
         <isExp>true</isExp>
+        <!-- Change the following 3 properties to match the information of your app -->
         <expId>000</expId>
         <expApid>1024</expApid>
+        <!-- The declared version is arbitrary and does not have to match the NMF version -->
         <expVersion>2.1.0-SNAPSHOT</expVersion>
       </properties>
       <dependencies>
@@ -143,9 +145,10 @@
                 <configuration>
                   <artifactItems>
                     <artifactItem>
-                      <!-- Change the following 3 lines to match the information of your app -->
+                      <!-- Change the following 3 properties to match the information of your app -->
                       <groupId>int.esa.nmf.sdk.examples.space</groupId>
                       <artifactId>publish-clock</artifactId>
+                      <!-- The declared version is arbitrary and does not have to match the NMF version -->
                       <version>2.1.0-SNAPSHOT</version>
                       <!-- Do not change this -->
                       <type>jar</type>
@@ -244,7 +247,7 @@
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration combine.self="override">
-          <finalName>nmf-opssat-${project.version}</finalName>
+          <finalName>nmf-ops-sat-${git.commit.id.describe}</finalName>
           <appendAssemblyId>false</appendAssemblyId>
           <descriptors>
             <descriptor>${basedir}/src/main/assembly/zip.xml</descriptor>
@@ -313,13 +316,13 @@
                 <copy todir="${basedir}/target/nmf-package">
                   <fileset dir="${basedir}/nmf-package"/>
                   <filterset>
-                    <filter token="VERSION" value="${project.version}"/>
+                    <filter token="VERSION" value="${git.commit.id.describe}"/>
                   </filterset>
                 </copy>
                 <chmod file="${basedir}/target/nmf-package/control/postinst" perm="+x"/>
                 <chmod file="${basedir}/target/nmf-package/control/prerm" perm="+x"/>
                 <copy todir="${basedir}/target/nmf-package/data">
-                  <fileset dir="${basedir}/target/nmf-opssat-${project.version}"/>
+                  <fileset dir="${basedir}/target/nmf-ops-sat-${project.version}"/>
                 </copy>
                 <exec dir="${basedir}/target/nmf-package/control" executable="tar">
                   <arg value="--use-compress-program=gzip -9 -n"/>
@@ -350,7 +353,7 @@
                   <arg value="--sort=name"/>
                   <arg value="--mtime=1970-01-01"/>
                   <arg value="-cf"/>
-                  <arg value="../nmf-ops-sat_${project.version}.ipk"/>
+                  <arg value="../nmf-ops-sat_${git.commit.id.describe}.ipk"/>
                   <arg value="./debian-binary"/>
                   <arg value="./control.tar.gz"/>
                   <arg value="./data.tar.gz"/>
@@ -359,6 +362,27 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
+        <version>4.0.4</version>
+        <executions>
+            <execution>
+                <id>get-the-git-infos</id>
+                <goals>
+                    <goal>revision</goal>
+                </goals>
+                <phase>initialize</phase>
+            </execution>
+        </executions>
+        <configuration>
+            <commitIdGenerationMode>full</commitIdGenerationMode>
+            <gitDescribe>
+              <tags>true</tags>
+              <forceLongFormat>true</forceLongFormat>
+            </gitDescribe>
+        </configuration>
       </plugin>
     </plugins>
   </build>
