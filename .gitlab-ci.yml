@@ -78,10 +78,10 @@ deploy_target1:
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - cd opssat-package/target/nmf-opssat-*/
-    - scp -r home/ $T1USER@$TARGET1:~/nmf-opssat
-    - ssh $T1USER@$TARGET1 "rm -rf /home/nmf/ /home/payloads-test/ && cp -r ~/nmf-opssat/* /home/"
-    - ssh $T1USER@$TARGET1 "rm -rf ~/nmf-opssat"
+    - cd opssat-package/target/nmf-ops-sat-*/
+    - scp -r home/ $T1USER@$TARGET1:~/nmf-ops-sat
+    - ssh $T1USER@$TARGET1 "rm -rf /home/nmf/ /home/payloads-test/ && cp -r ~/nmf-ops-sat/* /home/"
+    - ssh $T1USER@$TARGET1 "rm -rf ~/nmf-ops-sat"
   needs: ["build_ground"]
 
 deploy_target2:
@@ -95,7 +95,7 @@ deploy_target2:
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - cd opssat-package/target/nmf-opssat-*/
+    - cd opssat-package/target/nmf-ops-sat-*/
     - ssh $T2USER@$TARGET2 "rm -rf nmf/"
     - scp -r home/nmf/ $T2USER@$TARGET2:~/nmf/
   needs: ["build_ground"]
@@ -128,7 +128,7 @@ deploy_target4:
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - cd opssat-package/target/nmf-opssat*/experimenter-package/home/exp000
+    - cd opssat-package/target/nmf-ops-sat*/experimenter-package/home/exp000
     - scp -r * $T4USER@$TARGET4:$T4PATH/$NMF_USER
     - ssh $T4USER@$TARGET4 "chown $T4USER:$T4GROUP $T4PATH/$NMF_USER && chmod 644 $T4PATH/$NMF_USER/* && find $T4PATH/$NMF_USER -type d -exec chmod a+x {} \;"
   needs: ["build_space"]
@@ -144,6 +144,6 @@ deploy_sim:
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - cd opssat-package/target/nmf-opssat-*/home/nmf/
+    - cd opssat-package/target/nmf-ops-sat-*/home/nmf/
     - scp -r -o ProxyCommand="ssh -W %h:%p $JUSER@$JHOST" lib/ supervisor-sim/ $T3USER@$TARGET3:/home/nmf/
   needs: ["deploy_target3","build_ground"]

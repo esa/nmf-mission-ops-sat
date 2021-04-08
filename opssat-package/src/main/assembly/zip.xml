@@ -8,7 +8,7 @@
   <fileSets>
     <fileSet>
       <directory>${esa.nmf.mission.opssat.assembly.outputdir}</directory>
-      <outputDirectory>nmf-opssat-${esa.nmf.version}</outputDirectory>
+      <outputDirectory>nmf-ops-sat-${esa.nmf.version}</outputDirectory>
     </fileSet>
   </fileSets>
 </assembly>
