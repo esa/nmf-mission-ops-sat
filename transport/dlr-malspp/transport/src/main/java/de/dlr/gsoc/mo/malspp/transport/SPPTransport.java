@@ -417,12 +417,16 @@ public class SPPTransport implements MALTransport {
      */
     private MALMessage receive(final SPPSocket sppSocket, final Map qosProperties,
             final Map<SegmentCounterId, SPPSegmenter> segmenters, final Thread currentThread) {
-        // TODO: Queue receviced messages for stopped delivery and QoS level QUEUED.
+        // TODO: Queue received messages for stopped delivery and QoS level QUEUED.
 
         try {
             SpacePacket spacePacket = sppSocket.receive(); // blocks until a space packet has been received
             if (spacePacket == null) {
                 LOGGER.log(Level.FINE, "Discarding message as it is not inside the whitelist.");
+                return null;
+            }
+            if (spacePacket.getHeader().getSecondaryHeaderFlag() != 1) {
+                LOGGER.log(Level.FINE, "Discarding message as it has no secondary header.");
                 return null;
             }
             // PENDING: SPP TCP implementation allocates a new Space Packet with a body size
