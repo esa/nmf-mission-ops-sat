@@ -71,11 +71,6 @@ build_space:
 deploy_target1:
   stage: deploy
   when: manual
-  rules:
-    - if: '$AUTO_DEPLOY == "1"'
-      when: always
-    - if: '$AUTO_DEPLOY =~ "1"'
-      when: manual
   script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
