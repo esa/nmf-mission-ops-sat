@@ -36,9 +36,11 @@ build_base:
 
 build_ipk:
   stage: build_ipk
-  only:
-    variables:
-       - $IPK == "1"
+  rules:
+    - if '$AUTO_IPK == "1"'
+      when: always
+    - if '$AUTO_IPK =~ "1"'
+      when: manual
   script:
     - mvn clean install -Pipk-build
   artifacts:
@@ -70,9 +72,9 @@ deploy_target1:
   stage: deploy
   when: manual
   rules:
-    - if '$DEPLOY == "1"'
+    - if '$AUTO_DEPLOY == "1"'
       when: always
-    - if '$DEPLOY =~ "1"'
+    - if '$AUTO_DEPLOY =~ "1"'
       when: manual
   script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
@@ -89,9 +91,9 @@ deploy_target1:
 deploy_target2:
   stage: deploy
   rules:
-    - if '$DEPLOY == "1"'
+    - if '$AUTO_DEPLOY == "1"'
       when: always
-    - if '$DEPLOY =~ "1"'
+    - if '$AUTO_DEPLOY =~ "1"'
       when: manual
   script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
@@ -107,9 +109,9 @@ deploy_target2:
 deploy_target3:
   stage: deploy
   rules:
-    - if '$DEPLOY == "1"'
+    - if '$AUTO_DEPLOY == "1"'
       when: always
-    - if '$DEPLOY =~ "1"'
+    - if '$AUTO_DEPLOY =~ "1"'
       when: manual
   script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
@@ -126,9 +128,9 @@ deploy_target3:
 deploy_target4:
   stage: deploy
   rules:
-    - if '$DEPLOY == "1"'
+    - if '$AUTO_DEPLOY == "1"'
       when: always
-    - if '$DEPLOY =~ "1"'
+    - if '$AUTO_DEPLOY =~ "1"'
       when: manual
   script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
@@ -144,9 +146,9 @@ deploy_target4:
 deploy_sim:
   stage: deploy_extras
   rules:
-    - if '$DEPLOY == "1"'
+    - if '$AUTO_DEPLOY == "1"'
       when: always
-    - if '$DEPLOY =~ "1"'
+    - if '$AUTO_DEPLOY =~ "1"'
       when: manual
   script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
