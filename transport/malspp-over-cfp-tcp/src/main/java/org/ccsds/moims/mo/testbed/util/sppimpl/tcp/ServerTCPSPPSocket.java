@@ -208,6 +208,9 @@ public class ServerTCPSPPSocket implements SPPSocket
           while (running) {
             canStop = true;
             packet = channel.receive();
+            if (packet == null) {
+              continue;
+            }
             input.offer(packet);
           }
         } catch (IOException ex) {
