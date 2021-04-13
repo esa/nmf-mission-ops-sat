@@ -3,7 +3,6 @@ stages:
   - build_nmf_opssat
   - deploy
   - deploy_extras
-  - build_ipk
 image: maven:3-openjdk-8
 
 variables:
@@ -35,7 +34,7 @@ build_base:
     expire_in: 1 day
 
 build_ipk:
-  stage: build_ipk
+  stage: deploy
   rules:
     - if: '$AUTO_IPK == "1"'
       when: always
