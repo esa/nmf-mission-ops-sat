@@ -69,9 +69,11 @@ build_space:
 deploy_target1:
   stage: deploy
   when: manual
-  only:
-    variables:
-      - $DEPLOY == "1"
+  rules:
+    - if '$DEPLOY == "1"'
+      when: always
+    - if '$DEPLOY =~ "1"'
+      when: manual
   script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
@@ -86,9 +88,11 @@ deploy_target1:
 
 deploy_target2:
   stage: deploy
-  only:
-    variables:
-      - $DEPLOY == "1"
+  rules:
+    - if '$DEPLOY == "1"'
+      when: always
+    - if '$DEPLOY =~ "1"'
+      when: manual
   script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
@@ -102,9 +106,11 @@ deploy_target2:
 
 deploy_target3:
   stage: deploy
-  only:
-    variables:
-      - $DEPLOY == "1"
+  rules:
+    - if '$DEPLOY == "1"'
+      when: always
+    - if '$DEPLOY =~ "1"'
+      when: manual
   script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
@@ -119,9 +125,11 @@ deploy_target3:
 
 deploy_target4:
   stage: deploy
-  only:
-    variables:
-      - $DEPLOY == "1"
+  rules:
+    - if '$DEPLOY == "1"'
+      when: always
+    - if '$DEPLOY =~ "1"'
+      when: manual
   script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
@@ -135,9 +143,11 @@ deploy_target4:
 
 deploy_sim:
   stage: deploy_extras
-  only:
-    variables:
-      - $DEPLOY == "1"
+  rules:
+    - if '$DEPLOY == "1"'
+      when: always
+    - if '$DEPLOY =~ "1"'
+      when: manual
   script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
