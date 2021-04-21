@@ -470,7 +470,7 @@ class NanomindAggregationsHandler {
    * @param timeout The time (seconds) after which we consider a parameter is not used anymore
    */
   public void cleanParametersFromAggregations(CacheHandler cache, int timeout) {
-    LOGGER.log(Level.INFO, "Cleaning unused parameters from aggregations");
+    LOGGER.log(Level.FINE, "Cleaning unused parameters from aggregations");
 
     long now = System.currentTimeMillis();
     List<OBSWAggregation> newNanomindDefinitions = new ArrayList<>();
