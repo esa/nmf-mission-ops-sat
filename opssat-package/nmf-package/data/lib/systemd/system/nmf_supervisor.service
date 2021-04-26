@@ -6,6 +6,8 @@ After=network.target spp_bridge.service
 Type=simple
 WorkingDirectory=/home/nmf/supervisor
 ExecStart=/home/nmf/supervisor/supervisor.sh
+Restart=on-failure
+RestartSec=30s
 
 [Install]
 WantedBy=multi-user.target
