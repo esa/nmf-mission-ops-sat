@@ -142,15 +142,15 @@ public class NanomindServicesConsumer {
      */
     public void closeConnections() {
         if (this.gpsNanomindService != null) {
-            this.gpsNanomindService.closeConnection();
+            this.gpsNanomindService.close();
         }
 
         if (this.powerNanomindService != null) {
-            this.powerNanomindService.closeConnection();
+            this.powerNanomindService.close();
         }
 
         if (this.experimentWDNanomindService != null) {
-            this.experimentWDNanomindService.closeConnection();
+            this.experimentWDNanomindService.close();
         }
     }
 
