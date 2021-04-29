@@ -44,10 +44,10 @@ import esa.opssat.nanomind.opssat_pf.gps.consumer.GPSAdapter;
  * @author Cesar Coelho
  */
 public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
-  private static final int GET_GPS_TIMEOUT_MS = 2000;
+  private static final int GET_GPS_TIMEOUT_MS = 4000;
   private static final Logger LOGGER = Logger.getLogger(GPSOPSSATAdapter.class.getName());
   private final NanomindServicesConsumer obcServicesConsumer;
-  private final String TLE_LOCATION = File.separator + "etc" + File.separator + "tle";
+  private static final String TLE_LOCATION = File.separator + "etc" + File.separator + "tle";
   private String currentTleSentence = "";
   private long tleLastModified = -1;
 
@@ -62,9 +62,7 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
     try {
       obcServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData(new Blob(identifier.getBytes()),
           gpsHandler);
-    } catch (MALInteractionException ex) {
-      throw new IOException("Error when retrieving GPS NMEA response from Nanomind", ex);
-    } catch (MALException ex) {
+    } catch (MALInteractionException | MALException ex) {
       throw new IOException("Error when retrieving GPS NMEA response from Nanomind", ex);
     }
     try {
