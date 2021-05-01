@@ -100,7 +100,7 @@ deploy_target2:
     - scp -r home/nmf/ $T2USER@$TARGET2:~/nmf/
   needs: ["build_ground"]
 
-deploy_target3:
+deploy_target3_space:
   stage: deploy
   rules:
     - if: '$AUTO_DEPLOY == "1"'
@@ -137,8 +137,8 @@ deploy_target4:
     - ssh $T4USER@$TARGET4 "chown $T4USER:$T4GROUP $T4PATH/$NMF_USER && chmod 644 $T4PATH/$NMF_USER/* && find $T4PATH/$NMF_USER -type d -exec chmod a+x {} \;"
   needs: ["build_space"]
 
-deploy_sim:
-  stage: deploy_extras
+deploy_target3_sim:
+  stage: deploy
   rules:
     - if: '$AUTO_DEPLOY == "1"'
       when: always
@@ -152,4 +152,4 @@ deploy_sim:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - cd opssat-package/target/nmf-ops-sat-*/home/nmf/
     - scp -r -o ProxyCommand="ssh -W %h:%p $JUSER@$JHOST" lib/ supervisor-sim/ $T3USER@$TARGET3:/home/nmf/
-  needs: ["deploy_target3","build_ground"]
+  needs: ["build_ground"]
