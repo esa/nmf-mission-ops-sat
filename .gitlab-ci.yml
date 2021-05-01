@@ -1,8 +1,8 @@
 stages:
   - build_nmf
   - build_nmf_opssat
+  - package
   - deploy
-  - deploy_extras
 image: maven:3-openjdk-8
 
 variables:
@@ -33,20 +33,6 @@ build_base:
       - $NMF_HOME/.m2/repository
     expire_in: 1 day
 
-build_ipk:
-  stage: deploy
-  rules:
-    - if: '$AUTO_IPK == "1"'
-      when: always
-    - if: '$AUTO_IPK =~ "1"'
-      when: manual
-  script:
-    - mvn clean install -Pipk-build
-  artifacts:
-    paths:
-      - $NMF_HOME/opssat-package/target/
-    expire_in: 1 day
-
 build_ground:
   stage: build_nmf_opssat
   script:
@@ -64,6 +50,15 @@ build_space:
   artifacts:
     paths:
       - $NMF_HOME/.m2/repository
+      - $NMF_HOME/opssat-package/target/
+    expire_in: 1 day
+
+build_ipk:
+  stage: package
+  script:
+    - mvn clean install -Pipk-build
+  artifacts:
+    paths:
       - $NMF_HOME/opssat-package/target/
     expire_in: 1 day
 
@@ -117,7 +112,7 @@ deploy_target3_space:
     - scp -o ProxyCommand="ssh -W %h:%p $JUSER@$JHOST" nmf-ops-sat_*.ipk $T3USER@$TARGET3:~/
     - ssh -o ProxyCommand="ssh -W %h:%p $JUSER@$JHOST" $T3USER@$TARGET3 "opkg --force-reinstall install nmf-ops-sat_*.ipk"
     - ssh -o ProxyCommand="ssh -W %h:%p $JUSER@$JHOST" $T3USER@$TARGET3 "rm nmf-ops-sat_*.ipk"
-  needs: ["build_space"]
+  needs: ["build_ipk"]
 
 deploy_target4:
   stage: deploy
