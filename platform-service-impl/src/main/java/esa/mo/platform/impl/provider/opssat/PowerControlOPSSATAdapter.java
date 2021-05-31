@@ -118,13 +118,13 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
         if (found != null) {
           payloadId = payloadIdByObjInstId.get(found.getUnitObjInstId());
         } else {
-          throw new IOException("Cannot find the device by type " + device.toString());
+          throw new IOException("Cannot find the device by type " + device);
         }
       }
       if (payloadId != null) {
         switchDevice(payloadId, device.getEnabled());
       } else {
-        throw new IOException("Cannot find the device by oId " + device.toString());
+        throw new IOException("Cannot find the device by oId " + device);
       }
     }
   }

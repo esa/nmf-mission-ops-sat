@@ -85,8 +85,6 @@ public class SPPWriter
     final int segt_flag = sph.getSequenceFlags();
     final int pkt_ident = (vers_nb << 13) | (pkt_type << 12) | (sec_head_flag << 11) | (TCPacket_apid);
 
-    final Integer apid = TCPacket_apid;
-
     /* The sequence counter should be assigned by the upper layer
     Integer counter = (Integer) sequenceCounters.get(apid);
     if (counter == null) {
@@ -95,7 +93,7 @@ public class SPPWriter
     }*/
     final int pkt_seq_ctrl = (segt_flag << 14)
         | (packet.getHeader().getSequenceCount());
-    final boolean processCrc = crcEnabled && crcApids.inRange(apid);
+    final boolean processCrc = crcEnabled && crcApids.inRange(TCPacket_apid);
     // Remove 1 byte as specified by the specification.
 //    int pkt_length_value = packet.getLength() - 1;
     final int pkt_length_value = (processCrc) ? packet.getLength() - 1 + 2

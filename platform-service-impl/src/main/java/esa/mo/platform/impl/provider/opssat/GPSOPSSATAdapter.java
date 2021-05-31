@@ -85,7 +85,7 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
   public String getTLESentence() throws IOException
   {
     // read TLE from file
-    File file = new File(this.TLE_LOCATION);
+    File file = new File(TLE_LOCATION);
 
     // check if cached version is still accurate
     if (file.lastModified() == this.tleLastModified) {
@@ -145,7 +145,7 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
 
   private class GPSHandler extends GPSAdapter
   {
-    Semaphore lock = new Semaphore(0);
+    final Semaphore lock = new Semaphore(0);
     String response = "";
 
     @Override

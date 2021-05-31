@@ -311,7 +311,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       ret = stream.toByteArray();
       stream.close();
     } else {
-      throw new IOException(targetFormat.toString() + " format not supported.");
+      throw new IOException(targetFormat + " format not supported.");
     }
     return ret;
   }
