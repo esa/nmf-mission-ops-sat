@@ -46,10 +46,10 @@ public class CCSDSTime {
 	private AbsoluteDate epoch;
 	private int nOctets;
 	private TimeCode timeCode;
-	private int unitMultiplier;
-	private Map<String, Object> properties;
+	private final int unitMultiplier;
+	private final Map<String, Object> properties;
 
-	public static enum TimeCode {
+	public enum TimeCode {
 
 		CUC, CDS, CCS
 	};

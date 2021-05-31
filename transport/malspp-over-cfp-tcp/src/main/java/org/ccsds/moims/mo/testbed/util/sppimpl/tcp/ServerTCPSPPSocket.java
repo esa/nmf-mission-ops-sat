@@ -45,7 +45,6 @@ import fr.dyade.aaa.common.Daemon;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import org.objectweb.util.monolog.api.Logger;
 
 public class ServerTCPSPPSocket implements SPPSocket
 {

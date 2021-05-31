@@ -46,7 +46,7 @@ public class SPPHelper
   /**
    * Table used to compute the CRC
    */
-  private static int[] lookUpTable;
+  private static final int[] lookUpTable;
 
 //  public static boolean isAPIDqualifierInMessage = true;
   public static boolean isAPIDqualifierInMessage = false;
@@ -124,13 +124,11 @@ public class SPPHelper
           result.add(new APIDRange(val, val));
         }
       }
-    } catch (FileNotFoundException ex) {
-      Logger.getLogger(SPPReader.class.getName()).log(Level.WARNING, null, ex);
     } catch (IOException ex) {
       Logger.getLogger(SPPReader.class.getName()).log(Level.WARNING, null, ex);
     }
 
-    return result;
+      return result;
   }
 
 }

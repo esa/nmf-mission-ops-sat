@@ -25,8 +25,6 @@ import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -452,8 +450,7 @@ public class Configuration {
 
 		@Override
 		public int hashCode() {
-			int hash = 5;
-			return hash;
+			return 5;
 		}
 
 		@Override

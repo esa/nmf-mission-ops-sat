@@ -70,10 +70,10 @@ public class SPPTransport extends SPPBaseTransport<SpacePacket>
 
     uriBase = "malspp:";
 
-    GENMessagePoller rcvr = new GENMessagePoller<SpacePacket, List<ByteBuffer>>(this,
+    GENMessagePoller rcvr = new GENMessagePoller<>(this,
             new SPPMessageSender(sppSocket),
             new SPPMessageReceiver(sppSocket),
-            new SPPMessageDecoderFactory<SpacePacket>());
+            new SPPMessageDecoderFactory<>());
     rcvr.start();
   }
 
@@ -106,9 +106,8 @@ public class SPPTransport extends SPPBaseTransport<SpacePacket>
   protected GENMessageSender createMessageSender(GENMessage msg, String remoteRootURI) throws MALException, MALTransmitErrorException
   {
     //create a message sender and receiver for the socket
-    SPPMessageSender trans = new SPPMessageSender(sppSocket);
 
-    return trans;
+      return new SPPMessageSender(sppSocket);
   }
 
   @Override

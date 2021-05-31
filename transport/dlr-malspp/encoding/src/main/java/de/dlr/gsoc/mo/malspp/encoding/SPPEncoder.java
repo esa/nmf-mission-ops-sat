@@ -66,7 +66,7 @@ public class SPPEncoder implements MALEncoder, MALListEncoder {
 		}
 
 		final byte b;
-		if (att == true) {
+		if (att) {
 			b = 1;
 		} else {
 			b = 0;

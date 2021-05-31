@@ -88,10 +88,10 @@ public class SPPTransport implements MALTransport {
         // We need to set the initial capacity to have the MAL mixing messages from different sources.
         // For example, if I do a heavy query, I don't want to have the queue full of those messages, 
         // but instead, a mix of those combined with other messages. This let's them work in parallel.
-	private LinkedBlockingQueue<MALMessage> receivedMessages = new LinkedBlockingQueue<>(15);
+	private final LinkedBlockingQueue<MALMessage> receivedMessages = new LinkedBlockingQueue<>(15);
 //	private LinkedBlockingQueue<MALMessage> receivedMessages = new LinkedBlockingQueue<>();
 
-	private HashMap<Long, LinkedBlockingQueue<MALMessage>> transMap = new HashMap<Long, LinkedBlockingQueue<MALMessage>>();
+	private final HashMap<Long, LinkedBlockingQueue<MALMessage>> transMap = new HashMap<>();
         
         private final Map<SequenceCounterId, SPPCounter> sequenceCounters = new HashMap<>();
 	private final Map<SequenceCounterId, Queue<Short>> identifiers = new HashMap<>();
@@ -508,10 +508,8 @@ public class SPPTransport implements MALTransport {
 		} catch (InterruptedException ex) {
 			LOGGER.log(Level.INFO, THREAD_INTERRUPTED);
 			currentThread.interrupt();
-		} catch (MALException ex) {
-			// TODO: Is there any other way of handling reception exceptions?
-			LOGGER.log(Level.WARNING, SPP_ERROR, ex);
 		} catch (Exception ex) {
+			// TODO: Is there any other way of handling reception exceptions?
 			LOGGER.log(Level.WARNING, SPP_ERROR, ex);
 		}
 		return null;
@@ -590,10 +588,8 @@ public class SPPTransport implements MALTransport {
                             });
 */
                         }
-		} catch (MALException ex) {
-			// TODO: Is there any other way of handling reception exceptions?
-			LOGGER.log(Level.WARNING, SPP_ERROR, ex);
 		} catch (Exception ex) {
+			// TODO: Is there any other way of handling reception exceptions?
 			LOGGER.log(Level.WARNING, SPP_ERROR, ex);
 		}
 	}
@@ -634,7 +630,7 @@ public class SPPTransport implements MALTransport {
 	 * @return The newly created receive thread.
 	 */
 	private Thread constructReceiveThread(final SPPSocket socket, final Map qosProperties) throws MALException {
-		Thread thread = new Thread() {
+		return new Thread() {
 			private final Map<SegmentCounterId, SPPSegmenter> segmenters = new HashMap<>();
 
 			@Override
@@ -653,7 +649,6 @@ public class SPPTransport implements MALTransport {
 				}
 			}
 		};
-		return thread;
 	}
 
 	/**
@@ -666,43 +661,43 @@ public class SPPTransport implements MALTransport {
 	 * @throws MALException
 	 */
 	private Thread constructMessageHandlerThread(final Map qosProperties) throws MALException {
-		Thread thread = new Thread() {
+		return new Thread() {
 			@Override
 			public void run() {
 				this.setName("MessageHandlerThread_malspp");
 				while (!isInterrupted()) {
 					try {
 						MALMessage msg = receivedMessages.take();
-                                                
+
                                                 final Long transId = msg.getHeader().getTransactionId();
-                                                
+
                                                 LinkedBlockingQueue<MALMessage> msgs = null;
 
                                                 synchronized(MUTEX){
                                                     msgs = transMap.get(transId);
-                                                    
+
                                                     if(msgs != null){
                                                         msgs.add(msg);
                                                         continue;
                                                     }
                                                 }
-                                                
+
                                                     msgs = new LinkedBlockingQueue<MALMessage>();
                                                     msgs.add(msg);
                                                     transMap.put(transId, msgs);
-                                                    
+
                                                     executor.submit(new Runnable(){
                                                             @Override
                                                             public void run() {
                                                                 LinkedBlockingQueue<MALMessage> msgsIn = transMap.get(transId);
-                                                                
+
                                                                 MALMessage msg = msgsIn.poll();
                                                                 while(msg != null){
                                                                     handleReceivedMessage(msg, qosProperties);
-                                                                    
+
                                                                     synchronized(MUTEX){
                                                                         msg = msgsIn.poll();
-    
+
                                                                         if(msg == null){
                                                                             transMap.remove(transId);
                                                                         }
@@ -710,8 +705,8 @@ public class SPPTransport implements MALTransport {
                                                                 }
                                                             }
                                                     });
-                                                
-                                                
+
+
 					} catch (InterruptedException ex) {
 						LOGGER.log(Level.INFO, THREAD_INTERRUPTED);
 						break;
@@ -719,7 +714,6 @@ public class SPPTransport implements MALTransport {
 				}
 			}
 		};
-		return thread;
 	}
 
 	/**

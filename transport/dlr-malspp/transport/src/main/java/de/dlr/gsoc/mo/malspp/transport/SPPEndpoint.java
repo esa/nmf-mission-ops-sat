@@ -575,7 +575,7 @@ public class SPPEndpoint implements MALEndpoint {
 		}
 		if (!transmitErrors.isEmpty()) {
 			throw new MALTransmitMultipleErrorException(
-					transmitErrors.toArray(new MALTransmitErrorException[transmitErrors.size()]));
+					transmitErrors.toArray(new MALTransmitErrorException[0]));
 		}
 	}
 

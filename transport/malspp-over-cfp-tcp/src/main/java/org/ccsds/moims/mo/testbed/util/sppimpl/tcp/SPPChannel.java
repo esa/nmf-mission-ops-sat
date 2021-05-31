@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import org.ccsds.moims.mo.mal.MALException;
 
 import org.ccsds.moims.mo.testbed.util.spp.SpacePacket;
 import org.ccsds.moims.mo.testbed.util.sppimpl.util.SPPReader;
@@ -68,8 +67,7 @@ public class SPPChannel
 
   public SpacePacket receive() throws IOException
   {
-    SpacePacket packet = reader.receive();
-    return packet;
+      return reader.receive();
   }
 
   public void send(SpacePacket packet) throws IOException

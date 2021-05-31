@@ -149,7 +149,7 @@ public class SpacePacketHeader {
   }*/
  
   public String toString() {
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
     buf.append(super.toString());
     buf.append(",packetVersionNumber=" + packetVersionNumber);
     buf.append(",packetType=" + packetType);

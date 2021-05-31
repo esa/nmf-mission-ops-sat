@@ -71,7 +71,7 @@ import org.ccsds.moims.mo.mc.action.ActionHelper;
 public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
 
     private final ProtocolBridgeSPP protocolBridgeSPP = new ProtocolBridgeSPP();
-    private final HashMap<IdentifierList, URI> actionURIs = new HashMap<IdentifierList, URI>();
+    private final HashMap<IdentifierList, URI> actionURIs = new HashMap<>();
 
     /**
      * Ground MO Proxy for OPS-SAT
@@ -160,9 +160,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
                 }
 
             }
-        } catch (MALInteractionException ex) {
-            Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (MALException ex) {
+        } catch (MALInteractionException | MALException ex) {
             Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -178,7 +176,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
 
         try {
             final ProviderSummaryList archiveSyncsCD = localDirectoryService.lookupProvider(sf, null);
-            ArrayList<ArchiveSyncConsumerServiceImpl> archiveSyncs = new ArrayList<ArchiveSyncConsumerServiceImpl>();
+            ArrayList<ArchiveSyncConsumerServiceImpl> archiveSyncs = new ArrayList<>();
 
             // Cycle through the NMF Apps and sync them!
             for (int i = 0; i < archiveSyncsCD.size(); i++) {
@@ -200,9 +198,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
             }
 
             this.syncRemoteArchiveWithLocalArchive(archiveSyncs);
-        } catch (MALInteractionException ex) {
-            Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (MALException ex) {
+        } catch (MALInteractionException | MALException ex) {
             Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -308,9 +304,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
         try {
             super.localCOMServices.getArchiveService().query(false, objType,
                     archiveQueryList, null, new QueryInteractionImpl(arch, semaphore));
-        } catch (MALException ex) {
-            Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (MALInteractionException ex) {
+        } catch (MALException | MALInteractionException ex) {
             Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
 

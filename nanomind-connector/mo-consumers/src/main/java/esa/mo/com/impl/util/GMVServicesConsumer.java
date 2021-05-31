@@ -86,9 +86,7 @@ public class GMVServicesConsumer {
 
             // Add the other services!!
             
-        } catch (MALException ex) {
-            Logger.getLogger(GMVServicesConsumer.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (MalformedURLException ex) {
+        } catch (MALException | MalformedURLException ex) {
             Logger.getLogger(GMVServicesConsumer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

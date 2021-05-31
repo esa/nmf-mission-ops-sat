@@ -45,7 +45,7 @@ public class SPPElementOutputStream implements MALElementOutputStream {
 	private final SPPEncoder encoder;
 	protected static final String INVALID_ELEMENT_TYPE = "Supplied element type cannot be handled by the transport layer.";
 
-	private static enum ElementType {
+	private enum ElementType {
 
 		ELEMENT, JAVA_MAPPED, ENCODED_ELEMENT, ENCODED_LIST, NULL
 	}
@@ -182,7 +182,7 @@ public class SPPElementOutputStream implements MALElementOutputStream {
 				// updateValueShortForm denotes the element type, the corresponding list type is
 				// sign flipped. Exchange the last 24 bits of the absolute short form with the sign
 				// flipped type.
-				final Long updateListShortForm = (updateValueShortForm & ~0xFFFFFF)
+				final long updateListShortForm = (updateValueShortForm & ~0xFFFFFF)
 						| (-(updateValueShortForm & 0xFFFFFF) & 0xFFFFFF);
 				if (service.isDeclaredAbstract()) {
 					encodeShortForm(updateListShortForm);

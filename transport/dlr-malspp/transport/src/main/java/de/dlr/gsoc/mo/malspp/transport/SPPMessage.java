@@ -23,8 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.BitSet;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import org.ccsds.moims.mo.mal.MALContextFactory;
 import org.ccsds.moims.mo.mal.MALException;
 import org.ccsds.moims.mo.mal.MALOperation;

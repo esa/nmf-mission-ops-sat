@@ -35,8 +35,6 @@ package org.ccsds.moims.mo.testbed.util.sppimpl.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.ccsds.moims.mo.testbed.util.spp.SpacePacket;
 import org.ccsds.moims.mo.testbed.util.spp.SpacePacketHeader;
@@ -50,7 +48,7 @@ public class SPPWriter
 
   private final byte[] outCrcBuffer;
   private final boolean crcEnabled;
-  private APIDRangeList crcApids;
+  private final APIDRangeList crcApids;
 
   //private Hashtable sequenceCounters;
   private final OutputStream os;

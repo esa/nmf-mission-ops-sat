@@ -51,7 +51,7 @@ public class SPPMessageBody implements MALMessageBody {
 			this.bodyElements = null;
 		} else if (bodyElements.length == 1 && bodyElements[0] instanceof MALStandardError) {
 			MALStandardError err = (MALStandardError) bodyElements[0];
-			this.bodyElements = Arrays.asList(new Object[]{err.getErrorNumber(), err.getExtraInformation()});
+			this.bodyElements = Arrays.asList(err.getErrorNumber(), err.getExtraInformation());
 		} else {
 			this.bodyElements = Arrays.asList(bodyElements);
 		}

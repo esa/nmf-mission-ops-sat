@@ -40,26 +40,24 @@ class ServiceInfo {
 	private final Boolean isError;
 	private final Boolean isDeclaredAbstract;
 	private Boolean isDeclaredAttribute;
-	private static final Collection<Long> attributeShortForms = Arrays.asList(new Long[]{
-		Attribute.BOOLEAN_SHORT_FORM,
-		Attribute.FLOAT_SHORT_FORM,
-		Attribute.DOUBLE_SHORT_FORM,
-		Attribute.OCTET_SHORT_FORM,
-		Attribute.SHORT_SHORT_FORM,
-		Attribute.INTEGER_SHORT_FORM,
-		Attribute.LONG_SHORT_FORM,
-		Attribute.STRING_SHORT_FORM,
-		Attribute.BLOB_SHORT_FORM,
-		Attribute.DURATION_SHORT_FORM,
-		Attribute.IDENTIFIER_SHORT_FORM,
-		Attribute.TIME_SHORT_FORM,
-		Attribute.FINETIME_SHORT_FORM,
-		Attribute.UINTEGER_SHORT_FORM,
-		Attribute.ULONG_SHORT_FORM,
-		Attribute.UOCTET_SHORT_FORM,
-		Attribute.USHORT_SHORT_FORM,
-		Attribute.URI_SHORT_FORM
-	});
+	private static final Collection<Long> attributeShortForms = Arrays.asList(Attribute.BOOLEAN_SHORT_FORM,
+            Attribute.FLOAT_SHORT_FORM,
+            Attribute.DOUBLE_SHORT_FORM,
+            Attribute.OCTET_SHORT_FORM,
+            Attribute.SHORT_SHORT_FORM,
+            Attribute.INTEGER_SHORT_FORM,
+            Attribute.LONG_SHORT_FORM,
+            Attribute.STRING_SHORT_FORM,
+            Attribute.BLOB_SHORT_FORM,
+            Attribute.DURATION_SHORT_FORM,
+            Attribute.IDENTIFIER_SHORT_FORM,
+            Attribute.TIME_SHORT_FORM,
+            Attribute.FINETIME_SHORT_FORM,
+            Attribute.UINTEGER_SHORT_FORM,
+            Attribute.ULONG_SHORT_FORM,
+            Attribute.UOCTET_SHORT_FORM,
+            Attribute.USHORT_SHORT_FORM,
+            Attribute.URI_SHORT_FORM);
 
 	/**
 	 * Retrieve service information by evaluating the encoding context.

@@ -85,14 +85,11 @@ public class SPPElementStreamFactory extends MALElementStreamFactory {
 			ctx.setBodyElementIndex(i);
                     try {
                         eos.writeElement(elements[i], ctx);
-                    } catch (IllegalArgumentException ex) {
+                    } catch (IllegalArgumentException | MALException ex) {
                         Logger.getLogger(SPPElementStreamFactory.class.getName()).log(Level.SEVERE, "The Element is type: " + elements[i].getClass().getName() + " - " + elements[i].toString(), ex);
                         throw ex;
-                    } catch (MALException ex1) {
-                        Logger.getLogger(SPPElementStreamFactory.class.getName()).log(Level.SEVERE, "The Element is type: " + elements[i].getClass().getName() + " - " + elements[i].toString(), ex1);
-                        throw ex1;
                     }
-		}
+        }
 
 		try {
 			os.flush();

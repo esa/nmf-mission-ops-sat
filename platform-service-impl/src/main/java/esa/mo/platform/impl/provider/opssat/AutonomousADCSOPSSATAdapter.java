@@ -97,9 +97,9 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     File f = new File("/etc/tle");
     BufferedReader br = new BufferedReader(new FileReader(f));
     String s;
-    List<String> lines = new ArrayList<String>();
+    List<String> lines = new ArrayList<>();
     while ((s = br.readLine()) != null) {
-      String l = new String(s);
+      String l = s;
       lines.add(l);
     }
     if (lines.size() == 3) {

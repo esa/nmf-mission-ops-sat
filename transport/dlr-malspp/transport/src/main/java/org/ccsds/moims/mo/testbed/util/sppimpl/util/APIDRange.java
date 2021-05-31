@@ -11,8 +11,8 @@ package org.ccsds.moims.mo.testbed.util.sppimpl.util;
  */
 public class APIDRange
 {
-  private int min;
-  private int max;
+  private final int min;
+  private final int max;
 
   public APIDRange(int min, int max){
     this.min = min;

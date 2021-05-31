@@ -32,16 +32,10 @@
  */
 package org.ccsds.moims.mo.testbed.util.sppimpl.util;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import org.ccsds.moims.mo.testbed.util.spp.SpacePacket;
 import org.ccsds.moims.mo.testbed.util.spp.SpacePacketHeader;
 
@@ -58,8 +52,8 @@ public class SPPReader
   private final byte[] inCrcBuffer;
   private final InputStream is;
   private final boolean crcEnabled;
-  private APIDRangeList crcApids;
-  private APIDRangeList processedApids;
+  private final APIDRangeList crcApids;
+  private final APIDRangeList processedApids;
   private SpacePacket packet;
 
   public SPPReader(InputStream is)

@@ -215,8 +215,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       rawData = convertImage(rawData, settings.getFormat());
     }
     replySettings.setFormat(settings.getFormat());
-    Picture picture = new Picture(timestamp, replySettings, new Blob(rawData));
-    return picture;
+    return new Picture(timestamp, replySettings, new Blob(rawData));
   }
 
   @Override
