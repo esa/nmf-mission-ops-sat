@@ -71,7 +71,7 @@ import org.ccsds.moims.mo.mc.action.ActionHelper;
 public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
 
     private final ProtocolBridgeSPP protocolBridgeSPP = new ProtocolBridgeSPP();
-    private final HashMap<IdentifierList, URI> actionURIs = new HashMap<IdentifierList, URI>();
+    private final HashMap<IdentifierList, URI> actionURIs = new HashMap<>();
 
     /**
      * Ground MO Proxy for OPS-SAT
@@ -176,7 +176,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
 
         try {
             final ProviderSummaryList archiveSyncsCD = localDirectoryService.lookupProvider(sf, null);
-            final ArrayList<ArchiveSyncConsumerServiceImpl> archiveSyncs = new ArrayList<ArchiveSyncConsumerServiceImpl>();
+            final ArrayList<ArchiveSyncConsumerServiceImpl> archiveSyncs = new ArrayList<>();
 
             // Cycle through the NMF Apps and sync them!
             for (int i = 0; i < archiveSyncsCD.size(); i++) {
@@ -271,7 +271,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
      * @param args the command line arguments
      * @throws java.lang.Exception If there is an error
      */
-    public static void main(final String args[]) throws Exception {
+    public static void main(final String[] args) throws Exception {
         final GroundMOProxyOPSSATImpl proxy = new GroundMOProxyOPSSATImpl();
     }
 

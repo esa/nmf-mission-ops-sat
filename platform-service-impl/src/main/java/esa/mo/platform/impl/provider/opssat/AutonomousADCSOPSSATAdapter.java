@@ -24,7 +24,6 @@ import at.tugraz.ihf.opssat.iadcs.*;
 import esa.mo.platform.impl.provider.gen.AutonomousADCSAdapterInterface;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -258,8 +257,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     String s;
     final List<String> lines = new ArrayList<>();
     while ((s = br.readLine()) != null) {
-      final String l = new String(s);
-      lines.add(l);
+      lines.add(s);
     }
     if (lines.size() == 3) {
       lines.remove(0);
@@ -458,12 +456,12 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
                                                       final SEPP_IADCS_API_VECTOR3_UVW_FLOAT in2)
   {
     final FloatList list = new FloatList(6);
-    list.add((float) in1.getX());
-    list.add((float) in1.getY());
-    list.add((float) in1.getZ());
-    list.add((float) in2.getU());
-    list.add((float) in2.getV());
-    list.add((float) in2.getW());
+    list.add(in1.getX());
+    list.add(in1.getY());
+    list.add(in1.getZ());
+    list.add(in2.getU());
+    list.add(in2.getV());
+    list.add(in2.getW());
     return new WheelsSpeed(list);
   }
 

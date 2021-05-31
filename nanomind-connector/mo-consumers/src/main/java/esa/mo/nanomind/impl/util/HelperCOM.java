@@ -349,10 +349,10 @@ public class HelperCOM {
             return null;
         }
 
-        final long areaVal = (long) objectType.getArea().getValue();
-        final long serviceVal = (long) objectType.getService().getValue();
-        final long versionVal = (long) objectType.getVersion().getValue();
-        final long numberVal = (long) objectType.getNumber().getValue();
+        final long areaVal = objectType.getArea().getValue();
+        final long serviceVal = objectType.getService().getValue();
+        final long versionVal = objectType.getVersion().getValue();
+        final long numberVal = objectType.getNumber().getValue();
 
         return (numberVal
                 | (versionVal << 24)
