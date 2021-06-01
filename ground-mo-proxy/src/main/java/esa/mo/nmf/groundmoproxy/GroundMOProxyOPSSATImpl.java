@@ -24,6 +24,7 @@ import esa.mo.com.impl.consumer.ArchiveSyncConsumerServiceImpl;
 import esa.mo.com.impl.util.COMObjectStructure;
 import esa.mo.helpertools.connections.SingleConnectionDetails;
 import esa.mo.helpertools.helpers.HelperTime;
+import esa.mo.helpertools.misc.Const;
 import esa.mo.mc.impl.consumer.ActionConsumerServiceImpl;
 import esa.mo.mc.impl.proxy.ActionProxyServiceImpl;
 import esa.mo.sm.impl.provider.AppsLauncherManager;
@@ -69,6 +70,7 @@ import org.ccsds.moims.mo.mc.action.ActionHelper;
  * @author Cesar Coelho
  */
 public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
+    private static Logger LOGGER = Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName());
 
     private final ProtocolBridgeSPP protocolBridgeSPP = new ProtocolBridgeSPP();
     private final HashMap<IdentifierList, URI> actionURIs = new HashMap<>();
@@ -104,10 +106,10 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
             super.init(centralDirectoryServiceURI, routedURI);
 
             final URI uri = super.getDirectoryServiceURI();
-            Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.INFO,
+            LOGGER.log(Level.INFO,
                     "Ground MO Proxy initialized! URI: " + uri + "\n");
         } catch (final Exception ex) {
-            Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE,
+            LOGGER.log(Level.SEVERE,
                     "The SPP Protocol Bridge could not be initialized!", ex);
         }
     }
@@ -152,7 +154,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
                             super.localDirectoryService.rerouteActionServiceURI(connectionDetails.getDomain(), localActionURI);
                         }
                     } catch (final MalformedURLException ex) {
-                        Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
+                        LOGGER.log(Level.SEVERE, null, ex);
                     }
                 } catch (final IOException ex) {
                     // The Action service does not exist on this provider...
@@ -161,7 +163,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
 
             }
         } catch (final MALInteractionException | MALException ex) {
-            Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, null, ex);
         }
 
         // ---------------------
@@ -180,6 +182,10 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
 
             // Cycle through the NMF Apps and sync them!
             for (int i = 0; i < archiveSyncsCD.size(); i++) {
+                if (archiveSyncsCD.get(i).getProviderName().getValue().contains(Const.NANOSAT_MO_SUPERVISOR_NAME)) {
+                    LOGGER.fine("Skipping Supervisor in Archive Sync");
+                    continue;
+                }
                 final ProviderSummaryList psl = new ProviderSummaryList();
                 psl.add(archiveSyncsCD.get(i));
 
@@ -189,7 +195,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
                         final ArchiveSyncConsumerServiceImpl archSync = new ArchiveSyncConsumerServiceImpl(connectionDetails);
                         archiveSyncs.add(archSync);
                     } catch (final MalformedURLException ex) {
-                        Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
+                        LOGGER.log(Level.SEVERE, null, ex);
                     }
                 } catch (final IOException ex) {
                     // The ArchiveSync service does not exist on this provider...
@@ -199,7 +205,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
 
             this.syncRemoteArchiveWithLocalArchive(archiveSyncs);
         } catch (final MALInteractionException | MALException ex) {
-            Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -221,7 +227,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
 
             final FineTime until = response.getBodyElement0();
 
-            Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(
+            LOGGER.log(
                     Level.INFO,
                     "Synchronizing provider: {0}, From: {1}, Until: {2}",
                     new Object[] {archiveSync.getConnectionDetails().getDomain(), lastSyncTime, until});
@@ -242,14 +248,14 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
                             null
                     );
                 } catch (final MALException ex) {
-                    Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(
+                    LOGGER.log(
                             Level.SEVERE, null, ex);
                 } catch (final MALInteractionException ex) {
                     if (COMHelper.DUPLICATE_ERROR_NUMBER.equals(ex.getStandardError().getErrorNumber())) {
-                        Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(
+                        LOGGER.log(
                                 Level.SEVERE, "The object already exists!");
                     } else {
-                        Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(
+                        LOGGER.log(
                                 Level.SEVERE, "Error!", ex);
                     }
                 }
@@ -258,7 +264,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
             final IdentifierList providerDomain = archiveSync.getConnectionDetails().getDomain();
             final URI localCOMArchiveURI = super.getCOMArchiveServiceURI();
             //super.localDirectoryService.rerouteArchiveServiceURI(providerDomain, localCOMArchiveURI);
-            Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(
+            LOGGER.log(
                     Level.INFO,
                     "Synchronizing provider {0} completed",
                     new Object[] {archiveSync.getConnectionDetails().getDomain()});
@@ -308,14 +314,14 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
             super.localCOMServices.getArchiveService().query(false, objType,
                     archiveQueryList, null, new QueryInteractionImpl(arch, semaphore));
         } catch (final MALException | MALInteractionException ex) {
-            Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, null, ex);
         }
 
         try {
             semaphore.acquire();
             return arch.getTimestamp();
         } catch (final InterruptedException ex) {
-            Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, null, ex);
         }
 
         return new FineTime(0);
