@@ -86,7 +86,7 @@ public class SPPDecoderTest {
 	@Test
 	public void testDecodeNullableBoolean1() throws Exception {
 		newBuffer(new byte[]{0});
-		assertEquals(null, decoder.decodeNullableBoolean());
+		assertNull(decoder.decodeNullableBoolean());
 	}
 
 	@Test
@@ -99,7 +99,7 @@ public class SPPDecoderTest {
 			1, 0
 		});
 		assertEquals(Boolean.FALSE, decoder.decodeNullableBoolean());
-		assertEquals(null, decoder.decodeNullableBoolean());
+		assertNull(decoder.decodeNullableBoolean());
 		assertEquals(Boolean.TRUE, decoder.decodeNullableBoolean());
 		assertEquals(Boolean.FALSE, decoder.decodeNullableBoolean());
 	}
@@ -191,7 +191,7 @@ public class SPPDecoderTest {
 	@Test
 	public void testDecodeNullableFloat1() throws Exception {
 		newBuffer(new byte[]{0});
-		assertEquals(null, decoder.decodeNullableFloat());
+		assertNull(decoder.decodeNullableFloat());
 	}
 
 	@Test
@@ -203,7 +203,7 @@ public class SPPDecoderTest {
 			1, 0, (byte) 0b10000000, 0, 0
 		});
 		assertEquals(Float.valueOf((float) -0.0), decoder.decodeNullableFloat());
-		assertEquals(null, decoder.decodeNullableFloat());
+		assertNull(decoder.decodeNullableFloat());
 		assertEquals(Float.valueOf(Float.NaN), decoder.decodeNullableFloat());
 		assertEquals(Float.valueOf(Float.MIN_NORMAL), decoder.decodeNullableFloat());
 	}
@@ -305,7 +305,7 @@ public class SPPDecoderTest {
 	@Test
 	public void testDecodeNullableDouble1() throws Exception {
 		newBuffer(new byte[]{0});
-		assertEquals(null, decoder.decodeNullableDouble());
+		assertNull(decoder.decodeNullableDouble());
 	}
 
 	@Test
@@ -316,7 +316,7 @@ public class SPPDecoderTest {
 			1, (byte) 0b01111111, (byte) 0b11111000, 0, 0, 0, 0, 0, 0,
 			1, 0, (byte) 0b00010000, 0, 0, 0, 0, 0, 0
 		});
-		assertEquals(null, decoder.decodeNullableDouble());
+		assertNull(decoder.decodeNullableDouble());
 		assertEquals(Double.valueOf(-0.0), decoder.decodeNullableDouble());
 		assertEquals(Double.valueOf(Double.NaN), decoder.decodeNullableDouble());
 		assertEquals(Double.valueOf(Double.MIN_NORMAL), decoder.decodeNullableDouble());
@@ -393,7 +393,7 @@ public class SPPDecoderTest {
 	@Test
 	public void testDecodeNullableOctet1() throws Exception {
 		newBuffer(new byte[]{0});
-		assertEquals(null, decoder.decodeNullableOctet());
+		assertNull(decoder.decodeNullableOctet());
 	}
 
 	@Test
@@ -405,7 +405,7 @@ public class SPPDecoderTest {
 			1, (byte) 0b11010001
 		});
 		assertEquals(Byte.valueOf((byte) 127), decoder.decodeNullableOctet());
-		assertEquals(null, decoder.decodeNullableOctet());
+		assertNull(decoder.decodeNullableOctet());
 		assertEquals(Byte.valueOf((byte) 0), decoder.decodeNullableOctet());
 		assertEquals(Byte.valueOf((byte) -47), decoder.decodeNullableOctet());
 	}
@@ -470,7 +470,7 @@ public class SPPDecoderTest {
 	@Test
 	public void testDecodeNullableUOctet1() throws Exception {
 		newBuffer(new byte[]{0});
-		assertEquals(null, decoder.decodeNullableUOctet());
+		assertNull(decoder.decodeNullableUOctet());
 	}
 
 	@Test
@@ -483,7 +483,7 @@ public class SPPDecoderTest {
 		});
 		assertEquals(new UOctet((short) 254), decoder.decodeNullableUOctet());
 		assertEquals(new UOctet((short) 0), decoder.decodeNullableUOctet());
-		assertEquals(null, decoder.decodeNullableUOctet());
+		assertNull(decoder.decodeNullableUOctet());
 		assertEquals(new UOctet((short) 1), decoder.decodeNullableUOctet());
 	}
 
@@ -640,7 +640,7 @@ public class SPPDecoderTest {
 	@Test
 	public void testDecodeNullableShort1() throws Exception {
 		newBuffer(new byte[]{0});
-		assertEquals(null, decoder.decodeNullableShort());
+		assertNull(decoder.decodeNullableShort());
 	}
 
 	@Test
@@ -656,7 +656,7 @@ public class SPPDecoderTest {
 		assertEquals(Short.valueOf((short) 8193), decoder.decodeNullableShort());
 		assertEquals(Short.valueOf((short) 0), decoder.decodeNullableShort());
 		assertEquals(Short.valueOf((short) -256), decoder.decodeNullableShort());
-		assertEquals(null, decoder.decodeNullableShort());
+		assertNull(decoder.decodeNullableShort());
 	}
 
 	@Test
@@ -673,7 +673,7 @@ public class SPPDecoderTest {
 		assertEquals(Short.valueOf((short) 8193), decoder.decodeNullableShort());
 		assertEquals(Short.valueOf((short) 0), decoder.decodeNullableShort());
 		assertEquals(Short.valueOf((short) -256), decoder.decodeNullableShort());
-		assertEquals(null, decoder.decodeNullableShort());
+		assertNull(decoder.decodeNullableShort());
 	}
 
 	/**
@@ -888,7 +888,7 @@ public class SPPDecoderTest {
 	@Test
 	public void testDecodeNullableUShort1() throws Exception {
 		newBuffer(new byte[]{0});
-		assertEquals(null, decoder.decodeNullableUShort());
+		assertNull(decoder.decodeNullableUShort());
 	}
 
 	@Test
@@ -902,7 +902,7 @@ public class SPPDecoderTest {
 		});
 		assertEquals(new UShort(65535), decoder.decodeNullableUShort());
 		assertEquals(new UShort(0), decoder.decodeNullableUShort());
-		assertEquals(null, decoder.decodeNullableUShort());
+		assertNull(decoder.decodeNullableUShort());
 		assertEquals(new UShort(31415), decoder.decodeNullableUShort());
 		assertEquals(new UShort(256), decoder.decodeNullableUShort());
 	}
@@ -919,7 +919,7 @@ public class SPPDecoderTest {
 		setVarintSupportedProperty(false);
 		assertEquals(new UShort(65535), decoder.decodeNullableUShort());
 		assertEquals(new UShort(0), decoder.decodeNullableUShort());
-		assertEquals(null, decoder.decodeNullableUShort());
+		assertNull(decoder.decodeNullableUShort());
 		assertEquals(new UShort(31415), decoder.decodeNullableUShort());
 		assertEquals(new UShort(256), decoder.decodeNullableUShort());
 	}
@@ -1042,7 +1042,7 @@ public class SPPDecoderTest {
 	@Test
 	public void testDecodeNullableInteger1() throws Exception {
 		newBuffer(new byte[]{0});
-		assertEquals(null, decoder.decodeNullableInteger());
+		assertNull(decoder.decodeNullableInteger());
 	}
 
 	@Test
@@ -1054,7 +1054,7 @@ public class SPPDecoderTest {
 			1, (byte) 0b10101100, (byte) 0b10110101, (byte) 0b11011110, (byte) 0b01110101
 		});
 		assertEquals(Integer.valueOf(1), decoder.decodeNullableInteger());
-		assertEquals(null, decoder.decodeNullableInteger());
+		assertNull(decoder.decodeNullableInteger());
 		assertEquals(Integer.valueOf(-1), decoder.decodeNullableInteger());
 		assertEquals(Integer.valueOf(123456854), decoder.decodeNullableInteger());
 	}
@@ -1069,7 +1069,7 @@ public class SPPDecoderTest {
 		});
 		setVarintSupportedProperty(false);
 		assertEquals(Integer.valueOf(1), decoder.decodeNullableInteger());
-		assertEquals(null, decoder.decodeNullableInteger());
+		assertNull(decoder.decodeNullableInteger());
 		assertEquals(Integer.valueOf(-1), decoder.decodeNullableInteger());
 		assertEquals(Integer.valueOf(123456854), decoder.decodeNullableInteger());
 	}
@@ -1181,7 +1181,7 @@ public class SPPDecoderTest {
 	@Test
 	public void testDecodeNullableUInteger1() throws Exception {
 		newBuffer(new byte[]{0});
-		assertEquals(null, decoder.decodeNullableUInteger());
+		assertNull(decoder.decodeNullableUInteger());
 	}
 
 	@Test
@@ -1195,7 +1195,7 @@ public class SPPDecoderTest {
 		assertEquals(new UInteger(1), decoder.decodeNullableUInteger());
 		assertEquals(new UInteger(16363), decoder.decodeNullableUInteger());
 		assertEquals(new UInteger(2147559493L), decoder.decodeNullableUInteger());
-		assertEquals(null, decoder.decodeNullableUInteger());
+		assertNull(decoder.decodeNullableUInteger());
 	}
 
 	@Test
@@ -1210,7 +1210,7 @@ public class SPPDecoderTest {
 		assertEquals(new UInteger(1), decoder.decodeNullableUInteger());
 		assertEquals(new UInteger(16363), decoder.decodeNullableUInteger());
 		assertEquals(new UInteger(2147559493L), decoder.decodeNullableUInteger());
-		assertEquals(null, decoder.decodeNullableUInteger());
+		assertNull(decoder.decodeNullableUInteger());
 	}
 
 	/**
@@ -1360,7 +1360,7 @@ public class SPPDecoderTest {
 	@Test
 	public void testDecodeNullableLong1() throws Exception {
 		newBuffer(new byte[]{0});
-		assertEquals(null, decoder.decodeNullableLong());
+		assertNull(decoder.decodeNullableLong());
 	}
 
 	@Test
@@ -1373,7 +1373,7 @@ public class SPPDecoderTest {
 			1, (byte) 0b10111110, (byte) 0b11001110, (byte) 0b10010111,
 			(byte) 0b10111111, (byte) 0b11100100, (byte) 0b00000111
 		});
-		assertEquals(null, decoder.decodeNullableLong());
+		assertNull(decoder.decodeNullableLong());
 		assertEquals(Long.valueOf(9223372036854775807L), decoder.decodeNullableLong());
 		assertEquals(Long.valueOf(-1), decoder.decodeNullableLong());
 		assertEquals(Long.valueOf(133747110815L), decoder.decodeNullableLong());
@@ -1391,7 +1391,7 @@ public class SPPDecoderTest {
 			(byte) 0x23, (byte) 0xF2, (byte) 0xF3, (byte) 0x9F
 		});
 		setVarintSupportedProperty(false);
-		assertEquals(null, decoder.decodeNullableLong());
+		assertNull(decoder.decodeNullableLong());
 		assertEquals(Long.valueOf(9223372036854775807L), decoder.decodeNullableLong());
 		assertEquals(Long.valueOf(-1), decoder.decodeNullableLong());
 		assertEquals(Long.valueOf(133747110815L), decoder.decodeNullableLong());
@@ -1562,7 +1562,7 @@ public class SPPDecoderTest {
 	@Test
 	public void testDecodeNullableULong1() throws Exception {
 		newBuffer(new byte[]{0});
-		assertEquals(null, decoder.decodeNullableULong());
+		assertNull(decoder.decodeNullableULong());
 	}
 
 	@Test
@@ -1575,7 +1575,7 @@ public class SPPDecoderTest {
 			1, (byte) 0b10011111, (byte) 0b11100111, (byte) 0b11001011,
 			(byte) 0b10011111, (byte) 0b11110010, (byte) 0b00000011
 		});
-		assertEquals(null, decoder.decodeNullableULong());
+		assertNull(decoder.decodeNullableULong());
 		assertEquals(new ULong(new BigInteger("18446744073709551615")), decoder.decodeNullableULong());
 		assertEquals(new ULong(BigInteger.ZERO), decoder.decodeNullableULong());
 		assertEquals(new ULong(new BigInteger("133747110815")), decoder.decodeNullableULong());
@@ -1592,7 +1592,7 @@ public class SPPDecoderTest {
 			(byte) 0x23, (byte) 0xF2, (byte) 0xF3, (byte) 0x9F
 		});
 		setVarintSupportedProperty(false);
-		assertEquals(null, decoder.decodeNullableULong());
+		assertNull(decoder.decodeNullableULong());
 		assertEquals(new ULong(new BigInteger("18446744073709551615")), decoder.decodeNullableULong());
 		assertEquals(new ULong(BigInteger.ZERO), decoder.decodeNullableULong());
 		assertEquals(new ULong(new BigInteger("133747110815")), decoder.decodeNullableULong());
@@ -1724,7 +1724,7 @@ public class SPPDecoderTest {
 	@Test
 	public void testDecodeNullableString1() throws Exception {
 		newBuffer(new byte[]{0});
-		assertEquals(null, decoder.decodeNullableString());
+		assertNull(decoder.decodeNullableString());
 	}
 
 	@Test
@@ -1736,7 +1736,7 @@ public class SPPDecoderTest {
 			(byte) 1, (byte) 6, (byte) 0xE5, (byte) 0xAE, (byte) 0x87, (byte) 0xE5, (byte) 0xAE, (byte) 0x99
 		});
 		assertEquals("\ud83d\ude80 DLR", decoder.decodeNullableString());
-		assertEquals(null, decoder.decodeNullableString());
+		assertNull(decoder.decodeNullableString());
 		assertEquals("", decoder.decodeNullableString());
 		assertEquals("\u5b87\u5b99", decoder.decodeNullableString());
 	}
@@ -1831,7 +1831,7 @@ public class SPPDecoderTest {
 	@Test
 	public void testDecodeNullableBlob1() throws Exception {
 		newBuffer(new byte[]{0});
-		assertEquals(null, decoder.decodeNullableBlob());
+		assertNull(decoder.decodeNullableBlob());
 	}
 
 	@Test
@@ -1843,7 +1843,7 @@ public class SPPDecoderTest {
 			(byte) 1, (byte) 1, (byte) 0x21
 		});
 		assertEquals(new Blob(new byte[]{(byte) 0x44, (byte) 0x4C, (byte) 0x52}), decoder.decodeNullableBlob());
-		assertEquals(null, decoder.decodeNullableBlob());
+		assertNull(decoder.decodeNullableBlob());
 		assertEquals(new Blob(new byte[]{}), decoder.decodeNullableBlob());
 		assertEquals(new Blob(new byte[]{(byte) 0x21}), decoder.decodeNullableBlob());
 	}
@@ -1945,7 +1945,7 @@ public class SPPDecoderTest {
 			0, 1, 0
 		});
 		setTimeProperties("DURATION", "00100000", "9999-01-23T21:43:56", null);
-		assertEquals(null, decoder.decodeNullableDuration());
+		assertNull(decoder.decodeNullableDuration());
 		assertEquals(new Duration(0), decoder.decodeNullableDuration());
 	}
 
@@ -2051,7 +2051,7 @@ public class SPPDecoderTest {
 		});
 		setTimeProperties("FINE_TIME", "01001010", Configuration.MAL_FINE_TIME_EPOCH, "UTC");
 		assertEquals(new FineTime(0 + 35000000000000L), decoder.decodeNullableFineTime());
-		assertEquals(null, decoder.decodeNullableFineTime());
+		assertNull(decoder.decodeNullableFineTime());
 	}
 
 	/**
@@ -2116,7 +2116,7 @@ public class SPPDecoderTest {
 	@Test
 	public void testDecodeNullableIdentifier1() throws Exception {
 		newBuffer(new byte[]{0});
-		assertEquals(null, decoder.decodeNullableIdentifier());
+		assertNull(decoder.decodeNullableIdentifier());
 	}
 
 	@Test
@@ -2130,7 +2130,7 @@ public class SPPDecoderTest {
 		assertEquals(new Identifier("\ud83d\ude80 DLR"), decoder.decodeNullableIdentifier());
 		assertEquals(new Identifier(""), decoder.decodeNullableIdentifier());
 		assertEquals(new Identifier("\u5b87\u5b99"), decoder.decodeNullableIdentifier());
-		assertEquals(null, decoder.decodeNullableIdentifier());
+		assertNull(decoder.decodeNullableIdentifier());
 	}
 
 	/**
@@ -2325,7 +2325,7 @@ public class SPPDecoderTest {
 			0, 1, (byte) 0x07, (byte) 0xDD, (byte) 0x00, (byte) 0xE9, 12, 34, 56, 00, 40
 		});
 		setTimeProperties("TIME", "01011010", "9999-01-23T21:43:56", null);
-		assertEquals(null, decoder.decodeNullableTime());
+		assertNull(decoder.decodeNullableTime());
 		assertEquals(new Time(1377088523004L), decoder.decodeNullableTime());
 	}
 
@@ -2396,7 +2396,7 @@ public class SPPDecoderTest {
 	@Test
 	public void testDecodeNullableURI1() throws Exception {
 		newBuffer(new byte[]{0});
-		assertEquals(null, decoder.decodeNullableURI());
+		assertNull(decoder.decodeNullableURI());
 	}
 
 	@Test
@@ -2407,7 +2407,7 @@ public class SPPDecoderTest {
 			(byte) 1, (byte) 0,
 			(byte) 1, (byte) 6, (byte) 0xE5, (byte) 0xAE, (byte) 0x87, (byte) 0xE5, (byte) 0xAE, (byte) 0x99
 		});
-		assertEquals(null, decoder.decodeNullableURI());
+		assertNull(decoder.decodeNullableURI());
 		assertEquals(new URI("\ud83d\ude80 DLR"), decoder.decodeNullableURI());
 		assertEquals(new URI(""), decoder.decodeNullableURI());
 		assertEquals(new URI("\u5b87\u5b99"), decoder.decodeNullableURI());
@@ -2501,7 +2501,7 @@ public class SPPDecoderTest {
 		newBuffer(new byte[]{0});
 		Element e = new UShort();
 		Element ret = decoder.decodeNullableElement(e);
-		assertEquals(null, ret);
+		assertNull(ret);
 		assertNotSame(e, ret);
 	}
 
@@ -2520,12 +2520,12 @@ public class SPPDecoderTest {
 
 		Element e2 = new ULong();
 		Element ret2 = decoder.decodeNullableElement(e2);
-		assertEquals(null, ret2);
+		assertNull(ret2);
 		assertNotSame(e2, ret2);
 
 		Element e3 = new Identifier();
 		Element ret3 = decoder.decodeNullableElement(e3);
-		assertEquals(null, ret3);
+		assertNull(ret3);
 		assertNotSame(e3, ret3);
 
 		Element e4 = new Union(new Integer(4711));
@@ -2604,7 +2604,7 @@ public class SPPDecoderTest {
 	@Test
 	public void testDecodeNullableAttribute1() throws Exception {
 		newBuffer(new byte[]{0});
-		assertEquals(null, decoder.decodeNullableAttribute());
+		assertNull(decoder.decodeNullableAttribute());
 	}
 
 	@Test
@@ -2617,7 +2617,7 @@ public class SPPDecoderTest {
 		});
 		assertEquals(new URI("DLR"), decoder.decodeNullableAttribute());
 		assertEquals(new Union(Boolean.TRUE), decoder.decodeNullableAttribute());
-		assertEquals(null, decoder.decodeNullableAttribute());
+		assertNull(decoder.decodeNullableAttribute());
 		assertEquals(new Blob(new byte[]{0x42, 0x0}), decoder.decodeNullableAttribute());
 	}
 
@@ -2666,7 +2666,7 @@ public class SPPDecoderTest {
 		List<Element> list = new ArrayList<>();
 		newBuffer(new byte[]{0});
 		MALListDecoder listDecoder = decoder.createListDecoder(list);
-		assertEquals(false, listDecoder.hasNext());
+		assertFalse(listDecoder.hasNext());
 	}
 
 	@Test
@@ -2674,7 +2674,7 @@ public class SPPDecoderTest {
 		List<Element> list = new ArrayList<>();
 		newBuffer(new byte[]{3});
 		MALListDecoder listDecoder = decoder.createListDecoder(list);
-		assertEquals(true, listDecoder.hasNext());
+		assertTrue(listDecoder.hasNext());
 
 	}
 
@@ -2685,7 +2685,7 @@ public class SPPDecoderTest {
 		list.add(new URI("http://www.dlr.de"));
 		newBuffer(new byte[]{2});
 		MALListDecoder listDecoder = decoder.createListDecoder(list);
-		assertEquals(false, listDecoder.hasNext());
+		assertFalse(listDecoder.hasNext());
 	}
 
 	/**
