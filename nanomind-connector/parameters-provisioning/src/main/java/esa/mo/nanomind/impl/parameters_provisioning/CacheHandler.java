@@ -46,9 +46,9 @@ class CacheHandler extends OBSWParameterValuesProvider {
    */
 
   /**
-   * Maximum time a parameter value should stay in the cache in seconds.
+   * Maximum time a parameter value should stay in the cache in milliseconds.
    */
-  private long cachingTime = 10;
+  private int cachingTime = 10000;
 
   /**
    * Creates a new instance of CacheHandler.
@@ -61,11 +61,11 @@ class CacheHandler extends OBSWParameterValuesProvider {
   }
 
   /**
-   * Sets the maximum time a parameter value should stay in the cache in seconds.
+   * Sets the maximum time a parameter value should stay in the cache in milliseconds.
    * 
    * @param cachingTime the time
    */
-  public void setCachingTime(long cachingTime) {
+  public void setCachingTime(int cachingTime) {
     this.cachingTime = cachingTime;
   }
 
@@ -85,7 +85,7 @@ class CacheHandler extends OBSWParameterValuesProvider {
     long now = System.currentTimeMillis();
 
     // This parameter value is outdated
-    if (now - cache.get(identifier).getLastUpdateTime().getTime() > cachingTime * 1000) {
+    if (now - cache.get(identifier).getLastUpdateTime().getTime() > cachingTime) {
       return true;
     }
 

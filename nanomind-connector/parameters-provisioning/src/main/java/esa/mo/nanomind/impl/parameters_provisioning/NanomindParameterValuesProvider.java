@@ -50,10 +50,10 @@ public class NanomindParameterValuesProvider extends OBSWParameterValuesProvider
       Logger.getLogger(NanomindParameterValuesProvider.class.getName());
 
   /**
-   * Time (seconds) a parameter value stays in the cache before requesting a new one from the
+   * Time (milliseconds) a parameter value stays in the cache before requesting a new one from the
    * Nanomind
    */
-  private int CACHING_TIME = 10;
+  private int CACHING_TIME = 10000;
 
   /**
    * Interval (seconds) between attempts to clean aggregations definitions.
