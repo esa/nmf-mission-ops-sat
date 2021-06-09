@@ -365,7 +365,6 @@ public class SPPEndpoint implements MALEndpoint {
         try {
             if (isLocalDestination) {
                 try {
-                    ((SPPMessageBody) msg.getBody()).prepareInProcessBody();
                     transport.injectReceivedMessage(msg);
                     return;
                 } catch (final Exception ex) {
