@@ -75,7 +75,7 @@
     </copy>
     <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/home/nmf/ground-mo-proxy">
       <fileset dir="${basedir}/src/main/resources/ground-mo-proxy-root"/>
-      <fileset dir="${basedir}/src/main/resources/space-common" includes="mappingConfigurationParameters.xml startscript.sh processed_apids.txt crc_apids.txt"/>
+      <fileset dir="${basedir}/src/main/resources/space-common" excludes="transport.properties"/>
       <filterset>
         <filter token="MAIN_CLASS_NAME" value="esa.mo.nmf.groundmoproxy.GroundMOProxyOPSSATImpl"/>
         <filter token="NMF_HOME" value="`cd ../ > /dev/null; pwd`"/>
