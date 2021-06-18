@@ -74,9 +74,9 @@
 
   <properties>
     <esa.nmf.opssat.version>2.1.0-SNAPSHOT</esa.nmf.opssat.version>
-    <esa.nmf.opssat.next-version>2.1.0</esa.nmf.opssat.next-version>
+    <esa.nmf.opssat.maximum-version>2.1.100</esa.nmf.opssat.maximum-version>
     <!-- Automatically use the latest patch of each component for the current major.minor version -->
-    <esa.nmf.opssat.version-qualifier>[${esa.nmf.opssat.version},${esa.nmf.opssat.next-version})</esa.nmf.opssat.version-qualifier>
+    <esa.nmf.opssat.version-qualifier>[${esa.nmf.opssat.version},${esa.nmf.opssat.maximum-version}]</esa.nmf.opssat.version-qualifier>
   </properties>
 
   <dependencyManagement>
