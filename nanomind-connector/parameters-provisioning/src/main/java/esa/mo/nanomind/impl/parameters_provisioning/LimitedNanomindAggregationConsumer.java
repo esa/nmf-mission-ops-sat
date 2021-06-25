@@ -143,7 +143,7 @@ class LimitedNanomindAggregationConsumer {
     /**
      * Queries count for each interval of the time window
      */
-    private Map<Long, Integer> countsPerInterval;
+    private final Map<Long, Integer> countsPerInterval;
 
     /**
      * Total queries count of the current time window
@@ -163,7 +163,7 @@ class LimitedNanomindAggregationConsumer {
       this.TIME_WINDOW_MS = timeWindowMs;
       this.INTERVAL_MS = intervalMs;
 
-      this.countsPerInterval = new HashMap<Long, Integer>();
+      this.countsPerInterval = new HashMap<>();
       this.totalCounts = 0;
     }
 
@@ -187,10 +187,7 @@ class LimitedNanomindAggregationConsumer {
       totalCounts++;
 
       // return depending on total window queries count
-      if (totalCounts > MAX_QUERIES) {
-        return false;
-      }
-      return true;
+      return totalCounts <= MAX_QUERIES;
     }
 
     /**
@@ -198,7 +195,7 @@ class LimitedNanomindAggregationConsumer {
      * @return The interval in which the timestamp belongs to
      */
     private long getInterval(long timestamp) {
-      return (long) ((timestamp / INTERVAL_MS) * INTERVAL_MS);
+      return (timestamp / INTERVAL_MS) * INTERVAL_MS;
     }
 
     /**

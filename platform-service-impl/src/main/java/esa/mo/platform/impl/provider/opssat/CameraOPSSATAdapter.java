@@ -248,7 +248,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     byte[] rawData = new byte[imageData.capacity()];
 
     LOGGER.log(Level.INFO, String.format("Copying from native buffer"));
-    ((ByteBuffer) (imageData.duplicate().clear())).get(rawData);
+    imageData.duplicate().clear().get(rawData);
     final CameraSettings replySettings = new CameraSettings();
     replySettings.setResolution(settings.getResolution());
     replySettings.setExposureTime(settings.getExposureTime());
