@@ -70,7 +70,7 @@ import org.ccsds.moims.mo.mc.action.ActionHelper;
  * @author Cesar Coelho
  */
 public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
-    private static Logger LOGGER = Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GroundMOProxyOPSSATImpl.class.getName());
 
     private final ProtocolBridgeSPP protocolBridgeSPP = new ProtocolBridgeSPP();
     private final HashMap<IdentifierList, URI> actionURIs = new HashMap<>();

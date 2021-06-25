@@ -57,7 +57,7 @@ class CacheHandler extends OBSWParameterValuesProvider {
    */
   public CacheHandler(HashMap<Identifier, OBSWParameter> parameterMap) {
     super(parameterMap);
-    cache = new HashMap<Identifier, TimedAttributeValue>();
+    cache = new HashMap<>();
   }
 
   /**
@@ -85,12 +85,9 @@ class CacheHandler extends OBSWParameterValuesProvider {
     long now = System.currentTimeMillis();
 
     // This parameter value is outdated
-    if (now - cache.get(identifier).getLastUpdateTime().getTime() > cachingTime) {
-      return true;
-    }
+    return now - cache.get(identifier).getLastUpdateTime().getTime() > cachingTime;
 
     // No need to refresh, cached value is still valid.
-    return false;
   }
 
   /**

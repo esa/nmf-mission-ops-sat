@@ -87,7 +87,7 @@ class NanomindAggregationsHandler {
    * Identifier of cleaned aggregations that are available again after all their parameters where
    * removed from them because they were not used anymore.
    */
-  private List<String> aggsToReUse = new ArrayList<>();
+  private final List<String> aggsToReUse = new ArrayList<>();
 
   /**
    * List of the aggregations currently defined by this class in the Nanomind.
@@ -152,8 +152,7 @@ class NanomindAggregationsHandler {
           String.format("Agg. value for agg. id %d fetched from Nanomind", aggId));
 
       AggregationValueList aggValueList = valueResponse.getBodyElement1();
-      AggregationValue aggValue = aggValueList.get(0);
-      return aggValue;
+      return aggValueList.get(0);
     } catch (MALInteractionException | MALException e) {
       LOGGER.log(Level.SEVERE,
           "Error while calling getValue operation of Nanomind aggregation service", e);
@@ -352,8 +351,7 @@ class NanomindAggregationsHandler {
 
     // Query the nanomind using the aggregation service
     OBSWAggregation agg = obswParam.getAggregation();
-    AggregationValue aggValue = getNanomindAggregationValue(agg.getId());
-    return aggValue;
+    return getNanomindAggregationValue(agg.getId());
   }
 
   /**
@@ -451,8 +449,7 @@ class NanomindAggregationsHandler {
     }
 
     try {
-      LongList idsList = aggServiceCns.getAggregationNanomindStub().listDefinition(identifierList);
-      return idsList;
+      return aggServiceCns.getAggregationNanomindStub().listDefinition(identifierList);
     } catch (QueryRateExceededException | MALInteractionException | MALException e) {
       LOGGER.log(Level.SEVERE,
           "Error while calling listDefinition operation of Nanomind aggregation service", e);
@@ -549,25 +546,25 @@ class NanomindAggregationsHandler {
    * Logs aggregation definitions present locally and in the nanomind.
    */
   private void logDefinedAggregations() {
-    String message = "Locally defined aggregations:\n";
+    StringBuilder message = new StringBuilder("Locally defined aggregations:\n");
     for (OBSWAggregation obswAgg : nanomindDefinitions) {
-      message += (obswAgg.toString() + "\n");
+      message.append(obswAgg.toString()).append("\n");
       for (OBSWParameter p : obswAgg.getParameters()) {
-        message += (p.toString() + "\n");
+        message.append(p.toString()).append("\n");
       }
     }
-    LOGGER.log(Level.INFO, message);
+    LOGGER.log(Level.INFO, message.toString());
 
-    message = "Remotely (Nanomind) defined aggregations:\n";
+    message = new StringBuilder("Remotely (Nanomind) defined aggregations:\n");
     LongList idsList = listDefinitionIds(0, 5);
     if (idsList == null) {
-      message += "";
+      message.append("");
     } else {
       for (Long id : idsList) {
-        message += String.format("AggregationDefinition[ID=%s]\n", id);
+        message.append(String.format("AggregationDefinition[ID=%s]\n", id));
       }
     }
-    LOGGER.log(Level.INFO, message);
+    LOGGER.log(Level.INFO, message.toString());
   }
 
   /**
