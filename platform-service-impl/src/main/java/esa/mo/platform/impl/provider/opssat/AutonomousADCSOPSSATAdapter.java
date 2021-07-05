@@ -93,6 +93,12 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     } catch (final Exception e) {
       LOGGER.log(Level.WARNING, "Failed to dump iADCS TM", e);
     }
+
+    try {
+      unset(); // Transition to measurement mode
+    } catch (final Exception e) {
+      LOGGER.log(Level.WARNING, "Failed to switch to measurement mode upon init", e);
+    }
     initialized = true;
 
     tolerance = new SEPP_IADCS_API_TARGET_POINTING_TOLERANCE_PARAMETERS();
@@ -115,7 +121,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     private boolean isX = true;
     private boolean isY;
     private boolean isZ;
-    private boolean isFinshed;
+    private boolean isFinished;
 
     public PositionHolder(final Vector3D targetVec, final float margin)
     {
@@ -131,7 +137,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     public void stop()
     {
       isHoldingPosition = false;
-      while (!isFinshed) {
+      while (!isFinished) {
         try {
           wait(1);
         } catch (final InterruptedException ex) {
@@ -238,7 +244,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
           SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
       adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
-          SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
+          SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z);
 
       adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
           SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X);
@@ -247,7 +253,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
           SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z);
 
-      isFinshed = true;
+      isFinished = true;
     }
   }
 
@@ -711,7 +717,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
           SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
       adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
-          SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
+          SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z);
     } else if (activeAttitudeMode instanceof AttitudeModeSunPointing) {
       adcsApi.Stop_Operation_Mode_Sun_Pointing();
     } else if (activeAttitudeMode instanceof AttitudeModeTargetTracking) {
@@ -722,7 +728,17 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       holder.stop();
     }
     activeAttitudeMode = null;
-    adcsApi.Set_Operation_Mode_Idle();
+    adcsApi.Set_Operation_Mode_Measurement();
+    adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
+    adcsApi.Init_Orbit_Module(readTLEFile());
+    enableOrbitPropagator();
+  }
+
+  private void enableOrbitPropagator()
+  {
+    SEPP_IADCS_API_SYSTEM_SCHEDULER_REGISTER reg = adcsApi.Get_System_Scheduler_Register();
+    reg.setORBIT_PROPAGATION_ENABLE(true);
+    adcsApi.Set_System_Scheduler_Register(reg);
   }
 
   @Override
