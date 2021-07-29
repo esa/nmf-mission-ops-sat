@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -47,6 +48,7 @@ import org.hipparchus.util.FastMath;
 public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterface
 {
 
+  private static final String TLE_PATH = "/etc/tle";
   private static final Logger LOGGER = Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName());
   private static final float ANGLE_TOL_RAD = 0.0872665f;
   private static final float ANGLE_TOL_PERCENT = 20.0f;
@@ -263,7 +265,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   }
 
   private SEPP_IADCS_API_ORBIT_TLE_DATA readTLEFile() throws IOException {
-    final File f = new File("/etc/tle");
+    final File f = new File(TLE_PATH);
     final BufferedReader br = new BufferedReader(new FileReader(f));
     String s;
     final List<String> lines = new ArrayList<>();
@@ -274,13 +276,26 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       lines.remove(0);
     }
     final SEPP_IADCS_API_ORBIT_TLE_DATA tle = new SEPP_IADCS_API_ORBIT_TLE_DATA();
-    final byte[] l1 = lines.get(0).getBytes();
-    final byte[] l2 = lines.get(1).getBytes();
+    if (lines.get(0).length() != 69) {
+      throw new IOException(
+        MessageFormat.format("TLE Line 1 is not 69 characters long ({0}): {1}",
+          lines.get(0).length(), lines.get(0)));
+    }
+    else if (lines.get(1).length() != 69) {
+      throw new IOException(
+        MessageFormat.format("TLE Line 2 is not 69 characters long ({0}): {1}",
+          lines.get(1).length(), lines.get(1)));
+    }
+    // Convert Java bytes to null terminated strings
+    final byte[] l1 = new byte[70];
+    final byte[] l2 = new byte[70];
+    l1[69] = 0;
+    l2[69] = 0;
+    System.arraycopy(lines.get(0).getBytes("ISO-8859-1"), 0, l1, 0, 69);
+    LOGGER.log(Level.INFO, "Successfully loaded line 1 into {0} byte string.", l1.length);
+    System.arraycopy(lines.get(1).getBytes("ISO-8859-1"), 0, l2, 0, 69);
+    LOGGER.log(Level.INFO, "Successfully loaded line 2 into {0} byte string.", l2.length);
 
-    LOGGER.log(Level.INFO,
-        "Successfully loaded " + l1.length + " bytes of line 1.");
-    LOGGER.log(Level.INFO,
-        "Successfully loaded " + l2.length + " bytes of line 2.");
     tle.setTLE_1(l1);
     tle.setTLE_2(l2);
     return tle;
