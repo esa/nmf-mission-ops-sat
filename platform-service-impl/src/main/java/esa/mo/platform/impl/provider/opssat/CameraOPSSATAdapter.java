@@ -111,26 +111,30 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
 
   private void initBSTCamera() throws IOException
   {
-    serialPort = System.getProperty(SERIAL_PORT_ATTRIBUTE, SERIAL_PORT_DEFAULT);
-    blockDevice = System.getProperty(BLOCK_DEVICE_ATTRIBUTE, BLOCK_DEVICE_DEFAULT);
-    useWatchdog = Boolean.parseBoolean(System.getProperty(USE_WATCHDOG_ATTRIBUTE,
-        USE_WATCHDOG_DEFAULT));
-    final bst_ret_t ret = ims100_api.bst_ims100_init(serialPort, blockDevice, useWatchdog ? 1 : 0);
-    // FIXME: For now it always returns false?!?!?
-    /*if (ret != bst_ret_t.BST_RETURN_SUCCESS) {
-      throw new IOException("Failed to initialise BST camera (return: " + ret.toString() + ")");
-    }*/
-    ims100_api.bst_ims100_img_config_default(imageConfig);
-    ims100_api.bst_ims100_set_img_config(imageConfig);
-    ims100_api.bst_ims100_set_exp_time(imageConfig.getT_exp());
-    nativeImageWidth = imageConfig.getCol_end() - imageConfig.getCol_start() + 1;
-    nativeImageLength = imageConfig.getRow_end() - imageConfig.getRow_start() + 1;
+    synchronized(this) {
+      serialPort = System.getProperty(SERIAL_PORT_ATTRIBUTE, SERIAL_PORT_DEFAULT);
+      blockDevice = System.getProperty(BLOCK_DEVICE_ATTRIBUTE, BLOCK_DEVICE_DEFAULT);
+      useWatchdog = Boolean.parseBoolean(System.getProperty(USE_WATCHDOG_ATTRIBUTE,
+          USE_WATCHDOG_DEFAULT));
+      final bst_ret_t ret = ims100_api.bst_ims100_init(serialPort, blockDevice, useWatchdog ? 1 : 0);
+      // FIXME: For now it always returns false?!?!?
+      /*if (ret != bst_ret_t.BST_RETURN_SUCCESS) {
+        throw new IOException("Failed to initialise BST camera (return: " + ret.toString() + ")");
+      }*/
+      ims100_api.bst_ims100_img_config_default(imageConfig);
+      ims100_api.bst_ims100_set_img_config(imageConfig);
+      ims100_api.bst_ims100_set_exp_time(imageConfig.getT_exp());
+      nativeImageWidth = imageConfig.getCol_end() - imageConfig.getCol_start() + 1;
+      nativeImageLength = imageConfig.getRow_end() - imageConfig.getRow_start() + 1;
+    }
   }
 
   private synchronized void dumpHKTelemetry()
   {
     final bst_ims100_tele_std_t stdTM = new bst_ims100_tele_std_t();
-    ims100_api.bst_ims100_get_tele_std(stdTM);
+    synchronized(this) {
+      ims100_api.bst_ims100_get_tele_std(stdTM);
+    }
     LOGGER.log(Level.INFO,
         String.format("Dumping HK Telemetry...\n"
             + "Standard TM:\n"
@@ -169,7 +173,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   }
 
   @Override
-  public synchronized Picture takeAutoExposedPicture(final CameraSettings settings) throws IOException,
+  public Picture takeAutoExposedPicture(final CameraSettings settings) throws IOException,
       MALException
   {
     final Duration defaultExposure = new Duration(0.1);
@@ -216,54 +220,56 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   }
 
   @Override
-  public synchronized Picture takePicture(final CameraSettings settings) throws IOException
+  public Picture takePicture(final CameraSettings settings) throws IOException
   {
-    final bst_ims100_img_t image = new bst_ims100_img_t();
-    ims100_api.bst_ims100_img_config_default(imageConfig);
-    // TODO this is not scaling but cropping the picture
-    imageConfig.setCol_start(0);
-    imageConfig.setCol_end((int) settings.getResolution().getWidth().getValue() - 1);
-    imageConfig.setRow_start(0);
-    imageConfig.setRow_end((int) settings.getResolution().getHeight().getValue() - 1);
-    imageConfig.setT_exp((int) (settings.getExposureTime().getValue() * 1000));
-    imageConfig.setG_red(settings.getGainRed().shortValue());
-    imageConfig.setG_green(settings.getGainGreen().shortValue());
-    imageConfig.setG_blue(settings.getGainBlue().shortValue());
-    LOGGER.log(Level.INFO, String.format("Setting config"));
-    ims100_api.bst_ims100_set_img_config(imageConfig);
-    // Each pixel of raw image is encoded as uint16
-    LOGGER.log(Level.INFO, String.format("Allocating native buffer"));
-    final int dataN
-        = (int) (settings.getResolution().getHeight().getValue() * settings.getResolution().getWidth().getValue());
-    final ByteBuffer imageData = ByteBuffer.allocateDirect(
-            dataN * 2);
-    image.setData(imageData);
-    image.setData_n(dataN);
+    synchronized(this) {
+      final bst_ims100_img_t image = new bst_ims100_img_t();
+      ims100_api.bst_ims100_img_config_default(imageConfig);
+      // TODO this is not scaling but cropping the picture
+      imageConfig.setCol_start(0);
+      imageConfig.setCol_end((int) settings.getResolution().getWidth().getValue() - 1);
+      imageConfig.setRow_start(0);
+      imageConfig.setRow_end((int) settings.getResolution().getHeight().getValue() - 1);
+      imageConfig.setT_exp((int) (settings.getExposureTime().getValue() * 1000));
+      imageConfig.setG_red(settings.getGainRed().shortValue());
+      imageConfig.setG_green(settings.getGainGreen().shortValue());
+      imageConfig.setG_blue(settings.getGainBlue().shortValue());
+      LOGGER.log(Level.INFO, String.format("Setting config"));
+      ims100_api.bst_ims100_set_img_config(imageConfig);
+      // Each pixel of raw image is encoded as uint16
+      LOGGER.log(Level.INFO, String.format("Allocating native buffer"));
+      final int dataN
+          = (int) (settings.getResolution().getHeight().getValue() * settings.getResolution().getWidth().getValue());
+      final ByteBuffer imageData = ByteBuffer.allocateDirect(
+              dataN * 2);
+      image.setData(imageData);
+      image.setData_n(dataN);
 
-    final Time timestamp = HelperTime.getTimestampMillis();
-    LOGGER.log(Level.INFO, String.format("Acquiring image"));
-    if (ims100_api.bst_ims100_get_img_n(image, 1, (short) 0) != bst_ret_t.BST_RETURN_SUCCESS) {
-      throw new IOException("bst_ims100_get_img_n failed");
-    }
-    byte[] rawData = new byte[imageData.capacity()];
+      final Time timestamp = HelperTime.getTimestampMillis();
+      LOGGER.log(Level.INFO, String.format("Acquiring image"));
+      if (ims100_api.bst_ims100_get_img_n(image, 1, (short) 0) != bst_ret_t.BST_RETURN_SUCCESS) {
+        throw new IOException("bst_ims100_get_img_n failed");
+      }
+      byte[] rawData = new byte[imageData.capacity()];
 
-    LOGGER.log(Level.INFO, String.format("Copying from native buffer"));
-    ((ByteBuffer) (imageData.duplicate().clear())).get(rawData);
-    final CameraSettings replySettings = new CameraSettings();
-    replySettings.setResolution(settings.getResolution());
-    replySettings.setExposureTime(settings.getExposureTime());
-    replySettings.setGainRed(settings.getGainRed());
-    replySettings.setGainGreen(settings.getGainGreen());
-    replySettings.setGainBlue(settings.getGainBlue());
-    if (settings.getFormat() != PictureFormat.RAW) {
-      // Run debayering and possibly process further
-      //TODO Use a native debayering acceleration
-      LOGGER.log(Level.INFO, String.format(
-            "Converting the image from RAW to " + settings.getFormat().toString()));
-      rawData = convertImage(rawData, settings.getFormat());
+      LOGGER.log(Level.INFO, String.format("Copying from native buffer"));
+      ((ByteBuffer) (imageData.duplicate().clear())).get(rawData);
+      final CameraSettings replySettings = new CameraSettings();
+      replySettings.setResolution(settings.getResolution());
+      replySettings.setExposureTime(settings.getExposureTime());
+      replySettings.setGainRed(settings.getGainRed());
+      replySettings.setGainGreen(settings.getGainGreen());
+      replySettings.setGainBlue(settings.getGainBlue());
+      if (settings.getFormat() != PictureFormat.RAW) {
+        // Run debayering and possibly process further
+        //TODO Use a native debayering acceleration
+        LOGGER.log(Level.INFO, String.format(
+              "Converting the image from RAW to " + settings.getFormat().toString()));
+        rawData = convertImage(rawData, settings.getFormat());
+      }
+      replySettings.setFormat(settings.getFormat());
+      return new Picture(timestamp, replySettings, new Blob(rawData));
     }
-    replySettings.setFormat(settings.getFormat());
-    return new Picture(timestamp, replySettings, new Blob(rawData));
   }
 
   @Override

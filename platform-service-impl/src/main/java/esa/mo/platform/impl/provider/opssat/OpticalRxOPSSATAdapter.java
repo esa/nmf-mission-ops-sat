@@ -52,22 +52,24 @@ public class OpticalRxOPSSATAdapter implements OpticalDataReceiverAdapterInterfa
   @Override
   public byte[] recordOpticalReceiverData(final Duration duration)
   {
-    if (duration == null) {
-      return null;
+    synchronized(this) {
+      if (duration == null) {
+        return null;
+      }
+      if (optRxApi == null) {
+        return null;
+      }
+      LOGGER.log(Level.INFO, "Recording optical data for {0}s", duration);
+      optRxApi.Set_SharedMemory_IF_Switch(1);
+      try {
+        Thread.sleep((long) (duration.getValue() * 1000));
+      } catch (final InterruptedException e) {
+        return null;
+      }
+      optRxApi.Set_SharedMemory_IF_Switch(0);
+      // TODO capture data from the API
+      return new byte[0];
     }
-    if (optRxApi == null) {
-      return null;
-    }
-    LOGGER.log(Level.INFO, "Recording optical data for {0}s", duration);
-    optRxApi.Set_SharedMemory_IF_Switch(1);
-    try {
-      Thread.sleep((long) (duration.getValue() * 1000));
-    } catch (final InterruptedException e) {
-      return null;
-    }
-    optRxApi.Set_SharedMemory_IF_Switch(0);
-    // TODO capture data from the API
-    return new byte[0];
   }
 
   @Override

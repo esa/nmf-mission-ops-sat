@@ -95,10 +95,12 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
     lpfFreqsMap.put((float) 0.750, eSDR_RFFE_RX_LPF_BW.RFFE_RX_LPFBW_0M75);
     try {
       System.loadLibrary("sdr_api_jni");
-      sdrApi = new SEPP_SDR_API();
-      sdrApi.Print_Info();
-      sdrApi.Set_RF_Frontend_Input(eSDR_RFFE_INPUT.RFFE_INPUT_1);
-      sdrApi.Enable_Receiver();
+      synchronized(this) {
+        sdrApi = new SEPP_SDR_API();
+        sdrApi.Print_Info();
+        sdrApi.Set_RF_Frontend_Input(eSDR_RFFE_INPUT.RFFE_INPUT_1);
+        sdrApi.Enable_Receiver();
+      }
     } catch (final Exception ex) {
       LOGGER.log(Level.SEVERE, "SDR API could not be initialized!", ex);
       this.initialized = false;
@@ -140,66 +142,72 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
   @Override
   public boolean setConfiguration(final SDRConfiguration configuration)
   {
-    LOGGER.log(Level.INFO, "Setting SDR configuration: {0}", configuration);
-    final eSDR_RFFE_RX_SAMPLING_FREQ samplingFreq = getSamplingFreqFromFloat(
-        configuration.getRxSamplingFrequency());
-    final eSDR_RFFE_RX_LPF_BW lpfBw = getLPFFreqFromFloat(configuration.getRxLowPassBW());
-    if (samplingFreq == null) {
-      LOGGER.log(Level.WARNING, "Unsupported sampling frequency provided: {0} MHz",
+    synchronized(this) {
+      LOGGER.log(Level.INFO, "Setting SDR configuration: {0}", configuration);
+      final eSDR_RFFE_RX_SAMPLING_FREQ samplingFreq = getSamplingFreqFromFloat(
           configuration.getRxSamplingFrequency());
-      return false;
+      final eSDR_RFFE_RX_LPF_BW lpfBw = getLPFFreqFromFloat(configuration.getRxLowPassBW());
+      if (samplingFreq == null) {
+        LOGGER.log(Level.WARNING, "Unsupported sampling frequency provided: {0} MHz",
+            configuration.getRxSamplingFrequency());
+        return false;
+      }
+      try {
+        sdrApi.Set_RX_Gain_in_dB(configuration.getRxGain());
+        sdrApi.Set_RX_Carrier_Frequency_in_GHz(configuration.getRxCarrierFrequency() / 1000);
+        sdrApi.Set_RX_Sampling_Frequency(samplingFreq);
+        sdrApi.Set_RXLPF_Bandwidth(lpfBw);
+        sdrApi.Calibrate_RF_Frontend();
+        // This will allocate plenty of memory, allowing to store samples from 0.1 second. Each sample pair is 2 x uint32
+        bufferLength = (int) (configuration.getRxSamplingFrequency() * 100000);
+        bufferSize = bufferLength * 8;
+        sampleBuffer = ByteBuffer.allocateDirect(bufferSize);
+      } catch (final Exception ex) {
+        LOGGER.log(Level.WARNING, "Setting SDR configuration " + configuration + " failed", ex);
+        return false;
+      }
+      configured = true;
+      return true;
     }
-    try {
-      sdrApi.Set_RX_Gain_in_dB(configuration.getRxGain());
-      sdrApi.Set_RX_Carrier_Frequency_in_GHz(configuration.getRxCarrierFrequency() / 1000);
-      sdrApi.Set_RX_Sampling_Frequency(samplingFreq);
-      sdrApi.Set_RXLPF_Bandwidth(lpfBw);
-      sdrApi.Calibrate_RF_Frontend();
-      // This will allocate plenty of memory, allowing to store samples from 0.1 second. Each sample pair is 2 x uint32
-      bufferLength = (int) (configuration.getRxSamplingFrequency() * 100000);
-      bufferSize = bufferLength * 8;
-      sampleBuffer = ByteBuffer.allocateDirect(bufferSize);
-    } catch (final Exception ex) {
-      LOGGER.log(Level.WARNING, "Setting SDR configuration " + configuration + " failed", ex);
-      return false;
-    }
-    configured = true;
-    return true;
   }
 
   @Override
   public boolean enableSDR(final Boolean enable)
   {
-    LOGGER.log(Level.INFO, "EnableSDR: {0}", enable);
-    if (!configured) {
-      return false;
+    synchronized(this) {
+      LOGGER.log(Level.INFO, "EnableSDR: {0}", enable);
+      if (!configured) {
+        return false;
+      }
+      try {
+        sdrApi.Enable_RX_Sampling_Clock();
+      } catch (final Exception ex) {
+        LOGGER.log(Level.SEVERE, "Enabling the SDR failed", ex);
+        return false;
+      }
+      return true;
     }
-    try {
-      sdrApi.Enable_RX_Sampling_Clock();
-    } catch (final Exception ex) {
-      LOGGER.log(Level.SEVERE, "Enabling the SDR failed", ex);
-      return false;
-    }
-    return true;
   }
 
   @Override
   public IQComponents getIQComponents()
   {
-    if (!configured) {
-      return null;
-    }
-    final FloatList iList = new FloatList(bufferLength);
-    final FloatList qList = new FloatList(bufferLength);
+    synchronized(this) {
+      if (!configured) {
+        return null;
+      }
+      final FloatList iList = new FloatList(bufferLength);
+      final FloatList qList = new FloatList(bufferLength);
 
-    final int[] ints = new int[bufferLength];
-    sdrApi.Receive_IQ_Samples(ints, bufferSize);
-    final IntBuffer tempBuffer = sampleBuffer.asIntBuffer();
-    tempBuffer.put(ints);
-    for (int i = 0; i < bufferLength; ++i) {
-      iList.add((float) (sampleBuffer.getInt() & 0xFFFFFFFFL)); // remove sign extension
-      qList.add((float) (sampleBuffer.getInt() & 0xFFFFFFFFL));
+      final int[] ints = new int[bufferLength];
+      sdrApi.Receive_IQ_Samples(ints, bufferSize);
+      final IntBuffer tempBuffer = sampleBuffer.asIntBuffer();
+      tempBuffer.put(ints);
+      for (int i = 0; i < bufferLength; ++i) {
+        iList.add((float) (sampleBuffer.getInt() & 0xFFFFFFFFL)); // remove sign extension
+        qList.add((float) (sampleBuffer.getInt() & 0xFFFFFFFFL));
+      }
+      return new IQComponents(iList, qList);
     }
-    return new IQComponents(iList, qList);
   }
 }
