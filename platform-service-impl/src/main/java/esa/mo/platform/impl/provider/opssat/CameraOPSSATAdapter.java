@@ -27,6 +27,7 @@ import at.tugraz.ihf.opssat.ims100.bst_ims100_tele_std_t;
 import at.tugraz.ihf.opssat.ims100.ims100_api;
 import esa.mo.helpertools.helpers.HelperTime;
 import esa.mo.platform.impl.provider.gen.CameraAdapterInterface;
+import esa.mo.platform.impl.provider.gen.PowerControlAdapterInterface;
 import esa.opssat.camera.processing.OPSSATCameraDebayering;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -35,6 +36,7 @@ import java.nio.ByteBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+
 import org.ccsds.moims.mo.mal.MALException;
 import org.ccsds.moims.mo.mal.structures.Blob;
 import org.ccsds.moims.mo.mal.structures.Duration;
@@ -46,6 +48,7 @@ import org.ccsds.moims.mo.platform.camera.structures.PictureFormat;
 import org.ccsds.moims.mo.platform.camera.structures.PictureFormatList;
 import org.ccsds.moims.mo.platform.camera.structures.PixelResolution;
 import org.ccsds.moims.mo.platform.camera.structures.PixelResolutionList;
+import org.ccsds.moims.mo.platform.powercontrol.structures.DeviceType;
 
 /**
  *
@@ -71,11 +74,13 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   private bst_ims100_img_config_t imageConfig;
   private final PictureFormatList supportedFormats = new PictureFormatList();
   private final boolean unitAvailable;
+  private PowerControlAdapterInterface pcAdapter;
 
   private static final Logger LOGGER = Logger.getLogger(CameraOPSSATAdapter.class.getName());
 
-  public CameraOPSSATAdapter()
+  public CameraOPSSATAdapter(PowerControlAdapterInterface pcAdapter)
   {
+	this.pcAdapter = pcAdapter;
     supportedFormats.add(PictureFormat.RAW);
     supportedFormats.add(PictureFormat.RGB24);
     supportedFormats.add(PictureFormat.BMP);
@@ -106,7 +111,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   @Override
   public boolean isUnitAvailable()
   {
-    return unitAvailable;
+    return unitAvailable && pcAdapter.isDeviceEnabled(DeviceType.CAMERA);
   }
 
   private void initBSTCamera() throws IOException

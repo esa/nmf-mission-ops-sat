@@ -72,6 +72,7 @@
         <mal:item comment="Processing Platform 2" nvalue="16" value="SEPP2"/>
         <mal:item comment="HD Camera" nvalue="17" value="HDCamera"/>
         <mal:item comment="Optical Receiver" nvalue="18" value="OpticalRX"/>
+        <mal:item comment="GPS" nvalue="19" value="GPS"/>
       </mal:enumeration>
     </mal:dataTypes>
   </mal:area>

@@ -23,7 +23,11 @@ package esa.mo.platform.impl.provider.opssat;
 import esa.mo.platform.impl.provider.gen.OpticalDataReceiverAdapterInterface;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import esa.mo.platform.impl.provider.gen.PowerControlAdapterInterface;
 import org.ccsds.moims.mo.mal.structures.Duration;
+import org.ccsds.moims.mo.platform.powercontrol.structures.DeviceType;
+
 import at.tugraz.ihf.opssat.opt_rx.SEPP_OPT_RX_API;
 
 public class OpticalRxOPSSATAdapter implements OpticalDataReceiverAdapterInterface
@@ -32,9 +36,11 @@ public class OpticalRxOPSSATAdapter implements OpticalDataReceiverAdapterInterfa
   private static final Logger LOGGER = Logger.getLogger(OpticalRxOPSSATAdapter.class.getName());
   private SEPP_OPT_RX_API optRxApi;
   private final boolean initalized;
+  private PowerControlAdapterInterface pcAdapter;
 
-  public OpticalRxOPSSATAdapter()
+  public OpticalRxOPSSATAdapter(PowerControlAdapterInterface pcAdapter)
   {
+	this.pcAdapter = pcAdapter;
     LOGGER.log(Level.INFO, "Initialisation");
     try {
       System.loadLibrary("opt_rx_api_jni");
@@ -73,7 +79,7 @@ public class OpticalRxOPSSATAdapter implements OpticalDataReceiverAdapterInterfa
   @Override
   public boolean isUnitAvailable()
   {
-    return initalized;
+    return initalized && pcAdapter.isDeviceEnabled(DeviceType.OPTRX);
   }
 
 }

@@ -42,6 +42,8 @@ import org.ccsds.moims.mo.mal.structures.URI;
 public class NanomindServicesConsumer {
     private static final Logger LOGGER = Logger.getLogger(NanomindServicesConsumer.class.getName());
 
+    private static NanomindServicesConsumer instance;
+
     private GPSNanomindConsumerServiceImpl gpsNanomindService;
     private PowerNanomindConsumerServiceImpl powerNanomindService;
     private ExperimentWDNanomindConsumerServiceImpl experimentWDNanomindService;
@@ -53,11 +55,25 @@ public class NanomindServicesConsumer {
     private static final String SOURCE_ID = "0"; // OBSW supports any value. By default it is set to 0
     
     
-    public NanomindServicesConsumer() {
+    private NanomindServicesConsumer() {
 
     }
+
+    public static NanomindServicesConsumer getInstance()
+    {
+        if(instance == null)
+        {
+            synchronized (NanomindServicesConsumer.class) {
+                if(instance == null){
+                    instance = new NanomindServicesConsumer();
+                    instance.init();
+                }
+            }
+        }
+        return instance;
+    }
     
-    public void init(){
+    private void init(){
         // Enforce DLR's SPP
         System.setProperty("org.ccsds.moims.mo.mal.transport.protocol.malspp", "de.dlr.gsoc.mo.malspp.transport.SPPTransportFactory");
         System.setProperty("org.ccsds.moims.mo.mal.encoding.protocol.malspp", "de.dlr.gsoc.mo.malspp.encoding.SPPElementStreamFactory");

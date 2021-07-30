@@ -31,8 +31,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import esa.mo.platform.impl.provider.gen.PowerControlAdapterInterface;
 import org.ccsds.moims.mo.mal.structures.FloatList;
 import org.ccsds.moims.mo.platform.autonomousadcs.structures.*;
+import org.ccsds.moims.mo.platform.powercontrol.structures.DeviceType;
 import org.ccsds.moims.mo.platform.structures.VectorF3D;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
@@ -65,11 +68,13 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT flightVector;
   private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT targetVector; // For sun pointing
   private SEPP_IADCS_API_TARGET_POINTING_TOLERANCE_PARAMETERS tolerance;
+  private PowerControlAdapterInterface pcAdapter;
 
   private PositionHolder holder;
 
-  public AutonomousADCSOPSSATAdapter()
+  public AutonomousADCSOPSSATAdapter(PowerControlAdapterInterface pcAdapter)
   {
+	this.pcAdapter = pcAdapter;
     LOGGER.log(Level.INFO, "Initialisation");
     try {
       System.loadLibrary("iadcs_api_jni");
@@ -744,7 +749,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   @Override
   public boolean isUnitAvailable()
   {
-    return initialized;
+    return initialized && pcAdapter.isDeviceEnabled(DeviceType.ADCS);
   }
 
   @Override
