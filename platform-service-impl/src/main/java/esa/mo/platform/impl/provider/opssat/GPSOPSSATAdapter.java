@@ -33,10 +33,12 @@ import org.ccsds.moims.mo.mal.MALException;
 import org.ccsds.moims.mo.mal.MALInteractionException;
 import org.ccsds.moims.mo.mal.structures.Blob;
 import org.ccsds.moims.mo.platform.gps.structures.TwoLineElementSet;
+import org.ccsds.moims.mo.platform.powercontrol.structures.DeviceType;
 import org.orekit.propagation.analytical.tle.TLE;
 
 import esa.mo.nanomind.impl.util.NanomindServicesConsumer;
 import esa.mo.platform.impl.provider.gen.GPSNMEAonlyAdapter;
+import esa.mo.platform.impl.provider.gen.PowerControlAdapterInterface;
 import esa.opssat.nanomind.opssat_pf.gps.consumer.GPSAdapter;
 
 /**
@@ -50,9 +52,12 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
   private static final String TLE_LOCATION = File.separator + "etc" + File.separator + "tle";
   private String currentTleSentence = "";
   private long tleLastModified = -1;
+  private PowerControlAdapterInterface pcAdapter;
 
-  public GPSOPSSATAdapter(NanomindServicesConsumer obcServicesConsumer) {
-    this.obcServicesConsumer = obcServicesConsumer;
+
+  public GPSOPSSATAdapter(PowerControlAdapterInterface pcAdapter) {
+    this.obcServicesConsumer = NanomindServicesConsumer.getInstance();
+    this.pcAdapter = pcAdapter;
   }
 
   @Override
@@ -79,7 +84,7 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
   @Override
   public boolean isUnitAvailable()
   {
-    return true;
+    return pcAdapter.isDeviceEnabled(DeviceType.GNSS);
   }
 
   public String getTLESentence() throws IOException

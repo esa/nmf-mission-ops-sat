@@ -20,20 +20,22 @@
  */
 package esa.mo.platform.impl.provider.opssat;
 
+import esa.mo.helpertools.connections.ConnectionConsumer;
+import esa.mo.mc.impl.provider.ParameterInstance;
 import esa.mo.nanomind.impl.util.NanomindServicesConsumer;
+import esa.mo.nmf.commonmoadapter.CommonMOAdapterImpl;
+import esa.mo.nmf.commonmoadapter.CompleteDataReceivedListener;
 import esa.mo.platform.impl.provider.gen.PowerControlAdapterInterface;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.ccsds.moims.mo.mal.MALException;
 import org.ccsds.moims.mo.mal.MALInteractionException;
-import org.ccsds.moims.mo.mal.structures.BooleanList;
-import org.ccsds.moims.mo.mal.structures.Identifier;
+import org.ccsds.moims.mo.mal.structures.*;
 import esa.opssat.nanomind.opssat_pf.structures.PayloadDevice;
 import esa.opssat.nanomind.opssat_pf.structures.PayloadDeviceList;
 import org.ccsds.moims.mo.platform.powercontrol.structures.Device;
@@ -43,20 +45,39 @@ import org.ccsds.moims.mo.platform.powercontrol.structures.DeviceType;
 public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
 {
 
+  private static final long ADCS_ACTIVATION_DELAY = 60*1000;
+  private static final String PDU_CHANNEL_PARAM_NAME = "PDU1952";
+
+  enum STATUS_MASK {
+	DEVICE_STATUS_SEPP1_MASK(0x0004, PayloadDevice.SEPP1),
+	DEVICE_STATUS_SEPP2_MASK(0x0008, PayloadDevice.SEPP2),
+	DEVICE_STATUS_SBAND_MASK(0x0020, PayloadDevice.SBandTRX),
+	DEVICE_STATUS_XBAND_MASK(0x0080, PayloadDevice.XBandTRX),
+	DEVICE_STATUS_SDR_MASK(0x0100, PayloadDevice.SDR),
+	DEVICE_STATUS_IADCS_MASK(0x0200, PayloadDevice.FineADCS),
+	DEVICE_STATUS_OPT_MASK(0x0400, PayloadDevice.OpticalRX),
+	DEVICE_STATUS_CAM_MASK(0x1000, PayloadDevice.HDCamera),
+    DEVICE_STATUS_GPS_MASK(0x0800, PayloadDevice.GPS);
+
+	int value;
+	PayloadDevice payload;
+
+	STATUS_MASK(int val, PayloadDevice payload) {
+		value = val;
+	}
+  }
+
   private final NanomindServicesConsumer obcServicesConsumer;
-  private final List<Device> devices;
-  private final Map<Identifier, Device> deviceByName;
-  private final Map<Long, Device> deviceByObjInstId;
+  private final Map<PayloadDevice, Device> deviceByType;
   private final Map<Long, PayloadDevice> payloadIdByObjInstId;
+  private Long adcsChannelStartTime = null;
   private static final Logger LOGGER = Logger.getLogger(PowerControlOPSSATAdapter.class.getName());
 
-  public PowerControlOPSSATAdapter(final NanomindServicesConsumer obcServicesConsumer)
+  public PowerControlOPSSATAdapter()
   {
-    this.obcServicesConsumer = obcServicesConsumer;
+    this.obcServicesConsumer = NanomindServicesConsumer.getInstance();
     LOGGER.log(Level.INFO, "Initialisation");
-    devices = new ArrayList<>();
-    deviceByName = new HashMap<>();
-    deviceByObjInstId = new HashMap<>();
+    deviceByType = new ConcurrentHashMap<>();
     payloadIdByObjInstId = new HashMap<>();
     initDevices();
   }
@@ -79,25 +100,26 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
         PayloadDevice.OpticalRX);
     addDevice(new Device(false, 6L, new Identifier("HD Camera"), DeviceType.CAMERA),
         PayloadDevice.HDCamera);
+    addDevice(new Device(false, 7L, new Identifier("GPS"), DeviceType.GNSS), PayloadDevice.GPS);
   }
 
   private void addDevice(final Device device, final PayloadDevice payloadId)
   {
-    devices.add(device);
-    deviceByName.put(device.getName(), device);
-    deviceByObjInstId.put(device.getUnitObjInstId(), device);
+    deviceByType.put(payloadId, device);
     payloadIdByObjInstId.put(device.getUnitObjInstId(), payloadId);
   }
 
   @Override
   public Map<Identifier, Device> getDeviceMap()
   {
-    return Collections.unmodifiableMap(deviceByName);
+    Map<Identifier, Device> map = new HashMap<>();
+    deviceByType.forEach((k, device) -> { map.put(device.getName(), device); });
+    return map;
   }
 
   private Device findByType(final DeviceType type)
   {
-    for (final Device device : devices) {
+    for (Device device : deviceByType.values()) {
       if (device.getDeviceType() == type) {
         return device;
       }
@@ -123,17 +145,65 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
       }
       if (payloadId != null) {
         switchDevice(payloadId, device.getEnabled());
+        // When device is set OFF, mark the status right away
+        if(!device.getEnabled())
+        {
+          Device d = findByType(device.getDeviceType());
+          d.setEnabled(false);
+          if(d.getDeviceType() == DeviceType.ADCS){
+            adcsChannelStartTime = null;
+          }
+        }
       } else {
         throw new IOException("Cannot find the device by oId " + device);
       }
     }
   }
 
-  private void switchDevice(final PayloadDevice device, final Boolean enabled) throws IOException
+
+  @Override
+  public boolean isDeviceEnabled(DeviceType deviceType) {
+    boolean isEnabled = findByType(deviceType) == null ? false : findByType(deviceType).getEnabled();
+
+    // In the ADCS case, check that the power channel has been running at least a minute to get an accurate reading
+    if (deviceType.equals(DeviceType.ADCS) && ((System.currentTimeMillis() - adcsChannelStartTime) < ADCS_ACTIVATION_DELAY)) {
+      isEnabled = false;
+    }
+    return isEnabled;
+  }
+
+  @Override
+  public void startStatusTracking(ConnectionConsumer connection) {
+
+    CompleteDataReceivedListener listener = new CompleteDataReceivedListener() {
+      @Override
+      public void onDataReceived(ParameterInstance parameterInstance) {
+        if (parameterInstance == null || false == PDU_CHANNEL_PARAM_NAME.equals(parameterInstance.getName())) {
+           return;
+        }
+
+        Attribute rawValue = parameterInstance.getParameterValue().getRawValue();
+        long rawVal =  ((UShort)rawValue).getValue();
+        for(STATUS_MASK mask : STATUS_MASK.values())
+        {
+            boolean enabled = (rawVal & mask.value) > 0 ? true : false ;
+            deviceByType.get(mask.payload).setEnabled(enabled);
+            if(enabled && STATUS_MASK.DEVICE_STATUS_IADCS_MASK == mask && adcsChannelStartTime == null)
+            {
+              adcsChannelStartTime = System.currentTimeMillis();
+            }
+        }
+      }
+    };
+
+    CommonMOAdapterImpl commonMOAdapter = new CommonMOAdapterImpl(connection);
+    commonMOAdapter.addDataReceivedListener(listener);
+  }
+
+  private void switchDevice(PayloadDevice device, Boolean enabled) throws IOException
   {
-    // TODO: Track status of the device in the device list
-    final PayloadDeviceList deviceList = new PayloadDeviceList();
-    final BooleanList powerStates = new BooleanList();
+    PayloadDeviceList deviceList = new PayloadDeviceList();
+    BooleanList powerStates = new BooleanList();
     deviceList.add(device);
     powerStates.add(enabled);
     LOGGER.log(Level.INFO, "Switching device {0} to enabled: {1}", new Object[]{device, enabled});

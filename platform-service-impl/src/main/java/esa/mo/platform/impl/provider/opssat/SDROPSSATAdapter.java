@@ -24,6 +24,7 @@ import at.tugraz.ihf.opssat.sdr.SEPP_SDR_API;
 import at.tugraz.ihf.opssat.sdr.eSDR_RFFE_INPUT;
 import at.tugraz.ihf.opssat.sdr.eSDR_RFFE_RX_LPF_BW;
 import at.tugraz.ihf.opssat.sdr.eSDR_RFFE_RX_SAMPLING_FREQ;
+import esa.mo.platform.impl.provider.gen.PowerControlAdapterInterface;
 import esa.mo.platform.impl.provider.gen.SoftwareDefinedRadioAdapterInterface;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -33,6 +34,7 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.structures.FloatList;
+import org.ccsds.moims.mo.platform.powercontrol.structures.DeviceType;
 import org.ccsds.moims.mo.platform.softwaredefinedradio.structures.IQComponents;
 import org.ccsds.moims.mo.platform.softwaredefinedradio.structures.SDRConfiguration;
 
@@ -46,12 +48,14 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
   private SEPP_SDR_API sdrApi;
   private ByteBuffer sampleBuffer;
   private int bufferSize, bufferLength;
+  private PowerControlAdapterInterface pcAdapter;
 
   private final boolean initialized;
   private boolean configured;
 
-  public SDROPSSATAdapter()
+  public SDROPSSATAdapter(PowerControlAdapterInterface pcAdapter)
   {
+	this.pcAdapter = pcAdapter;
     LOGGER.log(Level.INFO, "Initialisation");
     samplingFreqsMap = new TreeMap<>();
     samplingFreqsMap.put((float) 1.50, eSDR_RFFE_RX_SAMPLING_FREQ.RFFE_RX_SAMPLING_1M5);
@@ -112,7 +116,7 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
   @Override
   public boolean isUnitAvailable()
   {
-    return initialized;
+    return initialized && pcAdapter.isDeviceEnabled(DeviceType.SDR);
   }
 
   private eSDR_RFFE_RX_SAMPLING_FREQ getSamplingFreqFromFloat(final float input)

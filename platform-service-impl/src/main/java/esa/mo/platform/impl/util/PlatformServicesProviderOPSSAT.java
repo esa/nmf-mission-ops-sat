@@ -21,6 +21,7 @@
 package esa.mo.platform.impl.util;
 
 import esa.mo.com.impl.util.COMServicesProvider;
+import esa.mo.helpertools.connections.ConnectionConsumer;
 import esa.mo.nanomind.impl.util.NanomindServicesConsumer;
 import esa.mo.platform.impl.provider.gen.PowerControlProviderServiceImpl;
 import esa.mo.platform.impl.provider.gen.CameraProviderServiceImpl;
@@ -56,24 +57,29 @@ public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderI
   private final PowerControlProviderServiceImpl powerService = new PowerControlProviderServiceImpl();
   private final SoftwareDefinedRadioProviderServiceImpl sdrService
       = new SoftwareDefinedRadioProviderServiceImpl();
+  private PowerControlOPSSATAdapter pcAdapter = null;
 
   @Override
   public void init(final COMServicesProvider comServices) throws
       MALException
   {
     try {
-      final NanomindServicesConsumer obcServicesConsumer = new NanomindServicesConsumer();
-        obcServicesConsumer.init();
-      powerService.init(new PowerControlOPSSATAdapter(obcServicesConsumer));
-      gpsService.init(comServices, new GPSOPSSATAdapter(obcServicesConsumer));
-      adcsService.init(comServices, new AutonomousADCSOPSSATAdapter());
-      cameraService.init(comServices, new CameraOPSSATAdapter());
-      optrxService.init(new OpticalRxOPSSATAdapter());
-      sdrService.init(new SDROPSSATAdapter());
-    } catch (final UnsatisfiedLinkError | NoClassDefFoundError | NoSuchMethodError error) {
+      pcAdapter = new PowerControlOPSSATAdapter();
+      powerService.init(pcAdapter);
+      gpsService.init(comServices, new GPSOPSSATAdapter(pcAdapter));
+      adcsService.init(comServices, new AutonomousADCSOPSSATAdapter(pcAdapter));
+      cameraService.init(comServices, new CameraOPSSATAdapter(pcAdapter));
+      optrxService.init(new OpticalRxOPSSATAdapter(pcAdapter));
+      sdrService.init(new SDROPSSATAdapter(pcAdapter));
+    } catch (UnsatisfiedLinkError | NoClassDefFoundError | NoSuchMethodError error) {
       LOGGER.log(Level.SEVERE,
           "Could not load platform adapters (check for missing JARs and libraries)", error);
     }
+  }
+
+  @Override
+  public void startStatusTracking(ConnectionConsumer connection) {
+    pcAdapter.startStatusTracking(connection);
   }
 
   @Override
