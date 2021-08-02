@@ -26,11 +26,11 @@ Remember that the startscript.sh should be mapped to "start\_YOURAPPNAME.sh", so
 ### Adding applications to the ground build
 
 1. Add your application to the dependencies inside the 'ground' profile in opssat-package/pom.xml.
-2. Add a copy task for your app in the opssat-package/copy\_ground.xml file. 
+2. Add a copy task for your app in the opssat-package/copy\_ground.xml file.
 
 ## Bugs Reporting
 
-Bug Reports can be submitted on: [Bug Reports]
+Bug Reports can be submitted on: [Issues]
 
 Or directly in the respective source code repository.
 
@@ -45,7 +45,7 @@ The NanoSat MO Framework is **licensed** under the **[European Space Agency Publ
 [European Space Agency Public License (ESA-PL) Weak Copyleft – v2.4]: https://github.com/esa/nanosat-mo-framework/blob/master/LICENCE.md
 [GitHub]: https://github.com/esa/nanosat-mo-framework
 [Releases]: https://github.com/esa/nanosat-mo-framework/releases
-[Bug Reports]: https://github.com/esa/nanosat-mo-framework/issues
+[Issues]: https://gitlab.com/esa/NMF/nmf-issues/-/issues
 [website]: http://www.esa.int/
 [NanoSat MO Framework]: https://nanosat-mo-framework.github.io/
 
