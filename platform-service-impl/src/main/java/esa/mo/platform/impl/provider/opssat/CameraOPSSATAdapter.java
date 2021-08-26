@@ -55,9 +55,9 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
 {
 
   private static final String SERIAL_PORT_ATTRIBUTE = "opssat.camera.port";
-  private static final String SERIAL_PORT_DEFAULT = "/dev/ttyACM0";
+  private static final String SERIAL_PORT_DEFAULT = "/dev/cam_tty";
   private static final String BLOCK_DEVICE_ATTRIBUTE = "opssat.camera.blockdev";
-  private static final String BLOCK_DEVICE_DEFAULT = "/dev/sda";
+  private static final String BLOCK_DEVICE_DEFAULT = "/dev/cam_sd";
   private static final String USE_WATCHDOG_ATTRIBUTE = "opssat.camera.usewatchdog";
   private static final String USE_WATCHDOG_DEFAULT = "true";
   private static final Duration PREVIEW_EXPOSURE_TIME = new Duration(0.100); // 100ms
