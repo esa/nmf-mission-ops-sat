@@ -63,9 +63,9 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   private final boolean initialized;
 
   // Additional parameters which need to be used for attitude mode changes.
-  private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT losVector;
-  private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT flightVector;
-  private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT targetVector; // For sun pointing
+  private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT losVector; // Satellite body vector pointing at the target (e.g. nadir or fixed target)
+  private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT flightVector; // Satellite body vector pointing into the flight direction
+  private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT sunPointingVector; // Satellite body vector pointing into the sun
   private SEPP_IADCS_API_TARGET_POINTING_TOLERANCE_PARAMETERS tolerance;
 
   private PositionHolder holder;
@@ -109,6 +109,21 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       tolerance.setPREALIGNMENT_ANGLE_TOLERANCE_PERCENT(ANGLE_TOL_PERCENT);
       tolerance.setPREALIGNMENT_ANGULAR_VELOCITY_TOLERANCE_RADPS(ANGLE_VEL_TOL_RADPS);
       tolerance.setPREALIGNMENT_TARGET_THRESHOLD_RAD(TARGET_THRESHOLD_RAD); // See section 6.2.2.4 in ICD
+
+      losVector = new SEPP_IADCS_API_VECTOR3_XYZ_FLOAT();
+      losVector.setX(0);
+      losVector.setY(0);
+      losVector.setZ(-1);
+  
+      flightVector = new SEPP_IADCS_API_VECTOR3_XYZ_FLOAT();
+      flightVector.setX(0);
+      flightVector.setY(-1);
+      flightVector.setZ(0);
+
+      sunPointingVector = new SEPP_IADCS_API_VECTOR3_XYZ_FLOAT();
+      sunPointingVector.setX(-1);
+      sunPointingVector.setY(0);
+      sunPointingVector.setZ(0);
     }
   }
 
@@ -338,12 +353,12 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
    * @param target Target vector as unit vector in body frame of the satellite.
    * @throws IllegalArgumentException Thrown when the vector is not a unit vector.
    */
-  public void setTargetVector(final VectorF3D target) throws IllegalArgumentException
+  public void setSunPointingVector(final VectorF3D target) throws IllegalArgumentException
   {
     if (!isUnity(target)) {
       throw new IllegalArgumentException("The provided target vector needs to have length 1.");
     }
-    targetVector = convertToAdcsApiVector(target);
+    sunPointingVector = convertToAdcsApiVector(target);
   }
 
   /**
@@ -357,7 +372,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     final double x2 = (double) vec.getX() * (double) vec.getX();
     final double y2 = (double) vec.getY() * (double) vec.getY();
     final double z2 = (double) vec.getZ() * (double) vec.getZ();
-    return Math.sqrt(x2 + y2 + z2) == 1.0;
+    return Math.abs(Math.sqrt(x2 + y2 + z2) - 1.0) < 0.001;
   }
 
   private void dumpStandardTelemetry()
@@ -594,16 +609,16 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
         adcsApi.Start_SingleAxis_AngularVelocity_Controller(vec, a.getAngularVelocity());
         activeAttitudeMode = a;
       } else if (attitude instanceof AttitudeModeSunPointing) {
-        if (targetVector == null) {
+        if (sunPointingVector == null) {
           throw new IOException(
-              "Target vector is not set. Call setTargetVector before calling setDesiredAttitudeMode.");
+              "Target vector is not set. Call setSunPointingVector before calling setDesiredAttitudeMode.");
         }
         final AttitudeModeSunPointing sunPointing = (AttitudeModeSunPointing) attitude;
         final SEPP_IADCS_API_SUN_POINTING_MODE_PARAMETERS params =
             new SEPP_IADCS_API_SUN_POINTING_MODE_PARAMETERS();
         params.setSTART_EPOCH_TIME_MSEC(BigInteger.valueOf(0));
         params.setSTOP_EPOCH_TIME_MSEC(BigInteger.valueOf(Long.MAX_VALUE));
-        params.setTARGET_VECTOR_BF(targetVector);
+        params.setTARGET_VECTOR_BF(sunPointingVector);
         adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
         adcsApi.Init_Orbit_Module(readTLEFile());
         adcsApi.Start_Operation_Mode_Sun_Pointing(params);
