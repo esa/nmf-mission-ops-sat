@@ -170,10 +170,24 @@ public class SPPTransport implements MALTransport {
         // SPPURI uri = new SPPURI(config.qualifier(), config.apid(), identifier);
 
         final SPPEndpoint endpoint = new SPPEndpoint(protocol, this, localName, uri.getURI(), qosProperties, sppSocket);
+
+        SPPEndpoint oldEndpoint = null;
+
         if (localName != null) {
-            endpointsByName.put(localName, endpoint);
+            oldEndpoint = endpointsByName.put(localName, endpoint);
+
+            if(null != oldEndpoint) {
+                oldEndpoint.close();
+                oldEndpoint = null;
+            }
         }
-        endpointsByURI.put(endpoint.getURI(), endpoint);
+
+        oldEndpoint = endpointsByURI.put(endpoint.getURI(), endpoint);
+
+        if(null != oldEndpoint) {
+            oldEndpoint.close();
+            oldEndpoint = null;
+        }
 
         synchronized (this) { // No need to make this more efficient; createEndpoint() is not called often.
             if (null == messageHandlerThread) {
