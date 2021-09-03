@@ -71,7 +71,7 @@ public class SPPWriter
       // 1- Write the APID qualifier
       final int apidQualifier = packet.getApidQualifier();
       apidQualifierBuffer[0] = (byte) (apidQualifier >>> 8);
-      apidQualifierBuffer[1] = (byte) (apidQualifier >>> 0);
+      apidQualifierBuffer[1] = (byte) (apidQualifier);
       os.write(apidQualifierBuffer);
     }
 

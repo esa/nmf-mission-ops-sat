@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -366,9 +367,9 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     final byte[] l2 = new byte[70];
     l1[69] = 0;
     l2[69] = 0;
-    System.arraycopy(lines.get(0).getBytes("ISO-8859-1"), 0, l1, 0, 69);
+    System.arraycopy(lines.get(0).getBytes(StandardCharsets.ISO_8859_1), 0, l1, 0, 69);
     LOGGER.log(Level.INFO, "Successfully loaded line 1 into {0} byte string.", l1.length);
-    System.arraycopy(lines.get(1).getBytes("ISO-8859-1"), 0, l2, 0, 69);
+    System.arraycopy(lines.get(1).getBytes(StandardCharsets.ISO_8859_1), 0, l2, 0, 69);
     LOGGER.log(Level.INFO, "Successfully loaded line 2 into {0} byte string.", l2.length);
 
     tle.setTLE_1(l1);
