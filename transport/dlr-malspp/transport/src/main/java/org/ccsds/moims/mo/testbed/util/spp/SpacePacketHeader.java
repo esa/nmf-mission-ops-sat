@@ -151,12 +151,12 @@ public class SpacePacketHeader {
   public String toString() {
     final StringBuilder buf = new StringBuilder();
     buf.append(super.toString());
-    buf.append(",packetVersionNumber=" + packetVersionNumber);
-    buf.append(",packetType=" + packetType);
-    buf.append(",secondaryHeaderFlag=" + secondaryHeaderFlag);
-    buf.append(",apid=" + apid);
-    buf.append(",sequenceFlags=" + sequenceFlags);
-    buf.append(",sequenceCount=" + sequenceCount);
+    buf.append(",packetVersionNumber=").append(packetVersionNumber);
+    buf.append(",packetType=").append(packetType);
+    buf.append(",secondaryHeaderFlag=").append(secondaryHeaderFlag);
+    buf.append(",apid=").append(apid);
+    buf.append(",sequenceFlags=").append(sequenceFlags);
+    buf.append(",sequenceCount=").append(sequenceCount);
     return buf.toString();
   }
 

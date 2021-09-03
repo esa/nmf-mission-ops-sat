@@ -543,7 +543,7 @@ public class SPPTransport implements MALTransport {
                 // Endpoint referenced in message not known. Choose a different endpoint for the
                 // sole purpose of returning an error message.
                 final Collection<SPPEndpoint> possibleEPs = endpointsByURI.values();
-                if (null != possibleEPs && !possibleEPs.isEmpty()) {
+                if (!possibleEPs.isEmpty()) {
                     // TODO: EP could be closed. Should we choose a different one?
                     final SPPEndpoint alternativeEndpoint = possibleEPs.iterator().next();
                     final MALStandardError error = new MALStandardError(MALHelper.DESTINATION_UNKNOWN_ERROR_NUMBER, null);

@@ -172,10 +172,6 @@ public class ServerTCPSPPSocket implements SPPSocket
           newChannel = new SPPChannel(clientSocket);
         } catch (final IOException ex) {
           LOGGER.log(Level.SEVERE, "Error when configuring the client connection", ex);
-          if (newChannel != null) {
-            newChannel.close();
-            newChannel = null;
-          }
           errorCount++;
           continue;
         }

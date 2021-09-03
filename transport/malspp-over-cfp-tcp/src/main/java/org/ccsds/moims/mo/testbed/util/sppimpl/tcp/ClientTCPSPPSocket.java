@@ -103,7 +103,7 @@ public class ClientTCPSPPSocket implements SPPSocket
           final SpacePacket packet = channel.receive();
 
           if(packet == null){ // return null if packet is not NMF relevant
-            return packet;
+            return null;
           }
 
           final int packetAPID = packet.getHeader().getApid();

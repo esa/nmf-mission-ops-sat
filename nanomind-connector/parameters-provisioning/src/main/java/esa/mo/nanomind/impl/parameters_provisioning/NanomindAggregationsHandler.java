@@ -130,8 +130,7 @@ class NanomindAggregationsHandler {
     IdentifierList domain = new IdentifierList();
     domain.add(new Identifier("OPSSAT"));
     details.setDomain(domain);
-    URI brokerUri = null;
-    details.setBrokerURI(brokerUri);
+    details.setBrokerURI(null);
     details.setProviderURI(MAL_SPP_BINDINDING + ":247/" + NANOMIND_APID + "/" + SOURCE_ID);
 
     aggServiceCns = new LimitedNanomindAggregationConsumer(details);
@@ -558,7 +557,6 @@ class NanomindAggregationsHandler {
     message = new StringBuilder("Remotely (Nanomind) defined aggregations:\n");
     LongList idsList = listDefinitionIds(0, 5);
     if (idsList == null) {
-      message.append("");
     } else {
       for (Long id : idsList) {
         message.append(String.format("AggregationDefinition[ID=%s]\n", id));

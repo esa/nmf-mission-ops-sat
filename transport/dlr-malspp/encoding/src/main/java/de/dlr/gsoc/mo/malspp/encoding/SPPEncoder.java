@@ -371,7 +371,7 @@ public class SPPEncoder implements MALEncoder, MALListEncoder {
         		encodeNulltag(att);
                     }
 		}else{
-                    encodeNulltag(att);
+                    encodeNulltag(null);
                 }
             
 		if (att != null) {

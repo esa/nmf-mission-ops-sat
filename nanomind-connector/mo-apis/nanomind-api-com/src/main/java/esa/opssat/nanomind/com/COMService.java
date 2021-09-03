@@ -21,7 +21,7 @@
 package esa.opssat.nanomind.com;
 
 import org.ccsds.moims.mo.com.Proposed;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.ccsds.moims.mo.mal.MALService;
@@ -83,6 +83,6 @@ public class COMService extends MALService
    */
   public COMObject[] getObjects()
   {
-    return (COMObject[]) Arrays.asList(objectsByName.values()).toArray();
+    return (COMObject[]) Collections.singletonList(objectsByName.values()).toArray();
   }
 }
