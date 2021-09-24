@@ -31,7 +31,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 /**
- * Entity holding lat archive synchronization time for provider.
+ * Entity holding last archive synchronization time for provider.
  *
  * @author Lukasz.Stochlak
  */
@@ -57,10 +57,19 @@ public class LastArchiveSync
     @Column(name = "last_sync", nullable = false)
     private Long lastSync;
 
+    /**
+     * Defult constructor.
+     */
     public LastArchiveSync()
     {
     }
 
+    /**
+     * Constructor taking provider URI and domain as parameters.
+     *
+     * @param providerUri provider URI as String.
+     * @param domain domain as String.
+     */
     public LastArchiveSync(String providerUri, String domain)
     {
         this.providerUri = providerUri;
@@ -68,12 +77,23 @@ public class LastArchiveSync
         this.lastSync = lastSync;
     }
 
+    /**
+     * Returns object hsh code.
+     *
+     * @return hash code.
+     */
     @Override
     public int hashCode()
     {
         return Objects.hash(getId(), getProviderUri(), getDomain(), getLastSync());
     }
 
+    /**
+     * Compares two objects (this and given as a parameter).
+     *
+     * @param o object to compare.
+     * @return true if objects are equal.
+     */
     @Override
     public boolean equals(Object o)
     {
@@ -91,46 +111,91 @@ public class LastArchiveSync
                && Objects.equals(getLastSync(), that.getLastSync());
     }
 
+    /**
+     * Returns object id.
+     *
+     * @return object id.
+     */
     public Long getId()
     {
         return id;
     }
 
+    /**
+     * Sets object id.
+     *
+     * @param id object id.
+     */
     public void setId(Long id)
     {
         this.id = id;
     }
 
+    /**
+     * Returns provider URI.
+     *
+     * @return provider URI.
+     */
     public String getProviderUri()
     {
         return providerUri;
     }
 
+    /**
+     * Sets provider URI.
+     *
+     * @param providerUri provider URI.
+     */
     public void setProviderUri(String providerUri)
     {
         this.providerUri = providerUri;
     }
 
+    /**
+     * Returns domain.
+     *
+     * @return domian.
+     */
     public String getDomain()
     {
         return domain;
     }
 
+    /**
+     * Sets domain.
+     *
+     * @param domain domain.
+     */
     public void setDomain(String domain)
     {
         this.domain = domain;
     }
 
+    /**
+     * Returns last synchronization time as Long.
+     *
+     * @return last synchronization time as Long.
+     */
     public Long getLastSync()
     {
         return lastSync;
     }
 
+    /**
+     * Sets last synchronization time as Long.
+     *
+     * @param lastSync synchronization time as Long.
+     */
     public void setLastSync(Long lastSync)
     {
         this.lastSync = lastSync;
     }
 
+    /**
+     * Returns object as String.
+     *
+     * @return object as String.
+     */
     @Override
     public String toString()
     {

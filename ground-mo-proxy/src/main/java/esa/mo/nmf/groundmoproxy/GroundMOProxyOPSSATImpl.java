@@ -28,7 +28,7 @@ import esa.mo.helpertools.misc.Const;
 import esa.mo.mc.impl.consumer.ActionConsumerServiceImpl;
 import esa.mo.mc.impl.proxy.ActionProxyServiceImpl;
 import esa.mo.nmf.groundmoproxy.entities.LastArchiveSync;
-import esa.mo.nmf.groundmoproxy.helper.ArchiveHelper;
+import esa.mo.nmf.groundmoproxy.helper.LastArchiveSyncHelper;
 import esa.mo.sm.impl.provider.AppsLauncherManager;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -96,7 +96,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
 
     private ExecutorService archiveSyncExecutor = Executors.newCachedThreadPool();
 
-    private ArchiveHelper archiveHelper;
+    private LastArchiveSyncHelper lastArchiveSyncHelper;
 
     /**
      * Ground MO Proxy for OPS-SAT
@@ -137,9 +137,9 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
             LOGGER.log(Level.SEVERE, "The SPP Protocol Bridge could not be initialized!", ex);
         }
 
-        archiveHelper =
-                new ArchiveHelper(super.localCOMServices.getArchiveService().getArchiveManager().getDbBackend().getEM(),
-                                  super.localCOMServices.getArchiveService().getArchiveManager().getDbBackend()
+        lastArchiveSyncHelper =
+                new LastArchiveSyncHelper(super.localCOMServices.getArchiveService().getArchiveManager().getDbBackend().getEM(),
+                                          super.localCOMServices.getArchiveService().getArchiveManager().getDbBackend()
                                           .getEmAvailability());
 
         archiveSyncPeriod = Integer.parseInt(System.getProperty(ARCHIVE_SYNC_PERIOD, "10")) * 1000;
@@ -236,7 +236,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
             String domain = HelperMisc.domain2domainId(archiveSync.getConnectionDetails().getDomain());
             String providerUri = archiveSync.getConnectionDetails().getProviderURI().getValue();
 
-            LastArchiveSync lastArchiveSync = archiveHelper.findLastArchiveSync(domain, providerUri);
+            LastArchiveSync lastArchiveSync = lastArchiveSyncHelper.findLastArchiveSync(domain, providerUri);
 
             GetTimeResponse lastSyncTime = archiveSync.getArchiveSyncStub().getTime();
 
@@ -372,7 +372,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
 
                 lastArchiveSync.setLastSync(timestamp.getValue());
 
-                archiveHelper.saveLastArchiveSync(lastArchiveSync);
+                lastArchiveSyncHelper.persistLastArchiveSync(lastArchiveSync);
 
                 LOGGER.log(Level.INFO, "Synchronizing provider {0} completed", new Object[] { domain });
             }

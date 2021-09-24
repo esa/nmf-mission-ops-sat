@@ -27,22 +27,35 @@ import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 
 /**
- * Archive helper class.
+ * Last Archive Sync helper class.
  *
  * @author Lukasz.Stochlak
  */
-public class ArchiveHelper
+public class LastArchiveSyncHelper
 {
     private EntityManager em;
 
     private Semaphore emAvailability;
 
-    public ArchiveHelper(EntityManager em, Semaphore emAvailability)
+    /**
+     * Default constructor.
+     *
+     * @param em EntityManager
+     * @param emAvailability EntityManager availability Semaphore
+     */
+    public LastArchiveSyncHelper(EntityManager em, Semaphore emAvailability)
     {
         this.em = em;
         this.emAvailability = emAvailability;
     }
 
+    /**
+     * Returns LastArchiveSync object for given parameters.
+     *
+     * @param domain domain
+     * @param uri URI
+     * @return LastArchiveSync object
+     */
     public synchronized LastArchiveSync findLastArchiveSync(String domain, String uri)
     {
         LastArchiveSync result = null;
@@ -57,7 +70,7 @@ public class ArchiveHelper
         }
         catch (InterruptedException e)
         {
-            Logger.getLogger(ArchiveHelper.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(LastArchiveSyncHelper.class.getName()).log(Level.SEVERE, null, e);
             result = null;
         }
 
@@ -66,7 +79,13 @@ public class ArchiveHelper
         return result;
     }
 
-    public synchronized boolean saveLastArchiveSync(LastArchiveSync lastArchiveSync)
+    /**
+     * Saves to Archive (file) given LastArchiveSync object.
+     *
+     * @param lastArchiveSync LastArchiveSync object
+     * @return true if success, false otherwise
+     */
+    public synchronized boolean persistLastArchiveSync(LastArchiveSync lastArchiveSync)
     {
         boolean result = true;
 
@@ -87,7 +106,7 @@ public class ArchiveHelper
         }
         catch (InterruptedException e)
         {
-            Logger.getLogger(ArchiveHelper.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(LastArchiveSyncHelper.class.getName()).log(Level.SEVERE, null, e);
             result = false;
         }
 
