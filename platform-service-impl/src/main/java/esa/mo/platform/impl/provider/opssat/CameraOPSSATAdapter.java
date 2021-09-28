@@ -73,48 +73,52 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   private int nativeImageWidth;
   private bst_ims100_img_config_t imageConfig;
   private final PictureFormatList supportedFormats = new PictureFormatList();
-  private final boolean unitAvailable;
+  private final boolean unitAvailable = false;
   private PowerControlAdapterInterface pcAdapter;
 
   private static final Logger LOGGER = Logger.getLogger(CameraOPSSATAdapter.class.getName());
 
   public CameraOPSSATAdapter(PowerControlAdapterInterface pcAdapter)
   {
-	this.pcAdapter = pcAdapter;
-    supportedFormats.add(PictureFormat.RAW);
-    supportedFormats.add(PictureFormat.RGB24);
-    supportedFormats.add(PictureFormat.BMP);
-    supportedFormats.add(PictureFormat.PNG);
-    supportedFormats.add(PictureFormat.JPG);
+    this.pcAdapter = pcAdapter;
+    this.supportedFormats.add(PictureFormat.RAW);
+    this.supportedFormats.add(PictureFormat.RGB24);
+    this.supportedFormats.add(PictureFormat.BMP);
+    this.supportedFormats.add(PictureFormat.PNG);
+    this.supportedFormats.add(PictureFormat.JPG);
     LOGGER.log(Level.INFO, "Initialisation");
     try {
       System.loadLibrary("ims100_api_jni");
     } catch (final Exception ex) {
       LOGGER.log(Level.SEVERE,
           "Camera library could not be loaded!", ex);
-      unitAvailable = false;
+      this.unitAvailable = false;
       return;
     }
-    imageConfig = new bst_ims100_img_config_t();
+    // Mark it as available even if it is offline - might come up later
+    this.unitAvailable = true;
+    this.imageConfig = new bst_ims100_img_config_t();
     try {
-      this.initBSTCamera();
+      this.openCamera();
     } catch (final IOException ex) {
       LOGGER.log(Level.SEVERE,
-          "BST Camera adapter could not be initialized!", ex);
-      unitAvailable = false;
+          "BST Camera could not be initialized for HK dump! It is possibly offline...", ex);
       return;
     }
-    dumpHKTelemetry();
-    unitAvailable = true;
+    try {
+      this.dumpHKTelemetry();
+    } finally {
+      this.closeCamera();
+    }
   }
 
   @Override
   public boolean isUnitAvailable()
   {
-    return unitAvailable && pcAdapter.isDeviceEnabled(DeviceType.CAMERA);
+    return this.unitAvailable && this.pcAdapter.isDeviceEnabled(DeviceType.CAMERA);
   }
 
-  private void initBSTCamera() throws IOException
+  private void openCamera() throws IOException
   {
     synchronized(this) {
       serialPort = System.getProperty(SERIAL_PORT_ATTRIBUTE, SERIAL_PORT_DEFAULT);
@@ -131,6 +135,14 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       ims100_api.bst_ims100_set_exp_time(imageConfig.getT_exp());
       nativeImageWidth = imageConfig.getCol_end() - imageConfig.getCol_start() + 1;
       nativeImageLength = imageConfig.getRow_end() - imageConfig.getRow_start() + 1;
+    }
+  }
+
+  
+  private void closeCamera()
+  {
+    synchronized(this) {
+      ims100_api.bst_ims100_done();
     }
   }
 
@@ -228,6 +240,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   public Picture takePicture(final CameraSettings settings) throws IOException
   {
     synchronized(this) {
+      this.openCamera();
       final bst_ims100_img_t image = new bst_ims100_img_t();
       ims100_api.bst_ims100_img_config_default(imageConfig);
       // TODO this is not scaling but cropping the picture
@@ -255,6 +268,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       if (ims100_api.bst_ims100_get_img_n(image, 1, (short) 0) != bst_ret_t.BST_RETURN_SUCCESS) {
         throw new IOException("bst_ims100_get_img_n failed");
       }
+      this.closeCamera();
       byte[] rawData = new byte[imageData.capacity()];
 
       LOGGER.log(Level.INFO, String.format("Copying from native buffer"));
