@@ -64,8 +64,9 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
 	int value;
 	PayloadDevice payload;
 
-	STATUS_MASK(int val, PayloadDevice payload) {
-		value = val;
+	STATUS_MASK(int value, PayloadDevice payload) {
+		this.value = value;
+    this.payload = payload;
 	}
   }
 
@@ -187,20 +188,23 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
     CompleteDataReceivedListener listener = new CompleteDataReceivedListener() {
       @Override
       public void onDataReceived(ParameterInstance parameterInstance) {
-        if (parameterInstance == null || false == PDU_CHANNEL_PARAM_NAME.equals(parameterInstance.getName())) {
+        if (parameterInstance == null || false == PDU_CHANNEL_PARAM_NAME.equals(parameterInstance.getName().getValue())) {
            return;
         }
         synchronized (this) {
           Attribute rawValue = parameterInstance.getParameterValue().getRawValue();
+          if (rawValue == null) {
+            return;
+          }
           long rawVal =  ((UShort)rawValue).getValue();
           for(STATUS_MASK mask : STATUS_MASK.values())
           {
               boolean enabled = (rawVal & mask.value) > 0 ? true : false ;
               boolean oldEnabled = deviceByType.get(mask.payload).getEnabled();
               if (oldEnabled && !enabled) { 
-                LOGGER.log(Level.INFO, "Device" + mask.toString() + " going offline");
+                LOGGER.log(Level.INFO, "Device " + mask.toString() + " going offline");
               } else if (!oldEnabled && enabled) {
-                LOGGER.log(Level.INFO, "Device" + mask.toString() + " coming online");
+                LOGGER.log(Level.INFO, "Device " + mask.toString() + " coming online");
               }
               deviceByType.get(mask.payload).setEnabled(enabled);
               if (mask.payload == PayloadDevice.FineADCS) {
