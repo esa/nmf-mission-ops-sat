@@ -23,10 +23,12 @@ package esa.mo.platform.impl.provider.opssat;
 import esa.mo.helpertools.connections.ConnectionConsumer;
 import esa.mo.mc.impl.provider.ParameterInstance;
 import esa.mo.nanomind.impl.util.NanomindServicesConsumer;
+import esa.mo.nmf.NMFException;
 import esa.mo.nmf.commonmoadapter.CommonMOAdapterImpl;
 import esa.mo.nmf.commonmoadapter.CompleteDataReceivedListener;
 import esa.mo.platform.impl.provider.gen.PowerControlAdapterInterface;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,7 +47,7 @@ import org.ccsds.moims.mo.platform.powercontrol.structures.DeviceType;
 public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
 {
 
-  private static final long ADCS_ACTIVATION_DELAY = 60*1000;
+  private static final long ADCS_ACTIVATION_DELAY_NS = 60 * 1000 * 1000 * 1000;
   private static final String PDU_CHANNEL_PARAM_NAME = "PDU1952";
 
   enum STATUS_MASK {
@@ -84,7 +86,7 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
 
   private void initDevices()
   {
-    addDevice(new Device(true, 0L, new Identifier(
+    addDevice(new Device(false, 0L, new Identifier(
         "Attitude Determination and Control System"), DeviceType.ADCS), PayloadDevice.FineADCS);
     addDevice(new Device(true, 10L, new Identifier(
         "Satellite Experimental Processing Platform 1"), DeviceType.OBC), PayloadDevice.SEPP1);
@@ -130,46 +132,53 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
   @Override
   public void enableDevices(final DeviceList inputList) throws IOException
   {
-    for (final Device device : inputList) {
-      LOGGER.log(Level.INFO, "Looking up Device {0}", new Object[]{device});
-      PayloadDevice payloadId = payloadIdByObjInstId.get(device.getUnitObjInstId());
-      if (device.getUnitObjInstId() != null) {
-        payloadId = payloadIdByObjInstId.get(device.getUnitObjInstId());
-      } else {
-        final Device found = findByType(device.getDeviceType());
-        if (found != null) {
-          payloadId = payloadIdByObjInstId.get(found.getUnitObjInstId());
+    synchronized (this) {
+      for (final Device device : inputList) {
+        LOGGER.log(Level.INFO, "Looking up Device {0}", new Object[]{device});
+        PayloadDevice payloadId = payloadIdByObjInstId.get(device.getUnitObjInstId());
+        if (device.getUnitObjInstId() != null) {
+          payloadId = payloadIdByObjInstId.get(device.getUnitObjInstId());
         } else {
-          throw new IOException("Cannot find the device by type " + device);
-        }
-      }
-      if (payloadId != null) {
-        switchDevice(payloadId, device.getEnabled());
-        // When device is set OFF, mark the status right away
-        if(!device.getEnabled())
-        {
-          Device d = findByType(device.getDeviceType());
-          d.setEnabled(false);
-          if(d.getDeviceType() == DeviceType.ADCS){
-            adcsChannelStartTime = null;
+          final Device found = findByType(device.getDeviceType());
+          if (found != null) {
+            payloadId = payloadIdByObjInstId.get(found.getUnitObjInstId());
+          } else {
+            throw new IOException("Cannot find the device by type " + device);
           }
         }
-      } else {
-        throw new IOException("Cannot find the device by oId " + device);
+        if (payloadId != null) {
+          switchDevice(payloadId, device.getEnabled());
+          // When device is set OFF, mark the status right away
+          if(!device.getEnabled())
+          {
+            Device d = findByType(device.getDeviceType());
+            d.setEnabled(false);
+            if(d.getDeviceType() == DeviceType.ADCS){
+              adcsChannelStartTime = null;
+            }
+          }
+        } else {
+          throw new IOException("Cannot find the device by oId " + device);
+        }
       }
     }
   }
 
-
   @Override
   public boolean isDeviceEnabled(DeviceType deviceType) {
-    boolean isEnabled = findByType(deviceType) == null ? false : findByType(deviceType).getEnabled();
+    synchronized (this) {
+      boolean isEnabled = findByType(deviceType) == null ? false : findByType(deviceType).getEnabled();
 
-    // In the ADCS case, check that the power channel has been running at least a minute to get an accurate reading
-    if (deviceType.equals(DeviceType.ADCS) && ((System.currentTimeMillis() - adcsChannelStartTime) < ADCS_ACTIVATION_DELAY)) {
-      isEnabled = false;
+      // In the ADCS case, check that the power channel has been running at least a minute to get an accurate reading
+      if (isEnabled && deviceType.equals(DeviceType.ADCS)) {
+        if (adcsChannelStartTime == null) {
+          isEnabled = false;
+        } else if ((System.nanoTime() - adcsChannelStartTime) < ADCS_ACTIVATION_DELAY_NS) {
+          isEnabled = false;
+        }
+      }
+      return isEnabled;
     }
-    return isEnabled;
   }
 
   @Override
@@ -181,37 +190,55 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
         if (parameterInstance == null || false == PDU_CHANNEL_PARAM_NAME.equals(parameterInstance.getName())) {
            return;
         }
-
-        Attribute rawValue = parameterInstance.getParameterValue().getRawValue();
-        long rawVal =  ((UShort)rawValue).getValue();
-        for(STATUS_MASK mask : STATUS_MASK.values())
-        {
-            boolean enabled = (rawVal & mask.value) > 0 ? true : false ;
-            deviceByType.get(mask.payload).setEnabled(enabled);
-            if(enabled && STATUS_MASK.DEVICE_STATUS_IADCS_MASK == mask && adcsChannelStartTime == null)
-            {
-              adcsChannelStartTime = System.currentTimeMillis();
-            }
+        synchronized (this) {
+          Attribute rawValue = parameterInstance.getParameterValue().getRawValue();
+          long rawVal =  ((UShort)rawValue).getValue();
+          for(STATUS_MASK mask : STATUS_MASK.values())
+          {
+              boolean enabled = (rawVal & mask.value) > 0 ? true : false ;
+              boolean oldEnabled = deviceByType.get(mask.payload).getEnabled();
+              if (oldEnabled && !enabled) { 
+                LOGGER.log(Level.INFO, "Device" + mask.toString() + " going offline");
+              } else if (!oldEnabled && enabled) {
+                LOGGER.log(Level.INFO, "Device" + mask.toString() + " coming online");
+              }
+              deviceByType.get(mask.payload).setEnabled(enabled);
+              if (mask.payload == PayloadDevice.FineADCS) {
+                if (enabled && adcsChannelStartTime == null) {
+                  adcsChannelStartTime = System.nanoTime();
+                } else if (!enabled && adcsChannelStartTime != null) {
+                  adcsChannelStartTime = null;
+                }
+              }
+          }
         }
       }
     };
 
     CommonMOAdapterImpl commonMOAdapter = new CommonMOAdapterImpl(connection);
+    try {
+      commonMOAdapter.toggleParametersGeneration(Arrays.asList(PDU_CHANNEL_PARAM_NAME) , true);
+    } catch (NMFException e) {
+      LOGGER.log(Level.WARNING, "Error enabling PDU channel parameter");
+    }
     commonMOAdapter.addDataReceivedListener(listener);
+    LOGGER.log(Level.INFO, "Now listening to PDU channel info");
   }
 
   private void switchDevice(PayloadDevice device, Boolean enabled) throws IOException
   {
-    PayloadDeviceList deviceList = new PayloadDeviceList();
-    BooleanList powerStates = new BooleanList();
-    deviceList.add(device);
-    powerStates.add(enabled);
-    LOGGER.log(Level.INFO, "Switching device {0} to enabled: {1}", new Object[]{device, enabled});
-    try {
-      obcServicesConsumer.getPowerNanomindService().getPowerNanomindStub().setPowerState(deviceList,
-          powerStates);
-    } catch (final MALInteractionException | MALException ex) {
-      throw new IOException("Cannot switch device through OBC", ex);
+    synchronized (this) {
+      PayloadDeviceList deviceList = new PayloadDeviceList();
+      BooleanList powerStates = new BooleanList();
+      deviceList.add(device);
+      powerStates.add(enabled);
+      LOGGER.log(Level.INFO, "Switching device {0} to enabled: {1}", new Object[]{device, enabled});
+      try {
+        obcServicesConsumer.getPowerNanomindService().getPowerNanomindStub().setPowerState(deviceList,
+            powerStates);
+      } catch (final MALInteractionException | MALException ex) {
+        throw new IOException("Cannot switch device through OBC", ex);
+      }
     }
   }
 

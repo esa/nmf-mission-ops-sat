@@ -13,9 +13,9 @@
  * You on an "as is" basis and without warranties of any kind, including without
  * limitation merchantability, fitness for a particular purpose, absence of
  * defects or errors, accuracy or non-infringement of intellectual property rights.
- * 
+ *
  * See the License for the specific language governing permissions and
- * limitations under the License. 
+ * limitations under the License.
  * ----------------------------------------------------------------------------
  */
 package esa.mo.platform.impl.provider.opssat;
@@ -35,24 +35,79 @@ public class OpticalRxOPSSATAdapter implements OpticalDataReceiverAdapterInterfa
 
   private static final Logger LOGGER = Logger.getLogger(OpticalRxOPSSATAdapter.class.getName());
   private SEPP_OPT_RX_API optRxApi;
-  private final boolean initalized;
+  private final boolean apiLoaded;
+  private boolean unitInitialized = false;
+
   private PowerControlAdapterInterface pcAdapter;
+  private static final int OPTRX_WATCH_PERIOD_MS = 30 * 1000;
+  private Thread watcherThread;
 
   public OpticalRxOPSSATAdapter(PowerControlAdapterInterface pcAdapter)
   {
-	this.pcAdapter = pcAdapter;
+    this.pcAdapter = pcAdapter;
     LOGGER.log(Level.INFO, "Initialisation");
     try {
       System.loadLibrary("opt_rx_api_jni");
-      optRxApi = new SEPP_OPT_RX_API();
     } catch (final Exception ex) {
       LOGGER.log(Level.SEVERE,
-          "OPT RX API could not be initialized!", ex);
-      initalized = false;
+          "OPTRX API could not be loaded!", ex);
+      apiLoaded = false;
       return;
     }
-    initalized = true;
+    apiLoaded = true;
+    watcherThread = new Thread(new OPTRXWatcher(), "OPTRX Watcher");
+    watcherThread.start();
+  }
 
+
+  /**
+   * Inits OPTRX API and puts it into default mode
+   */
+  private boolean initOPTRX() {
+    try {
+      synchronized(this) {
+        optRxApi = new SEPP_OPT_RX_API();
+      }
+    } catch (final Exception ex) {
+      LOGGER.log(Level.SEVERE, "OPTRX could not be initialised!", ex);
+      return false;
+    }
+    return true;
+  }
+   /**
+   * Monitors the OPTRXS offline->online transitions and configures it into default mode
+   */
+  private class OPTRXWatcher implements Runnable
+  {
+    public OPTRXWatcher()
+    {
+    }
+
+    @Override
+    public void run()
+    {
+      try {
+        while (true) {
+          Thread.sleep(OPTRX_WATCH_PERIOD_MS);
+          boolean isAvailable = isUnitAvailableInternal();
+          if (isAvailable && !unitInitialized) {
+            LOGGER.log(Level.INFO, "OPTRX came online - attempting initialisation");
+            if (initOPTRX()) {
+              LOGGER.log(Level.INFO, "OPTRX initialised - marking available");
+              unitInitialized = true;
+            } else {
+              LOGGER.log(Level.WARNING, "OPTRX init failed");
+            }
+          } else if (!isAvailable && unitInitialized) {
+            LOGGER.log(Level.INFO, "OPTRX gone offline - marking unavailable");
+            optRxApi = null;
+            unitInitialized = false;
+          }
+        }
+      } catch (InterruptedException ex) {
+        return;
+      }
+    }
   }
 
   @Override
@@ -77,11 +132,15 @@ public class OpticalRxOPSSATAdapter implements OpticalDataReceiverAdapterInterfa
       return new byte[0];
     }
   }
+  private boolean isUnitAvailableInternal()
+  {
+    return apiLoaded && pcAdapter.isDeviceEnabled(DeviceType.OPTRX);
+  }
 
   @Override
   public boolean isUnitAvailable()
   {
-    return initalized && pcAdapter.isDeviceEnabled(DeviceType.OPTRX);
+    return isUnitAvailableInternal() && unitInitialized;
   }
 
 }

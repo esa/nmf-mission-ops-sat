@@ -49,9 +49,12 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
   private ByteBuffer sampleBuffer;
   private int bufferSize, bufferLength;
   private PowerControlAdapterInterface pcAdapter;
+  private static final int SDR_WATCH_PERIOD_MS = 30 * 1000;
 
-  private final boolean initialized;
+  private final boolean apiLoaded;
   private boolean configured;
+  private boolean unitInitialized = false;
+  private Thread watcherThread;
 
   public SDROPSSATAdapter(PowerControlAdapterInterface pcAdapter)
   {
@@ -99,6 +102,21 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
     lpfFreqsMap.put((float) 0.750, eSDR_RFFE_RX_LPF_BW.RFFE_RX_LPFBW_0M75);
     try {
       System.loadLibrary("sdr_api_jni");
+    } catch (final Exception ex) {
+      LOGGER.log(Level.SEVERE, "SDR API could not be loaded!", ex);
+      this.apiLoaded = false;
+      return;
+    }
+    this.apiLoaded = true;
+    watcherThread = new Thread(new SDRWatcher(), "SDR Watcher");
+    watcherThread.start();
+  }
+
+  /**
+   * Inits SDR API and puts it into default mode
+   */
+  private boolean initSDR() {
+    try {
       synchronized(this) {
         sdrApi = new SEPP_SDR_API();
         sdrApi.Print_Info();
@@ -106,17 +124,57 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
         sdrApi.Enable_Receiver();
       }
     } catch (final Exception ex) {
-      LOGGER.log(Level.SEVERE, "SDR API could not be initialized!", ex);
-      this.initialized = false;
-      return;
+      LOGGER.log(Level.SEVERE, "SDR could not be initialised!", ex);
+      return false;
     }
-    this.initialized = true;
+    return true;
+  }
+
+   /**
+   * Monitors the SDR offline->online transitions and configures it into default mode
+   */
+  private class SDRWatcher implements Runnable
+  {
+    public SDRWatcher()
+    {
+    }
+
+    @Override
+    public void run()
+    {
+      try {
+        while (true) {
+          Thread.sleep(SDR_WATCH_PERIOD_MS);
+          boolean isAvailable = isUnitAvailableInternal();
+          if (isAvailable && !unitInitialized) {
+            LOGGER.log(Level.INFO, "SDR came online - attempting initialisation");
+            if (initSDR()) {
+              LOGGER.log(Level.INFO, "SDR initialised - marking available");
+              unitInitialized = true;
+            } else {
+              LOGGER.log(Level.WARNING, "SDR init failed");
+            }
+          } else if (!isAvailable && unitInitialized) {
+            LOGGER.log(Level.INFO, "SDR gone offline - marking unavailable");
+            sdrApi = null;
+            unitInitialized = false;
+          }
+        }
+      } catch (InterruptedException ex) {
+        return;
+      }
+    }
+  }
+
+  private boolean isUnitAvailableInternal()
+  {
+    return apiLoaded && pcAdapter.isDeviceEnabled(DeviceType.SDR);
   }
 
   @Override
   public boolean isUnitAvailable()
   {
-    return initialized && pcAdapter.isDeviceEnabled(DeviceType.SDR);
+    return isUnitAvailableInternal() && unitInitialized;
   }
 
   private eSDR_RFFE_RX_SAMPLING_FREQ getSamplingFreqFromFloat(final float input)

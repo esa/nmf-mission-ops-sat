@@ -60,10 +60,12 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
 
   private static final float MAX_REACTION_WHEEL_SPEED = 1047.197551f;
   private static final float MAX_REACTION_WHEEL_TORQUE = 0.0001f;
+  private static final int IADCS_WATCH_PERIOD_MS = 30 * 1000;
 
   private AttitudeMode activeAttitudeMode;
   private SEPP_IADCS_API adcsApi;
-  private final boolean initialized;
+  private final boolean apiLoaded;
+  private boolean unitInitialized = false;
 
   // Additional parameters which need to be used for attitude mode changes.
   private SEPP_IADCS_API_VECTOR3_XYZ_FLOAT losVector; // Satellite body vector pointing at the target (e.g. nadir or fixed target)
@@ -73,42 +75,37 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   private PowerControlAdapterInterface pcAdapter;
 
   private PositionHolder holder;
+  private Thread watcherThread;
 
   public AutonomousADCSOPSSATAdapter(PowerControlAdapterInterface pcAdapter)
   {
-	this.pcAdapter = pcAdapter;
+    this.pcAdapter = pcAdapter;
     LOGGER.log(Level.INFO, "Initialisation");
     try {
       System.loadLibrary("iadcs_api_jni");
     } catch (final Exception ex) {
       LOGGER.log(Level.SEVERE, "iADCS library could not be loaded!", ex);
-      initialized = false;
+      apiLoaded = false;
       return;
     }
-    adcsApi = new SEPP_IADCS_API();
+    // Mark it as available even if it is offline - might come up later
+    apiLoaded = true;
+    watcherThread = new Thread(new IADCSWatcher(), "iADCS Watcher");
+    watcherThread.start();
+  }
+
+  /**
+   * Inits iADCS API and puts it into default mode
+   */
+  private boolean initIADCS()
+  {
     synchronized(this) {
-      activeAttitudeMode = null;
       try {
-        // Try running a short command as a ping
-        adcsApi.Get_Epoch_Time();
-      } catch (final Exception e) {
-        LOGGER.log(Level.SEVERE, "Failed to initialize iADCS", e);
-        initialized = false;
-        return;
+      adcsApi = new SEPP_IADCS_API();
+      } catch (final Exception ex) {
+        LOGGER.log(Level.SEVERE, "iADCS API could not get initialized!", ex);
+        return false;
       }
-      try {
-        dumpPowerTelemetry();
-      } catch (final Exception e) {
-        LOGGER.log(Level.WARNING, "Failed to dump iADCS TM", e);
-      }
-
-      try {
-        unset(); // Transition to measurement mode
-      } catch (final Exception e) {
-        LOGGER.log(Level.WARNING, "Failed to switch to measurement mode upon init", e);
-      }
-      initialized = true;
-
       tolerance = new SEPP_IADCS_API_TARGET_POINTING_TOLERANCE_PARAMETERS();
       tolerance.setPREALIGNMENT_ANGLE_TOLERANCE_RAD(ANGLE_TOL_RAD);
       tolerance.setPREALIGNMENT_ANGLE_TOLERANCE_PERCENT(ANGLE_TOL_PERCENT);
@@ -129,9 +126,66 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       sunPointingVector.setX(-1);
       sunPointingVector.setY(0);
       sunPointingVector.setZ(0);
+      try {
+        // Try running a short command as a ping
+        adcsApi.Get_Epoch_Time();
+      } catch (final Exception e) {
+        LOGGER.log(Level.SEVERE, "Failed to get Epoch Time", e);
+        // Assume the device is offline / failed
+        return false;
+      }
+      try {
+        dumpPowerTelemetry();
+      } catch (final Exception e) {
+        LOGGER.log(Level.WARNING, "Failed to dump iADCS TM", e);
+        return false;
+      }
+
+      try {
+        unset(); // Transition to measurement mode
+      } catch (final Exception e) {
+        LOGGER.log(Level.WARNING, "Failed to switch to measurement mode upon init", e);
+        return false;
+      }
+      return true;
     }
   }
 
+  /**
+   * Monitors the iADCS offline->online transitions and configures it into default mode
+   */
+  private class IADCSWatcher implements Runnable
+  {
+    public IADCSWatcher()
+    {
+    }
+
+    @Override
+    public void run()
+    {
+      try {
+        while (true) {
+          Thread.sleep(IADCS_WATCH_PERIOD_MS);
+          boolean isAvailable = isUnitAvailableInternal();
+          if (isAvailable && !unitInitialized) {
+            LOGGER.log(Level.INFO, "iADCS came online - attempting initialisation");
+            if (initIADCS()) {
+              LOGGER.log(Level.INFO, "iADCS initialised - marking available");
+              unitInitialized = true;
+            } else {
+              LOGGER.log(Level.WARNING, "iADCS init failed");
+            }
+          } else if (!isAvailable && unitInitialized) {
+            LOGGER.log(Level.INFO, "iADCS gone offline - marking unavailable");
+            adcsApi = null;
+            unitInitialized = false;
+          }
+        }
+      } catch (InterruptedException ex) {
+        return;
+      }
+    }
+  }
   /**
    * class for controlling the vector pointing mode
    */
@@ -163,18 +217,19 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
       isHoldingPosition = false;
       while (!isFinished) {
         try {
-          wait(1);
+          Thread.sleep(1000);
         } catch (final InterruptedException ex) {
           Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
       }
     }
 
+    @Override
     public void run()
     {
       do {
         try {
-          wait(1);
+          Thread.sleep(1000);
           synchronized(this) {
             // get current attitude telemetry
             final SEPP_IADCS_API_QUATERNION_FLOAT telemetry =
@@ -680,7 +735,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
 
         holder = new PositionHolder(new Vector3D(a.getTarget().getX(), a.getTarget().getY(),
             a.getTarget().getZ()), a.getMargin());
-        final Thread runner = new Thread(holder);
+        final Thread runner = new Thread(holder, "iADCS Vector pointing holder");
         runner.start();
       } else {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -848,10 +903,15 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     }
   }
 
+  private boolean isUnitAvailableInternal()
+  {
+    return apiLoaded && pcAdapter.isDeviceEnabled(DeviceType.ADCS);
+  }
+
   @Override
   public boolean isUnitAvailable()
   {
-    return initialized && pcAdapter.isDeviceEnabled(DeviceType.ADCS);
+    return isUnitAvailableInternal() && unitInitialized;
   }
 
   @Override
