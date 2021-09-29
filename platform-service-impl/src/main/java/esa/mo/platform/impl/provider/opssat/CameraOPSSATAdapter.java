@@ -33,6 +33,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.Buffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -272,7 +273,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       byte[] rawData = new byte[imageData.capacity()];
 
       LOGGER.log(Level.INFO, String.format("Copying from native buffer"));
-      ((ByteBuffer) (imageData.duplicate().clear())).get(rawData);
+      ((ByteBuffer) (((Buffer)imageData.duplicate()).clear())).get(rawData);
       final CameraSettings replySettings = new CameraSettings();
       replySettings.setResolution(settings.getResolution());
       replySettings.setExposureTime(settings.getExposureTime());
