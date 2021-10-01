@@ -20,6 +20,7 @@
  */
 package esa.mo.nmf.groundmoproxy;
 
+import esa.mo.com.impl.archive.entities.LastArchiveSyncEntity;
 import esa.mo.com.impl.consumer.ArchiveSyncConsumerServiceImpl;
 import esa.mo.com.impl.util.COMObjectStructure;
 import esa.mo.helpertools.connections.SingleConnectionDetails;
@@ -27,7 +28,6 @@ import esa.mo.helpertools.helpers.HelperMisc;
 import esa.mo.helpertools.misc.Const;
 import esa.mo.mc.impl.consumer.ActionConsumerServiceImpl;
 import esa.mo.mc.impl.proxy.ActionProxyServiceImpl;
-import esa.mo.nmf.groundmoproxy.entities.LastArchiveSync;
 import esa.mo.nmf.groundmoproxy.helper.LastArchiveSyncHelper;
 import esa.mo.sm.impl.provider.AppsLauncherManager;
 import java.io.IOException;
@@ -38,9 +38,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -88,15 +85,15 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
 
     private final HashMap<IdentifierList, URI> actionURIs = new HashMap<>();
 
-    public int archiveSyncPeriod = 10000;
+    private final LastArchiveSyncHelper lastArchiveSyncHelper;
+
+    private final Object syncObject = new Object();
+
+    private int archiveSyncPeriod = 10000;
 
     private Timer archiveSyncTimer;
 
-    private Future<?> currentSyncTask = null;
-
-    private ExecutorService archiveSyncExecutor = Executors.newCachedThreadPool();
-
-    private LastArchiveSyncHelper lastArchiveSyncHelper;
+    private boolean syncInProgress = false;
 
     /**
      * Ground MO Proxy for OPS-SAT
@@ -113,7 +110,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
         // Default it to tcp if the property is not defined
         protocol = (protocol != null) ? protocol.split(":")[0] : "maltcp";
 
-        // The range of APIDs below were formally requested 
+        // The range of APIDs below were formally requested
         // And are uniquely assigned for the Ground MO Proxy of OPS-SAT
         properties.put(ProtocolBridgeSPP.PROPERTY_APID_RANGE_START, "1450");
         properties.put(ProtocolBridgeSPP.PROPERTY_APID_RANGE_END, "1499");
@@ -137,10 +134,8 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
             LOGGER.log(Level.SEVERE, "The SPP Protocol Bridge could not be initialized!", ex);
         }
 
-        lastArchiveSyncHelper =
-                new LastArchiveSyncHelper(super.localCOMServices.getArchiveService().getArchiveManager().getDbBackend().getEM(),
-                                          super.localCOMServices.getArchiveService().getArchiveManager().getDbBackend()
-                                          .getEmAvailability());
+        lastArchiveSyncHelper = new LastArchiveSyncHelper(
+                super.localCOMServices.getArchiveService().getArchiveManager().getDbBackend());
 
         archiveSyncPeriod = Integer.parseInt(System.getProperty(ARCHIVE_SYNC_PERIOD, "10")) * 1000;
 
@@ -150,74 +145,95 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
             @Override
             public void run()
             {
-                if (null == currentSyncTask || currentSyncTask.isDone())
+                synchronized (syncObject)
                 {
-                    currentSyncTask = archiveSyncExecutor.submit(GroundMOProxyOPSSATImpl.this::synchronizeArchives);
+                    if (!syncInProgress)
+                    {
+                        syncInProgress = true;
+                        Thread syncThread = new Thread(() -> synchronizeArchives());
+                        syncThread.start();
+                    }
                 }
+
             }
         }, 0, archiveSyncPeriod);
     }
 
     private synchronized void synchronizeArchives()
     {
-        final IdentifierList domain = new IdentifierList();
-        domain.add(new Identifier("*"));
-
-        COMService serviceType;
-        ServiceKey serviceKey;
-        ServiceFilter sf;
-        // ---------------------
-        // Sync the COM Archives
-        // ---------------------
-        serviceType = ArchiveSyncHelper.ARCHIVESYNC_SERVICE;
-        serviceKey = new ServiceKey(serviceType.getArea().getNumber(), serviceType.getNumber(),
-                                    serviceType.getArea().getVersion());
-        sf = new ServiceFilter(new Identifier("*"), domain, new Identifier("*"), null, new Identifier("*"), serviceKey,
-                               new UIntegerList());
-
         try
         {
-            final ProviderSummaryList archiveSyncsCD = localDirectoryService.lookupProvider(sf, null);
-            final ArrayList<ArchiveSyncConsumerServiceImpl> archiveSyncs = new ArrayList<>();
+            final IdentifierList domain = new IdentifierList();
+            domain.add(new Identifier("*"));
 
-            // Cycle through the NMF Apps and sync them!
-            for (int i = 0; i < archiveSyncsCD.size(); i++)
+            COMService serviceType;
+            ServiceKey serviceKey;
+            ServiceFilter sf;
+            // ---------------------
+            // Sync the COM Archives
+            // ---------------------
+            serviceType = ArchiveSyncHelper.ARCHIVESYNC_SERVICE;
+            serviceKey = new ServiceKey(serviceType.getArea().getNumber(), serviceType.getNumber(),
+                                        serviceType.getArea().getVersion());
+            sf = new ServiceFilter(new Identifier("*"), domain, new Identifier("*"), null, new Identifier("*"),
+                                   serviceKey, new UIntegerList());
+
+            try
             {
-                if (archiveSyncsCD.get(i).getProviderName().getValue().contains(Const.NANOSAT_MO_SUPERVISOR_NAME))
-                {
-                    LOGGER.fine("Skipping Supervisor in Archive Sync");
-                    continue;
-                }
-                final ProviderSummaryList psl = new ProviderSummaryList();
-                psl.add(archiveSyncsCD.get(i));
+                final ProviderSummaryList archiveSyncsCD = localDirectoryService.lookupProvider(sf, null);
+                final ArrayList<ArchiveSyncConsumerServiceImpl> archiveSyncs = new ArrayList<>();
 
-                try
+                // Cycle through the NMF Apps and sync them!
+                for (int i = 0; i < archiveSyncsCD.size(); i++)
                 {
-                    final SingleConnectionDetails connectionDetails =
-                            AppsLauncherManager.getSingleConnectionDetailsFromProviderSummaryList(psl);
+                    if (archiveSyncsCD.get(i).getProviderName().getValue().contains(Const.NANOSAT_MO_SUPERVISOR_NAME))
+                    {
+                        LOGGER.fine("Skipping Supervisor in Archive Sync");
+                        continue;
+                    }
+                    final ProviderSummaryList psl = new ProviderSummaryList();
+                    psl.add(archiveSyncsCD.get(i));
+
                     try
                     {
-                        final ArchiveSyncConsumerServiceImpl archSync =
-                                new ArchiveSyncConsumerServiceImpl(connectionDetails);
-                        archiveSyncs.add(archSync);
+                        final SingleConnectionDetails connectionDetails =
+                                AppsLauncherManager.getSingleConnectionDetailsFromProviderSummaryList(psl);
+                        try
+                        {
+                            final ArchiveSyncConsumerServiceImpl archSync =
+                                    new ArchiveSyncConsumerServiceImpl(connectionDetails);
+                            archiveSyncs.add(archSync);
+                        }
+                        catch (final MalformedURLException ex)
+                        {
+                            LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+                        }
                     }
-                    catch (final MalformedURLException ex)
+                    catch (final IOException ex)
                     {
-                        LOGGER.log(Level.SEVERE, null, ex);
+                        // The ArchiveSync service does not exist on this provider...
+                        // Do nothing!
+                        LOGGER.fine("No Archive Sync service on provider");
                     }
                 }
-                catch (final IOException ex)
-                {
-                    // The ArchiveSync service does not exist on this provider...
-                    // Do nothing!
-                }
-            }
 
-            this.syncRemoteArchiveWithLocalArchive(archiveSyncs);
+                this.syncRemoteArchiveWithLocalArchive(archiveSyncs);
+            }
+            catch (final MALInteractionException | MALException ex)
+            {
+                LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            }
         }
-        catch (final MALInteractionException | MALException ex)
+        catch (Exception e)
         {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+        }
+        finally
+        {
+            synchronized (syncObject)
+            {
+                this.syncInProgress = false;
+            }
         }
     }
 
@@ -236,7 +252,8 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
             String domain = HelperMisc.domain2domainId(archiveSync.getConnectionDetails().getDomain());
             String providerUri = archiveSync.getConnectionDetails().getProviderURI().getValue();
 
-            LastArchiveSync lastArchiveSync = lastArchiveSyncHelper.findLastArchiveSync(domain, providerUri);
+            LastArchiveSyncEntity lastArchiveSyncEntity =
+                    lastArchiveSyncHelper.findLastArchiveSync(domain, providerUri);
 
             GetTimeResponse lastSyncTime = archiveSync.getArchiveSyncStub().getTime();
 
@@ -251,27 +268,24 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
             FineTime from = null;
             FineTime until = null;
 
-            if (null == lastArchiveSync)
+            if (null == lastArchiveSyncEntity)
             {
+                lastArchiveSyncEntity = new LastArchiveSyncEntity(providerUri, domain);
+            }
+
+            if (lastArchiveSyncEntity.getLastSync() <= lastSyncTime.getBodyElement0().getValue())
+            {
+                from = new FineTime(lastArchiveSyncEntity.getLastSync() + 1);
                 until = lastSyncTime.getBodyElement0();
-                lastArchiveSync = new LastArchiveSync(providerUri, domain);
             }
             else
             {
-                if (lastArchiveSync.getLastSync() <= lastSyncTime.getBodyElement0().getValue())
-                {
-                    from = new FineTime(lastArchiveSync.getLastSync());
-                    until = lastSyncTime.getBodyElement0();
-                }
-                else
-                {
-                    LOGGER.log(Level.WARNING,
-                               "Archive sync completed for domain: {0}! Sync not performed! Last sync time {1} is greater than provider current time {2}!",
-                               new Object[] { domain, lastArchiveSync.getLastSync(),
-                                              lastSyncTime.getBodyElement0().getValue() });
-                    continue;
+                LOGGER.log(Level.WARNING,
+                           "Archive sync completed for domain: {0}! Sync not performed! Last sync time {1} is greater than provider current time {2}!",
+                           new Object[] { domain, lastArchiveSyncEntity.getLastSync(),
+                                          lastSyncTime.getBodyElement0().getValue() });
+                continue;
 
-                }
             }
 
             LOGGER.log(Level.INFO, "Synchronizing provider: {0}, From: {1}, Until: {2}",
@@ -295,11 +309,6 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
                     super.localCOMServices.getArchiveService()
                             .store(false, comObject.getObjType(), comObject.getDomain(), detailsList,
                                    comObject.getObjects(), null);
-                }
-                catch (final MALException ex)
-                {
-                    LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
-                    success = false;
                 }
                 catch (final MALInteractionException ex)
                 {
@@ -326,31 +335,34 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
                                         tempElementsList.add(comObject.getObjects().get((int) duplicate.getValue()));
                                     }
                                 }
+
                                 super.localCOMServices.getArchiveService()
                                         .update(comObject.getObjType(), comObject.getDomain(), tempDetailsList,
                                                 tempElementsList, null);
 
+                                final ElementList elementList = comObject.getObjects();
+
                                 for (UInteger duplicate : duplicatesList)
                                 {
                                     detailsList.set((int) duplicate.getValue(), null);
-                                    if (comObject.getObjects() != null)
+                                    if (elementList != null)
                                     {
-                                        comObject.getObjects().set((int) duplicate.getValue(), null);
+                                        elementList.set((int) duplicate.getValue(), null);
                                     }
                                 }
                                 detailsList.removeIf(Objects::isNull);
-                                if (comObject.getObjects() != null)
+                                if (elementList != null)
                                 {
-                                    comObject.getObjects().removeIf(Objects::isNull);
+                                    elementList.removeIf(Objects::isNull);
                                 }
 
                                 super.localCOMServices.getArchiveService()
                                         .store(false, comObject.getObjType(), comObject.getDomain(), detailsList,
-                                               comObject.getObjects(), null);
+                                               elementList, null);
                             }
-                            catch (MALException | MALInteractionException ex2)
+                            catch (Exception ex2)
                             {
-                                LOGGER.log(Level.SEVERE, "Error!", ex);
+                                LOGGER.log(Level.SEVERE, "Error!", ex2);
                                 success = false;
                             }
                         }
@@ -361,6 +373,11 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
                         success = false;
                     }
                 }
+                catch (final Exception ex)
+                {
+                    LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+                    success = false;
+                }
             }
             // Change the Archive URI to be the one of the local COM Archive service
             /*final IdentifierList providerDomain = archiveSync.getConnectionDetails().getDomain();
@@ -370,9 +387,9 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
             if (success)
             {
 
-                lastArchiveSync.setLastSync(timestamp.getValue());
+                lastArchiveSyncEntity.setLastSync(timestamp.getValue());
 
-                lastArchiveSyncHelper.persistLastArchiveSync(lastArchiveSync);
+                lastArchiveSyncHelper.persistLastArchiveSync(lastArchiveSyncEntity);
 
                 LOGGER.log(Level.INFO, "Synchronizing provider {0} completed", new Object[] { domain });
             }
@@ -463,6 +480,11 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
         {
             LOGGER.log(Level.SEVERE, null, ex);
         }
+    }
+
+    public int getArchiveSyncPeriod()
+    {
+        return archiveSyncPeriod;
     }
 
     private static class QueryInteractionImpl extends QueryInteraction
