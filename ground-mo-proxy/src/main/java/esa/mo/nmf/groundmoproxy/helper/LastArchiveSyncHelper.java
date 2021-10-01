@@ -20,11 +20,11 @@
  */
 package esa.mo.nmf.groundmoproxy.helper;
 
-import esa.mo.nmf.groundmoproxy.entities.LastArchiveSync;
-import java.util.concurrent.Semaphore;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import esa.mo.com.impl.archive.db.DatabaseBackend;
+import esa.mo.com.impl.archive.entities.LastArchiveSyncEntity;
+import java.util.Map;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 
 /**
  * Last Archive Sync helper class.
@@ -33,87 +33,87 @@ import javax.persistence.EntityManager;
  */
 public class LastArchiveSyncHelper
 {
-    private EntityManager em;
-
-    private Semaphore emAvailability;
+    final private DatabaseBackend dbBackend;
 
     /**
      * Default constructor.
      *
-     * @param em EntityManager
-     * @param emAvailability EntityManager availability Semaphore
+     * @param dbBackend DatabaseBackend
      */
-    public LastArchiveSyncHelper(EntityManager em, Semaphore emAvailability)
+    public LastArchiveSyncHelper(DatabaseBackend dbBackend)
     {
-        this.em = em;
-        this.emAvailability = emAvailability;
+        this.dbBackend = dbBackend;
     }
 
     /**
-     * Returns LastArchiveSync object for given parameters.
+     * Returns LastArchiveSyncEntity object for given parameters.
      *
      * @param domain domain
      * @param uri URI
-     * @return LastArchiveSync object
+     * @return LastArchiveSyncEntity object
      */
-    public synchronized LastArchiveSync findLastArchiveSync(String domain, String uri)
+    public synchronized LastArchiveSyncEntity findLastArchiveSync(String domain, String uri)
     {
-        LastArchiveSync result = null;
+        EntityManager em = dbBackend.getEmf().createEntityManager();
 
+        LastArchiveSyncEntity result = null;
         try
         {
-            emAvailability.acquire();
-
-            result = (LastArchiveSync) em.createNamedQuery("findLastArchiveSync").setParameter("domain", domain)
+            result = (LastArchiveSyncEntity) em.createNamedQuery("findLastArchiveSync").setParameter("domain", domain)
                     .setParameter("uri", uri).getSingleResult();
-
         }
-        catch (InterruptedException e)
+        catch (NoResultException e)
         {
-            Logger.getLogger(LastArchiveSyncHelper.class.getName()).log(Level.SEVERE, null, e);
             result = null;
         }
 
-        emAvailability.release();
+        em.close();
 
         return result;
     }
 
     /**
-     * Saves to Archive (file) given LastArchiveSync object.
+     * Saves to Archive (file) given LastArchiveSyncEntity object.
      *
-     * @param lastArchiveSync LastArchiveSync object
+     * @param lastArchiveSyncEntity LastArchiveSyncEntity object
      * @return true if success, false otherwise
      */
-    public synchronized boolean persistLastArchiveSync(LastArchiveSync lastArchiveSync)
+    public synchronized boolean persistLastArchiveSync(LastArchiveSyncEntity lastArchiveSyncEntity)
     {
-        boolean result = true;
+        EntityManager em = dbBackend.getEmf().createEntityManager();
 
-        try
-        {
-            emAvailability.acquire();
+        boolean result = true;
 
             try
             {
                 em.getTransaction().begin();
-                em.persist(lastArchiveSync);
+
+            if (null != lastArchiveSyncEntity.getId())
+            {
+                LastArchiveSyncEntity tmp = em.find(LastArchiveSyncEntity.class, lastArchiveSyncEntity.getId());
+
+                if (null != tmp)
+                {
+                    em.merge(lastArchiveSyncEntity);
+                }
+                else
+                {
+                    em.persist(lastArchiveSyncEntity);
+                }
+            }
+            else
+            {
+                em.persist(lastArchiveSyncEntity);
+            }
+
                 em.getTransaction().commit();
             }
             finally
             {
                 em.close();
             }
-        }
-        catch (InterruptedException e)
-        {
-            Logger.getLogger(LastArchiveSyncHelper.class.getName()).log(Level.SEVERE, null, e);
-            result = false;
-        }
-
-        emAvailability.release();
 
         return result;
     }
-
 }
 //------------------------------------------------------------------------------
