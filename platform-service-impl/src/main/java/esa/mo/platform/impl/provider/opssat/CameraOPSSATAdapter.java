@@ -199,7 +199,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     final double EV = Math.log(F / defaultExposure.getValue()) / Math.log(2);
 
     final CameraSettings tmpSettings = new CameraSettings(settings.getResolution(), PictureFormat.RAW,
-        defaultExposure, 1.0f, 1.0f, 1.0f);
+        defaultExposure, 8.0f, 8.0f, 8.0f);
     LOGGER.log(Level.INFO, "take sample picture");
     final Picture initialPicture = takePicture(tmpSettings);
 
@@ -253,10 +253,10 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       imageConfig.setG_red(settings.getGainRed().shortValue());
       imageConfig.setG_green(settings.getGainGreen().shortValue());
       imageConfig.setG_blue(settings.getGainBlue().shortValue());
-      LOGGER.log(Level.INFO, String.format("Setting config"));
+      LOGGER.log(Level.INFO, String.format("Setting config {}", settings.toString()));
       ims100_api.bst_ims100_set_img_config(imageConfig);
       // Each pixel of raw image is encoded as uint16
-      LOGGER.log(Level.INFO, String.format("Allocating native buffer"));
+      LOGGER.log(Level.FINE, String.format("Allocating native buffer"));
       final int dataN
           = (int) (settings.getResolution().getHeight().getValue() * settings.getResolution().getWidth().getValue());
       final ByteBuffer imageData = ByteBuffer.allocateDirect(
@@ -272,7 +272,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       this.closeCamera();
       byte[] rawData = new byte[imageData.capacity()];
 
-      LOGGER.log(Level.INFO, String.format("Copying from native buffer"));
+      LOGGER.log(Level.FINE, String.format("Copying from native buffer"));
       ((ByteBuffer) (((Buffer)imageData.duplicate()).clear())).get(rawData);
       final CameraSettings replySettings = new CameraSettings();
       replySettings.setResolution(settings.getResolution());
