@@ -31,6 +31,8 @@ import esa.opssat.nanomind.com.event.consumer.EventAdapter;
 import esa.opssat.nanomind.com.event.consumer.EventStub;
 import esa.opssat.nanomind.com.structures.ObjectDetailsList;
 import esa.opssat.nanomind.com.structures.ObjectType;
+import esa.opssat.nanomind.mc.MCHelper;
+import esa.opssat.nanomind.mc.aggregation.AggregationHelper;
 import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.logging.Level;
@@ -91,10 +93,9 @@ public class EventNanomindConsumerServiceImpl extends ConsumerServiceImpl
       COMHelper.init(MALContextFactory.getElementFactoryRegistry());
     }
 
-    try {
+    if (MALContextFactory.lookupArea(COMHelper.COM_AREA_NAME, COMHelper.COM_AREA_VERSION)
+                .getServiceByName(EventHelper.EVENT_SERVICE_NAME) == null) {
       EventHelper.init(MALContextFactory.getElementFactoryRegistry());
-    } catch (final MALException ex) {
-      // nothing to be done..
     }
 
     this.connectionDetails = connectionDetails;
