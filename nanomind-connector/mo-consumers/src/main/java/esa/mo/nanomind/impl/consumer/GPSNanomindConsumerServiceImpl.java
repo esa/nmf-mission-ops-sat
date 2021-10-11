@@ -23,6 +23,7 @@ package esa.mo.nanomind.impl.consumer;
 import esa.mo.helpertools.connections.ConnectionConsumer;
 import esa.mo.helpertools.misc.ConsumerServiceImpl;
 import esa.mo.helpertools.connections.SingleConnectionDetails;
+import esa.opssat.nanomind.opssat_pf.experimentwd.ExperimentWDHelper;
 import java.net.MalformedURLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -71,9 +72,9 @@ public class GPSNanomindConsumerServiceImpl extends ConsumerServiceImpl {
             OPSSAT_PFHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
 
-        try {
+        if (MALContextFactory.lookupArea(OPSSAT_PFHelper.OPSSAT_PF_AREA_NAME, OPSSAT_PFHelper.OPSSAT_PF_AREA_VERSION)
+                    .getServiceByName(GPSHelper.GPS_SERVICE_NAME) == null) {
             GPSHelper.init(MALContextFactory.getElementFactoryRegistry());
-        } catch (final MALException ex) {
         }
         
         connection = new ConnectionConsumer();

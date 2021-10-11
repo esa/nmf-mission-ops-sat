@@ -71,9 +71,9 @@ public class AggregationNanomindConsumerServiceImpl extends ConsumerServiceImpl 
             MCHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
 
-        try {
+        if (MALContextFactory.lookupArea(MCHelper.MC_AREA_NAME, MCHelper.MC_AREA_VERSION)
+                    .getServiceByName(AggregationHelper.AGGREGATION_SERVICE_NAME) == null) {
             AggregationHelper.init(MALContextFactory.getElementFactoryRegistry());
-        } catch (final MALException ex) {
         }
 
         connection = new ConnectionConsumer();
