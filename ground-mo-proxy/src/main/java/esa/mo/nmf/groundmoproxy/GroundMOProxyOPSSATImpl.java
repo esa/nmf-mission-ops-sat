@@ -96,7 +96,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
 
     private int archiveSyncPeriod = 10000;
 
-    private Timer archiveSyncTimer;
+    private final Timer archiveSyncTimer;
 
     private boolean syncInProgress = false;
 
