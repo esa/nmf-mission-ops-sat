@@ -42,7 +42,7 @@ import org.ccsds.moims.mo.mal.structures.URI;
 public class NanomindServicesConsumer {
     private static final Logger LOGGER = Logger.getLogger(NanomindServicesConsumer.class.getName());
 
-    private static NanomindServicesConsumer instance;
+    private static volatile NanomindServicesConsumer instance;
 
     private GPSNanomindConsumerServiceImpl gpsNanomindService;
     private PowerNanomindConsumerServiceImpl powerNanomindService;
