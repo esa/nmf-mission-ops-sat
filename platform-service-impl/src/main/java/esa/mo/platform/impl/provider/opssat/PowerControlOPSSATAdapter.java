@@ -199,12 +199,12 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
           long rawVal =  ((UShort)rawValue).getValue();
           for(STATUS_MASK mask : STATUS_MASK.values())
           {
-              boolean enabled = (rawVal & mask.value) > 0 ? true : false ;
+              boolean enabled = (rawVal & mask.value) > 0;
               boolean oldEnabled = deviceByType.get(mask.payload).getEnabled();
               if (oldEnabled && !enabled) { 
-                LOGGER.log(Level.INFO, "Device " + mask.toString() + " going offline");
+                LOGGER.log(Level.INFO, "Device " + mask + " going offline");
               } else if (!oldEnabled && enabled) {
-                LOGGER.log(Level.INFO, "Device " + mask.toString() + " coming online");
+                LOGGER.log(Level.INFO, "Device " + mask + " coming online");
               }
               deviceByType.get(mask.payload).setEnabled(enabled);
               if (mask.payload == OnBoardDevice.FineADCS) {

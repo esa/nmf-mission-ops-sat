@@ -52,7 +52,7 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
   private static final String TLE_LOCATION = File.separator + "etc" + File.separator + "tle";
   private String currentTleSentence = "";
   private long tleLastModified = -1;
-  private PowerControlAdapterInterface pcAdapter;
+  private final PowerControlAdapterInterface pcAdapter;
 
 
   public GPSOPSSATAdapter(PowerControlAdapterInterface pcAdapter) {

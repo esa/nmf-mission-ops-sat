@@ -71,17 +71,17 @@ public abstract class SPPElementIOStreamTestHelper {
 		Attribute.URI_SHORT_FORM
 	};
 
-	protected static enum TestContext {
+	protected enum TestContext {
 
 		PUBSUB_PUBLISH_UPDATE, PUBSUB_NOTIFY_UPDATE, PUBSUB, ERROR_NUMBER, ERROR_EXTRA_INFORMATION, STANDARD, NULL
 	}
 
-	protected static enum TestDeclaredType {
+	protected enum TestDeclaredType {
 
 		CONCRETE, ABSTRACT_ATTRIBUTE, ABSTRACT_ELEMENT
 	}
 
-	protected static enum TestActualType {
+	protected enum TestActualType {
 
 		NULL, JAVA_ATTRIBUTE, MAL_ATTRIBUTE, MAL_ELEMENT, MAL_ENCODED_ELEMENT, MAL_ENCODED_ELEMENT_LIST, UPDATE_LIST, IDENTIFIER_LIST, ERROR_NUMBER
 	}

@@ -76,7 +76,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   private bst_ims100_img_config_t imageConfig;
   private final PictureFormatList supportedFormats = new PictureFormatList();
   private final boolean unitAvailable;
-  private PowerControlAdapterInterface pcAdapter;
+  private final PowerControlAdapterInterface pcAdapter;
 
   private static final Logger LOGGER = Logger.getLogger(CameraOPSSATAdapter.class.getName());
 
