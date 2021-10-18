@@ -194,13 +194,13 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   public Picture takeAutoExposedPicture(final CameraSettings settings) throws IOException,
       MALException
   {
-    final Duration defaultExposure = new Duration(0.1);
+    final Duration defaultExposure = new Duration(0.05);
     final double F = 4;// f^2 value of ops-sat camera
     final double EV = Math.log(F / defaultExposure.getValue()) / Math.log(2);
 
     final CameraSettings tmpSettings = new CameraSettings(settings.getResolution(), PictureFormat.RAW,
         defaultExposure, 8.0f, 8.0f, 8.0f);
-    LOGGER.log(Level.INFO, "take sample picture");
+    LOGGER.log(Level.INFO, "Taking a sample picture");
     final Picture initialPicture = takePicture(tmpSettings);
 
     final BufferedImage image = OPSSATCameraDebayering.getDebayeredImage(
@@ -253,7 +253,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       imageConfig.setG_red(settings.getGainRed().shortValue());
       imageConfig.setG_green(settings.getGainGreen().shortValue());
       imageConfig.setG_blue(settings.getGainBlue().shortValue());
-      LOGGER.log(Level.INFO, String.format("Setting config {}", settings.toString()));
+      LOGGER.log(Level.INFO, String.format("Setting config: %s", settings.toString()));
       ims100_api.bst_ims100_set_img_config(imageConfig);
       // Each pixel of raw image is encoded as uint16
       LOGGER.log(Level.FINE, String.format("Allocating native buffer"));
