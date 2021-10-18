@@ -212,6 +212,12 @@
       <artifactId>parameters-provisioning</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>int.esa.nmf.sdk</groupId>
+      <artifactId>orekit-resources</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
