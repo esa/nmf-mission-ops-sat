@@ -64,9 +64,10 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   private static final String BLOCK_DEVICE_DEFAULT = "/dev/cam_sd";
   private static final String USE_WATCHDOG_ATTRIBUTE = "opssat.camera.usewatchdog";
   private static final String USE_WATCHDOG_DEFAULT = "true";
-  private static final Duration PREVIEW_EXPOSURE_TIME = new Duration(0.100); // 100ms
-  private static final Duration MINIMUM_PERIOD = new Duration(1); // 1 second for now...
-  private static final float PREVIEW_GAIN = 10.f;
+  private static final Duration PREVIEW_EXPOSURE_TIME = new Duration(0.002);
+  private static final float MAX_EXPOSURE_TIME_S = 1.f;
+  private static final Duration MINIMUM_PERIOD = new Duration(1);
+  private static final float PREVIEW_GAIN = 8.f;
   private String blockDevice;
   private String serialPort;
   private boolean useWatchdog;
@@ -194,12 +195,11 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   public Picture takeAutoExposedPicture(final CameraSettings settings) throws IOException,
       MALException
   {
-    final Duration defaultExposure = new Duration(0.05);
     final double F = 4;// f^2 value of ops-sat camera
-    final double EV = Math.log(F / defaultExposure.getValue()) / Math.log(2);
+    final double EV = Math.log(F / PREVIEW_EXPOSURE_TIME.getValue()) / Math.log(2);
 
     final CameraSettings tmpSettings = new CameraSettings(settings.getResolution(), PictureFormat.RAW,
-        defaultExposure, 8.0f, 8.0f, 8.0f);
+      PREVIEW_EXPOSURE_TIME, PREVIEW_GAIN, PREVIEW_GAIN, PREVIEW_GAIN);
     LOGGER.log(Level.INFO, "Taking a sample picture");
     final Picture initialPicture = takePicture(tmpSettings);
 
@@ -228,9 +228,13 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
         + (Math.log(luminanceSum) / Math.log(2))
         - (Math.log(0.5) / Math.log(2));
 
-    final double optimalExposureTime = F * Math.pow(2, -optimal_EV);
-    LOGGER.log(Level.INFO, "normalised Luminance = {0}", luminanceSum);
-    LOGGER.log(Level.INFO, "Exposure = {0}", optimalExposureTime);
+    double optimalExposureTime = F * Math.pow(2, -optimal_EV);
+    LOGGER.log(Level.INFO, "Normalised Luminance = {0}", luminanceSum);
+    LOGGER.log(Level.INFO, "Calculated Exposure = {0}", optimalExposureTime);
+    if (optimalExposureTime > MAX_EXPOSURE_TIME_S) {
+      LOGGER.log(Level.INFO, "Exposure limited to {0}", MAX_EXPOSURE_TIME_S);
+      optimalExposureTime = MAX_EXPOSURE_TIME_S;
+    }
 
     tmpSettings.setFormat(settings.getFormat());
     tmpSettings.setExposureTime(new Duration(optimalExposureTime));
