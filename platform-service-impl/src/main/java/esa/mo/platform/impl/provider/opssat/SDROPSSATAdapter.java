@@ -49,7 +49,7 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface
   private ByteBuffer sampleBuffer;
   private int bufferSize, bufferLength;
   private PowerControlAdapterInterface pcAdapter;
-  private static final int SDR_WATCH_PERIOD_MS = 30 * 1000;
+  private static final int SDR_WATCH_PERIOD_MS = 10 * 1000;
 
   private final boolean apiLoaded;
   private boolean configured;
