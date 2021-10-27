@@ -39,7 +39,7 @@ public class OpticalRxOPSSATAdapter implements OpticalDataReceiverAdapterInterfa
   private boolean unitInitialized = false;
 
   private PowerControlAdapterInterface pcAdapter;
-  private static final int OPTRX_WATCH_PERIOD_MS = 30 * 1000;
+  private static final int OPTRX_WATCH_PERIOD_MS = 10 * 1000;
   private Thread watcherThread;
 
   public OpticalRxOPSSATAdapter(PowerControlAdapterInterface pcAdapter)

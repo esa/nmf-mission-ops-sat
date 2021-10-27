@@ -47,7 +47,7 @@ import org.ccsds.moims.mo.platform.powercontrol.structures.DeviceType;
 public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
 {
 
-  private static final long ADCS_ACTIVATION_DELAY_NS = 60 * 1000 * 1000 * 1000;
+  private static final long ADCS_ACTIVATION_DELAY_NS = 60L * 1000 * 1000 * 1000;
   private static final String PDU_CHANNEL_PARAM_NAME = "PDU1952";
 
   enum STATUS_MASK {

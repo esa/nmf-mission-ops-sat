@@ -271,6 +271,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       final Time timestamp = HelperTime.getTimestampMillis();
       LOGGER.log(Level.INFO, String.format("Acquiring image"));
       if (ims100_api.bst_ims100_get_img_n(image, 1, (short) 0) != bst_ret_t.BST_RETURN_SUCCESS) {
+        LOGGER.log(Level.WARNING, String.format("bst_ims100_get_img_n failed"));
         throw new IOException("bst_ims100_get_img_n failed");
       }
       this.closeCamera();
