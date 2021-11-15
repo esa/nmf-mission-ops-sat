@@ -65,7 +65,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   private static final String USE_WATCHDOG_ATTRIBUTE = "opssat.camera.usewatchdog";
   private static final String USE_WATCHDOG_DEFAULT = "true";
   private static final Duration PREVIEW_EXPOSURE_TIME = new Duration(0.002);
-  private static final float MAX_EXPOSURE_TIME_S = 1.f;
+  private static final float MAX_EXPOSURE_TIME_S = 0.8f;
   private static final Duration MINIMUM_PERIOD = new Duration(1);
   private static final float PREVIEW_GAIN = 8.f;
   private String blockDevice;
