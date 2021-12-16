@@ -104,7 +104,7 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
   }
 
   @Override
-  public TwoLineElementSet getTLE()
+  public TLE getTLE()
   {
     String content = "";
     try {
@@ -129,23 +129,12 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
         break;
       default:
         LOGGER.log(Level.SEVERE,
-            "TLE is empty or wrongly formatet. TLE:{0}{1}", new Object[]{System.lineSeparator(),
+            "TLE is empty or wrongly formated. TLE:{0}{1}", new Object[]{System.lineSeparator(),
               Arrays.toString(lines)});
         return null;
     }
 
-    TLE tle = new TLE(line1, line2);
-
-    return new TwoLineElementSet(tle.getSatelliteNumber(), "" + tle.getClassification(),
-        tle.getLaunchYear(), tle.getLaunchNumber(), tle.getLaunchPiece(),
-        tle.getDate().getComponents(0).getDate().getYear(),
-        tle.getDate().getComponents(0).getDate().getDayOfYear(),
-        tle.getDate().getComponents(0).getTime().getSecondsInUTCDay(),
-        tle.getMeanMotionFirstDerivative(), tle.getMeanMotionSecondDerivative(),
-        tle.getBStar(), tle.getElementNumber(), tle.getI(), tle.getRaan(), tle.getE(),
-        tle.getPerigeeArgument(), tle.getMeanAnomaly(), tle.getMeanMotion(),
-        tle.getRevolutionNumberAtEpoch());
-
+    return new TLE(line1, line2);
   }
 
   private class GPSHandler extends GPSAdapter
