@@ -107,6 +107,13 @@
       <scope>system</scope>
     </dependency>
     <dependency>
+      <groupId>at.tugraz.ihf.opssat</groupId>
+      <artifactId>sepp_api_core</artifactId>
+      <version>0.1</version>
+      <systemPath>${basedir}/src/main/resources/sepp_api_core.jar</systemPath>
+      <scope>system</scope>
+    </dependency>
+    <dependency>
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
       <version>3.2.2</version>

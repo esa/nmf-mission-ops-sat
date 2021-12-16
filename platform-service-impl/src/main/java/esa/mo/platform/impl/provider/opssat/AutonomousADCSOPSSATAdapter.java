@@ -32,6 +32,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import at.tugraz.ihf.opssat.iadcs.*;
+import at.tugraz.ihf.opssat.sepp_api_core.*;
 import esa.mo.platform.impl.provider.gen.PowerControlAdapterInterface;
 import esa.mo.platform.impl.provider.opssat.iadcs.NadirPointingConfig;
 import esa.mo.platform.impl.provider.opssat.iadcs.SunPointingConfig;
@@ -79,6 +80,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     LOGGER.log(Level.INFO, "Initialisation");
     try {
       System.loadLibrary("iadcs_api_jni");
+      System.loadLibrary("sepp_api_core_jni");
     } catch (final Exception ex) {
       LOGGER.log(Level.SEVERE, "iADCS library could not be loaded!", ex);
       apiLoaded = false;
@@ -97,6 +99,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   {
     synchronized(this) {
       try {
+        SEPP_API_Debug.clearAllLevel();
         adcsApi = new SEPP_IADCS_API();
       } catch (final Exception ex) {
         LOGGER.log(Level.SEVERE, "iADCS API could not get initialized!", ex);
