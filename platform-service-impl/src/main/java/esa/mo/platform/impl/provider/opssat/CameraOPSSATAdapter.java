@@ -105,6 +105,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     } catch (final IOException ex) {
       LOGGER.log(Level.SEVERE,
           "BST Camera could not be initialized for HK dump! It is possibly offline...", ex);
+      this.closeCamera();
       return;
     }
     try {
