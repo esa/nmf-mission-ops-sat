@@ -62,7 +62,7 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
 
   @Override
   public synchronized String getNMEASentence(String identifier) throws IOException {
-    LOGGER.log(Level.FINE, "run getNMEASentence with \"{0}\"", identifier);
+    LOGGER.log(Level.FINE, "run getNMEASentence with \"{0}\"", identifier.trim());
     GPSHandler gpsHandler = new GPSHandler();
     try {
       obcServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData(new Blob(identifier.getBytes()),
@@ -149,6 +149,7 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
     {
       try {
         response = new String(data.getValue());
+        LOGGER.log(Level.FINE, "getNMEASentence answered with \"{0}\"", response);
       } catch (MALException ex) {
         Logger.getLogger(GPSHandler.class.getName()).log(Level.SEVERE, null, ex);
       }
