@@ -54,6 +54,7 @@ import org.ccsds.moims.mo.common.directory.structures.ProviderSummaryList;
 import org.ccsds.moims.mo.common.directory.structures.ServiceFilter;
 import org.ccsds.moims.mo.common.structures.ServiceKey;
 import org.ccsds.moims.mo.mal.MALException;
+import org.ccsds.moims.mo.mal.MALHelper;
 import org.ccsds.moims.mo.mal.MALInteractionException;
 import org.ccsds.moims.mo.mal.MALStandardError;
 import org.ccsds.moims.mo.mal.structures.ElementList;
@@ -255,8 +256,21 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
             LastArchiveSyncEntity lastArchiveSyncEntity =
                     lastArchiveSyncHelper.findLastArchiveSync(domain, providerUri);
 
-            GetTimeResponse lastSyncTime = archiveSync.getArchiveSyncStub().getTime();
+            GetTimeResponse lastSyncTime = null;
 
+            try
+            {
+                lastSyncTime = archiveSync.getArchiveSyncStub().getTime();
+            }
+            catch (final MALInteractionException ex)
+            {
+                if (MALHelper.DELIVERY_TIMEDOUT_ERROR_NUMBER.equals(ex.getStandardError().getErrorNumber()))
+                {
+                    LOGGER.log(Level.WARNING, "Timeout when trying to synchronize: {0}. Skipping this provider.",
+                        new Object[] {domain});
+                    continue;
+                }
+            }
             if (null == lastSyncTime)
             {
                 LOGGER.log(Level.WARNING,
