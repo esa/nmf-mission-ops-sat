@@ -334,18 +334,18 @@
             <configuration>
               <target>
                 <echo>${basedir}</echo>
-                <copy todir="${basedir}/target/nmf-package">
+                <copy todir="${project.build.directory}/nmf-package">
                   <fileset dir="${basedir}/nmf-package"/>
                   <filterset>
                     <filter token="VERSION" value="${git.commit.id.describe}"/>
                   </filterset>
                 </copy>
-                <chmod file="${basedir}/target/nmf-package/control/postinst" perm="+x"/>
-                <chmod file="${basedir}/target/nmf-package/control/prerm" perm="+x"/>
-                <copy todir="${basedir}/target/nmf-package/data">
-                  <fileset dir="${basedir}/target/nmf-ops-sat-${project.version}"/>
+                <chmod file="${project.build.directory}/nmf-package/control/postinst" perm="+x"/>
+                <chmod file="${project.build.directory}/nmf-package/control/prerm" perm="+x"/>
+                <copy todir="${project.build.directory}/nmf-package/data">
+                  <fileset dir="${project.build.directory}/nmf-ops-sat-${project.version}"/>
                 </copy>
-                <exec dir="${basedir}/target/nmf-package/control" executable="tar">
+                <exec dir="${project.build.directory}/nmf-package/control" executable="tar">
                   <arg value="--use-compress-program=gzip -9 -n"/>
                   <arg value="--numeric-owner"/>
                   <arg value="--group=0"/>
@@ -356,7 +356,7 @@
                   <arg value="../control.tar.gz"/>
                   <arg value="./"/>
                 </exec>
-                <exec dir="${basedir}/target/nmf-package/data" executable="tar">
+                <exec dir="${project.build.directory}/nmf-package/data" executable="tar">
                   <arg value="--use-compress-program=gzip -9 -n"/>
                   <arg value="--numeric-owner"/>
                   <arg value="--group=0"/>
@@ -367,7 +367,7 @@
                   <arg value="../data.tar.gz"/>
                   <arg value="./"/>
                 </exec>
-                <exec dir="${basedir}/target/nmf-package/" executable="tar">
+                <exec dir="${project.build.directory}/nmf-package/" executable="tar">
                   <arg value="--numeric-owner"/>
                   <arg value="--group=0"/>
                   <arg value="--owner=0"/>
