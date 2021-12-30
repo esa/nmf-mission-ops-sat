@@ -187,11 +187,6 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
                 // Cycle through the NMF Apps and sync them!
                 for (int i = 0; i < archiveSyncsCD.size(); i++)
                 {
-                    if (archiveSyncsCD.get(i).getProviderName().getValue().contains(Const.NANOSAT_MO_SUPERVISOR_NAME))
-                    {
-                        LOGGER.fine("Skipping Supervisor in Archive Sync");
-                        continue;
-                    }
                     final ProviderSummaryList psl = new ProviderSummaryList();
                     psl.add(archiveSyncsCD.get(i));
 
