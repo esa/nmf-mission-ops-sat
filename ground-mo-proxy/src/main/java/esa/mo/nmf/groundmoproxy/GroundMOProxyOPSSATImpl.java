@@ -389,9 +389,9 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
                 }
             }
             // Change the Archive URI to be the one of the local COM Archive service
-            /*final IdentifierList providerDomain = archiveSync.getConnectionDetails().getDomain();
+            final IdentifierList providerDomain = archiveSync.getConnectionDetails().getDomain();
             final URI localCOMArchiveURI = super.getCOMArchiveServiceURI();
-            super.localDirectoryService.rerouteArchiveServiceURI(providerDomain, localCOMArchiveURI);*/
+            super.localDirectoryService.rerouteArchiveServiceURI(providerDomain, localCOMArchiveURI);
 
             if (success)
             {
