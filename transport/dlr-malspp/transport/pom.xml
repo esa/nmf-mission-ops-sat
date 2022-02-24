@@ -22,12 +22,6 @@
     <url>http://www.dlr.de</url>
 
     <dependencies>
-        <dependency>
-            <groupId>int.esa.ccsds.mo</groupId>
-            <artifactId>API_MAL</artifactId>
-            <version>1.2</version>
-        </dependency>
-
 <!--
         <dependency>
             <groupId>fr.cnes.ccsds.mo</groupId>

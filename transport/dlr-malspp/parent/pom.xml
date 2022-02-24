@@ -46,7 +46,7 @@
         <dependency>
             <groupId>int.esa.ccsds.mo</groupId>
             <artifactId>API_MAL</artifactId>
-            <version>1.2</version>
+            <version>8.0</version>
         </dependency>
     </dependencies>
 
