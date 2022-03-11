@@ -517,7 +517,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   public void setDesiredAttitude(final AttitudeMode attitude) throws IOException,
       UnsupportedOperationException
   {
-    LOGGER.log(Level.FINE, "Setting desired attitude: {0}", attitude);
+    LOGGER.log(Level.INFO, "Setting desired attitude: {0}: {1}", attitude.getClass().getName(), attitude);
     synchronized(this) {
       if (attitude instanceof AttitudeModeBDot) {
         final AttitudeModeBDot bDot = (AttitudeModeBDot) attitude;

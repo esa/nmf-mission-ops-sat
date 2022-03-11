@@ -202,7 +202,7 @@ public abstract class BasePointingConfig {
 
     slidingControllerConfigEnable = strToBool(map.get("sliding_control_config_en"), true);
     scConfig.setK_1(strToFloat(map.get("sliding_controller_k1"), DEFAULT_SLIDING_CONTROLLER_GAIN_K1));
-    scConfig.setK_1(strToFloat(map.get("sliding_controller_k2"), DEFAULT_SLIDING_CONTROLLER_GAIN_K2));
+    scConfig.setK_2(strToFloat(map.get("sliding_controller_k2"), DEFAULT_SLIDING_CONTROLLER_GAIN_K2));
   }
   
   public SEPP_IADCS_API_TARGET_POINTING_OPERATION_PARAMETERS getTargetPointingOperationParams() {
