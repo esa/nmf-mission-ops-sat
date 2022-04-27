@@ -20,20 +20,22 @@
  */
 package esa.mo.nmf.groundmoproxy;
 
-import esa.mo.com.impl.archive.entities.LastArchiveSyncEntity;
 import esa.mo.com.impl.consumer.ArchiveSyncConsumerServiceImpl;
+import esa.mo.com.impl.provider.ArchivePersistenceObject;
+import esa.mo.com.impl.provider.ArchiveProviderServiceImpl;
 import esa.mo.com.impl.util.COMObjectStructure;
+import esa.mo.com.impl.util.HelperArchive;
 import esa.mo.helpertools.connections.SingleConnectionDetails;
 import esa.mo.helpertools.helpers.HelperMisc;
-import esa.mo.helpertools.misc.Const;
+import esa.mo.helpertools.helpers.HelperTime;
 import esa.mo.mc.impl.consumer.ActionConsumerServiceImpl;
 import esa.mo.mc.impl.proxy.ActionProxyServiceImpl;
-import esa.mo.nmf.groundmoproxy.helper.LastArchiveSyncHelper;
 import esa.mo.sm.impl.provider.AppsLauncherManager;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
@@ -46,8 +48,11 @@ import org.ccsds.moims.mo.com.COMService;
 import org.ccsds.moims.mo.com.archive.provider.QueryInteraction;
 import org.ccsds.moims.mo.com.archive.structures.ArchiveDetails;
 import org.ccsds.moims.mo.com.archive.structures.ArchiveDetailsList;
+import org.ccsds.moims.mo.com.archive.structures.ArchiveQuery;
 import org.ccsds.moims.mo.com.archivesync.ArchiveSyncHelper;
 import org.ccsds.moims.mo.com.archivesync.body.GetTimeResponse;
+import org.ccsds.moims.mo.com.archivesync.structures.LastSync;
+import org.ccsds.moims.mo.com.archivesync.structures.LastSyncList;
 import org.ccsds.moims.mo.com.structures.ObjectType;
 import org.ccsds.moims.mo.com.structures.ObjectTypeList;
 import org.ccsds.moims.mo.common.directory.structures.ProviderSummaryList;
@@ -85,8 +90,6 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
     private final ProtocolBridgeSPP protocolBridgeSPP = new ProtocolBridgeSPP();
 
     private final HashMap<IdentifierList, URI> actionURIs = new HashMap<>();
-
-    private final LastArchiveSyncHelper lastArchiveSyncHelper;
 
     private final Object syncObject = new Object();
 
@@ -134,9 +137,6 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
         {
             LOGGER.log(Level.SEVERE, "The SPP Protocol Bridge could not be initialized!", ex);
         }
-
-        lastArchiveSyncHelper = new LastArchiveSyncHelper(
-                super.localCOMServices.getArchiveService().getArchiveManager().getDbBackend());
 
         archiveSyncPeriod = Integer.parseInt(System.getProperty(ARCHIVE_SYNC_PERIOD, "10")) * 1000;
 
@@ -245,11 +245,15 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
         {
             final ArchiveSyncConsumerServiceImpl archiveSync = archiveSyncs.get(i);
 
-            String domain = HelperMisc.domain2domainId(archiveSync.getConnectionDetails().getDomain());
-            String providerUri = archiveSync.getConnectionDetails().getProviderURI().getValue();
+            IdentifierList domain = archiveSync.getConnectionDetails().getDomain();
+            URI providerUri = archiveSync.getConnectionDetails().getProviderURI();
 
-            LastArchiveSyncEntity lastArchiveSyncEntity =
-                    lastArchiveSyncHelper.findLastArchiveSync(domain, providerUri);
+            ArchiveProviderServiceImpl archive = localCOMServices.getArchiveService();
+
+            ArchiveQuery query = new ArchiveQuery(domain, null, providerUri, null, null, null, null, null, null);
+            List<ArchivePersistenceObject> result =  archive.getArchiveManager().query(ArchiveSyncHelper.LASTSYNC_OBJECT_TYPE, query, null);
+            ArchivePersistenceObject lastSyncPersistenceObject = result.isEmpty() ? null : result.get(0);
+            LastSync lastArchiveSync = (LastSync) (lastSyncPersistenceObject == null ? null : lastSyncPersistenceObject.getObject());
 
             GetTimeResponse lastSyncTime = null;
 
@@ -277,21 +281,23 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
             FineTime from = null;
             FineTime until = null;
 
-            if (null == lastArchiveSyncEntity)
+            if (null == lastArchiveSync)
             {
-                lastArchiveSyncEntity = new LastArchiveSyncEntity(providerUri, domain);
+                lastArchiveSync = new LastSync();
+                lastArchiveSync.setDomainId(HelperMisc.domain2domainId(domain));
+                lastArchiveSync.setProviderURI(providerUri.getValue());
             }
 
-            if (lastArchiveSyncEntity.getLastSync() <= lastSyncTime.getBodyElement0().getValue())
+            if (lastArchiveSync.getLastSyncTime().getValue() <= lastSyncTime.getBodyElement0().getValue())
             {
-                from = new FineTime(lastArchiveSyncEntity.getLastSync() + 1);
+                from = new FineTime(lastArchiveSync.getLastSyncTime().getValue() + 1);
                 until = lastSyncTime.getBodyElement0();
             }
             else
             {
                 LOGGER.log(Level.WARNING,
                            "Archive sync completed for domain: {0}! Sync not performed! Last sync time {1} is greater than provider current time {2}!",
-                           new Object[] { domain, lastArchiveSyncEntity.getLastSync(),
+                           new Object[] { domain, lastArchiveSync.getLastSyncTime().getValue(),
                                           lastSyncTime.getBodyElement0().getValue() });
                 continue;
 
@@ -395,11 +401,21 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
 
             if (success)
             {
+                lastArchiveSync.setLastSyncTime(HelperTime.fineTimeToTime(timestamp));
 
-                lastArchiveSyncEntity.setLastSync(timestamp.getValue());
-
-                lastArchiveSyncHelper.persistLastArchiveSync(lastArchiveSyncEntity);
-
+                LastSyncList bodies = new LastSyncList();
+                bodies.add(lastArchiveSync);
+                if(lastSyncPersistenceObject == null)
+                {
+                    ArchiveDetailsList details = HelperArchive.generateArchiveDetailsList(null, null, providerUri);
+                    archive.getArchiveManager().insertEntriesFast(ArchiveSyncHelper.LASTSYNC_OBJECT_TYPE, domain, details, bodies, null);
+                }
+                else
+                {
+                    ArchiveDetailsList details = new ArchiveDetailsList();
+                    details.add(lastSyncPersistenceObject.getArchiveDetails());
+                    archive.getArchiveManager().updateEntries(ArchiveSyncHelper.LASTSYNC_OBJECT_TYPE, domain, details, bodies, null);
+                }
                 LOGGER.log(Level.INFO, "Synchronizing provider {0} completed", new Object[] { domain });
             }
             else
