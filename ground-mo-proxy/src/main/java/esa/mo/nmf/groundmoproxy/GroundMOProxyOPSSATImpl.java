@@ -66,6 +66,7 @@ import org.ccsds.moims.mo.mal.structures.ElementList;
 import org.ccsds.moims.mo.mal.structures.FineTime;
 import org.ccsds.moims.mo.mal.structures.Identifier;
 import org.ccsds.moims.mo.mal.structures.IdentifierList;
+import org.ccsds.moims.mo.mal.structures.Time;
 import org.ccsds.moims.mo.mal.structures.UInteger;
 import org.ccsds.moims.mo.mal.structures.UIntegerList;
 import org.ccsds.moims.mo.mal.structures.UOctet;
@@ -233,6 +234,13 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
         }
     }
 
+    private class ArchiveObjects
+    {
+        public ArchiveDetailsList archiveDetailsList = new ArchiveDetailsList();
+        public ElementList elementList;
+        public IdentifierList archiveDomain;
+    }
+
     public final void syncRemoteArchiveWithLocalArchive(final ArrayList<ArchiveSyncConsumerServiceImpl> archiveSyncs)
             throws MALInteractionException, MALException
     {
@@ -250,7 +258,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
 
             ArchiveProviderServiceImpl archive = localCOMServices.getArchiveService();
 
-            ArchiveQuery query = new ArchiveQuery(domain, null, providerUri, null, null, null, null, null, null);
+            ArchiveQuery query = new ArchiveQuery(domain, null, providerUri, 0L, null, null, null, null, null);
             List<ArchivePersistenceObject> result =  archive.getArchiveManager().query(ArchiveSyncHelper.LASTSYNC_OBJECT_TYPE, query, null);
             ArchivePersistenceObject lastSyncPersistenceObject = result.isEmpty() ? null : result.get(0);
             LastSync lastArchiveSync = (LastSync) (lastSyncPersistenceObject == null ? null : lastSyncPersistenceObject.getObject());
@@ -286,11 +294,12 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
                 lastArchiveSync = new LastSync();
                 lastArchiveSync.setDomainId(HelperMisc.domain2domainId(domain));
                 lastArchiveSync.setProviderURI(providerUri.getValue());
+                lastArchiveSync.setLastSyncTime(new Time(0));
             }
 
-            if (lastArchiveSync.getLastSyncTime().getValue() <= lastSyncTime.getBodyElement0().getValue())
+            if (HelperTime.timeToFineTime(lastArchiveSync.getLastSyncTime()).getValue() <= lastSyncTime.getBodyElement0().getValue())
             {
-                from = new FineTime(lastArchiveSync.getLastSyncTime().getValue() + 1);
+                from = HelperTime.timeToFineTime(new Time(lastArchiveSync.getLastSyncTime().getValue() + 1));
                 until = lastSyncTime.getBodyElement0();
             }
             else
@@ -307,23 +316,43 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
                        new Object[] { domain, from, until });
             // This value should be obtained from the getCurrent timestamp!
             final ArrayList<COMObjectStructure> comObjects = archiveSync.retrieveCOMObjects(from, until, objTypes);
-
             lastSyncTime = archiveSync.getArchiveSyncStub().getTime();
 
             FineTime timestamp = lastSyncTime.getBodyElement1();
 
             boolean success = true;
 
-            for (final COMObjectStructure comObject : comObjects)
-            {
-                final ArchiveDetailsList detailsList = new ArchiveDetailsList();
-                detailsList.add(comObject.getArchiveDetails());
+            Map<ObjectType, ArchiveObjects> archiveObjectsMap = new HashMap<>();
 
+            for (COMObjectStructure object : comObjects)
+            {
+                if (archiveObjectsMap.containsKey(object.getObjType()))
+                {
+                    ArchiveObjects archiveObjects = archiveObjectsMap.get(object.getObjType());
+                    archiveObjects.archiveDetailsList.add(object.getArchiveDetails());
+                    if (archiveObjects.elementList != null)
+                    {
+                        archiveObjects.elementList.add(object.getObject());
+                    }
+                }
+                else
+                {
+                    ArchiveObjects archiveObjects = new ArchiveObjects();
+                    archiveObjects.archiveDetailsList.add(object.getArchiveDetails());
+                    archiveObjects.elementList = object.getObjects();
+                    archiveObjects.archiveDomain = object.getDomain();
+                    archiveObjectsMap.put(object.getObjType(), archiveObjects);
+                }
+            }
+
+            for (Map.Entry<ObjectType, ArchiveObjects> entry : archiveObjectsMap.entrySet())
+            {
+                ArchiveObjects archiveObjects = entry.getValue();
                 try
                 {
                     super.localCOMServices.getArchiveService()
-                            .store(false, comObject.getObjType(), comObject.getDomain(), detailsList,
-                                   comObject.getObjects(), null);
+                            .store(false, entry.getKey(), archiveObjects.archiveDomain, archiveObjects.archiveDetailsList,
+                                    archiveObjects.elementList, null);
                 }
                 catch (final MALInteractionException ex)
                 {
@@ -338,42 +367,40 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
                                 ElementList tempElementsList = null;
                                 for (UInteger duplicate : duplicatesList)
                                 {
-                                    tempDetailsList.add(detailsList.get((int) duplicate.getValue()));
+                                    tempDetailsList.add(archiveObjects.archiveDetailsList.get((int) duplicate.getValue()));
 
-                                    if (comObject.getObjects() != null)
+                                    if (archiveObjects.elementList != null)
                                     {
                                         if (tempElementsList == null)
                                         {
                                             tempElementsList = HelperMisc.element2elementList(
-                                                    comObject.getObjects().get((int) duplicate.getValue()));
+                                                    archiveObjects.elementList.get((int) duplicate.getValue()));
                                         }
-                                        tempElementsList.add(comObject.getObjects().get((int) duplicate.getValue()));
+                                        tempElementsList.add(archiveObjects.elementList.get((int) duplicate.getValue()));
                                     }
                                 }
 
                                 super.localCOMServices.getArchiveService()
-                                        .update(comObject.getObjType(), comObject.getDomain(), tempDetailsList,
+                                        .update(entry.getKey(), archiveObjects.archiveDomain, tempDetailsList,
                                                 tempElementsList, null);
-
-                                final ElementList elementList = comObject.getObjects();
 
                                 for (UInteger duplicate : duplicatesList)
                                 {
-                                    detailsList.set((int) duplicate.getValue(), null);
-                                    if (elementList != null)
+                                    archiveObjects.archiveDetailsList.set((int) duplicate.getValue(), null);
+                                    if (archiveObjects.elementList != null)
                                     {
-                                        elementList.set((int) duplicate.getValue(), null);
+                                        archiveObjects.elementList.set((int) duplicate.getValue(), null);
                                     }
                                 }
-                                detailsList.removeIf(Objects::isNull);
-                                if (elementList != null)
+                                archiveObjects.archiveDetailsList.removeIf(Objects::isNull);
+                                if (archiveObjects.elementList != null)
                                 {
-                                    elementList.removeIf(Objects::isNull);
+                                    archiveObjects.elementList.removeIf(Objects::isNull);
                                 }
 
                                 super.localCOMServices.getArchiveService()
-                                        .store(false, comObject.getObjType(), comObject.getDomain(), detailsList,
-                                               elementList, null);
+                                        .store(false, entry.getKey(), archiveObjects.archiveDomain, archiveObjects.archiveDetailsList,
+                                                archiveObjects.elementList, null);
                             }
                             catch (Exception ex2)
                             {
