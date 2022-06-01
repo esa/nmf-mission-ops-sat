@@ -43,6 +43,8 @@ import esa.mo.platform.impl.provider.opssat.iadcs.IADCSTools;
 import esa.mo.platform.impl.provider.gen.AutonomousADCSAdapterInterface;
 
 import org.ccsds.moims.mo.platform.autonomousadcs.structures.*;
+import org.ccsds.moims.mo.platform.powercontrol.structures.Device;
+import org.ccsds.moims.mo.platform.powercontrol.structures.DeviceList;
 import org.ccsds.moims.mo.platform.powercontrol.structures.DeviceType;
 import org.ccsds.moims.mo.platform.structures.VectorF3D;
 import org.hipparchus.geometry.euclidean.threed.Rotation;
@@ -60,14 +62,18 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
 
   private static final float MAX_REACTION_WHEEL_SPEED = 1047.197551f;
   private static final float MAX_REACTION_WHEEL_TORQUE = 0.0001f;
-  private static final int IADCS_WATCH_PERIOD_MS = 10 * 1000;
-  private static final int IADCS_INIT_BACKOFF_MS = 10 * 1000;
-  private static final int INIT_FAILED_STOP_THRESHOLD = 3;
+  private int iadcsWatchPeriodMS = 10 * 1000;
+  private int iadcsInitBackoffMS = 10 * 1000;
+  private int initFailedStopThreshold = 3;
+  private int powercycleFailedStopThreshold = 2;
+  private int powerdownWaitTimeMS = 20 * 1000;
+  private int powerupWaitTimeMS = 90 * 1000;
 
   private AttitudeMode activeAttitudeMode;
   private SEPP_IADCS_API adcsApi;
   private final boolean apiLoaded;
   private int initFailedCount = 0;
+  private int powercycleCount = 0;
   private boolean unitInitialized = false;
 
   private PowerControlAdapterInterface pcAdapter;
@@ -99,6 +105,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
   private boolean initIADCS()
   {
     synchronized(this) {
+      loadProperties();
       try {
         SEPP_API_Debug.clearAllLevel();
         adcsApi = new SEPP_IADCS_API();
@@ -134,6 +141,76 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     }
   }
 
+  public void loadProperties()
+  {
+    String iadcsWatchPeriodMSProp = "opssat.adcs.iadcsWatchPeriodMS";
+    iadcsWatchPeriodMS = getIntegerProperty(iadcsWatchPeriodMSProp, iadcsWatchPeriodMS);
+
+    String iadcsInitBackoffMSProp = "opssat.adcs.iadcsInitBackoffMS";
+    iadcsInitBackoffMS = getIntegerProperty(iadcsInitBackoffMSProp, iadcsInitBackoffMS);
+
+    String initFailedStopThresholdProp = "opssat.adcs.initFailedStopThreshold";
+    initFailedStopThreshold = getIntegerProperty(initFailedStopThresholdProp, initFailedStopThreshold);
+
+    String powercycleFailedStopThresholdProp = "opssat.adcs.powercycleFailedStopThreshold";
+    powercycleFailedStopThreshold = getIntegerProperty(powercycleFailedStopThresholdProp, powercycleFailedStopThreshold);
+
+    String powerdownWaitTimeMSProp = "opssat.adcs.powerdownWaitTimeMS";
+    powerdownWaitTimeMS = getIntegerProperty(powerdownWaitTimeMSProp, powerdownWaitTimeMS);
+
+    String powerupWaitTimeMSProp = "opssat.adcs.powerupWaitTimeMS";
+    powerupWaitTimeMS = getIntegerProperty(powerupWaitTimeMSProp, powerupWaitTimeMS);
+  }
+
+   /**
+   * Tries to get a system property and parse it as an Integer.
+   * 
+   * @param propertyKey The property key
+   * @param defaultValue Default value to return if the property is not found
+   * @return the parsed system property
+   */
+  public static int getIntegerProperty(String propertyKey, int defaultValue) {
+    String propertyValue = System.getProperty(propertyKey);
+    if (propertyValue != null) {
+      try {
+        return Integer.parseInt(propertyValue);
+      } catch (NumberFormatException e) {
+        LOGGER.log(Level.WARNING,
+            String.format("Error parsing properties %s to Integer, defaulting to %d", propertyKey,
+                defaultValue),
+            e);
+        return defaultValue;
+      }
+    }
+    LOGGER.log(Level.WARNING,
+        String.format("Properties %s not found, defaulting to %d", propertyKey, defaultValue));
+    return defaultValue;
+  }
+
+  public void iADCSPowercycle()
+  {
+    DeviceList list = new DeviceList();
+    Device d = new Device(false, null, null, DeviceType.ADCS);
+    list.add(d);
+    try {  
+      pcAdapter.enableDevices(list);
+      Thread.sleep(powerdownWaitTimeMS);
+    } catch (IOException | InterruptedException ex){
+      LOGGER.log(Level.SEVERE, ex.getMessage());
+    } 
+    
+    list.clear();
+    d = new Device(true, null, null, DeviceType.ADCS);
+    list.add(d);
+    try {  
+      pcAdapter.enableDevices(list);
+      Thread.sleep(powerupWaitTimeMS);
+    } catch (IOException | InterruptedException ex){
+      LOGGER.log(Level.SEVERE, ex.getMessage());
+    } 
+    list.clear();
+  }
+
   /**
    * Monitors the iADCS offline->online transitions and configures it into default mode
    */
@@ -148,9 +225,9 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     {
       try {
         while (true) {
-          Thread.sleep(IADCS_WATCH_PERIOD_MS);
+          Thread.sleep(iadcsWatchPeriodMS);
           boolean isAvailable = isUnitAvailableInternal();
-          if (isAvailable && !unitInitialized && initFailedCount < INIT_FAILED_STOP_THRESHOLD) {
+          if (isAvailable && !unitInitialized && initFailedCount < initFailedStopThreshold) {
             LOGGER.log(Level.INFO, "iADCS came online - attempting initialisation");
             if (initIADCS()) {
               LOGGER.log(Level.INFO, "iADCS initialised - marking available");
@@ -158,12 +235,18 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
             } else {
               LOGGER.log(Level.WARNING, "iADCS init failed");
               initFailedCount++;
-              if (initFailedCount >= INIT_FAILED_STOP_THRESHOLD) {
+              if (initFailedCount >= initFailedStopThreshold) {
                 LOGGER.log(Level.WARNING, "iADCS init failed {0} times. Will not retry until it gets powercycled.", initFailedCount);
+                if (powercycleCount < powercycleFailedStopThreshold) {
+                  LOGGER.log(Level.INFO, "iADCS init failed {0} times - attempting powercycle.", initFailedCount);
+                  iADCSPowercycle();
+                  powercycleCount++;
+                  initFailedCount = 0;
+                }
                 continue;
               }
-              LOGGER.log(Level.WARNING, "Sleeping for an extra {0} ms before checking again.", IADCS_INIT_BACKOFF_MS);
-              Thread.sleep(IADCS_INIT_BACKOFF_MS);
+              LOGGER.log(Level.WARNING, "Sleeping for an extra {0} ms before checking again.", iadcsInitBackoffMS);
+              Thread.sleep(iadcsInitBackoffMS);
             }
           } else if (!isAvailable && unitInitialized) {
             LOGGER.log(Level.INFO, "iADCS gone offline - marking unavailable");
@@ -171,6 +254,8 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
             unitInitialized = false;
           } else if (!isAvailable) {
             initFailedCount = 0;
+            powercycleCount = 0; //Edge case - could cause the watcher thread to loop indefinitely if ADCS 
+                                 //power-on wait time is not long enough for PowerAdapter to pick up the ADCS unit
           }
         }
       } catch (InterruptedException ex) {
