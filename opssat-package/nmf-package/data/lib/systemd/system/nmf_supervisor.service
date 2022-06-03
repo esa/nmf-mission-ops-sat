@@ -9,6 +9,7 @@ ExecStart=/home/nmf/supervisor/supervisor.sh
 Restart=on-failure
 SuccessExitStatus=0 143
 RestartSec=30s
+OOMScoreAdjust=-100
 
 [Install]
 WantedBy=multi-user.target
