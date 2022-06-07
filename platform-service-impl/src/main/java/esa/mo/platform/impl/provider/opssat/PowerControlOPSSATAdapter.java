@@ -51,23 +51,23 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
   private static final String PDU_CHANNEL_PARAM_NAME = "PDU1952";
 
   enum STATUS_MASK {
-	DEVICE_STATUS_SEPP1_MASK(0x0004, OnBoardDevice.SEPP1),
-	DEVICE_STATUS_SEPP2_MASK(0x0008, OnBoardDevice.SEPP2),
-	DEVICE_STATUS_SBAND_MASK(0x0020, OnBoardDevice.SBandTRX),
-	DEVICE_STATUS_XBAND_MASK(0x0080, OnBoardDevice.XBandTRX),
-	DEVICE_STATUS_SDR_MASK(0x0100, OnBoardDevice.SDR),
-	DEVICE_STATUS_IADCS_MASK(0x0200, OnBoardDevice.FineADCS),
-	DEVICE_STATUS_OPT_MASK(0x0400, OnBoardDevice.OpticalRX),
-	DEVICE_STATUS_CAM_MASK(0x1000, OnBoardDevice.HDCamera),
+    DEVICE_STATUS_SEPP1_MASK(0x0004, OnBoardDevice.SEPP1),
+    DEVICE_STATUS_SEPP2_MASK(0x0008, OnBoardDevice.SEPP2),
+    DEVICE_STATUS_SBAND_MASK(0x0020, OnBoardDevice.SBandTRX),
+    DEVICE_STATUS_XBAND_MASK(0x0080, OnBoardDevice.XBandTRX),
+    DEVICE_STATUS_SDR_MASK(0x0100, OnBoardDevice.SDR),
+    DEVICE_STATUS_IADCS_MASK(0x0200, OnBoardDevice.FineADCS),
+    DEVICE_STATUS_OPT_MASK(0x0400, OnBoardDevice.OpticalRX),
+    DEVICE_STATUS_CAM_MASK(0x1000, OnBoardDevice.HDCamera),
     DEVICE_STATUS_GPS_MASK(0x0800, OnBoardDevice.GPS);
 
-	int value;
-	OnBoardDevice payload;
+    int value;
+    OnBoardDevice payload;
 
-	STATUS_MASK(int value, OnBoardDevice payload) {
-		this.value = value;
-    this.payload = payload;
-	}
+    STATUS_MASK(int value, OnBoardDevice payload) {
+      this.value = value;
+      this.payload = payload;
+    }
   }
 
   private final NanomindServicesConsumer obcServicesConsumer;
