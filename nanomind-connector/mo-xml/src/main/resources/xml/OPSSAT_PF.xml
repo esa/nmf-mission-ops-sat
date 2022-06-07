@@ -6,11 +6,33 @@
         <mal:submitIP comment="The setPowerState sets the power state of selected devices.&#10;NOTE: Only ground segment has full control on the power state changing (APID filtering is performed)." name="setPowerState" number="5" supportInReplay="false">
           <mal:messages>
             <mal:submit>
-              <mal:field comment="The 'devices' field shall contain the list of devices for which the power state change should be applied.&#10;If one or more of the devices is not recognized, then an UNKNOWN error will be raised." name="devices">
-                <mal:type area="OPSSAT_PF" list="true" name="PayloadDevice"/>
+              <mal:field canBeNull="true" comment="The 'devices' field shall contain the list of devices for which the power state change should be applied.&#10;If one or more of the devices is not recognized, then an UNKNOWN error will be raised." name="devices">
+                <mal:type area="OPSSAT_PF" list="true" name="OnBoardDevice"/>
               </mal:field>
-              <mal:field comment="The 'powerStates' field shall contain the list of MAL::Boolean objects that corresponds to the elements in the device list.&#10;If the MAL::Boolean object on the list contains the value of 'TRUE' then the corresponding device should be powered on; otherwise it should be powered off." name="powerStates">
+              <mal:field canBeNull="true" comment="The 'powerStates' field shall contain the list of MAL::Boolean objects that corresponds to the elements in the device list.&#10;If the MAL::Boolean object on the list contains the value of 'TRUE' then the corresponding device should be powered on; otherwise it should be powered off." name="powerStates">
                 <mal:type area="MAL" list="true" name="Boolean"/>
+              </mal:field>
+            </mal:submit>
+          </mal:messages>
+          <mal:errors>
+            <mal:errorRef comment="One or more of the devices specified in the list do not exist.&#10;The indexes of the unrecognized devices shall be contained in the extra information field.">
+              <mal:type area="MAL" list="false" name="UNKNOWN"/>
+              <mal:extraInformation>
+                <mal:type area="MAL" list="true" name="UInteger"/>
+              </mal:extraInformation>
+            </mal:errorRef>
+          </mal:errors>
+        </mal:submitIP>
+      </mal:capabilitySet>
+      <mal:capabilitySet number="3">
+        <mal:submitIP comment="The powercycle operation powers off the selected devices and then power on after specified delay.&#10;NOTE: Only ground segment has full control on the power state changing (APID filtering is performed)." name="powercycle" number="6" supportInReplay="false">
+          <mal:messages>
+            <mal:submit>
+              <mal:field canBeNull="true" comment="The 'devices' field shall contain the list of devices for which the powercycling should be performed.&#10;If one or more of the devices is not recognized, then an UNKNOWN error will be raised." name="devices">
+                <mal:type area="OPSSAT_PF" list="true" name="OnBoardDevice"/>
+              </mal:field>
+              <mal:field canBeNull="true" comment="The 'delay' field shall contain a list of MAL::UOctet objects specifying delay corresponding to the elements in the device list.&#10; The MAL::UOctet object on the list contains the value in seconds; This is the delay between power off and power on commands" name="delay">
+                <mal:type area="MAL" list="true" name="UOctet"/>
               </mal:field>
             </mal:submit>
           </mal:messages>
@@ -35,17 +57,17 @@
       </mal:capabilitySet>
     </mal:service>
     <mal:service comment="The GPS service allows the user to obtain data samples from the GPS device." name="GPS" number="21">
-      <mal:capabilitySet number="1">	
+      <mal:capabilitySet number="1">
         <mal:invokeIP comment="The getGPSData operation allows a consumer to receive requested data from the GPS device (for example, GPGSA data frame)." name="getGPSData" number="1" supportInReplay="false">
           <mal:messages>
             <mal:invoke>
-              <mal:field comment="The 'command' field shall contain a request encoded as an ASCII string to be sent to the GPS receiver." name="command">
+              <mal:field canBeNull="true" comment="The 'command' field shall contain a request encoded as an ASCII string to be sent to the GPS receiver." name="command">
                 <mal:type area="MAL" list="false" name="Blob"/>
               </mal:field>
             </mal:invoke>
             <mal:acknowledgement/>
             <mal:response>
-              <mal:field comment="The response shall contain the received GPS data frame encoded as a string of ASCII characters." name="data">
+              <mal:field canBeNull="true" comment="The response shall contain the received GPS data frame encoded as a string of ASCII characters." name="data">
                 <mal:type area="MAL" list="false" name="Blob"/>
               </mal:field>
             </mal:response>
@@ -62,17 +84,26 @@
       </mal:capabilitySet>
     </mal:service>
     <mal:dataTypes>
-      <mal:enumeration comment="PayloadDevice is an enumeration representing the possible payload devices that could be serviced." name="PayloadDevice" shortFormPart="2">
+      <mal:enumeration comment="OnBoardDevice is an enumeration representing the possible on-board devices that could be serviced." name="OnBoardDevice" shortFormPart="2">
+        <mal:item comment="ID not used!" nvalue="1" value="Unused1"/>
+        <mal:item comment="ID not used!" nvalue="2" value="Unused2"/>
+        <mal:item comment="ID not used!" nvalue="3" value="Unused3"/>
         <mal:item comment="CCSDS Engine" nvalue="4" value="CCSDSEngine"/>
-        <mal:item comment="X-Band Transmitter/Receiver" nvalue="11" value="XBandTRX"/>
-        <mal:item comment="S-Band Transmitter/Receiver" nvalue="12" value="SBandTRX"/>
-        <mal:item comment="Fine ADCS" nvalue="13" value="FineADCS"/>
-        <mal:item comment="Software Defined Radio" nvalue="14" value="SDR"/>
-        <mal:item comment="Processing Platform 1" nvalue="15" value="SEPP1"/>
-        <mal:item comment="Processing Platform 2" nvalue="16" value="SEPP2"/>
-        <mal:item comment="HD Camera" nvalue="17" value="HDCamera"/>
-        <mal:item comment="Optical Receiver" nvalue="18" value="OpticalRX"/>
-        <mal:item comment="GPS" nvalue="19" value="GPS"/>
+        <mal:item comment="ID not used!" nvalue="5" value="Unused5"/>
+        <mal:item comment="GPS" nvalue="6" value="GPS"/>
+        <mal:item comment="ID not used!" nvalue="7" value="Unused7"/>
+        <mal:item comment="ID not used!" nvalue="8" value="Unused8"/>
+        <mal:item comment="ID not used!" nvalue="9" value="Unused9"/>
+        <mal:item comment="ID not used!" nvalue="10" value="Unused10"/>
+        <mal:item comment="ID not used!" nvalue="11" value="Unused11"/>
+        <mal:item comment="X-Band Transmitter/Receiver" nvalue="12" value="XBandTRX"/>
+        <mal:item comment="S-Band Transmitter/Receiver" nvalue="13" value="SBandTRX"/>
+        <mal:item comment="Fine ADCS" nvalue="14" value="FineADCS"/>
+        <mal:item comment="Software Defined Radio" nvalue="15" value="SDR"/>
+        <mal:item comment="Processing Platform 1" nvalue="16" value="SEPP1"/>
+        <mal:item comment="Processing Platform 2" nvalue="17" value="SEPP2"/>
+        <mal:item comment="HD Camera" nvalue="18" value="HDCamera"/>
+        <mal:item comment="Optical Receiver" nvalue="19" value="OpticalRX"/>
       </mal:enumeration>
     </mal:dataTypes>
   </mal:area>

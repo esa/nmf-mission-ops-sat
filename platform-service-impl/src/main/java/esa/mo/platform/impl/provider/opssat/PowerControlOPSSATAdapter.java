@@ -38,8 +38,8 @@ import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.MALException;
 import org.ccsds.moims.mo.mal.MALInteractionException;
 import org.ccsds.moims.mo.mal.structures.*;
-import esa.opssat.nanomind.opssat_pf.structures.PayloadDevice;
-import esa.opssat.nanomind.opssat_pf.structures.PayloadDeviceList;
+import esa.opssat.nanomind.opssat_pf.structures.OnBoardDevice;
+import esa.opssat.nanomind.opssat_pf.structures.OnBoardDeviceList;
 import org.ccsds.moims.mo.platform.powercontrol.structures.Device;
 import org.ccsds.moims.mo.platform.powercontrol.structures.DeviceList;
 import org.ccsds.moims.mo.platform.powercontrol.structures.DeviceType;
@@ -51,28 +51,28 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
   private static final String PDU_CHANNEL_PARAM_NAME = "PDU1952";
 
   enum STATUS_MASK {
-	DEVICE_STATUS_SEPP1_MASK(0x0004, PayloadDevice.SEPP1),
-	DEVICE_STATUS_SEPP2_MASK(0x0008, PayloadDevice.SEPP2),
-	DEVICE_STATUS_SBAND_MASK(0x0020, PayloadDevice.SBandTRX),
-	DEVICE_STATUS_XBAND_MASK(0x0080, PayloadDevice.XBandTRX),
-	DEVICE_STATUS_SDR_MASK(0x0100, PayloadDevice.SDR),
-	DEVICE_STATUS_IADCS_MASK(0x0200, PayloadDevice.FineADCS),
-	DEVICE_STATUS_OPT_MASK(0x0400, PayloadDevice.OpticalRX),
-	DEVICE_STATUS_CAM_MASK(0x1000, PayloadDevice.HDCamera),
-    DEVICE_STATUS_GPS_MASK(0x0800, PayloadDevice.GPS);
+	DEVICE_STATUS_SEPP1_MASK(0x0004, OnBoardDevice.SEPP1),
+	DEVICE_STATUS_SEPP2_MASK(0x0008, OnBoardDevice.SEPP2),
+	DEVICE_STATUS_SBAND_MASK(0x0020, OnBoardDevice.SBandTRX),
+	DEVICE_STATUS_XBAND_MASK(0x0080, OnBoardDevice.XBandTRX),
+	DEVICE_STATUS_SDR_MASK(0x0100, OnBoardDevice.SDR),
+	DEVICE_STATUS_IADCS_MASK(0x0200, OnBoardDevice.FineADCS),
+	DEVICE_STATUS_OPT_MASK(0x0400, OnBoardDevice.OpticalRX),
+	DEVICE_STATUS_CAM_MASK(0x1000, OnBoardDevice.HDCamera),
+    DEVICE_STATUS_GPS_MASK(0x0800, OnBoardDevice.GPS);
 
 	int value;
-	PayloadDevice payload;
+	OnBoardDevice payload;
 
-	STATUS_MASK(int value, PayloadDevice payload) {
+	STATUS_MASK(int value, OnBoardDevice payload) {
 		this.value = value;
     this.payload = payload;
 	}
   }
 
   private final NanomindServicesConsumer obcServicesConsumer;
-  private final Map<PayloadDevice, Device> deviceByType;
-  private final Map<Long, PayloadDevice> payloadIdByObjInstId;
+  private final Map<OnBoardDevice, Device> deviceByType;
+  private final Map<Long, OnBoardDevice> payloadIdByObjInstId;
   private Long adcsChannelStartTime = null;
   private static final Logger LOGGER = Logger.getLogger(PowerControlOPSSATAdapter.class.getName());
 
@@ -88,25 +88,25 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
   private void initDevices()
   {
     addDevice(new Device(false, 0L, new Identifier(
-        "Attitude Determination and Control System"), DeviceType.ADCS), PayloadDevice.FineADCS);
+        "Attitude Determination and Control System"), DeviceType.ADCS), OnBoardDevice.FineADCS);
     addDevice(new Device(true, 10L, new Identifier(
-        "Satellite Experimental Processing Platform 1"), DeviceType.OBC), PayloadDevice.SEPP1);
+        "Satellite Experimental Processing Platform 1"), DeviceType.OBC), OnBoardDevice.SEPP1);
     addDevice(new Device(true, 11L, new Identifier(
-        "Satellite Experimental Processing Platform 2"), DeviceType.OBC), PayloadDevice.SEPP2);
+        "Satellite Experimental Processing Platform 2"), DeviceType.OBC), OnBoardDevice.SEPP2);
     addDevice(new Device(false, 2L, new Identifier("S-Band Transceiver"), DeviceType.SBAND),
-        PayloadDevice.SBandTRX);
+        OnBoardDevice.SBandTRX);
     addDevice(new Device(false, 3L, new Identifier("X-Band Transmitter"), DeviceType.XBAND),
-        PayloadDevice.XBandTRX);
+        OnBoardDevice.XBandTRX);
     addDevice(new Device(false, 4L, new Identifier("Software Defined Radio"),
-        DeviceType.SDR), PayloadDevice.SDR);
+        DeviceType.SDR), OnBoardDevice.SDR);
     addDevice(new Device(false, 5L, new Identifier("Optical Receiver"), DeviceType.OPTRX),
-        PayloadDevice.OpticalRX);
+        OnBoardDevice.OpticalRX);
     addDevice(new Device(false, 6L, new Identifier("HD Camera"), DeviceType.CAMERA),
-        PayloadDevice.HDCamera);
-    addDevice(new Device(false, 7L, new Identifier("GPS"), DeviceType.GNSS), PayloadDevice.GPS);
+        OnBoardDevice.HDCamera);
+    addDevice(new Device(false, 7L, new Identifier("GPS"), DeviceType.GNSS), OnBoardDevice.GPS);
   }
 
-  private void addDevice(final Device device, final PayloadDevice payloadId)
+  private void addDevice(final Device device, final OnBoardDevice payloadId)
   {
     deviceByType.put(payloadId, device);
     payloadIdByObjInstId.put(device.getUnitObjInstId(), payloadId);
@@ -136,7 +136,7 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
     synchronized (this) {
       for (final Device device : inputList) {
         LOGGER.log(Level.INFO, "Looking up Device {0}", new Object[]{device});
-        PayloadDevice payloadId = payloadIdByObjInstId.get(device.getUnitObjInstId());
+        OnBoardDevice payloadId = payloadIdByObjInstId.get(device.getUnitObjInstId());
         if (device.getUnitObjInstId() != null) {
           payloadId = payloadIdByObjInstId.get(device.getUnitObjInstId());
         } else {
@@ -207,7 +207,7 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
                 LOGGER.log(Level.INFO, "Device " + mask.toString() + " coming online");
               }
               deviceByType.get(mask.payload).setEnabled(enabled);
-              if (mask.payload == PayloadDevice.FineADCS) {
+              if (mask.payload == OnBoardDevice.FineADCS) {
                 if (enabled && adcsChannelStartTime == null) {
                   adcsChannelStartTime = System.nanoTime();
                 } else if (!enabled && adcsChannelStartTime != null) {
@@ -229,10 +229,10 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface
     LOGGER.log(Level.INFO, "Now listening to PDU channel info");
   }
 
-  private void switchDevice(PayloadDevice device, Boolean enabled) throws IOException
+  private void switchDevice(OnBoardDevice device, Boolean enabled) throws IOException
   {
     synchronized (this) {
-      PayloadDeviceList deviceList = new PayloadDeviceList();
+      OnBoardDeviceList deviceList = new OnBoardDeviceList();
       BooleanList powerStates = new BooleanList();
       deviceList.add(device);
       powerStates.add(enabled);
