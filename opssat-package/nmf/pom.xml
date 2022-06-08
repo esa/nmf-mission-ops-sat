@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Licensed under European Space Agency Public License (ESA-PL) Weak Copyleft – v2.4
+    You may not use this file except in compliance with the License.
+
+    Except as expressly set forth in this License, the Software is provided to
+    You on an "as is" basis and without warranties of any kind, including without
+    limitation merchantability, fitness for a particular purpose, absence of
+    defects or errors, accuracy or non-infringement of intellectual property rights.
+
+    See the License for the specific language governing permissions and limitations under the License.
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>int.esa.nmf.mission.opssat</groupId>
+    <artifactId>parent</artifactId>
+    <version>2.1.0-SNAPSHOT</version>
+    <relativePath>../../parent/pom.xml</relativePath>
+  </parent>
+
+  <groupId>int.esa.nmf.mission.opssat</groupId>
+  <artifactId>nmf-package</artifactId>
+  <name>ESA NMF Mission OPS-SAT - Package Assembly</name>
+  <packaging>jar</packaging>
+
+  <organization>
+    <name>ESA</name>
+    <url>http://www.esa.int</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <name>European Space Agency Public License (ESA-PL) Weak Copyleft – v2.4</name>
+      <url>https://raw.github.com/esa/nanosat-mo-framework/master/LICENCE.md</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:git@github.com:esa/NMF_MISSION_OPS-SAT.git</connection>
+    <developerConnection>scm:git:git@github.com:esa/NMF_MISSION_OPS-SAT.git</developerConnection>
+    <url>https://github.com/esa/NMF_MISSION_OPS-SAT</url>
+  </scm>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/esa/NMF_MISSION_OPS-SAT/issues</url>
+  </issueManagement>
+
+  <developers>
+    <developer>
+      <id>CesarCoelho</id>
+      <name>César Coelho</name>
+      <url>https://github.com/CesarCoelho</url>
+    </developer>
+  </developers>
+
+  <properties>
+    <esa.nmf.mission.opssat.assembly.outputdir>${project.build.directory}/nmf-ops-sat-${esa.nmf.version}</esa.nmf.mission.opssat.assembly.outputdir>
+  </properties>
+  <profiles>
+    <profile>
+      <id>ipk-build</id>
+      <dependencies>
+        <dependency>
+          <groupId>int.esa.nmf.core</groupId>
+          <artifactId>nanosat-mo-supervisor</artifactId>
+          <version>${project.version}</version>
+          <exclusions>
+            <exclusion>
+              <groupId>int.esa.nmf.mission.simulator.moservices.impl</groupId>
+              <artifactId>nmf-platform-impl-sim</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+      </dependencies>
+
+    </profile>
+    <profile>
+      <id>ground</id>
+      <properties>
+        <isGround>true</isGround>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>int.esa.nmf.sdk.examples.space</groupId>
+          <artifactId>publish-clock</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>int.esa.nmf.sdk.examples.space</groupId>
+          <artifactId>all-mc-services</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>int.esa.nmf.sdk.examples.space</groupId>
+          <artifactId>camera</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>int.esa.nmf.sdk.examples.space</groupId>
+          <artifactId>camera-acquisitor-system</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>int.esa.nmf.mission.opssat</groupId>
+          <artifactId>ground-mo-proxy</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>exp</id>
+      <properties>
+        <isExp>true</isExp>
+        <!-- Change the following 3 properties to match the information of your app -->
+        <expId>000</expId>
+        <expApid>1024</expApid>
+        <!-- The declared version is arbitrary and does not have to match the NMF version -->
+        <expVersion>2.1.0-SNAPSHOT</expVersion>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>int.esa.nmf.sdk.examples.space</groupId>
+          <artifactId>publish-clock</artifactId>
+          <version>${expVersion}</version>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+              <execution>
+                <id>expLib</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <configuration>
+                  <artifactItems>
+                    <artifactItem>
+                      <!-- Change the following 3 properties to match the information of your app -->
+                      <groupId>int.esa.nmf.sdk.examples.space</groupId>
+                      <artifactId>publish-clock</artifactId>
+                      <!-- The declared version is arbitrary and does not have to match the NMF version -->
+                      <version>2.1.0-SNAPSHOT</version>
+                      <!-- Do not change this -->
+                      <type>jar</type>
+                      <overWrite>true</overWrite>
+                      <outputDirectory>${esa.nmf.mission.opssat.assembly.outputdir}/experimenter-package/home/exp${expId}/lib/</outputDirectory>
+                    </artifactItem>
+                  </artifactItems>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+  <dependencies>
+    <!-- NOTE: Imprecise version resolution using ${esa.nmf.version-qualifier} cannot be used here,
+    as maven-dependency-plugin:copy does not support it. -->
+    <dependency>
+      <groupId>int.esa.nmf.core</groupId>
+      <artifactId>nanosat-mo-connector</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.nmf.core</groupId>
+      <artifactId>nanosat-mo-supervisor</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.nmf.core</groupId>
+      <artifactId>common-mo-adapter</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.nmf.core</groupId>
+      <artifactId>space-mo-adapter</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.nmf.sdk.examples.space</groupId>
+      <artifactId>payloads-test</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.opssat.transport</groupId>
+      <artifactId>malspp-over-cfp-tcp</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.nmf.mission.opssat.moservices.impl</groupId>
+      <artifactId>nmf-platform-impl-opssat</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.opssat.transport.dlr</groupId>
+      <artifactId>malspp-encoding-opssat</artifactId>
+      <version>1.0.1-FC</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.nmf.mission.opssat.nanomind</groupId>
+      <artifactId>parameters-provisioning</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.nmf.sdk</groupId>
+      <artifactId>orekit-resources</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <!-- disable JAR assembly -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.4</version>
+        <executions>
+          <execution>
+            <id>default-jar</id>
+            <phase/>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${esa.nmf.mission.opssat.assembly.outputdir}/home/nmf/lib</outputDirectory>
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>false</overWriteSnapshots>
+              <overWriteIfNewer>true</overWriteIfNewer>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration combine.self="override">
+          <finalName>nmf-ops-sat-${git.commit.id.describe}</finalName>
+          <appendAssemblyId>false</appendAssemblyId>
+          <descriptors>
+            <descriptor>${basedir}/../src/main/assembly/zip.xml</descriptor>
+          </descriptors>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.8</version>
+        <executions>
+          <execution>
+            <id>space</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/home/nmf/" file="${basedir}/../src/main/resources/logging.properties"/>
+                <ant antfile="ant_copy_jobs.xml" target="copyfiles"/>
+              </target>
+            </configuration>
+          </execution>
+          <execution>
+            <id>ground</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target if="${isGround}">
+                <ant antfile="ant_copy_jobs_ground.xml" target="copyfiles"/>
+              </target>
+            </configuration>
+          </execution>
+          <execution>
+            <id>experimenter</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target if="${isExp}">
+                <ant antfile="ant_copy_jobs.xml" target="copyExp"/>
+              </target>
+            </configuration>
+          </execution>
+          <execution>
+            <id>ipk</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <echo>${basedir}</echo>
+                <copy todir="${project.build.directory}/nmf-package">
+                  <fileset dir="${basedir}/nmf-package"/>
+                  <filterset>
+                    <filter token="VERSION" value="${git.commit.id.describe}"/>
+                  </filterset>
+                </copy>
+                <chmod file="${project.build.directory}/nmf-package/control/postinst" perm="+x"/>
+                <chmod file="${project.build.directory}/nmf-package/control/prerm" perm="+x"/>
+                <copy todir="${project.build.directory}/nmf-package/data">
+                  <fileset dir="${project.build.directory}/nmf-ops-sat-${project.version}"/>
+                </copy>
+                <exec dir="${project.build.directory}/nmf-package/control" executable="tar">
+                  <arg value="--use-compress-program=gzip -9 -n"/>
+                  <arg value="--numeric-owner"/>
+                  <arg value="--group=0"/>
+                  <arg value="--owner=0"/>
+                  <arg value="--sort=name"/>
+                  <arg value="--mtime=1970-01-01"/>
+                  <arg value="-cf"/>
+                  <arg value="../control.tar.gz"/>
+                  <arg value="./"/>
+                </exec>
+                <exec dir="${project.build.directory}/nmf-package/data" executable="tar">
+                  <arg value="--use-compress-program=gzip -9 -n"/>
+                  <arg value="--numeric-owner"/>
+                  <arg value="--group=0"/>
+                  <arg value="--owner=0"/>
+                  <arg value="--sort=name"/>
+                  <arg value="--mtime=1970-01-01"/>
+                  <arg value="-cf"/>
+                  <arg value="../data.tar.gz"/>
+                  <arg value="./"/>
+                </exec>
+                <exec dir="${project.build.directory}/nmf-package/" executable="tar">
+                  <arg value="--numeric-owner"/>
+                  <arg value="--group=0"/>
+                  <arg value="--owner=0"/>
+                  <arg value="--sort=name"/>
+                  <arg value="--mtime=1970-01-01"/>
+                  <arg value="-cf"/>
+                  <arg value="../nmf-ops-sat_${git.commit.id.describe}.ipk"/>
+                  <arg value="./debian-binary"/>
+                  <arg value="./control.tar.gz"/>
+                  <arg value="./data.tar.gz"/>
+                </exec>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
+        <version>4.0.4</version>
+        <executions>
+            <execution>
+                <id>get-the-git-infos</id>
+                <goals>
+                    <goal>revision</goal>
+                </goals>
+                <phase>initialize</phase>
+            </execution>
+        </executions>
+        <configuration>
+            <failOnNoGitDirectory>false</failOnNoGitDirectory>
+            <commitIdGenerationMode>full</commitIdGenerationMode>
+            <gitDescribe>
+              <tags>true</tags>
+              <forceLongFormat>true</forceLongFormat>
+            </gitDescribe>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
