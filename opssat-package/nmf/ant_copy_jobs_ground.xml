@@ -3,8 +3,8 @@
     <!-- TODO - ideally most of space-common should be copied once and symlinks used -->
     <!-- TODO: Non essential parts, should be activated on a profile-basis -->
     <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/home/nmf/supervisor-sim">
-      <fileset dir="${basedir}/src/main/resources/space-common"/>
-      <fileset dir="${basedir}/src/main/resources/space-supervisor-sim-root"/>
+      <fileset dir="${basedir}/../src/main/resources/space-common"/>
+      <fileset dir="${basedir}/../src/main/resources/space-supervisor-sim-root"/>
       <filterset>
         <filter token="MAIN_CLASS_NAME" value="esa.mo.nmf.nanosatmosupervisor.NanosatMOSupervisorBasicImpl"/>
         <filter token="APPS_DIR" value="../.."/>
@@ -19,8 +19,8 @@
       </firstmatchmapper>
     </copy>
     <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/home/all-mc-services">
-      <fileset dir="${basedir}/src/main/resources/space-common"/>
-      <fileset dir="${basedir}/src/main/resources/space-app-root"/>
+      <fileset dir="${basedir}/../src/main/resources/space-common"/>
+      <fileset dir="${basedir}/../src/main/resources/space-app-root"/>
       <filterset>
         <filter token="MAIN_CLASS_NAME" value="esa.mo.nmf.apps.AllInOne"/>
         <filter token="APID" value="1501"/>
@@ -34,8 +34,8 @@
       </firstmatchmapper>
     </copy>
     <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/home/camera">
-      <fileset dir="${basedir}/src/main/resources/space-common"/>
-      <fileset dir="${basedir}/src/main/resources/space-app-root"/>
+      <fileset dir="${basedir}/../src/main/resources/space-common"/>
+      <fileset dir="${basedir}/../src/main/resources/space-app-root"/>
       <filterset>
         <filter token="MAIN_CLASS_NAME" value="esa.mo.nmf.apps.SnapNMF"/>
         <filter token="APID" value="1502"/>
@@ -49,8 +49,8 @@
       </firstmatchmapper>
     </copy>
     <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/home/publish-clock">
-      <fileset dir="${basedir}/src/main/resources/space-common"/>
-      <fileset dir="${basedir}/src/main/resources/space-app-root"/>
+      <fileset dir="${basedir}/../src/main/resources/space-common"/>
+      <fileset dir="${basedir}/../src/main/resources/space-app-root"/>
       <filterset>
         <filter token="MAIN_CLASS_NAME" value="esa.mo.nmf.apps.PushClock"/>
         <filter token="APID" value="1503"/>
@@ -64,8 +64,8 @@
       </firstmatchmapper>
     </copy>
     <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/home/nmf/ground-mo-proxy">
-      <fileset dir="${basedir}/src/main/resources/ground-mo-proxy-root"/>
-      <fileset dir="${basedir}/src/main/resources/space-common" excludes="transport.properties"/>
+      <fileset dir="${basedir}/../src/main/resources/ground-mo-proxy-root"/>
+      <fileset dir="${basedir}/../src/main/resources/space-common" excludes="transport.properties"/>
       <filterset>
         <filter token="MAIN_CLASS_NAME" value="esa.mo.nmf.groundmoproxy.GroundMOProxyOPSSATImpl"/>
         <filter token="NMF_HOME" value="`cd ../ > /dev/null; pwd`"/>

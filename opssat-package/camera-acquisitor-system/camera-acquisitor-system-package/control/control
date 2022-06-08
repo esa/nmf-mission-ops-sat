@@ -1,0 +1,7 @@
+Package: camera-acquisitor-system
+Version: @VERSION@
+Architecture: sepp
+Maintainer: ESOC
+Section: Applications
+Description: Camera Acquisitor System package
+Priority: optional

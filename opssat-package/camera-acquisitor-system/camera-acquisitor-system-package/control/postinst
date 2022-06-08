@@ -1,0 +1,2 @@
+#!/bin/sh
+chmod u+x /home/exp495/start_exp495.sh
