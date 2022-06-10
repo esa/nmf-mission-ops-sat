@@ -28,12 +28,23 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.MALException;
+import org.ccsds.moims.mo.mal.MALInteractionException;
 import org.ccsds.moims.mo.mal.structures.Attribute;
 import org.ccsds.moims.mo.mal.structures.Identifier;
+import org.ccsds.moims.mo.mal.structures.IdentifierList;
+import org.ccsds.moims.mo.mal.structures.UInteger;
+import org.ccsds.moims.mo.mal.structures.URI;
+
+import esa.mo.helpertools.connections.SingleConnectionDetails;
+import esa.mo.helpertools.helpers.HelperAttributes;
+import esa.mo.nanomind.impl.consumer.ActionNanomindConsumerServiceImpl;
 import esa.mo.nmf.nanosatmosupervisor.parameter.OBSWAggregation;
 import esa.mo.nmf.nanosatmosupervisor.parameter.OBSWParameter;
 import esa.mo.nmf.nanosatmosupervisor.parameter.OBSWParameterValuesProvider;
 import esa.opssat.nanomind.mc.aggregation.structures.AggregationValue;
+import esa.opssat.nanomind.mc.action.structures.ActionInstanceDetails;
+import esa.opssat.nanomind.mc.structures.AttributeValue;
+import esa.opssat.nanomind.mc.structures.AttributeValueList;
 
 /**
  * Provides OBSW parameter values by consuming the Nanomind aggregation service. Fetched values are
@@ -61,6 +72,11 @@ public class NanomindParameterValuesProvider extends OBSWParameterValuesProvider
   private int AGGREGATION_CLEANING_INTERVAL = 300;
 
   /**
+   * OBSW Parameter-write allowed ID ranges
+   */
+  private String WRITEABLE_PARAMETERS;
+
+  /**
    * Object handling caching of the values
    */
   private CacheHandler cacheHandler;
@@ -69,6 +85,20 @@ public class NanomindParameterValuesProvider extends OBSWParameterValuesProvider
    * Nanomind aggregations handler.
    */
   private NanomindAggregationsHandler aggHandler;
+
+  private static final String NANOMIND_APID = "10"; // Default Nanomind APID (on 13 June 2016)
+  private static final String MAL_SPP_BINDINDING = "malspp"; // Use the SPP Implementation
+  private static final String SOURCE_ID = "0"; // OBSW supports any value. By default it is set to 0
+
+  private static final Long ACTION_SET_VALUE_ID = (long)0x1101; // 0x1101 HEX -> 4353 DEC
+
+  ActionNanomindConsumerServiceImpl actionServiceCns;
+  ActionInstanceDetails actionInstDetails;
+
+  /**
+   * Allowed ranges of writeable OBSW parameter IDs
+   */
+  private ParameterIDRange parameterIDs[];
 
   /**
    * Main lock to synchronize cache and aggregations manipulations.
@@ -83,12 +113,18 @@ public class NanomindParameterValuesProvider extends OBSWParameterValuesProvider
   public NanomindParameterValuesProvider(HashMap<Identifier, OBSWParameter> parameterMap) {
     super(parameterMap);
     loadProperties();
+    loadParameterIDs();
     initCacheHandler(parameterMap);
     try {
       initAggregationHandler();
       scheduleCleaners();
     } catch (MALException | MalformedURLException ex) {
       LOGGER.log(Level.SEVERE, "Couldn't initialize the nanomind aggregation handler", ex);
+    }
+    try {
+      initActionService();
+    } catch (MALException | MalformedURLException ex) {
+      LOGGER.log(Level.SEVERE, "Couldn't initialize the nanomind action handler", ex);
     }
   }
 
@@ -105,6 +141,11 @@ public class NanomindParameterValuesProvider extends OBSWParameterValuesProvider
         "nmf.supervisor.parameter.valuesprovider.nanomind.cleaningInterval";
     AGGREGATION_CLEANING_INTERVAL =
         ConfigurationHelper.getIntegerProperty(cleaningIntervalProp, AGGREGATION_CLEANING_INTERVAL);
+
+    // OBSW Parameter-write allowed ID range
+    String writeableParametersProp =
+        "nmf.supervisor.parameter.valuesprovider.nanomind.writeableParameters";
+        WRITEABLE_PARAMETERS = System.getProperty(writeableParametersProp);
   }
 
   /**
@@ -122,6 +163,20 @@ public class NanomindParameterValuesProvider extends OBSWParameterValuesProvider
    */
   private void initAggregationHandler() throws MalformedURLException, MALException {
     aggHandler = new NanomindAggregationsHandler();
+  }
+
+  /**
+   * Initializes the Nanomind action service.
+   */
+  private void initActionService() throws MalformedURLException, MALException{
+    final SingleConnectionDetails details = new SingleConnectionDetails();
+    IdentifierList domain = new IdentifierList();
+    domain.add(new Identifier("OPSSAT"));
+    details.setDomain(domain);
+    URI brokerUri = null;
+    details.setBrokerURI(brokerUri);
+    details.setProviderURI(MAL_SPP_BINDINDING + ":247/" + NANOMIND_APID + "/" + SOURCE_ID);
+    actionServiceCns = new ActionNanomindConsumerServiceImpl(details);
   }
 
   /**
@@ -243,4 +298,103 @@ public class NanomindParameterValuesProvider extends OBSWParameterValuesProvider
       LOGGER.log(Level.FINE, "getValue(" + identifier + ") finished");
     }
   }
+
+  @Override
+  public Boolean setValue(Attribute rawValue, Identifier identifier){
+    
+    Long longParameterID = parameterMap.get(identifier).getId();
+    
+    if (acceptParameterID(longParameterID)){
+      UInteger idUInt = new UInteger(longParameterID);
+      Attribute id = (Attribute) HelperAttributes.javaType2Attribute(idUInt);
+      
+      AttributeValue parameterID = new AttributeValue(id);
+      AttributeValue parameterValue = new AttributeValue(rawValue);
+
+      AttributeValueList argList = new AttributeValueList();
+      argList.add(parameterID);
+      argList.add(parameterValue);
+
+      actionInstDetails = new ActionInstanceDetails(
+                    ACTION_SET_VALUE_ID,
+                    false, 
+                    false, 
+                    true, 
+                    argList, 
+                    null, 
+                    null);
+
+      try{
+        actionServiceCns.getActionStub().submitAction(ACTION_SET_VALUE_ID, actionInstDetails);
+        LOGGER.log(Level.INFO, "Set parameter value action submitted");
+        return true;
+      } catch (MALException | MALInteractionException e) {
+        LOGGER.log(Level.SEVERE, e.getMessage());
+      }
+    }
+    return false;
+  }
+
+  public ParameterIDRange[] getParameterIDRanges() {
+    return parameterIDs;
+}
+
+private ParameterIDRange[] loadParameterIDs() {
+  if (parameterIDs == null) {
+      String sparameterIDs[] = WRITEABLE_PARAMETERS.split(",");
+      parameterIDs = new ParameterIDRange[sparameterIDs.length];
+      for (int i = 0; i < sparameterIDs.length; i++) {
+        parameterIDs[i] = new ParameterIDRange(sparameterIDs[i]);
+      }
+  }
+  return parameterIDs;
+}
+
+public boolean acceptParameterID(Long parameterID) {
+  for (ParameterIDRange i : parameterIDs) {
+    if (i.acceptParameterID(parameterID))//found a match
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+  protected class ParameterIDRange {
+
+    private int min;
+    private int max;
+
+    public ParameterIDRange(String range) {
+      String[] vals = range.split("-");
+      if (vals.length > 2) {
+        throw new ArrayIndexOutOfBoundsException("Range includes more than two values");
+      }
+
+      if (vals.length == 2) {
+        int min = Integer.parseInt(vals[0]);
+        int max = Integer.parseInt(vals[1]);
+        init(min, max);
+      } else {//vals.length  = 1
+        int minmax = Integer.parseInt(vals[0]);
+        init(minmax, minmax);
+      }
+    }
+
+    public ParameterIDRange(int min, int max) {
+      init(min, max);
+    }
+
+    private void init(int min, int max) {
+      if (min > max) {
+        throw new ArrayIndexOutOfBoundsException("Parameter ID Range: Start ID is larger than end ID");
+      }
+      this.min = min;
+      this.max = max;
+    }
+
+    public boolean acceptParameterID(Long parameterID) {
+      return parameterID >= this.min && parameterID <= this.max;
+    }
+}
 }
