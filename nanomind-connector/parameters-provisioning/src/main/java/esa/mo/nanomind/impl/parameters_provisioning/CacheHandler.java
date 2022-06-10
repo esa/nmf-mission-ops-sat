@@ -137,4 +137,9 @@ class CacheHandler extends OBSWParameterValuesProvider {
       cache.get(identifier).setValue(value);
     }
   }
+
+  @Override
+  public Boolean setValue(Attribute value, Identifier identifier){
+    return false;
+  }
 }
