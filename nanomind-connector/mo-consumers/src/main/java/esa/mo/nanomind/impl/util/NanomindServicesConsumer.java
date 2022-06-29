@@ -94,8 +94,7 @@ public class NanomindServicesConsumer {
             details = new SingleConnectionDetails();
             final IdentifierList domain = new IdentifierList();
             domain.add(new Identifier("OPSSAT"));
-            final URI brokerURI = null;
-            details.setBrokerURI(brokerURI);
+            details.setBrokerURI((URI) null);
             details.setProviderURI(MAL_SPP_BINDINDING + ":247/" + NANOMIND_APID + "/" + SOURCE_ID);
             details.setDomain(domain);
 

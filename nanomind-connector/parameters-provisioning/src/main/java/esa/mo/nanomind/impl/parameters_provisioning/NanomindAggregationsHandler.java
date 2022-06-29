@@ -130,7 +130,7 @@ class NanomindAggregationsHandler {
     IdentifierList domain = new IdentifierList();
     domain.add(new Identifier("OPSSAT"));
     details.setDomain(domain);
-    details.setBrokerURI(null);
+    details.setBrokerURI((URI) null);
     details.setProviderURI(MAL_SPP_BINDINDING + ":247/" + NANOMIND_APID + "/" + SOURCE_ID);
 
     aggServiceCns = new LimitedNanomindAggregationConsumer(details);
