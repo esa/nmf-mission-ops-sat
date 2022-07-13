@@ -13,9 +13,9 @@
  * You on an "as is" basis and without warranties of any kind, including without
  * limitation merchantability, fitness for a particular purpose, absence of
  * defects or errors, accuracy or non-infringement of intellectual property rights.
- * 
+ *
  * See the License for the specific language governing permissions and
- * limitations under the License. 
+ * limitations under the License.
  * ----------------------------------------------------------------------------
  */
 package esa.mo.platform.impl.provider.opssat;
@@ -30,14 +30,20 @@ import esa.mo.platform.impl.provider.gen.CameraAdapterInterface;
 import esa.mo.platform.impl.provider.gen.PowerControlAdapterInterface;
 import esa.opssat.camera.processing.OPSSATCameraDebayering;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 import java.nio.Buffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
+import org.ccsds.moims.mo.common.configuration.ConfigurationHelper;
 import org.ccsds.moims.mo.mal.MALException;
 import org.ccsds.moims.mo.mal.structures.Blob;
 import org.ccsds.moims.mo.mal.structures.Duration;
@@ -68,11 +74,14 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   private static final float MAX_EXPOSURE_TIME_S = 0.8f;
   private static final Duration MINIMUM_PERIOD = new Duration(1);
   private static final float PREVIEW_GAIN = 8.f;
+  private static final String BITDEPTH_ATTRIBUTE = "opssat.camera.bitdepth";
+  private static final String BITDEPTH_DEFAULT = "8";
   private String blockDevice;
   private String serialPort;
   private boolean useWatchdog;
   private int nativeImageLength;
   private int nativeImageWidth;
+  private int bitdepth;
   private bst_ims100_img_config_t imageConfig;
   private final PictureFormatList supportedFormats = new PictureFormatList();
   private final boolean unitAvailable;
@@ -128,20 +137,19 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       blockDevice = System.getProperty(BLOCK_DEVICE_ATTRIBUTE, BLOCK_DEVICE_DEFAULT);
       useWatchdog = Boolean.parseBoolean(System.getProperty(USE_WATCHDOG_ATTRIBUTE,
           USE_WATCHDOG_DEFAULT));
+      bitdepth = Integer.parseInt(System.getProperty(BITDEPTH_ATTRIBUTE, BITDEPTH_DEFAULT));
       final bst_ret_t ret = ims100_api.bst_ims100_init(serialPort, blockDevice, useWatchdog ? 1 : 0);
       // FIXME: For now it always returns false?!?!?
       /*if (ret != bst_ret_t.BST_RETURN_SUCCESS) {
         throw new IOException("Failed to initialise BST camera (return: " + ret.toString() + ")");
       }*/
       ims100_api.bst_ims100_img_config_default(imageConfig);
-      ims100_api.bst_ims100_set_img_config(imageConfig);
-      ims100_api.bst_ims100_set_exp_time(imageConfig.getT_exp());
       nativeImageWidth = imageConfig.getCol_end() - imageConfig.getCol_start() + 1;
       nativeImageLength = imageConfig.getRow_end() - imageConfig.getRow_start() + 1;
     }
   }
 
-  
+
   private void closeCamera()
   {
     synchronized(this) {
@@ -249,7 +257,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       this.openCamera();
       final bst_ims100_img_t image = new bst_ims100_img_t();
       ims100_api.bst_ims100_img_config_default(imageConfig);
-      // TODO this is not scaling but cropping the picture
+      // Note this is not scaling but cropping the picture
       imageConfig.setCol_start(0);
       imageConfig.setCol_end((int) settings.getResolution().getWidth().getValue() - 1);
       imageConfig.setRow_start(0);
@@ -275,11 +283,8 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
         LOGGER.log(Level.WARNING, String.format("bst_ims100_get_img_n failed"));
         throw new IOException("bst_ims100_get_img_n failed");
       }
-      this.closeCamera();
-      byte[] rawData = new byte[imageData.capacity()];
 
-      LOGGER.log(Level.FINE, String.format("Copying from native buffer"));
-      ((ByteBuffer) (((Buffer)imageData.duplicate()).clear())).get(rawData);
+      byte[] rawData = new byte[imageData.capacity()];
       final CameraSettings replySettings = new CameraSettings();
       replySettings.setResolution(settings.getResolution());
       replySettings.setExposureTime(settings.getExposureTime());
@@ -288,11 +293,25 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       replySettings.setGainBlue(settings.getGainBlue());
       if (settings.getFormat() != PictureFormat.RAW) {
         // Run debayering and possibly process further
-        //TODO Use a native debayering acceleration
+        LOGGER.log(Level.FINE, String.format("Allocating native buffer for debayered image"));
+        final ByteBuffer debayeredImageData = ByteBuffer.allocateDirect(
+              dataN * 3 * bitdepth/8);
+        byte[] rgbData = new byte[debayeredImageData.capacity()];
+        LOGGER.log(Level.FINE, String.format("Debayering the image"));
+        if (ims100_api.bst_ims100_img_debayer(image, debayeredImageData, 1, 1, 1, (short)bitdepth)
+                != bst_ret_t.BST_RETURN_SUCCESS) {
+          LOGGER.log(Level.WARNING, String.format("bst_ims100_img_debayer failed"));
+          throw new IOException("bst_ims100_img_debayer failed");
+        }
+        ((ByteBuffer) (((Buffer)debayeredImageData).clear())).get(rgbData);
         LOGGER.log(Level.INFO, String.format(
-              "Converting the image from RAW to " + settings.getFormat().toString()));
-        rawData = convertImage(rawData, settings.getFormat());
+        "Converting the image from RGB to " + settings.getFormat().toString()));
+        rawData = convertImage(rgbData, settings.getFormat());
+      } else if (settings.getFormat() == PictureFormat.RAW) {
+        LOGGER.log(Level.FINE, String.format("Copying from native buffer"));
+        ((ByteBuffer) (((Buffer)imageData.duplicate()).clear())).get(rawData);
       }
+      this.closeCamera();
       replySettings.setFormat(settings.getFormat());
       return new Picture(timestamp, replySettings, new Blob(rawData));
     }
@@ -310,10 +329,41 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     return supportedFormats;
   }
 
-  private byte[] convertImage(final byte[] rawImage, final PictureFormat targetFormat) throws
+  private byte[] convertImage(final byte[] rgbData, final PictureFormat targetFormat) throws
       IOException
   {
-    final BufferedImage image = OPSSATCameraDebayering.getDebayeredImage(rawImage);
+    int width = 2048;
+    int height = 1944;
+    BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    int pixel;
+    int bytesPerColor = bitdepth/8;
+    int i = 0;
+    for(int y = 0; y < height; y++) {
+      for(int x = 0; x < width; x++) {
+        /*
+        * bitdepth = 8 --> bytesPerColor = 1
+        * This is an 8-bit per channel RGB array so,
+        * the rgbData array contains the data in {[R,G,B], [R,G,B], ...} format
+        * so we get all indexes in multiples of 3
+        *
+        * bitdepth = 16 --> bytesPerColor = 2
+        * This is a 16-bit per channel RGB array so,
+        * the rgbData array contains the data in {[RR,GG,BB], [RR,GG,BB], ...} format in LittleEndian order
+        * we add an offset of 1 to each channel index to get the MSB
+        * i.e. R = rgbData[1]
+        *      G = rgbData[3]
+        *      B = rgbData[5]
+        * and we get all indexes in multiples of 6 (because the array is twice the size)
+        */
+        pixel =
+            rgbData[(1 * bytesPerColor - 1) + (3 * i * bytesPerColor)] << 16
+          | rgbData[(2 * bytesPerColor - 1) + (3 * i * bytesPerColor)] << 8
+          | rgbData[(3 * bytesPerColor - 1) + (3 * i * bytesPerColor)];
+        ++i;
+        image.setRGB(x, y, pixel);
+      }
+    }
+
     byte[] ret = null;
 
     final ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -323,7 +373,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       final int h = image.getHeight();
       final int[] rgba = image.getRGB(0, 0, w, h, null, 0, w);
       ret = new byte[rgba.length * 3];
-      for (int i = 0; i < rgba.length; ++i) {
+      for (i = 0; i < rgba.length; ++i) {
         final int pixelval = rgba[i];
         ret[i * 3 + 0] = (byte) ((pixelval >> 16) & 0xFF); // R
         ret[i * 3 + 1] = (byte) ((pixelval >> 8) & 0xFF);  // G
