@@ -5,17 +5,17 @@ This projects contains a prototype implementation of the [MAL/SPP Binding] [CCSD
 
 The MAL/SPP Binding is a technology binding that allows the translation of MAL messages into a concrete representation using Space Packets and vice versa. The binding itself relies on a lower layer for actually sending the Space Packets.
 
-[CCSDS 133.0-B-1]: http://public.ccsds.org/publications/archive/133x0b1c2.pdf
-                   "Space Packet Protocol (September 2003)"
-[CCSDS 524.1-R-1]: not yet published
-                   "Mission Operations - Space Packet Binding (December 2014)"
-[CCSDS 520.0-G-3]: http://public.ccsds.org/publications/archive/520x0g3.pdf
+[CCSDS 133.0-B-1]: https://public.ccsds.org/Pubs/133x0b2e1.pdf
+                   "Space Packet Protocol (June 2020)"
+[CCSDS 524.1-R-1]: https://public.ccsds.org/Pubs/524x1b1.pdf
+                   "Mission Operations - Space Packet Binding (August 2015)"
+[CCSDS 520.0-G-3]: https://public.ccsds.org/Pubs/520x0g3.pdf
                    "Mission Operations Services Concept (December 2010)"
-[CCSDS 520.1-M-1]: http://public.ccsds.org/publications/archive/520x1m1.pdf
+[CCSDS 520.1-M-1]: https://public.ccsds.org/Pubs/520x1m1.pdf
                    "Mission Operations Reference Model (July 2010)"
-[CCSDS 521.0-B-2]: http://public.ccsds.org/publications/archive/521x0b2e1.pdf
+[CCSDS 521.0-B-2]: https://public.ccsds.org/Pubs/521x0b2e1.pdf
                    "Mission Operations Message Abstraction Layer (March 2013)"
-[CCSDS 523.1-M-1]: http://public.ccsds.org/publications/archive/523x1m1.pdf
+[CCSDS 523.1-M-1]: https://public.ccsds.org/Pubs/523x1m1.pdf
                    "Mission Operations Message Abstraction Layer - Java API (April 2013)"
 
 Module structure
@@ -211,7 +211,7 @@ Notes
 7. It has to be specified in which timescale the epochs are to interpret. Possible values are UTC, TAI, GMST, GPS, GST, TCB, TCG, TDB, TT, case insensitive. If these parameters are omitted it is assumed the epochs are given in UTC timescale. Please note, that this only affects the interpretation of the epoch parameters.
 8. This specifies the number of milliseconds for sequenced packet timeout. If a sequence of packets is not full after this timeout, the whole sequence is discarded. A timeout of 0 means no timeout, which is also the default value.
 
-[CCSDS 301.0-B-4]: http://public.ccsds.org/publications/archive/301x0b4.pdf
+[CCSDS 301.0-B-4]: https://public.ccsds.org/Pubs/301x0b4e1.pdf
                    "Time Code Formats (November 2010)"
 
 
