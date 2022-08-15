@@ -11,7 +11,7 @@
         <filter token="NMF_LIB" value="`cd ../lib > /dev/null; pwd`"/>
         <filter token="USER" value="root"/>
         <filter token="PLATFORM" value="esa.mo.platform.impl.util.PlatformServicesProviderOPSSAT"/>
-        <filter token="MAX_HEAP" value="128m"/>
+        <filter token="MAX_HEAP" value="96m"/>
       </filterset>
       <firstmatchmapper>
         <globmapper from="startscript.sh" to="supervisor.sh"/>
