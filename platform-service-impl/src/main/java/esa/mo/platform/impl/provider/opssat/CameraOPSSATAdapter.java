@@ -79,7 +79,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   private String blockDevice;
   private String serialPort;
   private boolean useWatchdog;
-  private int nativeImageLength;
+  private int nativeImageHeight;
   private int nativeImageWidth;
   private int bitdepth;
   private bst_ims100_img_config_t imageConfig;
@@ -145,7 +145,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       }*/
       ims100_api.bst_ims100_img_config_default(imageConfig);
       nativeImageWidth = imageConfig.getCol_end() - imageConfig.getCol_start() + 1;
-      nativeImageLength = imageConfig.getRow_end() - imageConfig.getRow_start() + 1;
+      nativeImageHeight = imageConfig.getRow_end() - imageConfig.getRow_start() + 1;
     }
   }
 
@@ -185,7 +185,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   {
     final PixelResolutionList availableResolutions = new PixelResolutionList();
     availableResolutions.add(new PixelResolution(new UInteger(nativeImageWidth), new UInteger(
-        nativeImageLength)));
+        nativeImageHeight)));
 
     return availableResolutions;
   }
@@ -194,7 +194,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   public synchronized Picture getPicturePreview() throws IOException
   {
     final PixelResolution resolution = new PixelResolution(new UInteger(nativeImageWidth),
-        new UInteger(nativeImageLength));
+        new UInteger(nativeImageHeight));
     return takePicture(new CameraSettings(resolution, PictureFormat.RAW, PREVIEW_EXPOSURE_TIME,
         PREVIEW_GAIN, PREVIEW_GAIN, PREVIEW_GAIN));
 
@@ -283,8 +283,9 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
         LOGGER.log(Level.WARNING, String.format("bst_ims100_get_img_n failed"));
         throw new IOException("bst_ims100_get_img_n failed");
       }
+      this.closeCamera();
 
-      byte[] rawData = new byte[imageData.capacity()];
+      byte[] rawData = null;
       final CameraSettings replySettings = new CameraSettings();
       replySettings.setResolution(settings.getResolution());
       replySettings.setExposureTime(settings.getExposureTime());
@@ -292,29 +293,36 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       replySettings.setGainGreen(settings.getGainGreen());
       replySettings.setGainBlue(settings.getGainBlue());
       if (settings.getFormat() != PictureFormat.RAW) {
-        // Run debayering and possibly process further
-        LOGGER.log(Level.FINE, String.format("Allocating native buffer for debayered image"));
-        final ByteBuffer debayeredImageData = ByteBuffer.allocateDirect(
-              dataN * 3 * bitdepth/8);
-        byte[] rgbData = new byte[debayeredImageData.capacity()];
-        LOGGER.log(Level.FINE, String.format("Debayering the image"));
-        if (ims100_api.bst_ims100_img_debayer(image, debayeredImageData, 1, 1, 1, (short)bitdepth)
-                != bst_ret_t.BST_RETURN_SUCCESS) {
-          LOGGER.log(Level.WARNING, String.format("bst_ims100_img_debayer failed"));
-          throw new IOException("bst_ims100_img_debayer failed");
-        }
-        ((ByteBuffer) (((Buffer)debayeredImageData).clear())).get(rgbData);
-        LOGGER.log(Level.INFO, String.format(
-        "Converting the image from RGB to " + settings.getFormat().toString()));
-        rawData = convertImage(rgbData, settings.getFormat());
+        rawData = processRawCameraPicture(settings.getFormat(), image);
       } else if (settings.getFormat() == PictureFormat.RAW) {
         LOGGER.log(Level.FINE, String.format("Copying from native buffer"));
+        rawData = new byte[imageData.capacity()];
         ((ByteBuffer) (((Buffer)imageData.duplicate()).clear())).get(rawData);
       }
-      this.closeCamera();
       replySettings.setFormat(settings.getFormat());
       return new Picture(timestamp, replySettings, new Blob(rawData));
     }
+  }
+
+  public byte[] processRawCameraPicture(final PictureFormat targetFormat, final bst_ims100_img_t image)
+      throws IOException {
+    byte[] ret;
+    // Run debayering and possibly process further
+    LOGGER.log(Level.FINE, String.format("Allocating native buffer for debayered image"));
+    final ByteBuffer debayeredImageData = ByteBuffer.allocateDirect(
+          (int)image.getData_n() * 3 * bitdepth/8);
+    byte[] rgbData = new byte[debayeredImageData.capacity()];
+    LOGGER.log(Level.FINE, String.format("Debayering the image"));
+    if (ims100_api.bst_ims100_img_debayer(image, debayeredImageData, 1, 1, 1, (short)bitdepth)
+            != bst_ret_t.BST_RETURN_SUCCESS) {
+      LOGGER.log(Level.WARNING, String.format("bst_ims100_img_debayer failed"));
+      throw new IOException("bst_ims100_img_debayer failed");
+    }
+    ((ByteBuffer) (((Buffer)debayeredImageData).clear())).get(rgbData);
+    LOGGER.log(Level.INFO, String.format(
+    "Converting the image from RGB to " + targetFormat.toString()));
+    ret = convertImage(rgbData, targetFormat);
+    return ret;
   }
 
   @Override
