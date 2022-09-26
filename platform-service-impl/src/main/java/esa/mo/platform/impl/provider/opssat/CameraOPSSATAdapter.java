@@ -364,9 +364,9 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
         * and we get all indexes in multiples of 6 (because the array is twice the size)
         */
         pixel =
-            rgbData[(1 * bytesPerColor - 1) + (3 * i * bytesPerColor)] << 16
-          | rgbData[(2 * bytesPerColor - 1) + (3 * i * bytesPerColor)] << 8
-          | rgbData[(3 * bytesPerColor - 1) + (3 * i * bytesPerColor)];
+            (((int)rgbData[(1 * bytesPerColor - 1) + (3 * i * bytesPerColor)]) & 0xFF) << 16
+          | (((int)rgbData[(2 * bytesPerColor - 1) + (3 * i * bytesPerColor)]) & 0xFF) << 8
+          | (((int)rgbData[(3 * bytesPerColor - 1) + (3 * i * bytesPerColor)]) & 0xFF);
         ++i;
         image.setRGB(x, y, pixel);
       }
