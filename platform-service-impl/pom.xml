@@ -142,6 +142,12 @@
       <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>int.esa.nmf.mission.simulator.moservices.impl</groupId>
+      <artifactId>nmf-platform-impl-sim</artifactId>
+      <version>${esa.nmf.version-qualifier}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   
   <build>
@@ -168,6 +174,16 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <environmentVariables>
+            <!-- <argLine>-Djava.library.path=${basedir}/src/test/resources</argLine> -->
+            <LD_LIBRARY_PATH>${basedir}/src/test/resources</LD_LIBRARY_PATH>
+          </environmentVariables>
+        </configuration>
       </plugin>
     </plugins>
   </build>
