@@ -72,6 +72,7 @@ import org.ccsds.moims.mo.mal.structures.UIntegerList;
 import org.ccsds.moims.mo.mal.structures.UOctet;
 import org.ccsds.moims.mo.mal.structures.URI;
 import org.ccsds.moims.mo.mal.structures.UShort;
+import org.ccsds.moims.mo.mal.structures.UShortList;
 import org.ccsds.moims.mo.mal.transport.MALMessage;
 import org.ccsds.moims.mo.mc.action.ActionHelper;
 
@@ -178,7 +179,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
             serviceKey = new ServiceKey(serviceType.getArea().getNumber(), serviceType.getNumber(),
                                         serviceType.getArea().getVersion());
             sf = new ServiceFilter(new Identifier("*"), domain, new Identifier("*"), null, new Identifier("*"),
-                                   serviceKey, new UIntegerList());
+                                   serviceKey, new UShortList());
 
             try
             {
@@ -476,7 +477,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
                                                serviceType.getArea().getVersion());
         ServiceFilter sf =
                 new ServiceFilter(new Identifier("*"), domain, new Identifier("*"), null, new Identifier("*"),
-                                  serviceKey, new UIntegerList());
+                                  serviceKey, new UShortList());
 
         try
         {
