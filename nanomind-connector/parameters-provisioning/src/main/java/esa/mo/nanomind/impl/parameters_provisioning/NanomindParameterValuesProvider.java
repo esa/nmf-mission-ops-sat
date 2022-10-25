@@ -360,7 +360,7 @@ public boolean acceptParameterID(Long parameterID) {
   return false;
 }
 
-  protected class ParameterIDRange {
+  protected static class ParameterIDRange {
 
     private int min;
     private int max;
