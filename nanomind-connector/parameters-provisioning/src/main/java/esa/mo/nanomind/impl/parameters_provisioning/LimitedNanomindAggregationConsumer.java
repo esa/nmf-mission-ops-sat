@@ -100,7 +100,7 @@ class LimitedNanomindAggregationConsumer {
   public AggregationStub getAggregationNanomindStub() throws QueryRateExceededException {
     if (limitRate && !rateLimiter.allowQuery()) {
       throw new QueryRateExceededException(
-          String.format("Rate of %d query/s exceeded", MAX_QUERY_RATE));
+              String.format("Rate of %d query/s exceeded", MAX_QUERY_RATE));
     }
     return aggConsumerServiceImpl.getAggregationNanomindStub();
   }
@@ -110,7 +110,7 @@ class LimitedNanomindAggregationConsumer {
    * 
    * @author Tanguy Soto
    */
-  public class QueryRateExceededException extends Exception {
+  public static class QueryRateExceededException extends Exception {
     private static final long serialVersionUID = 6011021055757437002L;
 
     public QueryRateExceededException(String errorMessage) {
@@ -123,7 +123,7 @@ class LimitedNanomindAggregationConsumer {
    * 
    * @author Tanguy Soto
    */
-  private class SlidingWindowRateLimiter {
+  private static class SlidingWindowRateLimiter {
 
     /**
      * Number of queries allowed per time window

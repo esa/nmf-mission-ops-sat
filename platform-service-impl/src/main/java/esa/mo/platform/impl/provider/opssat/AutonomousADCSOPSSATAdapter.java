@@ -424,6 +424,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     while ((s = br.readLine()) != null) {
       lines.add(s);
     }
+    br.close();
     if (lines.size() == 3) {
       lines.remove(0);
     }

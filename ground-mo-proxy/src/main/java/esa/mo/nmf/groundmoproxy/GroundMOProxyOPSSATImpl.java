@@ -235,7 +235,7 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy
         }
     }
 
-    private class ArchiveObjects
+    private static class ArchiveObjects
     {
         public ArchiveDetailsList archiveDetailsList = new ArchiveDetailsList();
         public ElementList elementList;
