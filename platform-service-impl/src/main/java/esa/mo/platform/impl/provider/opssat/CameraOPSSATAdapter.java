@@ -210,14 +210,13 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     final CameraSettings tmpSettings = new CameraSettings(settings.getResolution(), PictureFormat.RAW,
       PREVIEW_EXPOSURE_TIME, PREVIEW_GAIN, PREVIEW_GAIN, PREVIEW_GAIN);
     LOGGER.log(Level.INFO, "Taking a sample picture");
-    final Picture initialPicture = takePicture(tmpSettings);
-
-    final BufferedImage image = OPSSATCameraDebayering.getDebayeredImage(
-        initialPicture.getContent().getValue());
+    final bst_ims100_img_t image = innerTakePicture(tmpSettings);
+    final byte[] rgbData = runNativeDebayering(image);
+    BufferedImage bImage = rgbDataToBufferedImage(rgbData, (int)image.getAttr().getWidth(), (int)image.getAttr().getHeight());
 
     final int w = (int) settings.getResolution().getWidth().getValue();
     final int h = (int) settings.getResolution().getHeight().getValue();
-    final int[] rgb = image.getRGB(0, 0, w, h, null, 0, w);
+    final int[] rgb = bImage.getRGB(0, 0, w, h, null, 0, w);
 
     double luminanceSum = 0;
     for (final int color : rgb) {
@@ -250,12 +249,11 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     return takePicture(tmpSettings);
   }
 
-  @Override
-  public Picture takePicture(final CameraSettings settings) throws IOException
+  private bst_ims100_img_t innerTakePicture(final CameraSettings settings) throws IOException
   {
+    final bst_ims100_img_t image = new bst_ims100_img_t();
     synchronized(this) {
       this.openCamera();
-      final bst_ims100_img_t image = new bst_ims100_img_t();
       ims100_api.bst_ims100_img_config_default(imageConfig);
       // Note this is not scaling but cropping the picture
       imageConfig.setCol_start(0);
@@ -277,13 +275,21 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       image.setData(imageData);
       image.setData_n(dataN);
 
-      final Time timestamp = HelperTime.getTimestampMillis();
       LOGGER.log(Level.INFO, String.format("Acquiring image"));
       if (ims100_api.bst_ims100_get_img_n(image, 1, (short) 0) != bst_ret_t.BST_RETURN_SUCCESS) {
         LOGGER.log(Level.WARNING, String.format("bst_ims100_get_img_n failed"));
         throw new IOException("bst_ims100_get_img_n failed");
       }
       this.closeCamera();
+    }
+    return image;
+  }
+  @Override
+  public Picture takePicture(final CameraSettings settings) throws IOException
+  {
+    synchronized(this) {
+      final Time timestamp = HelperTime.getTimestampMillis();
+      final bst_ims100_img_t image = innerTakePicture(settings);
 
       byte[] rawData = null;
       final CameraSettings replySettings = new CameraSettings();
@@ -296,8 +302,8 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
         rawData = processRawCameraPicture(settings.getFormat(), image);
       } else if (settings.getFormat() == PictureFormat.RAW) {
         LOGGER.log(Level.FINE, String.format("Copying from native buffer"));
-        rawData = new byte[imageData.capacity()];
-        ((ByteBuffer) (((Buffer)imageData.duplicate()).clear())).get(rawData);
+        rawData = new byte[image.getData().capacity()];
+        ((ByteBuffer) (((Buffer)image.getData().duplicate()).clear())).get(rawData);
       }
       replySettings.setFormat(settings.getFormat());
       return new Picture(timestamp, replySettings, new Blob(rawData));
@@ -306,7 +312,14 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
 
   public byte[] processRawCameraPicture(final PictureFormat targetFormat, final bst_ims100_img_t image)
       throws IOException {
-    byte[] ret;
+    byte[] rgbData = runNativeDebayering(image);
+    LOGGER.log(Level.INFO, String.format(
+      "Converting the image from RGB to " + targetFormat.toString()));
+    BufferedImage bImage = rgbDataToBufferedImage(rgbData, (int)image.getAttr().getWidth(), (int)image.getAttr().getHeight());
+    return convertImage(bImage, targetFormat);
+  }
+
+  private byte[] runNativeDebayering(final bst_ims100_img_t image) throws IOException {
     // Run debayering and possibly process further
     LOGGER.log(Level.FINE, String.format("Allocating native buffer for debayered image"));
     final ByteBuffer debayeredImageData = ByteBuffer.allocateDirect(
@@ -319,10 +332,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       throw new IOException("bst_ims100_img_debayer failed");
     }
     ((ByteBuffer) (((Buffer)debayeredImageData).clear())).get(rgbData);
-    LOGGER.log(Level.INFO, String.format(
-    "Converting the image from RGB to " + targetFormat.toString()));
-    ret = convertImage(rgbData, targetFormat);
-    return ret;
+    return rgbData;
   }
 
   @Override
@@ -337,41 +347,10 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     return supportedFormats;
   }
 
-  private byte[] convertImage(final byte[] rgbData, final PictureFormat targetFormat) throws
+  private byte[] convertImage(BufferedImage image, final PictureFormat targetFormat) throws
       IOException
   {
-    int width = 2048;
-    int height = 1944;
-    BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-    int pixel;
-    int bytesPerColor = bitdepth/8;
-    int i = 0;
-    for(int y = 0; y < height; y++) {
-      for(int x = 0; x < width; x++) {
-        /*
-        * bitdepth = 8 --> bytesPerColor = 1
-        * This is an 8-bit per channel RGB array so,
-        * the rgbData array contains the data in {[R,G,B], [R,G,B], ...} format
-        * so we get all indexes in multiples of 3
-        *
-        * bitdepth = 16 --> bytesPerColor = 2
-        * This is a 16-bit per channel RGB array so,
-        * the rgbData array contains the data in {[RR,GG,BB], [RR,GG,BB], ...} format in LittleEndian order
-        * we add an offset of 1 to each channel index to get the MSB
-        * i.e. R = rgbData[1]
-        *      G = rgbData[3]
-        *      B = rgbData[5]
-        * and we get all indexes in multiples of 6 (because the array is twice the size)
-        */
-        pixel =
-            (((int)rgbData[(1 * bytesPerColor - 1) + (3 * i * bytesPerColor)]) & 0xFF) << 16
-          | (((int)rgbData[(2 * bytesPerColor - 1) + (3 * i * bytesPerColor)]) & 0xFF) << 8
-          | (((int)rgbData[(3 * bytesPerColor - 1) + (3 * i * bytesPerColor)]) & 0xFF);
-        ++i;
-        image.setRGB(x, y, pixel);
-      }
-    }
-
+    int i;
     byte[] ret = null;
 
     final ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -404,5 +383,38 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       throw new IOException(targetFormat + " format not supported.");
     }
     return ret;
+  }
+
+  private BufferedImage rgbDataToBufferedImage(final byte[] rgbData, int width, int height) {
+    BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    int pixel;
+    int bytesPerColor = bitdepth/8;
+    int i = 0;
+    for(int y = 0; y < height; y++) {
+      for(int x = 0; x < width; x++) {
+        /*
+        * bitdepth = 8 --> bytesPerColor = 1
+        * This is an 8-bit per channel RGB array so,
+        * the rgbData array contains the data in {[R,G,B], [R,G,B], ...} format
+        * so we get all indexes in multiples of 3
+        *
+        * bitdepth = 16 --> bytesPerColor = 2
+        * This is a 16-bit per channel RGB array so,
+        * the rgbData array contains the data in {[RR,GG,BB], [RR,GG,BB], ...} format in LittleEndian order
+        * we add an offset of 1 to each channel index to get the MSB
+        * i.e. R = rgbData[1]
+        *      G = rgbData[3]
+        *      B = rgbData[5]
+        * and we get all indexes in multiples of 6 (because the array is twice the size)
+        */
+        pixel =
+            (((int)rgbData[(1 * bytesPerColor - 1) + (3 * i * bytesPerColor)]) & 0xFF) << 16
+          | (((int)rgbData[(2 * bytesPerColor - 1) + (3 * i * bytesPerColor)]) & 0xFF) << 8
+          | (((int)rgbData[(3 * bytesPerColor - 1) + (3 * i * bytesPerColor)]) & 0xFF);
+        ++i;
+        image.setRGB(x, y, pixel);
+      }
+    }
+    return image;
   }
 }
