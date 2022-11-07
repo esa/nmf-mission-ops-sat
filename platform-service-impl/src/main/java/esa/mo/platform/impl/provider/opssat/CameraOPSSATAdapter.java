@@ -210,7 +210,16 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     final CameraSettings tmpSettings = new CameraSettings(settings.getResolution(), PictureFormat.RAW,
       PREVIEW_EXPOSURE_TIME, PREVIEW_GAIN, PREVIEW_GAIN, PREVIEW_GAIN);
     LOGGER.log(Level.INFO, "Taking a sample picture");
-    final bst_ims100_img_t image = innerTakePicture(tmpSettings);
+    final bst_ims100_img_t image = new bst_ims100_img_t();
+    // Each pixel of raw image is encoded as uint16
+    LOGGER.log(Level.FINE, String.format("Allocating native buffer"));
+    final int dataN
+        = (int) (tmpSettings.getResolution().getHeight().getValue() * tmpSettings.getResolution().getWidth().getValue());
+    final ByteBuffer imageData = ByteBuffer.allocateDirect(
+            dataN * 2);
+    image.setData(imageData);
+    image.setData_n(dataN);
+    internalTakePicture(tmpSettings, image);
     final byte[] rgbData = runNativeDebayering(image);
     BufferedImage bImage = rgbDataToBufferedImage(rgbData, (int)image.getAttr().getWidth(), (int)image.getAttr().getHeight());
 
@@ -249,9 +258,15 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     return takePicture(tmpSettings);
   }
 
-  private bst_ims100_img_t innerTakePicture(final CameraSettings settings) throws IOException
+  /**
+   *
+   * @param settings
+   * @param image Preconfigured image with memory for the picture
+   * @return
+   * @throws IOException
+   */
+  private void internalTakePicture(final CameraSettings settings, final bst_ims100_img_t image) throws IOException
   {
-    final bst_ims100_img_t image = new bst_ims100_img_t();
     synchronized(this) {
       this.openCamera();
       ims100_api.bst_ims100_img_config_default(imageConfig);
@@ -266,14 +281,6 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       imageConfig.setG_blue(settings.getGainBlue().shortValue());
       LOGGER.log(Level.INFO, String.format("Setting config: %s", settings.toString()));
       ims100_api.bst_ims100_set_img_config(imageConfig);
-      // Each pixel of raw image is encoded as uint16
-      LOGGER.log(Level.FINE, String.format("Allocating native buffer"));
-      final int dataN
-          = (int) (settings.getResolution().getHeight().getValue() * settings.getResolution().getWidth().getValue());
-      final ByteBuffer imageData = ByteBuffer.allocateDirect(
-              dataN * 2);
-      image.setData(imageData);
-      image.setData_n(dataN);
 
       LOGGER.log(Level.INFO, String.format("Acquiring image"));
       if (ims100_api.bst_ims100_get_img_n(image, 1, (short) 0) != bst_ret_t.BST_RETURN_SUCCESS) {
@@ -282,14 +289,23 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
       }
       this.closeCamera();
     }
-    return image;
   }
   @Override
   public Picture takePicture(final CameraSettings settings) throws IOException
   {
     synchronized(this) {
       final Time timestamp = HelperTime.getTimestampMillis();
-      final bst_ims100_img_t image = innerTakePicture(settings);
+
+      final bst_ims100_img_t image = new bst_ims100_img_t();
+      // Each pixel of raw image is encoded as uint16
+      LOGGER.log(Level.FINE, String.format("Allocating native buffer"));
+      final int dataN
+          = (int) (settings.getResolution().getHeight().getValue() * settings.getResolution().getWidth().getValue());
+      final ByteBuffer imageData = ByteBuffer.allocateDirect(
+              dataN * 2);
+      image.setData(imageData);
+      image.setData_n(dataN);
+      internalTakePicture(settings, image);
 
       byte[] rawData = null;
       final CameraSettings replySettings = new CameraSettings();
@@ -302,8 +318,8 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
         rawData = processRawCameraPicture(settings.getFormat(), image);
       } else if (settings.getFormat() == PictureFormat.RAW) {
         LOGGER.log(Level.FINE, String.format("Copying from native buffer"));
-        rawData = new byte[image.getData().capacity()];
-        ((ByteBuffer) (((Buffer)image.getData().duplicate()).clear())).get(rawData);
+        rawData = new byte[imageData.capacity()];
+        ((ByteBuffer) (((Buffer)imageData.duplicate()).clear())).get(rawData);
       }
       replySettings.setFormat(settings.getFormat());
       return new Picture(timestamp, replySettings, new Blob(rawData));
@@ -320,7 +336,6 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   }
 
   private byte[] runNativeDebayering(final bst_ims100_img_t image) throws IOException {
-    // Run debayering and possibly process further
     LOGGER.log(Level.FINE, String.format("Allocating native buffer for debayered image"));
     final ByteBuffer debayeredImageData = ByteBuffer.allocateDirect(
           (int)image.getData_n() * 3 * bitdepth/8);
