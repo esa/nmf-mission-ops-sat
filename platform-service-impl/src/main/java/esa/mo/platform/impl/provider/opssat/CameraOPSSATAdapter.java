@@ -87,6 +87,8 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   private final boolean unitAvailable;
   private final PowerControlAdapterInterface pcAdapter;
 
+  private final int imageDataMaxSize = (int) (2048 * 1944);
+  private final ByteBuffer sharedImageDataBuf = ByteBuffer.allocateDirect(imageDataMaxSize * 2);
   private static final Logger LOGGER = Logger.getLogger(CameraOPSSATAdapter.class.getName());
 
   public CameraOPSSATAdapter(PowerControlAdapterInterface pcAdapter)
@@ -210,16 +212,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
     final CameraSettings tmpSettings = new CameraSettings(settings.getResolution(), PictureFormat.RAW,
       PREVIEW_EXPOSURE_TIME, PREVIEW_GAIN, PREVIEW_GAIN, PREVIEW_GAIN);
     LOGGER.log(Level.INFO, "Taking a sample picture");
-    final bst_ims100_img_t image = new bst_ims100_img_t();
-    // Each pixel of raw image is encoded as uint16
-    LOGGER.log(Level.FINE, String.format("Allocating native buffer"));
-    final int dataN
-        = (int) (tmpSettings.getResolution().getHeight().getValue() * tmpSettings.getResolution().getWidth().getValue());
-    final ByteBuffer imageData = ByteBuffer.allocateDirect(
-            dataN * 2);
-    image.setData(imageData);
-    image.setData_n(dataN);
-    internalTakePicture(tmpSettings, image);
+    final bst_ims100_img_t image = internalTakePicture(tmpSettings);
     final byte[] rgbData = runNativeDebayering(image);
     BufferedImage bImage = rgbDataToBufferedImage(rgbData, (int)image.getAttr().getWidth(), (int)image.getAttr().getHeight());
 
@@ -261,13 +254,19 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   /**
    *
    * @param settings
-   * @param image Preconfigured image with memory for the picture
    * @return
    * @throws IOException
    */
-  private void internalTakePicture(final CameraSettings settings, final bst_ims100_img_t image) throws IOException
+  private bst_ims100_img_t internalTakePicture(final CameraSettings settings) throws IOException
   {
     synchronized(this) {
+      final bst_ims100_img_t image = new bst_ims100_img_t();
+      // Each pixel of raw image is encoded as uint16
+      final int dataN
+          = (int) (settings.getResolution().getHeight().getValue() * settings.getResolution().getWidth().getValue());
+      ((Buffer)sharedImageDataBuf).clear();
+      image.setData(sharedImageDataBuf);
+      image.setData_n(dataN);
       this.openCamera();
       ims100_api.bst_ims100_img_config_default(imageConfig);
       // Note this is not scaling but cropping the picture
@@ -288,6 +287,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
         throw new IOException("bst_ims100_get_img_n failed");
       }
       this.closeCamera();
+      return image;
     }
   }
   @Override
@@ -295,18 +295,7 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
   {
     synchronized(this) {
       final Time timestamp = HelperTime.getTimestampMillis();
-
-      final bst_ims100_img_t image = new bst_ims100_img_t();
-      // Each pixel of raw image is encoded as uint16
-      LOGGER.log(Level.FINE, String.format("Allocating native buffer"));
-      final int dataN
-          = (int) (settings.getResolution().getHeight().getValue() * settings.getResolution().getWidth().getValue());
-      final ByteBuffer imageData = ByteBuffer.allocateDirect(
-              dataN * 2);
-      image.setData(imageData);
-      image.setData_n(dataN);
-      internalTakePicture(settings, image);
-
+      final bst_ims100_img_t image = internalTakePicture(settings);
       byte[] rawData = null;
       final CameraSettings replySettings = new CameraSettings();
       replySettings.setResolution(settings.getResolution());
@@ -318,8 +307,8 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface
         rawData = processRawCameraPicture(settings.getFormat(), image);
       } else if (settings.getFormat() == PictureFormat.RAW) {
         LOGGER.log(Level.FINE, String.format("Copying from native buffer"));
-        rawData = new byte[imageData.capacity()];
-        ((ByteBuffer) (((Buffer)imageData.duplicate()).clear())).get(rawData);
+        rawData = new byte[(int)image.getData_n()];
+        ((ByteBuffer) (((Buffer)sharedImageDataBuf).clear())).get(rawData);
       }
       replySettings.setFormat(settings.getFormat());
       return new Picture(timestamp, replySettings, new Blob(rawData));
