@@ -15,21 +15,21 @@ import esa.opssat.nanomind.mc.MCHelper;
 import esa.opssat.nanomind.mc.action.ActionHelper;
 import esa.opssat.nanomind.mc.action.consumer.ActionStub;
 
-public class ActionNanomindConsumerServiceImpl extends ConsumerServiceImpl{
-    
+public class ActionNanomindConsumerServiceImpl extends ConsumerServiceImpl {
+
     private final ActionStub actionService;
 
     @Override
-    public Object generateServiceStub(final MALConsumer tmConsumer){
+    public Object generateServiceStub(final MALConsumer tmConsumer) {
         return new ActionStub(tmConsumer);
     }
 
-    public ActionStub getActionStub(){
+    public ActionStub getActionStub() {
         return actionService;
     }
 
     @Override
-    public Object getStub(){
+    public Object getStub() {
         return getActionStub();
     }
 
@@ -48,7 +48,7 @@ public class ActionNanomindConsumerServiceImpl extends ConsumerServiceImpl{
         }
 
         if (MALContextFactory.lookupArea(MCHelper.MC_AREA_NAME, MCHelper.MC_AREA_VERSION)
-                    .getServiceByName(ActionHelper.ACTION_SERVICE_NAME) == null) {
+                             .getServiceByName(ActionHelper.ACTION_SERVICE_NAME) == null) {
             ActionHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
 
@@ -64,11 +64,9 @@ public class ActionNanomindConsumerServiceImpl extends ConsumerServiceImpl{
             }
         }
 
-        tmConsumer = connection.startService(
-                this.connectionDetails.getProviderURI(),
-                this.connectionDetails.getBrokerURI(),
-                this.connectionDetails.getDomain(),
-                ActionHelper.ACTION_SERVICE);
+        tmConsumer = connection.startService(this.connectionDetails.getProviderURI(), this.connectionDetails
+                                                                                                            .getBrokerURI(),
+                                             this.connectionDetails.getDomain(), ActionHelper.ACTION_SERVICE);
 
         this.actionService = new ActionStub(tmConsumer);
 

@@ -22,7 +22,6 @@ package esa.mo.platform.impl.util;
 
 import esa.mo.com.impl.util.COMServicesProvider;
 import esa.mo.helpertools.connections.ConnectionConsumer;
-import esa.mo.nanomind.impl.util.NanomindServicesConsumer;
 import esa.mo.platform.impl.provider.gen.PowerControlProviderServiceImpl;
 import esa.mo.platform.impl.provider.gen.CameraProviderServiceImpl;
 import esa.mo.platform.impl.provider.gen.GPSProviderServiceImpl;
@@ -43,73 +42,60 @@ import org.ccsds.moims.mo.mal.MALException;
  *
  *
  */
-public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderInterface
-{
+public class PlatformServicesProviderOPSSAT implements PlatformServicesProviderInterface {
 
-  private final static Logger LOGGER = Logger.getLogger(
-      PlatformServicesProviderOPSSAT.class.getName());
-  private final AutonomousADCSProviderServiceImpl adcsService
-      = new AutonomousADCSProviderServiceImpl();
-  private final CameraProviderServiceImpl cameraService = new CameraProviderServiceImpl();
-  private final GPSProviderServiceImpl gpsService = new GPSProviderServiceImpl();
-  private final OpticalDataReceiverProviderServiceImpl optrxService
-      = new OpticalDataReceiverProviderServiceImpl();
-  private final PowerControlProviderServiceImpl powerService = new PowerControlProviderServiceImpl();
-  private final SoftwareDefinedRadioProviderServiceImpl sdrService
-      = new SoftwareDefinedRadioProviderServiceImpl();
-  private PowerControlOPSSATAdapter pcAdapter = null;
+    private final static Logger LOGGER = Logger.getLogger(PlatformServicesProviderOPSSAT.class.getName());
+    private final AutonomousADCSProviderServiceImpl adcsService = new AutonomousADCSProviderServiceImpl();
+    private final CameraProviderServiceImpl cameraService = new CameraProviderServiceImpl();
+    private final GPSProviderServiceImpl gpsService = new GPSProviderServiceImpl();
+    private final OpticalDataReceiverProviderServiceImpl optrxService = new OpticalDataReceiverProviderServiceImpl();
+    private final PowerControlProviderServiceImpl powerService = new PowerControlProviderServiceImpl();
+    private final SoftwareDefinedRadioProviderServiceImpl sdrService = new SoftwareDefinedRadioProviderServiceImpl();
+    private PowerControlOPSSATAdapter pcAdapter = null;
 
-  @Override
-  public void init(final COMServicesProvider comServices) throws
-      MALException
-  {
-    try {
-      pcAdapter = new PowerControlOPSSATAdapter();
-      powerService.init(pcAdapter);
-      gpsService.init(comServices, new GPSOPSSATAdapter(pcAdapter));
-      adcsService.init(comServices, new AutonomousADCSOPSSATAdapter(pcAdapter));
-      cameraService.init(comServices, new CameraOPSSATAdapter(pcAdapter));
-      optrxService.init(new OpticalRxOPSSATAdapter(pcAdapter));
-      sdrService.init(new SDROPSSATAdapter(pcAdapter));
-    } catch (UnsatisfiedLinkError | NoClassDefFoundError | NoSuchMethodError error) {
-      LOGGER.log(Level.SEVERE,
-          "Could not load platform adapters (check for missing JARs and libraries)", error);
+    @Override
+    public void init(final COMServicesProvider comServices) throws MALException {
+        try {
+            pcAdapter = new PowerControlOPSSATAdapter();
+            powerService.init(pcAdapter);
+            gpsService.init(comServices, new GPSOPSSATAdapter(pcAdapter));
+            adcsService.init(comServices, new AutonomousADCSOPSSATAdapter(pcAdapter));
+            cameraService.init(comServices, new CameraOPSSATAdapter(pcAdapter));
+            optrxService.init(new OpticalRxOPSSATAdapter(pcAdapter));
+            sdrService.init(new SDROPSSATAdapter(pcAdapter));
+        } catch (UnsatisfiedLinkError | NoClassDefFoundError | NoSuchMethodError error) {
+            LOGGER.log(Level.SEVERE, "Could not load platform adapters (check for missing JARs and libraries)", error);
+        }
     }
-  }
 
-  @Override
-  public void startStatusTracking(ConnectionConsumer connection) {
-    pcAdapter.startStatusTracking(connection);
-  }
+    @Override
+    public void startStatusTracking(ConnectionConsumer connection) {
+        pcAdapter.startStatusTracking(connection);
+    }
 
-  @Override
-  public GPSProviderServiceImpl getGPSService()
-  {
-    return this.gpsService;
-  }
+    @Override
+    public GPSProviderServiceImpl getGPSService() {
+        return this.gpsService;
+    }
 
-  @Override
-  public CameraProviderServiceImpl getCameraService()
-  {
-    return this.cameraService;
-  }
+    @Override
+    public CameraProviderServiceImpl getCameraService() {
+        return this.cameraService;
+    }
 
-  @Override
-  public AutonomousADCSProviderServiceImpl getAutonomousADCSService()
-  {
-    return this.adcsService;
-  }
+    @Override
+    public AutonomousADCSProviderServiceImpl getAutonomousADCSService() {
+        return this.adcsService;
+    }
 
-  @Override
-  public OpticalDataReceiverProviderServiceImpl getOpticalDataReceiverService()
-  {
-    return this.optrxService;
-  }
+    @Override
+    public OpticalDataReceiverProviderServiceImpl getOpticalDataReceiverService() {
+        return this.optrxService;
+    }
 
-  @Override
-  public SoftwareDefinedRadioProviderServiceImpl getSoftwareDefinedRadioService()
-  {
-    return this.sdrService;
-  }
+    @Override
+    public SoftwareDefinedRadioProviderServiceImpl getSoftwareDefinedRadioService() {
+        return this.sdrService;
+    }
 
 }

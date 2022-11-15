@@ -23,7 +23,6 @@ package esa.mo.nanomind.impl.consumer;
 import esa.mo.helpertools.connections.ConnectionConsumer;
 import esa.mo.helpertools.misc.ConsumerServiceImpl;
 import esa.mo.helpertools.connections.SingleConnectionDetails;
-import esa.opssat.nanomind.opssat_pf.experimentwd.ExperimentWDHelper;
 import java.net.MalformedURLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,15 +67,16 @@ public class GPSNanomindConsumerServiceImpl extends ConsumerServiceImpl {
             COMHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
 
-        if (MALContextFactory.lookupArea(OPSSAT_PFHelper.OPSSAT_PF_AREA_NAME, OPSSAT_PFHelper.OPSSAT_PF_AREA_VERSION) == null) {
+        if (MALContextFactory.lookupArea(OPSSAT_PFHelper.OPSSAT_PF_AREA_NAME, OPSSAT_PFHelper.OPSSAT_PF_AREA_VERSION) ==
+            null) {
             OPSSAT_PFHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
 
         if (MALContextFactory.lookupArea(OPSSAT_PFHelper.OPSSAT_PF_AREA_NAME, OPSSAT_PFHelper.OPSSAT_PF_AREA_VERSION)
-                    .getServiceByName(GPSHelper.GPS_SERVICE_NAME) == null) {
+                             .getServiceByName(GPSHelper.GPS_SERVICE_NAME) == null) {
             GPSHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
-        
+
         connection = new ConnectionConsumer();
         this.connectionDetails = connectionDetails;
 
@@ -89,11 +89,9 @@ public class GPSNanomindConsumerServiceImpl extends ConsumerServiceImpl {
             }
         }
 
-        tmConsumer = connection.startService(
-                this.connectionDetails.getProviderURI(),
-                this.connectionDetails.getBrokerURI(),
-                this.connectionDetails.getDomain(),
-                GPSHelper.GPS_SERVICE);
+        tmConsumer = connection.startService(this.connectionDetails.getProviderURI(), this.connectionDetails
+                                                                                                            .getBrokerURI(),
+                                             this.connectionDetails.getDomain(), GPSHelper.GPS_SERVICE);
 
         this.gpsNanomindService = new GPSStub(tmConsumer);
     }

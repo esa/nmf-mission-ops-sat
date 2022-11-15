@@ -26,54 +26,44 @@ import org.ccsds.moims.mo.testbed.util.spp.SpacePacket;
 
 /**
  */
-public class SPPMessageReceiver implements esa.mo.mal.transport.gen.util.GENMessagePoller.GENMessageReceiver<SpacePacket>
-{
-  protected final SPPSocket socket;
+public class SPPMessageReceiver implements esa.mo.mal.transport.gen.util.GENMessagePoller.GENMessageReceiver<SpacePacket> {
+    protected final SPPSocket socket;
 
-  /**
-   * Constructor.
-   *
-   * @param socket the socket.
-   */
-  public SPPMessageReceiver(final SPPSocket socket)
-  {
-    this.socket = socket;
-  }
-
-  @Override
-  public SpacePacket readEncodedMessage() throws IOException
-  {
-    try
-    {
-      final SpacePacket spacePacket = socket.receive();
-
-      // PENDING: SPP TCP implementation allocates a new Space Packet with a body size of
-      // 65536 bytes. If the received Space Packet is smaller, the body byte array is not
-      // trimmed to fit. Here: Create new byte array of right size, copy contents, and set
-      // array as new body of the Space Packet.
-      final byte[] trimmedBody = new byte[spacePacket.getLength()];
-      System.arraycopy(spacePacket.getBody(), 0, trimmedBody, 0, spacePacket.getLength());
-      spacePacket.setBody(trimmedBody);
-
-      return spacePacket;
+    /**
+     * Constructor.
+     *
+     * @param socket the socket.
+     */
+    public SPPMessageReceiver(final SPPSocket socket) {
+        this.socket = socket;
     }
-    catch (final Exception ex)
-    {
-      // socket has been closed to throw EOF exception higher
-      throw new java.io.EOFException();
-    }
-  }
 
-  @Override
-  public void close()
-  {
-    try
-    {
-      socket.close();
+    @Override
+    public SpacePacket readEncodedMessage() throws IOException {
+        try {
+            final SpacePacket spacePacket = socket.receive();
+
+            // PENDING: SPP TCP implementation allocates a new Space Packet with a body size of
+            // 65536 bytes. If the received Space Packet is smaller, the body byte array is not
+            // trimmed to fit. Here: Create new byte array of right size, copy contents, and set
+            // array as new body of the Space Packet.
+            final byte[] trimmedBody = new byte[spacePacket.getLength()];
+            System.arraycopy(spacePacket.getBody(), 0, trimmedBody, 0, spacePacket.getLength());
+            spacePacket.setBody(trimmedBody);
+
+            return spacePacket;
+        } catch (final Exception ex) {
+            // socket has been closed to throw EOF exception higher
+            throw new java.io.EOFException();
+        }
     }
-    catch (final Exception ex)
-    {
-      ex.printStackTrace();
+
+    @Override
+    public void close() {
+        try {
+            socket.close();
+        } catch (final Exception ex) {
+            ex.printStackTrace();
+        }
     }
-  }
 }

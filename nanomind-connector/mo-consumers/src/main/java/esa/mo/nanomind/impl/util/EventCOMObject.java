@@ -36,145 +36,121 @@ import org.ccsds.moims.mo.mal.structures.URI;
  *
  * @author Cesar Coelho
  */
-public class EventCOMObject
-{
+public class EventCOMObject {
 
-  private IdentifierList domain;
-  private ObjectType objType;
-  private Long objId;
+    private IdentifierList domain;
+    private ObjectType objType;
+    private Long objId;
 
-  private ObjectId source;
-  private Long related;
-  private Element body;
+    private ObjectId source;
+    private Long related;
+    private Element body;
 
-  private Time timestamp;
-  private Identifier networkZone;
-  private URI sourceURI;
+    private Time timestamp;
+    private Identifier networkZone;
+    private URI sourceURI;
 
-  public EventCOMObject()
-  {
-  }
+    public EventCOMObject() {
+    }
 
-  public EventCOMObject(final IdentifierList domain, final ObjectType objType,
-      final Long objId, final ObjectId source, final Long related, final Element body,
-      final Time timestamp, final Identifier networkZone, final URI sourceURI)
-  {
-    this.domain = domain;
-    this.objType = objType;
-    this.objId = objId;
+    public EventCOMObject(final IdentifierList domain, final ObjectType objType, final Long objId,
+                          final ObjectId source, final Long related, final Element body, final Time timestamp,
+                          final Identifier networkZone, final URI sourceURI) {
+        this.domain = domain;
+        this.objType = objType;
+        this.objId = objId;
 
-    this.source = source;
-    this.related = related;
-    this.body = body;
+        this.source = source;
+        this.related = related;
+        this.body = body;
 
-    this.timestamp = timestamp;
-    this.networkZone = networkZone;
-    this.sourceURI = sourceURI;
-  }
+        this.timestamp = timestamp;
+        this.networkZone = networkZone;
+        this.sourceURI = sourceURI;
+    }
 
-  public IdentifierList getDomain()
-  {
-    return domain;
-  }
+    public IdentifierList getDomain() {
+        return domain;
+    }
 
-  public ObjectType getObjType()
-  {
-    return objType;
-  }
+    public ObjectType getObjType() {
+        return objType;
+    }
 
-  public Long getObjId()
-  {
-    return objId;
-  }
+    public Long getObjId() {
+        return objId;
+    }
 
-  public ObjectId getSource()
-  {
-    return source;
-  }
+    public ObjectId getSource() {
+        return source;
+    }
 
-  public Long getRelated()
-  {
-    return related;
-  }
+    public Long getRelated() {
+        return related;
+    }
 
-  public Element getBody()
-  {
-    return body;
-  }
+    public Element getBody() {
+        return body;
+    }
 
-  public Time getTimestamp()
-  {
-    return timestamp;
-  }
+    public Time getTimestamp() {
+        return timestamp;
+    }
 
-  public Identifier getNetworkZone()
-  {
-    return networkZone;
-  }
+    public Identifier getNetworkZone() {
+        return networkZone;
+    }
 
-  public URI getSourceURI()
-  {
-    return sourceURI;
-  }
+    public URI getSourceURI() {
+        return sourceURI;
+    }
 
-  public void setDomain(final IdentifierList domain)
-  {
-    this.domain = domain;
-  }
+    public void setDomain(final IdentifierList domain) {
+        this.domain = domain;
+    }
 
-  public void setObjType(final ObjectType objType)
-  {
-    this.objType = objType;
-  }
+    public void setObjType(final ObjectType objType) {
+        this.objType = objType;
+    }
 
-  public void setObjId(final Long objId)
-  {
-    this.objId = objId;
-  }
+    public void setObjId(final Long objId) {
+        this.objId = objId;
+    }
 
-  public void setSource(final ObjectId source)
-  {
-    this.source = source;
-  }
+    public void setSource(final ObjectId source) {
+        this.source = source;
+    }
 
-  public void setRelated(final Long related)
-  {
-    this.related = related;
-  }
+    public void setRelated(final Long related) {
+        this.related = related;
+    }
 
-  public void setBody(final Element body)
-  {
-    this.body = body;
-  }
+    public void setBody(final Element body) {
+        this.body = body;
+    }
 
-  public void setTimestamp(final Time timestamp)
-  {
-    this.timestamp = timestamp;
-  }
+    public void setTimestamp(final Time timestamp) {
+        this.timestamp = timestamp;
+    }
 
-  public void setNetworkZone(final Identifier networkZone)
-  {
-    this.networkZone = networkZone;
-  }
+    public void setNetworkZone(final Identifier networkZone) {
+        this.networkZone = networkZone;
+    }
 
-  public void setSourceURI(final URI sourceURI)
-  {
-    this.sourceURI = sourceURI;
-  }
+    public void setSourceURI(final URI sourceURI) {
+        this.sourceURI = sourceURI;
+    }
 
-  public ObjectId getObjectId()
-  {
-    return new ObjectId(this.objType, new ObjectKey(this.domain, this.objId));
-  }
+    public ObjectId getObjectId() {
+        return new ObjectId(this.objType, new ObjectKey(this.domain, this.objId));
+    }
 
-  @Override
-  public String toString()
-  {
-    return MessageFormat.format(
-        "EventCOMObject: domain={1}, objType={2}, objId={3}, source={4}, related={5}"
-        + ", body={6}, timestamp={7}, networkZone={8}, sourceURI={9}",
-        HelperMisc.domain2domainId(domain), objType, objId, source, related, body, timestamp,
-        networkZone, sourceURI);
-  }
+    @Override
+    public String toString() {
+        return MessageFormat.format("EventCOMObject: domain={1}, objType={2}, objId={3}, source={4}, related={5}" +
+                                    ", body={6}, timestamp={7}, networkZone={8}, sourceURI={9}", HelperMisc
+                                                                                                           .domain2domainId(domain),
+                                    objType, objId, source, related, body, timestamp, networkZone, sourceURI);
+    }
 
 }

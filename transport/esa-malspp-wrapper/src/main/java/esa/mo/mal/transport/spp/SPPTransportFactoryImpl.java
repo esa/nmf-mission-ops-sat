@@ -29,33 +29,28 @@ import org.ccsds.moims.mo.mal.transport.MALTransportFactory;
 /**
  * Instance of the transport factory for a TCP/IP transport.
  */
-public class SPPTransportFactoryImpl extends MALTransportFactory
-{
-  private static final Object MUTEX = new Object();
-  private SPPTransport transport;
+public class SPPTransportFactoryImpl extends MALTransportFactory {
+    private static final Object MUTEX = new Object();
+    private SPPTransport transport;
 
-  /**
-   * Constructor.
-   *
-   * @param protocol The protocol string.
-   */
-  public SPPTransportFactoryImpl(final String protocol)
-  {
-    super(protocol);
-  }
-
-  @Override
-  public MALTransport createTransport(final MALContext malContext, final Map properties) throws MALException
-  {
-    synchronized (MUTEX)
-    {
-      if (null == transport)
-      {
-        transport = new SPPTransport(getProtocol(), this, properties);
-        transport.init();
-      }
-
-      return transport;
+    /**
+     * Constructor.
+     *
+     * @param protocol The protocol string.
+     */
+    public SPPTransportFactoryImpl(final String protocol) {
+        super(protocol);
     }
-  }
+
+    @Override
+    public MALTransport createTransport(final MALContext malContext, final Map properties) throws MALException {
+        synchronized (MUTEX) {
+            if (null == transport) {
+                transport = new SPPTransport(getProtocol(), this, properties);
+                transport.init();
+            }
+
+            return transport;
+        }
+    }
 }

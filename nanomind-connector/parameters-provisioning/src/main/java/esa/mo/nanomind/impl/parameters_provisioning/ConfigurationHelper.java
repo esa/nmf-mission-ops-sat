@@ -29,30 +29,28 @@ import java.util.logging.Logger;
  * @author Tangy Soto
  */
 public class ConfigurationHelper {
-  private static final Logger LOGGER = Logger.getLogger(ConfigurationHelper.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ConfigurationHelper.class.getName());
 
-  /**
-   * Tries to get a system property and parse it as an Integer.
-   * 
-   * @param propertyKey The property key
-   * @param defaultValue Default value to return if the property is not found
-   * @return the parsed system property
-   */
-  public static int getIntegerProperty(String propertyKey, int defaultValue) {
-    String propertyValue = System.getProperty(propertyKey);
-    if (propertyValue != null) {
-      try {
-        return Integer.parseInt(propertyValue);
-      } catch (NumberFormatException e) {
-        LOGGER.log(Level.WARNING,
-            String.format("Error parsing properties %s to Integer, defaulting to %d", propertyKey,
-                defaultValue),
-            e);
+    /**
+     * Tries to get a system property and parse it as an Integer.
+     * 
+     * @param propertyKey The property key
+     * @param defaultValue Default value to return if the property is not found
+     * @return the parsed system property
+     */
+    public static int getIntegerProperty(String propertyKey, int defaultValue) {
+        String propertyValue = System.getProperty(propertyKey);
+        if (propertyValue != null) {
+            try {
+                return Integer.parseInt(propertyValue);
+            } catch (NumberFormatException e) {
+                LOGGER.log(Level.WARNING, String.format("Error parsing properties %s to Integer, defaulting to %d",
+                                                        propertyKey, defaultValue), e);
+                return defaultValue;
+            }
+        }
+        LOGGER.log(Level.WARNING, String.format("Properties %s not found, defaulting to %d", propertyKey,
+                                                defaultValue));
         return defaultValue;
-      }
     }
-    LOGGER.log(Level.WARNING,
-        String.format("Properties %s not found, defaulting to %d", propertyKey, defaultValue));
-    return defaultValue;
-  }
 }

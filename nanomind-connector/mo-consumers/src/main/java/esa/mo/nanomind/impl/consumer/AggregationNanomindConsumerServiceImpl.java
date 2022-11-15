@@ -72,7 +72,7 @@ public class AggregationNanomindConsumerServiceImpl extends ConsumerServiceImpl 
         }
 
         if (MALContextFactory.lookupArea(MCHelper.MC_AREA_NAME, MCHelper.MC_AREA_VERSION)
-                    .getServiceByName(AggregationHelper.AGGREGATION_SERVICE_NAME) == null) {
+                             .getServiceByName(AggregationHelper.AGGREGATION_SERVICE_NAME) == null) {
             AggregationHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
 
@@ -88,11 +88,9 @@ public class AggregationNanomindConsumerServiceImpl extends ConsumerServiceImpl 
             }
         }
 
-        tmConsumer = connection.startService(
-                this.connectionDetails.getProviderURI(),
-                this.connectionDetails.getBrokerURI(),
-                this.connectionDetails.getDomain(),
-                AggregationHelper.AGGREGATION_SERVICE);
+        tmConsumer = connection.startService(this.connectionDetails.getProviderURI(), this.connectionDetails
+                                                                                                            .getBrokerURI(),
+                                             this.connectionDetails.getDomain(), AggregationHelper.AGGREGATION_SERVICE);
 
         this.aggregationService = new AggregationStub(tmConsumer);
 
