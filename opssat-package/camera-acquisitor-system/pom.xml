@@ -24,8 +24,8 @@
 
   <groupId>int.esa.nmf.mission.opssat</groupId>
   <artifactId>cas-package</artifactId>
-  <name>ESA NMF Mission OPS-SAT - Package Assembly</name>
-  <packaging>jar</packaging>
+  <name>ESA NMF Mission OPS-SAT - Camera Acquisitor System Assembly</name>
+  <packaging>pom</packaging>
 
   <organization>
     <name>ESA</name>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-  <!--
+<!--
     Licensed under European Space Agency Public License (ESA-PL) Weak Copyleft – v2.4
     You may not use this file except in compliance with the License.
 
@@ -13,16 +13,16 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  
+
   <parent>
     <groupId>int.esa.nmf.mission.opssat</groupId>
     <artifactId>parent</artifactId>
     <version>2.1.0-SNAPSHOT</version>
     <relativePath>../parent/pom.xml</relativePath>
   </parent>
-  
+
   <groupId>int.esa.nmf.mission.opssat.moservices.impl</groupId>
   <artifactId>nmf-platform-impl-opssat</artifactId>
   <packaging>jar</packaging>
@@ -30,7 +30,7 @@
   <name>ESA NMF Mission OPS-SAT - Platform Services Implementation</name>
   <description>The ESA/TU Graz implementation of the Platform services for OPS-SAT</description>
   <url>http://www.esa.int</url>
-  
+
   <organization>
     <name>ESA</name>
     <url>http://www.esa.int</url>
@@ -43,12 +43,12 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
-    
+
   <issueManagement>
     <system>GitHub</system>
     <url>https://github.com/CesarCoelho/BUG_REPORTS_NANOSAT_MO_FRAMEWORK/issues</url>
   </issueManagement>
-  
+
   <developers>
     <developer>
       <id>CesarCoelho</id>
@@ -148,11 +148,10 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  
+
   <build>
-    <resources>
-    </resources>
-    
+    <resources></resources>
+
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

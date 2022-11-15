@@ -13,31 +13,29 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <!-- TODO: Remove dependency on NMF -->
   <parent>
     <groupId>int.esa.nmf.mission.opssat</groupId>
     <artifactId>parent</artifactId>
     <version>2.1.0-SNAPSHOT</version>
     <relativePath>../../parent/pom.xml</relativePath>
   </parent>
-  
+
   <groupId>int.esa.opssat.transport</groupId>
   <artifactId>malspp-over-cfp-tcp</artifactId>
-  <version>2.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>ESA OPS-SAT Transport - SPP over TCP</name>
   <description>A glue code for transporting Space Packets over TCP</description>
   <url>http://www.esa.int</url>
-  
+
   <organization>
     <name>ESA</name>
     <url>http://www.esa.int</url>
   </organization>
-  
+
   <licenses>
     <license>
       <name>European Space Agency Public License (ESA-PL) Weak Copyleft – v2.4</name>
@@ -56,12 +54,12 @@
     <developerConnection>scm:git:git@github.com:esa/CCSDS_MO_TESTBEDS.git</developerConnection>
     <url>https://github.com/esa/CCSDS_MO_TESTBEDS</url>
   </scm>
-  
+
   <issueManagement>
     <system>GitHub</system>
     <url>https://github.com/esa/CCSDS_MO_TESTBEDS/issues</url>
   </issueManagement>
-  
+
   <developers>
     <developer>
       <id>CesarCoelho</id>
@@ -91,9 +89,8 @@
   </dependencies>
 
   <build>
-    <resources>
-    </resources>
-    
+    <resources></resources>
+
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
