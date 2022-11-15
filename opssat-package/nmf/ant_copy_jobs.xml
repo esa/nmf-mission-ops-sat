@@ -36,23 +36,4 @@
     </copy>
     <chmod dir="${esa.nmf.mission.opssat.assembly.outputdir}" perm="ugo+rx" includes="**/*.sh"/>
   </target>
-  <target name="copyExp">
-    <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/experimenter-package/home/exp${expId}/">
-      <fileset dir="${basedir}/../src/main/resources/space-common"/>
-      <fileset dir="${basedir}/../src/main/resources/space-app-root"/>
-      <filterset>
-        <filter token="MAIN_CLASS_NAME" value="esa.mo.nmf.apps.PayloadsTestApp"/>
-        <filter token="APID" value="${expApid}"/>
-        <filter token="NMF_HOME" value="`cd ../nmf > /dev/null; pwd`"/>
-        <filter token="NMF_LIB" value="`cd ../nmf/lib > /dev/null; pwd`"/>
-        <filter token="USER" value="exp${expId}"/>
-        <filter token="MAX_HEAP" value="128m"/>
-      </filterset>
-      <firstmatchmapper>
-        <globmapper from="startscript.sh" to="start_exp${expId}.sh"/>
-        <globmapper from="*" to="*"/>
-      </firstmatchmapper>
-    </copy>
-    <chmod dir="${esa.nmf.mission.opssat.assembly.outputdir}" perm="ugo+rx" includes="**/*.sh"/>
-  </target>
 </project>

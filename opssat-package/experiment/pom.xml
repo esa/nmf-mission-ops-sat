@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Licensed under European Space Agency Public License (ESA-PL) Weak Copyleft – v2.4
+    You may not use this file except in compliance with the License.
+
+    Except as expressly set forth in this License, the Software is provided to
+    You on an "as is" basis and without warranties of any kind, including without
+    limitation merchantability, fitness for a particular purpose, absence of
+    defects or errors, accuracy or non-infringement of intellectual property rights.
+
+    See the License for the specific language governing permissions and limitations under the License.
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>int.esa.nmf.mission.opssat</groupId>
+    <artifactId>parent</artifactId>
+    <version>2.1.0-SNAPSHOT</version>
+    <relativePath>../../parent/pom.xml</relativePath>
+  </parent>
+
+  <groupId>int.esa.nmf.mission.opssat</groupId>
+  <artifactId>experiment</artifactId>
+  <name>ESA NMF Mission OPS-SAT - Experiment Preparation Assembly</name>
+  <packaging>jar</packaging>
+
+  <properties>
+    <!-- Change the following 4 properties to match the information of your app -->
+    <!-- The declared version is arbitrary and does not have to match the NMF version, but only the app version -->
+    <expId>000</expId>
+    <expApid>1024</expApid>
+    <expMainClass>esa.mo.nmf.apps.PayloadsTestApp</expMainClass>
+    <expVersion>2.1.0-SNAPSHOT</expVersion>
+    <!-- Do not change the following -->
+    <esa.nmf.mission.opssat.assembly.outputdir>${project.build.directory}/experiment-package</esa.nmf.mission.opssat.assembly.outputdir>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>int.esa.nmf.sdk.examples.space</groupId>
+      <artifactId>payloads-test</artifactId>
+      <version>${expVersion}</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <!-- Configure the following plugin for experiment dependencies generation -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>expLib</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <!-- Change the following 3 properties to locate JAR your app needs -->
+                  <groupId>int.esa.nmf.sdk.examples.space</groupId>
+                  <artifactId>payloads-test</artifactId>
+                  <version>${expVersion}</version>
+                  <!-- Do not change the following -->
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <outputDirectory>${esa.nmf.mission.opssat.assembly.outputdir}/home/exp${expId}/lib/</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- disable JAR assembly -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.4</version>
+        <executions>
+          <execution>
+            <id>default-jar</id>
+            <phase/>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.8</version>
+        <executions>
+          <execution>
+            <id>experimenter</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <ant antfile="ant_copy_jobs.xml" target="copyExp"/>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

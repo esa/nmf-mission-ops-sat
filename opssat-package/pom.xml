@@ -64,6 +64,7 @@
     <modules>
         <module>nmf</module>
         <module>camera-acquisitor-system</module>
+        <module>experiment</module>
     </modules>
 
 </project>
