@@ -36,110 +36,110 @@ import esa.mo.nmf.nanosatmosupervisor.parameter.OBSWParameterValuesProvider;
  */
 class CacheHandler extends OBSWParameterValuesProvider {
 
-  /**
-   * Map of OBSW parameter value by parameter name acting as our cache storage.
-   */
-  private final Map<Identifier, TimedAttributeValue> cache;
+    /**
+     * Map of OBSW parameter value by parameter name acting as our cache storage.
+     */
+    private final Map<Identifier, TimedAttributeValue> cache;
 
-  /*
-   * Cache configuration settings
-   */
+    /*
+     * Cache configuration settings
+     */
 
-  /**
-   * Maximum time a parameter value should stay in the cache in milliseconds.
-   */
-  private int cachingTime = 10000;
+    /**
+     * Maximum time a parameter value should stay in the cache in milliseconds.
+     */
+    private int cachingTime = 10000;
 
-  /**
-   * Creates a new instance of CacheHandler.
-   * 
-   * @param parameterMap
-   */
-  public CacheHandler(HashMap<Identifier, OBSWParameter> parameterMap) {
-    super(parameterMap);
-    cache = new HashMap<>();
-  }
-
-  /**
-   * Sets the maximum time a parameter value should stay in the cache in milliseconds.
-   * 
-   * @param cachingTime the time
-   */
-  public void setCachingTime(int cachingTime) {
-    this.cachingTime = cachingTime;
-  }
-
-  /**
-   * Returns true if the cached value of this parameter has to be refreshed according to the cache
-   * settings.
-   *
-   * @param identifier Name of the parameter
-   * @return A boolean
-   */
-  public synchronized boolean mustRefreshValue(Identifier identifier) {
-    // Value for this parameter has never been cached
-    if (!cache.containsKey(identifier)) {
-      return true;
+    /**
+     * Creates a new instance of CacheHandler.
+     * 
+     * @param parameterMap
+     */
+    public CacheHandler(HashMap<Identifier, OBSWParameter> parameterMap) {
+        super(parameterMap);
+        cache = new HashMap<>();
     }
 
-    long now = System.currentTimeMillis();
-
-    // This parameter value is outdated
-    return now - cache.get(identifier).getLastUpdateTime().getTime() > cachingTime;
-
-    // No need to refresh, cached value is still valid.
-  }
-
-  /**
-   * Updates the last request time of this parameter to the time of the call.
-   * 
-   * @param identifier Name of the parameter
-   */
-  public synchronized void updateLastRequestTime(Identifier identifier) {
-    if (!cache.containsKey(identifier)) {
-      return;
+    /**
+     * Sets the maximum time a parameter value should stay in the cache in milliseconds.
+     * 
+     * @param cachingTime the time
+     */
+    public void setCachingTime(int cachingTime) {
+        this.cachingTime = cachingTime;
     }
-    cache.get(identifier).updateLastRequestTime();
-  }
 
-  /**
-   * Returns the date and time at which the parameter was last requested.
-   *
-   * @param identifier Name of the parameter
-   * @return A Date object or null if the parameter was never requested before
-   */
-  public synchronized Date getLastRequestTime(Identifier identifier) {
-    if (!cache.containsKey(identifier)) {
-      return null;
+    /**
+     * Returns true if the cached value of this parameter has to be refreshed according to the cache
+     * settings.
+     *
+     * @param identifier Name of the parameter
+     * @return A boolean
+     */
+    public synchronized boolean mustRefreshValue(Identifier identifier) {
+        // Value for this parameter has never been cached
+        if (!cache.containsKey(identifier)) {
+            return true;
+        }
+
+        long now = System.currentTimeMillis();
+
+        // This parameter value is outdated
+        return now - cache.get(identifier).getLastUpdateTime().getTime() > cachingTime;
+
+        // No need to refresh, cached value is still valid.
     }
-    return cache.get(identifier).getLastRequestTime();
-  }
 
-  /** {@inheritDoc} */
-  @Override
-  public synchronized Attribute getValue(Identifier identifier) {
-    if (!cache.containsKey(identifier)) {
-      return null;
+    /**
+     * Updates the last request time of this parameter to the time of the call.
+     * 
+     * @param identifier Name of the parameter
+     */
+    public synchronized void updateLastRequestTime(Identifier identifier) {
+        if (!cache.containsKey(identifier)) {
+            return;
+        }
+        cache.get(identifier).updateLastRequestTime();
     }
-    return cache.get(identifier).getValue();
-  }
 
-  /**
-   * Caches a value for a given OBSW parameter name
-   *
-   * @param value Value to cache
-   * @param identifier Name of the parameter
-   */
-  public synchronized void cacheValue(Attribute value, Identifier identifier) {
-    if (!cache.containsKey(identifier)) {
-      cache.put(identifier, new TimedAttributeValue(value));
-    } else {
-      cache.get(identifier).setValue(value);
+    /**
+     * Returns the date and time at which the parameter was last requested.
+     *
+     * @param identifier Name of the parameter
+     * @return A Date object or null if the parameter was never requested before
+     */
+    public synchronized Date getLastRequestTime(Identifier identifier) {
+        if (!cache.containsKey(identifier)) {
+            return null;
+        }
+        return cache.get(identifier).getLastRequestTime();
     }
-  }
 
-  @Override
-  public Boolean setValue(Attribute value, Identifier identifier){
-    return false;
-  }
+    /** {@inheritDoc} */
+    @Override
+    public synchronized Attribute getValue(Identifier identifier) {
+        if (!cache.containsKey(identifier)) {
+            return null;
+        }
+        return cache.get(identifier).getValue();
+    }
+
+    /**
+     * Caches a value for a given OBSW parameter name
+     *
+     * @param value Value to cache
+     * @param identifier Name of the parameter
+     */
+    public synchronized void cacheValue(Attribute value, Identifier identifier) {
+        if (!cache.containsKey(identifier)) {
+            cache.put(identifier, new TimedAttributeValue(value));
+        } else {
+            cache.get(identifier).setValue(value);
+        }
+    }
+
+    @Override
+    public Boolean setValue(Attribute value, Identifier identifier) {
+        return false;
+    }
 }

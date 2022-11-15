@@ -46,200 +46,181 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-public class ServerTCPSPPSocket implements SPPSocket
-{
+public class ServerTCPSPPSocket implements SPPSocket {
 
-  private static final java.util.logging.Logger LOGGER
-      = java.util.logging.Logger.getLogger(ServerTCPSPPSocket.class.getName());
+    private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(ServerTCPSPPSocket.class.getName());
 
-  private static final int MAX_ERROR_COUNT = 10;
+    private static final int MAX_ERROR_COUNT = 10;
 
-  public final static String PORT_PROP = "org.ccsds.moims.mo.malspp.test.sppimpl.tcp.port";
-  private int port;
-  private ServerSocket listenerSocket;
-  private boolean tcpNoDelay;
-  private final List<SPPChannel> channels = new ArrayList<>();
-  private AcceptorDaemon readerDaemon;
+    public final static String PORT_PROP = "org.ccsds.moims.mo.malspp.test.sppimpl.tcp.port";
+    private int port;
+    private ServerSocket listenerSocket;
+    private boolean tcpNoDelay;
+    private final List<SPPChannel> channels = new ArrayList<>();
+    private AcceptorDaemon readerDaemon;
 
-  private final LinkedBlockingQueue<SpacePacket> input = new LinkedBlockingQueue<>();
+    private final LinkedBlockingQueue<SpacePacket> input = new LinkedBlockingQueue<>();
 
-  public ServerTCPSPPSocket()
-  {
-    super();
-  }
-
-  public void init(final Map properties) throws Exception
-  {
-    final String portS = (String) properties.get(PORT_PROP);
-    port = Integer.parseInt(portS);
-    listen(port);
-  }
-
-  private void listen(final int port) throws Exception
-  {
-    LOGGER.log(Level.FINE, "listen({0})", new Object[]{port});
-    listenerSocket = new ServerSocket(port);
-    readerDaemon = new AcceptorDaemon();
-    readerDaemon.start();
-  }
-
-  @Override
-  public void close() throws Exception
-  {
-    closeClientChannels();
-    if (readerDaemon != null) {
-      readerDaemon.stop();
-    }
-  }
-
-  private void closeClientChannels()
-  {
-    synchronized (channels) {
-      for (final SPPChannel channel : channels) {
-        if (channel != null) {
-          channel.close();
-        }
-      }
-    }
-  }
-
-  @Override
-  public SpacePacket receive() throws Exception
-  {
-    final SpacePacket packet = input.take();
-    LOGGER.log(Level.FINE, "Received: {0}", packet);
-    return packet;
-  }
-
-  @Override
-  public void send(final SpacePacket packet) throws IOException
-  {
-    LOGGER.log(Level.FINE, "send({0})", packet);
-    synchronized (channels) {
-      if (channels.isEmpty()) {
-        throw new IOException("SPP send called, but no connection established!");
-      }
-      for (final SPPChannel channel : channels) {
-        if (channel != null) {
-          channel.send(packet);
-        }
-      }
+    public ServerTCPSPPSocket() {
+        super();
     }
 
-  }
+    public void init(final Map properties) throws Exception {
+        final String portS = (String) properties.get(PORT_PROP);
+        port = Integer.parseInt(portS);
+        listen(port);
+    }
 
-  @Override
-  public String getDescription()
-  {
-    return "-" + port;
-
-  }
-
-  class AcceptorDaemon extends Daemon
-  {
-
-    private Socket clientSocket;
-
-    private SpacePacket packet;
-
-    protected AcceptorDaemon()
-    {
-      super("AcceptorDaemon", null);
+    private void listen(final int port) throws Exception {
+        LOGGER.log(Level.FINE, "listen({0})", new Object[]{port});
+        listenerSocket = new ServerSocket(port);
+        readerDaemon = new AcceptorDaemon();
+        readerDaemon.start();
     }
 
     @Override
-    public final void run()
-    {
-      int errorCount = 0;
-      while (running) {
-        if (errorCount >= MAX_ERROR_COUNT) {
-          LOGGER.log(Level.SEVERE, "errorCount >= {0}. Stopping the server.", MAX_ERROR_COUNT);
-          break;
+    public void close() throws Exception {
+        closeClientChannels();
+        if (readerDaemon != null) {
+            readerDaemon.stop();
         }
-        try {
-          LOGGER.log(Level.INFO, "Listening for a client connection on {0}",
-              listenerSocket.getLocalSocketAddress());
-          clientSocket = listenerSocket.accept();
-        } catch (final IOException ex) {
-          LOGGER.log(Level.SEVERE, "Error when accepting the client connection", ex);
-          errorCount++;
-          continue;
-        }
-        SPPChannel newChannel = null;
-        try {
-          clientSocket.setTcpNoDelay(tcpNoDelay);
-          clientSocket.setSoLinger(true, 1000);
-          newChannel = new SPPChannel(clientSocket);
-        } catch (final IOException ex) {
-          LOGGER.log(Level.SEVERE, "Error when configuring the client connection", ex);
-          errorCount++;
-          continue;
-        }
-        errorCount = 0;
-        LOGGER.log(Level.INFO, "Accepted connection from: {0}",
-            clientSocket.getRemoteSocketAddress());
+    }
+
+    private void closeClientChannels() {
         synchronized (channels) {
-          channels.add(newChannel);
-        }
-        new ClientThread(newChannel).start();
-      }
-      shutdown();
-      finish();
-    }
-
-    private class ClientThread extends Thread
-    {
-
-      protected SPPChannel channel;
-
-      public ClientThread(final SPPChannel channel)
-      {
-        this.channel = channel;
-      }
-
-      public void run()
-      {
-        try {
-          while (running) {
-            canStop = true;
-            packet = channel.receive();
-            if (packet == null) {
-              continue;
+            for (final SPPChannel channel : channels) {
+                if (channel != null) {
+                    channel.close();
+                }
             }
-            input.offer(packet);
-          }
-        } catch (final IOException ex) {
-          LOGGER.log(Level.WARNING,
-              this.getName() + ", error during packet receive. Closing the client connection.", ex);
-
-        } finally {
-          if (channel != null) {
-            synchronized (channels) {
-              channels.remove(channel);
-            }
-            channel.close();
-            channel = null;
-          }
         }
-      }
     }
 
     @Override
-    protected void close()
-    {
-      if (listenerSocket != null) {
-        try {
-          listenerSocket.close();
-        } catch (final IOException e) {
-        }
-      }
+    public SpacePacket receive() throws Exception {
+        final SpacePacket packet = input.take();
+        LOGGER.log(Level.FINE, "Received: {0}", packet);
+        return packet;
     }
 
     @Override
-    protected void shutdown()
-    {
-      close();
+    public void send(final SpacePacket packet) throws IOException {
+        LOGGER.log(Level.FINE, "send({0})", packet);
+        synchronized (channels) {
+            if (channels.isEmpty()) {
+                throw new IOException("SPP send called, but no connection established!");
+            }
+            for (final SPPChannel channel : channels) {
+                if (channel != null) {
+                    channel.send(packet);
+                }
+            }
+        }
+
     }
-  }
+
+    @Override
+    public String getDescription() {
+        return "-" + port;
+
+    }
+
+    class AcceptorDaemon extends Daemon {
+
+        private Socket clientSocket;
+
+        private SpacePacket packet;
+
+        protected AcceptorDaemon() {
+            super("AcceptorDaemon", null);
+        }
+
+        @Override
+        public final void run() {
+            int errorCount = 0;
+            while (running) {
+                if (errorCount >= MAX_ERROR_COUNT) {
+                    LOGGER.log(Level.SEVERE, "errorCount >= {0}. Stopping the server.", MAX_ERROR_COUNT);
+                    break;
+                }
+                try {
+                    LOGGER.log(Level.INFO, "Listening for a client connection on {0}", listenerSocket
+                                                                                                     .getLocalSocketAddress());
+                    clientSocket = listenerSocket.accept();
+                } catch (final IOException ex) {
+                    LOGGER.log(Level.SEVERE, "Error when accepting the client connection", ex);
+                    errorCount++;
+                    continue;
+                }
+                SPPChannel newChannel = null;
+                try {
+                    clientSocket.setTcpNoDelay(tcpNoDelay);
+                    clientSocket.setSoLinger(true, 1000);
+                    newChannel = new SPPChannel(clientSocket);
+                } catch (final IOException ex) {
+                    LOGGER.log(Level.SEVERE, "Error when configuring the client connection", ex);
+                    errorCount++;
+                    continue;
+                }
+                errorCount = 0;
+                LOGGER.log(Level.INFO, "Accepted connection from: {0}", clientSocket.getRemoteSocketAddress());
+                synchronized (channels) {
+                    channels.add(newChannel);
+                }
+                new ClientThread(newChannel).start();
+            }
+            shutdown();
+            finish();
+        }
+
+        private class ClientThread extends Thread {
+
+            protected SPPChannel channel;
+
+            public ClientThread(final SPPChannel channel) {
+                this.channel = channel;
+            }
+
+            public void run() {
+                try {
+                    while (running) {
+                        canStop = true;
+                        packet = channel.receive();
+                        if (packet == null) {
+                            continue;
+                        }
+                        input.offer(packet);
+                    }
+                } catch (final IOException ex) {
+                    LOGGER.log(Level.WARNING, this.getName() +
+                                              ", error during packet receive. Closing the client connection.", ex);
+
+                } finally {
+                    if (channel != null) {
+                        synchronized (channels) {
+                            channels.remove(channel);
+                        }
+                        channel.close();
+                        channel = null;
+                    }
+                }
+            }
+        }
+
+        @Override
+        protected void close() {
+            if (listenerSocket != null) {
+                try {
+                    listenerSocket.close();
+                } catch (final IOException e) {
+                }
+            }
+        }
+
+        @Override
+        protected void shutdown() {
+            close();
+        }
+    }
 
 }

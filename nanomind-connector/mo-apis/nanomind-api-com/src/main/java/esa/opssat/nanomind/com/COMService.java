@@ -31,58 +31,52 @@ import org.ccsds.moims.mo.mal.structures.UShort;
 /**
  *
  */
-public class COMService extends MALService
-{
-  private final Map<Integer, COMObject> objectsByNumber = new HashMap<>();
-  private final Map<String, COMObject> objectsByName = new HashMap<>();
-  
-  public COMService(final UShort number, final Identifier name)
-  {
-    super(number, name);
-  }
+public class COMService extends MALService {
+    private final Map<Integer, COMObject> objectsByNumber = new HashMap<>();
+    private final Map<String, COMObject> objectsByName = new HashMap<>();
 
-  /**
-   * Adds a COM object to this service specification.
-   *
-   * @param object The new object to add.
-   * @throws java.lang.IllegalArgumentException If the argument is null.
-   */
-  @Proposed
-  public void addCOMObject(final COMObject object) throws java.lang.IllegalArgumentException
-  {
-    objectsByNumber.put(object.getObjectType().getNumber().getValue(), object);
-    objectsByName.put(object.getObjectName().getValue(), object);
-  }
+    public COMService(final UShort number, final Identifier name) {
+        super(number, name);
+    }
 
-  /**
-   * Return an object identified by its number.
-   *
-   * @param opNumber The number of the object.
-   * @return The found operation or null.
-   */
-  public COMObject getObjectByNumber(final UShort opNumber)
-  {
-    return objectsByNumber.get(opNumber.getValue());
-  }
+    /**
+     * Adds a COM object to this service specification.
+     *
+     * @param object The new object to add.
+     * @throws java.lang.IllegalArgumentException If the argument is null.
+     */
+    @Proposed
+    public void addCOMObject(final COMObject object) throws java.lang.IllegalArgumentException {
+        objectsByNumber.put(object.getObjectType().getNumber().getValue(), object);
+        objectsByName.put(object.getObjectName().getValue(), object);
+    }
 
-  /**
-   * Return an object identified by its name.
-   *
-   * @param opName The name of the object.
-   * @return The found operation or null.
-   */
-  public COMObject getObjectByName(final Identifier opName)
-  {
-    return objectsByName.get(opName.getValue());
-  }
+    /**
+     * Return an object identified by its number.
+     *
+     * @param opNumber The number of the object.
+     * @return The found operation or null.
+     */
+    public COMObject getObjectByNumber(final UShort opNumber) {
+        return objectsByNumber.get(opNumber.getValue());
+    }
 
-  /**
-   * Returns the set of objects.
-   *
-   * @return The set of objects or an empty array if none defined.
-   */
-  public COMObject[] getObjects()
-  {
-    return (COMObject[]) Collections.singletonList(objectsByName.values()).toArray();
-  }
+    /**
+     * Return an object identified by its name.
+     *
+     * @param opName The name of the object.
+     * @return The found operation or null.
+     */
+    public COMObject getObjectByName(final Identifier opName) {
+        return objectsByName.get(opName.getValue());
+    }
+
+    /**
+     * Returns the set of objects.
+     *
+     * @return The set of objects or an empty array if none defined.
+     */
+    public COMObject[] getObjects() {
+        return (COMObject[]) Collections.singletonList(objectsByName.values()).toArray();
+    }
 }

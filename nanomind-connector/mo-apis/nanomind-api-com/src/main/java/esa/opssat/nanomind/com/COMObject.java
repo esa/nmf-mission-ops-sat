@@ -26,95 +26,74 @@ import org.ccsds.moims.mo.mal.structures.Identifier;
 /**
  *
  */
-public class COMObject
-{
-  private final ObjectType objectType;
-  private final Identifier objectName;
-  private final Object bodyShortForm;
-  private final boolean hasRelated;
-  private final ObjectType relatedType;
-  private final boolean hasSource;
-  private final ObjectType sourceType;
-  private final boolean event;
+public class COMObject {
+    private final ObjectType objectType;
+    private final Identifier objectName;
+    private final Object bodyShortForm;
+    private final boolean hasRelated;
+    private final ObjectType relatedType;
+    private final boolean hasSource;
+    private final ObjectType sourceType;
+    private final boolean event;
 
-  public COMObject(final org.ccsds.moims.mo.mal.structures.UShort area,
-                   final org.ccsds.moims.mo.mal.structures.UShort service,
-                   final org.ccsds.moims.mo.mal.structures.UOctet version,
-                   final org.ccsds.moims.mo.mal.structures.UShort number,
-                   final Identifier name,
-                   final Object bodyShortForm,
-                   final boolean hasRelated,
-                   final ObjectType relatedType,
-                   final boolean hasSource,
-                   final ObjectType sourceType,
-                   final boolean isEvent)
-  {
-    this.objectType = new ObjectType(area, service, version, number);
-    this.objectName = name;
-    this.bodyShortForm = bodyShortForm;
-    this.hasRelated = hasRelated;
-    this.relatedType = relatedType;
-    this.hasSource = hasSource;
-    this.sourceType = sourceType;
-    this.event = isEvent;
-  }
+    public COMObject(final org.ccsds.moims.mo.mal.structures.UShort area,
+                     final org.ccsds.moims.mo.mal.structures.UShort service,
+                     final org.ccsds.moims.mo.mal.structures.UOctet version,
+                     final org.ccsds.moims.mo.mal.structures.UShort number, final Identifier name,
+                     final Object bodyShortForm, final boolean hasRelated, final ObjectType relatedType,
+                     final boolean hasSource, final ObjectType sourceType, final boolean isEvent) {
+        this.objectType = new ObjectType(area, service, version, number);
+        this.objectName = name;
+        this.bodyShortForm = bodyShortForm;
+        this.hasRelated = hasRelated;
+        this.relatedType = relatedType;
+        this.hasSource = hasSource;
+        this.sourceType = sourceType;
+        this.event = isEvent;
+    }
 
-  public COMObject(final ObjectType objectType,
-                   final Identifier name,
-                   final Object bodyShortForm,
-                   final boolean hasRelated,
-                   final ObjectType relatedType,
-                   final boolean hasSource,
-                   final ObjectType sourceType,
-                   final boolean isEvent)
-  {
-    this.objectType = objectType;
-    this.objectName = name;
-    this.bodyShortForm = bodyShortForm;
-    this.hasRelated = hasRelated;
-    this.relatedType = relatedType;
-    this.hasSource = hasSource;
-    this.sourceType = sourceType;
-    this.event = isEvent;
-  }
-  
-  public ObjectType getObjectType()
-  {
-    return objectType;
-  }
+    public COMObject(final ObjectType objectType, final Identifier name, final Object bodyShortForm,
+                     final boolean hasRelated, final ObjectType relatedType, final boolean hasSource,
+                     final ObjectType sourceType, final boolean isEvent) {
+        this.objectType = objectType;
+        this.objectName = name;
+        this.bodyShortForm = bodyShortForm;
+        this.hasRelated = hasRelated;
+        this.relatedType = relatedType;
+        this.hasSource = hasSource;
+        this.sourceType = sourceType;
+        this.event = isEvent;
+    }
 
-  public Identifier getObjectName()
-  {
-    return objectName;
-  }
+    public ObjectType getObjectType() {
+        return objectType;
+    }
 
-  public Object getBodyShortForm()
-  {
-    return bodyShortForm;
-  }
+    public Identifier getObjectName() {
+        return objectName;
+    }
 
-  public boolean hasRelated()
-  {
-    return hasRelated;
-  }
+    public Object getBodyShortForm() {
+        return bodyShortForm;
+    }
 
-  public ObjectType getRelatedType()
-  {
-    return relatedType;
-  }
+    public boolean hasRelated() {
+        return hasRelated;
+    }
 
-  public boolean hasSource()
-  {
-    return hasSource;
-  }
+    public ObjectType getRelatedType() {
+        return relatedType;
+    }
 
-  public ObjectType getSourceType()
-  {
-    return sourceType;
-  }
+    public boolean hasSource() {
+        return hasSource;
+    }
 
-  public boolean isEvent()
-  {
-    return event;
-  }
+    public ObjectType getSourceType() {
+        return sourceType;
+    }
+
+    public boolean isEvent() {
+        return event;
+    }
 }

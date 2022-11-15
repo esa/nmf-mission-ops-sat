@@ -53,18 +53,15 @@ public class NanomindServicesConsumer {
     private static final String NANOMIND_APID = "10";  // Default Nanomind APID (on 13 June 2016)
     private static final String MAL_SPP_BINDINDING = "malspp"; // Use the SPP Implementation
     private static final String SOURCE_ID = "0"; // OBSW supports any value. By default it is set to 0
-    
-    
+
     private NanomindServicesConsumer() {
 
     }
 
-    public static NanomindServicesConsumer getInstance()
-    {
-        if(instance == null)
-        {
+    public static NanomindServicesConsumer getInstance() {
+        if (instance == null) {
             synchronized (NanomindServicesConsumer.class) {
-                if(instance == null){
+                if (instance == null) {
                     instance = new NanomindServicesConsumer();
                     instance.init();
                 }
@@ -72,13 +69,16 @@ public class NanomindServicesConsumer {
         }
         return instance;
     }
-    
-    private void init(){
+
+    private void init() {
         // Enforce DLR's SPP
-        System.setProperty("org.ccsds.moims.mo.mal.transport.protocol.malspp", "de.dlr.gsoc.mo.malspp.transport.SPPTransportFactory");
-        System.setProperty("org.ccsds.moims.mo.mal.encoding.protocol.malspp", "de.dlr.gsoc.mo.malspp.encoding.SPPElementStreamFactory");
-                System.setProperty("org.ccsds.moims.mo.malspp.test.spp.factory.class", "org.ccsds.moims.mo.testbed.util.sppimpl.tcp.TCPSPPSocketFactory");
-//        System.setProperty("helpertools.configurations.ground.Network", "SEPP");
+        System.setProperty("org.ccsds.moims.mo.mal.transport.protocol.malspp",
+                           "de.dlr.gsoc.mo.malspp.transport.SPPTransportFactory");
+        System.setProperty("org.ccsds.moims.mo.mal.encoding.protocol.malspp",
+                           "de.dlr.gsoc.mo.malspp.encoding.SPPElementStreamFactory");
+        System.setProperty("org.ccsds.moims.mo.malspp.test.spp.factory.class",
+                           "org.ccsds.moims.mo.testbed.util.sppimpl.tcp.TCPSPPSocketFactory");
+        //        System.setProperty("helpertools.configurations.ground.Network", "SEPP");
 
         // Disable some flags
         System.setProperty("org.ccsds.moims.mo.malspp.authenticationIdFlag", "false");
@@ -106,9 +106,8 @@ public class NanomindServicesConsumer {
             eventService.registerDefaultEventHandler();
 
             // Add the other services!!
-            
-        } catch (final MALException | MalformedURLException |
-            MALInteractionException ex) {
+
+        } catch (final MALException | MalformedURLException | MALInteractionException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         }
     }
@@ -129,11 +128,9 @@ public class NanomindServicesConsumer {
         return this.aggregationService;
     }
 
-    public void setServices(
-            final GPSNanomindConsumerServiceImpl gpsNanomindService,
-            final PowerNanomindConsumerServiceImpl powerNanomindService,
-            final ExperimentWDNanomindConsumerServiceImpl experimentWDNanomindService
-    ) {
+    public void setServices(final GPSNanomindConsumerServiceImpl gpsNanomindService,
+                            final PowerNanomindConsumerServiceImpl powerNanomindService,
+                            final ExperimentWDNanomindConsumerServiceImpl experimentWDNanomindService) {
         this.gpsNanomindService = gpsNanomindService;
         this.powerNanomindService = powerNanomindService;
         this.experimentWDNanomindService = experimentWDNanomindService;

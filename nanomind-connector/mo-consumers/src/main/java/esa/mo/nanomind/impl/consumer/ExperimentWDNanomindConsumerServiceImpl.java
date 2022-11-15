@@ -23,7 +23,6 @@ package esa.mo.nanomind.impl.consumer;
 import esa.mo.helpertools.connections.ConnectionConsumer;
 import esa.mo.helpertools.misc.ConsumerServiceImpl;
 import esa.mo.helpertools.connections.SingleConnectionDetails;
-import esa.opssat.nanomind.com.event.EventHelper;
 import java.net.MalformedURLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,12 +67,13 @@ public class ExperimentWDNanomindConsumerServiceImpl extends ConsumerServiceImpl
             COMHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
 
-        if (MALContextFactory.lookupArea(OPSSAT_PFHelper.OPSSAT_PF_AREA_NAME, OPSSAT_PFHelper.OPSSAT_PF_AREA_VERSION) == null) {
+        if (MALContextFactory.lookupArea(OPSSAT_PFHelper.OPSSAT_PF_AREA_NAME, OPSSAT_PFHelper.OPSSAT_PF_AREA_VERSION) ==
+            null) {
             OPSSAT_PFHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
 
         if (MALContextFactory.lookupArea(OPSSAT_PFHelper.OPSSAT_PF_AREA_NAME, OPSSAT_PFHelper.OPSSAT_PF_AREA_VERSION)
-                    .getServiceByName(ExperimentWDHelper.EXPERIMENTWD_SERVICE_NAME) == null) {
+                             .getServiceByName(ExperimentWDHelper.EXPERIMENTWD_SERVICE_NAME) == null) {
             ExperimentWDHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
 
@@ -89,11 +89,10 @@ public class ExperimentWDNanomindConsumerServiceImpl extends ConsumerServiceImpl
             }
         }
 
-        tmConsumer = connection.startService(
-                this.connectionDetails.getProviderURI(),
-                this.connectionDetails.getBrokerURI(),
-                this.connectionDetails.getDomain(),
-                ExperimentWDHelper.EXPERIMENTWD_SERVICE);
+        tmConsumer = connection.startService(this.connectionDetails.getProviderURI(), this.connectionDetails
+                                                                                                            .getBrokerURI(),
+                                             this.connectionDetails.getDomain(),
+                                             ExperimentWDHelper.EXPERIMENTWD_SERVICE);
 
         this.experimentWDNanomindService = new ExperimentWDStub(tmConsumer);
 

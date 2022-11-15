@@ -43,59 +43,54 @@ import org.ccsds.moims.mo.testbed.util.spp.SpacePacket;
 import org.ccsds.moims.mo.testbed.util.sppimpl.util.SPPReader;
 import org.ccsds.moims.mo.testbed.util.sppimpl.util.SPPWriter;
 
-public class SPPChannel
-{
+public class SPPChannel {
 
-  private final Socket socket;
+    private final Socket socket;
 
-  private final InputStream is;
+    private final InputStream is;
 
-  private final OutputStream os;
+    private final OutputStream os;
 
-  private final SPPReader reader;
+    private final SPPReader reader;
 
-  private final SPPWriter writer;
+    private final SPPWriter writer;
 
-  public SPPChannel(final Socket socket) throws IOException
-  {
-    this.socket = socket;
-    is = new BufferedInputStream(socket.getInputStream());
-    os = new BufferedOutputStream(socket.getOutputStream());
-    reader = new SPPReader(is);
-    writer = new SPPWriter(os);
-  }
-
-  public SpacePacket receive() throws IOException
-  {
-    return reader.receive();
-  }
-
-  public void send(final SpacePacket packet) throws IOException
-  {
-    writer.send(packet);
-  }
-
-  public void close()
-  {
-    try {
-      if (is != null) {
-        is.close();
-      }
-    } catch (final IOException exc) {
+    public SPPChannel(final Socket socket) throws IOException {
+        this.socket = socket;
+        is = new BufferedInputStream(socket.getInputStream());
+        os = new BufferedOutputStream(socket.getOutputStream());
+        reader = new SPPReader(is);
+        writer = new SPPWriter(os);
     }
 
-    try {
-      if (os != null) {
-        os.close();
-      }
-    } catch (final IOException exc) {
+    public SpacePacket receive() throws IOException {
+        return reader.receive();
     }
 
-    try {
-      if (socket != null) {
-        socket.close();
-      }
-    } catch (final IOException exc) {
+    public void send(final SpacePacket packet) throws IOException {
+        writer.send(packet);
     }
-  }
+
+    public void close() {
+        try {
+            if (is != null) {
+                is.close();
+            }
+        } catch (final IOException exc) {
+        }
+
+        try {
+            if (os != null) {
+                os.close();
+            }
+        } catch (final IOException exc) {
+        }
+
+        try {
+            if (socket != null) {
+                socket.close();
+            }
+        } catch (final IOException exc) {
+        }
+    }
 }

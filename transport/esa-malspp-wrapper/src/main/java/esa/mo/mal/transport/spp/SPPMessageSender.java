@@ -36,59 +36,53 @@ import org.ccsds.moims.mo.testbed.util.spp.SpacePacketHeader;
  * If the protocol uses a different message encoding this class can be replaced in the TCPIPTransport.
  *
  */
-public class SPPMessageSender implements GENMessageSender<List<ByteBuffer>>
-{
-  protected final SPPSocket socket;
-  private final SPPSourceSequenceCounterSimple sscGenerator = new SPPSourceSequenceCounterSimple();
+public class SPPMessageSender implements GENMessageSender<List<ByteBuffer>> {
+    protected final SPPSocket socket;
+    private final SPPSourceSequenceCounterSimple sscGenerator = new SPPSourceSequenceCounterSimple();
 
-  /**
-   * Constructor.
-   *
-   * @param socket the TCPIP socket.
-   */
-  public SPPMessageSender(final SPPSocket socket)
-  {
-    this.socket = socket;
-  }
-
-  @Override
-  public void sendEncodedMessage(final GENOutgoingMessageHolder<List<ByteBuffer>> packetData) throws IOException
-  {
-    // write packet
-    final List<ByteBuffer> msgs = packetData.getEncodedMessage();
-
-    final SPPMessage msg = (SPPMessage) packetData.getOriginalMessage();
-    final SPPMessageHeader malhdr = (SPPMessageHeader) msg.getHeader();
-    
-//    int count = 0;
-    for (final ByteBuffer buf : msgs)
-    {
-      final int sequenceFlags = (buf.get(buf.position() + 2) & 0xC0) >> 6;
-      final short shortVal = buf.getShort(buf.position() + 4);
-      int bodyLength = shortVal >= 0 ? shortVal : 0x10000 + shortVal;
-      ++bodyLength;
-
-      final SpacePacketHeader hdr = new SpacePacketHeader(0,
-              0 == malhdr.getPacketType() ? 0 : 1,
-              1, malhdr.getApid(), sequenceFlags, sscGenerator.getNextSourceSequenceCount());
-
-      final SpacePacket pkt = new SpacePacket(hdr, malhdr.getApidQualifier(), buf.array(), buf.position() + 6, bodyLength);
-      pkt.setQosProperties(packetData.getOriginalMessage().getQoSProperties());
-      
-      try
-      {
-        socket.send(pkt);
-      }
-      catch (final Exception ex)
-      {
-        ex.printStackTrace();
-        throw new IOException("Unable to send SPP message", ex);
-      }
+    /**
+     * Constructor.
+     *
+     * @param socket the TCPIP socket.
+     */
+    public SPPMessageSender(final SPPSocket socket) {
+        this.socket = socket;
     }
-  }
 
-  @Override
-  public void close()
-  {
-  }
+    @Override
+    public void sendEncodedMessage(final GENOutgoingMessageHolder<List<ByteBuffer>> packetData) throws IOException {
+        // write packet
+        final List<ByteBuffer> msgs = packetData.getEncodedMessage();
+
+        final SPPMessage msg = (SPPMessage) packetData.getOriginalMessage();
+        final SPPMessageHeader malhdr = (SPPMessageHeader) msg.getHeader();
+
+        //    int count = 0;
+        for (final ByteBuffer buf : msgs) {
+            final int sequenceFlags = (buf.get(buf.position() + 2) & 0xC0) >> 6;
+            final short shortVal = buf.getShort(buf.position() + 4);
+            int bodyLength = shortVal >= 0 ? shortVal : 0x10000 + shortVal;
+            ++bodyLength;
+
+            final SpacePacketHeader hdr = new SpacePacketHeader(0, 0 == malhdr.getPacketType() ? 0 : 1, 1, malhdr
+                                                                                                                 .getApid(),
+                                                                sequenceFlags, sscGenerator
+                                                                                           .getNextSourceSequenceCount());
+
+            final SpacePacket pkt = new SpacePacket(hdr, malhdr.getApidQualifier(), buf.array(), buf.position() + 6,
+                                                    bodyLength);
+            pkt.setQosProperties(packetData.getOriginalMessage().getQoSProperties());
+
+            try {
+                socket.send(pkt);
+            } catch (final Exception ex) {
+                ex.printStackTrace();
+                throw new IOException("Unable to send SPP message", ex);
+            }
+        }
+    }
+
+    @Override
+    public void close() {
+    }
 }

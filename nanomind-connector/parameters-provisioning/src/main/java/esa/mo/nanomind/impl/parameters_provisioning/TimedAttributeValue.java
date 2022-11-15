@@ -29,71 +29,71 @@ import org.ccsds.moims.mo.mal.structures.Attribute;
  * @author Tanguy Soto
  */
 class TimedAttributeValue {
-  /**
-   * The latest value
-   */
-  private Attribute value;
+    /**
+     * The latest value
+     */
+    private Attribute value;
 
-  /**
-   * The latest update time of value
-   */
-  private Date lastUpdateTime;
+    /**
+     * The latest update time of value
+     */
+    private Date lastUpdateTime;
 
-  /**
-   * The latest request time of value
-   */
-  private Date lastRequestTime;
+    /**
+     * The latest request time of value
+     */
+    private Date lastRequestTime;
 
-  /**
-   * Creates a new instance of TimedAttributeValue and sets the last update time to now.
-   *
-   * @param value The value
-   */
-  public TimedAttributeValue(Attribute value) {
-    this.value = value;
-    lastUpdateTime = new Date();
-    lastRequestTime = lastUpdateTime;
-  }
+    /**
+     * Creates a new instance of TimedAttributeValue and sets the last update time to now.
+     *
+     * @param value The value
+     */
+    public TimedAttributeValue(Attribute value) {
+        this.value = value;
+        lastUpdateTime = new Date();
+        lastRequestTime = lastUpdateTime;
+    }
 
-  /**
-   * @return The latest value
-   */
-  public Attribute getValue() {
-    return value;
-  }
+    /**
+     * @return The latest value
+     */
+    public Attribute getValue() {
+        return value;
+    }
 
-  /**
-   * Sets the value and updates the latest update time.
-   * 
-   * @param value the new value to set
-   */
-  public void setValue(Attribute value) {
-    this.value = value;
-    lastUpdateTime = new Date();
-  }
+    /**
+     * Sets the value and updates the latest update time.
+     * 
+     * @param value the new value to set
+     */
+    public void setValue(Attribute value) {
+        this.value = value;
+        lastUpdateTime = new Date();
+    }
 
-  /**
-   * Returns the latest update time of this value.
-   * 
-   * @return a Date containing the latest update time
-   */
-  public Date getLastUpdateTime() {
-    return lastUpdateTime;
-  }
+    /**
+     * Returns the latest update time of this value.
+     * 
+     * @return a Date containing the latest update time
+     */
+    public Date getLastUpdateTime() {
+        return lastUpdateTime;
+    }
 
-  /*
-   * Updates the last request time of this value to the time of the call.
-   */
-  public void updateLastRequestTime() {
-    lastRequestTime = new Date();
-  }
+    /*
+     * Updates the last request time of this value to the time of the call.
+     */
+    public void updateLastRequestTime() {
+        lastRequestTime = new Date();
+    }
 
-  /**
-   * Returns the latest request time of this value.
-   * 
-   * @return a Date containing the latest request time
-   */
-  public Date getLastRequestTime() {
-    return lastRequestTime;
-  }
+    /**
+     * Returns the latest request time of this value.
+     * 
+     * @return a Date containing the latest request time
+     */
+    public Date getLastRequestTime() {
+        return lastRequestTime;
+    }
 }
