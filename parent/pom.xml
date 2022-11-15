@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-  <!--
+<!--
     Licensed under European Space Agency Public License (ESA-PL) Weak Copyleft – v2.4
     You may not use this file except in compliance with the License.
 
@@ -13,9 +13,9 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  
+
   <parent>
     <groupId>int.esa.nmf</groupId>
     <artifactId>parent</artifactId>
@@ -52,12 +52,12 @@
     <developerConnection>scm:git:git@github.com:esa/NMF_MISSION_OPS-SAT.git</developerConnection>
     <url>https://github.com/esa/NMF_MISSION_OPS-SAT</url>
   </scm>
-  
+
   <issueManagement>
     <system>GitHub</system>
     <url>https://github.com/esa/NMF_CORE/issues</url>
   </issueManagement>
-  
+
   <developers>
     <developer>
       <id>CesarCoelho</id>

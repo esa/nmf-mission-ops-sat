@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -12,9 +12,9 @@
     <artifactId>malspp-transport</artifactId>
     <version>1.0.1-FC</version>
     <packaging>jar</packaging>
-    
+
     <properties>
-      <skipTests>true</skipTests>
+        <skipTests>true</skipTests>
     </properties>
 
     <name>DLR MO MAL/SPP Transport Layer</name>
@@ -22,7 +22,7 @@
     <url>http://www.dlr.de</url>
 
     <dependencies>
-<!--
+        <!--
         <dependency>
             <groupId>fr.cnes.ccsds.mo</groupId>
             <artifactId>TESTBED_UTIL_SPP</artifactId>

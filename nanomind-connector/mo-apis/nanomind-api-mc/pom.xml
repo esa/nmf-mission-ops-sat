@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-  <!--
+<!--
     Licensed under European Space Agency Public License (ESA-PL) Weak Copyleft – v2.4
     You may not use this file except in compliance with the License.
 
@@ -13,9 +13,9 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  
+
   <parent>
     <groupId>int.esa.nmf.mission.opssat</groupId>
     <artifactId>parent</artifactId>
@@ -30,12 +30,12 @@
   <name>ESA NMF Mission OPS-SAT Nanomind MO API - MC Services</name>
   <description>OBSW MC API for Java</description>
   <url>http://www.esa.int</url>
-  
+
   <organization>
     <name>ESA</name>
     <url>http://www.esa.int</url>
   </organization>
-  
+
   <licenses>
     <license>
       <name>European Space Agency Public License (ESA-PL) Weak Copyleft – v2.4</name>
@@ -49,12 +49,12 @@
     <developerConnection>scm:git:git@github.com:esa/CCSDS_MO_APIS.git</developerConnection>
     <url>https://github.com/esa/CCSDS_MO_APIS</url>
   </scm>
-  
+
   <issueManagement>
     <system>GitHub</system>
     <url>https://github.com/esa/CCSDS_MO_APIS/issues</url>
   </issueManagement>
-  
+
   <developers>
     <developer>
       <id>SamCooper</id>
@@ -76,7 +76,7 @@
     <ccsds.specification.download.ref-skip>false</ccsds.specification.download.ref-skip>
     <ccsds.specification.download.ref-filter>**/ServiceDefMAL.xml, **/ServiceDefCOM.xml</ccsds.specification.download.ref-filter>
   </properties>
-  
+
   <dependencies>
     <dependency>
       <groupId>int.esa.nmf.mission.opssat.nanomind</groupId>
@@ -93,9 +93,8 @@
   </dependencies>
 
   <build>
-    <resources>
-    </resources>
-    
+    <resources></resources>
+
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

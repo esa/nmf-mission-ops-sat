@@ -63,10 +63,10 @@
 
   <dependencies>
     <dependency>
-        <groupId>int.esa.nmf.sdk.examples.space</groupId>
-        <artifactId>camera-acquisitor-system</artifactId>
-        <version>${project.version}</version>
-      </dependency>
+      <groupId>int.esa.nmf.sdk.examples.space</groupId>
+      <artifactId>camera-acquisitor-system</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -88,29 +88,29 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-dependency-plugin</artifactId>
-          <version>3.1.0</version>
-          <executions>
-            <execution>
-              <id>ipkLib</id>
-              <phase>package</phase>
-              <goals>
-                <goal>copy</goal>
-              </goals>
-              <configuration>
-                <artifactItems>
-                  <artifactItem>
-                    <groupId>int.esa.nmf.sdk.examples.space</groupId>
-                    <artifactId>camera-acquisitor-system</artifactId>
-                    <version>2.1.0-SNAPSHOT</version>
-                    <type>jar</type>
-                    <overWrite>true</overWrite>
-                    <outputDirectory>${esa.nmf.mission.opssat.assembly.outputdir}/home/exp495/lib/</outputDirectory>
-                  </artifactItem>
-                </artifactItems>
-              </configuration>
-            </execution>
-          </executions>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>ipkLib</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>int.esa.nmf.sdk.examples.space</groupId>
+                  <artifactId>camera-acquisitor-system</artifactId>
+                  <version>2.1.0-SNAPSHOT</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <outputDirectory>${esa.nmf.mission.opssat.assembly.outputdir}/home/exp495/lib/</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -146,9 +146,9 @@
           <execution>
             <id>experimenter</id>
             <phase>process-resources</phase>
-              <goals>
-                <goal>run</goal>
-              </goals>
+            <goals>
+              <goal>run</goal>
+            </goals>
             <configuration>
               <target>
                 <ant antfile="ant_copy_job_exp495.xml" target="copyExp495"/>
@@ -174,21 +174,21 @@
         <artifactId>git-commit-id-plugin</artifactId>
         <version>4.0.4</version>
         <executions>
-            <execution>
-                <id>get-the-git-infos</id>
-                <goals>
-                    <goal>revision</goal>
-                </goals>
-                <phase>initialize</phase>
-            </execution>
+          <execution>
+            <id>get-the-git-infos</id>
+            <goals>
+              <goal>revision</goal>
+            </goals>
+            <phase>initialize</phase>
+          </execution>
         </executions>
         <configuration>
-            <failOnNoGitDirectory>false</failOnNoGitDirectory>
-            <commitIdGenerationMode>full</commitIdGenerationMode>
-            <gitDescribe>
-              <tags>true</tags>
-              <forceLongFormat>true</forceLongFormat>
-            </gitDescribe>
+          <failOnNoGitDirectory>false</failOnNoGitDirectory>
+          <commitIdGenerationMode>full</commitIdGenerationMode>
+          <gitDescribe>
+            <tags>true</tags>
+            <forceLongFormat>true</forceLongFormat>
+          </gitDescribe>
         </configuration>
       </plugin>
     </plugins>
