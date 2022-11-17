@@ -65,12 +65,10 @@ public class SPPMessageSender implements GENMessageSender<List<ByteBuffer>> {
             ++bodyLength;
 
             final SpacePacketHeader hdr = new SpacePacketHeader(0, 0 == malhdr.getPacketType() ? 0 : 1, 1, malhdr
-                                                                                                                 .getApid(),
-                                                                sequenceFlags, sscGenerator
-                                                                                           .getNextSourceSequenceCount());
+                .getApid(), sequenceFlags, sscGenerator.getNextSourceSequenceCount());
 
             final SpacePacket pkt = new SpacePacket(hdr, malhdr.getApidQualifier(), buf.array(), buf.position() + 6,
-                                                    bodyLength);
+                bodyLength);
             pkt.setQosProperties(packetData.getOriginalMessage().getQoSProperties());
 
             try {

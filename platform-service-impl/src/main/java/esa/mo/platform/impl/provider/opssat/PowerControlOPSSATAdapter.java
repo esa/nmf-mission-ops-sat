@@ -52,10 +52,9 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface {
     enum STATUS_MASK {
         DEVICE_STATUS_SEPP1_MASK(0x0004, OnBoardDevice.SEPP1), DEVICE_STATUS_SEPP2_MASK(0x0008, OnBoardDevice.SEPP2),
         DEVICE_STATUS_SBAND_MASK(0x0020, OnBoardDevice.SBandTRX), DEVICE_STATUS_XBAND_MASK(0x0080,
-                                                                                           OnBoardDevice.XBandTRX),
-        DEVICE_STATUS_SDR_MASK(0x0100, OnBoardDevice.SDR), DEVICE_STATUS_IADCS_MASK(0x0200, OnBoardDevice.FineADCS),
-        DEVICE_STATUS_OPT_MASK(0x0400, OnBoardDevice.OpticalRX), DEVICE_STATUS_CAM_MASK(0x1000, OnBoardDevice.HDCamera),
-        DEVICE_STATUS_GPS_MASK(0x0800, OnBoardDevice.GPS);
+            OnBoardDevice.XBandTRX), DEVICE_STATUS_SDR_MASK(0x0100, OnBoardDevice.SDR), DEVICE_STATUS_IADCS_MASK(0x0200,
+                OnBoardDevice.FineADCS), DEVICE_STATUS_OPT_MASK(0x0400, OnBoardDevice.OpticalRX),
+        DEVICE_STATUS_CAM_MASK(0x1000, OnBoardDevice.HDCamera), DEVICE_STATUS_GPS_MASK(0x0800, OnBoardDevice.GPS);
 
         int value;
         OnBoardDevice payload;
@@ -82,15 +81,15 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface {
 
     private void initDevices() {
         addDevice(new Device(false, 0L, new Identifier("Attitude Determination and Control System"), DeviceType.ADCS),
-                  OnBoardDevice.FineADCS);
+            OnBoardDevice.FineADCS);
         addDevice(new Device(true, 10L, new Identifier("Satellite Experimental Processing Platform 1"), DeviceType.OBC),
-                  OnBoardDevice.SEPP1);
+            OnBoardDevice.SEPP1);
         addDevice(new Device(true, 11L, new Identifier("Satellite Experimental Processing Platform 2"), DeviceType.OBC),
-                  OnBoardDevice.SEPP2);
+            OnBoardDevice.SEPP2);
         addDevice(new Device(false, 2L, new Identifier("S-Band Transceiver"), DeviceType.SBAND),
-                  OnBoardDevice.SBandTRX);
+            OnBoardDevice.SBandTRX);
         addDevice(new Device(false, 3L, new Identifier("X-Band Transmitter"), DeviceType.XBAND),
-                  OnBoardDevice.XBandTRX);
+            OnBoardDevice.XBandTRX);
         addDevice(new Device(false, 4L, new Identifier("Software Defined Radio"), DeviceType.SDR), OnBoardDevice.SDR);
         addDevice(new Device(false, 5L, new Identifier("Optical Receiver"), DeviceType.OPTRX), OnBoardDevice.OpticalRX);
         addDevice(new Device(false, 6L, new Identifier("HD Camera"), DeviceType.CAMERA), OnBoardDevice.HDCamera);
@@ -174,8 +173,8 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface {
         CompleteDataReceivedListener listener = new CompleteDataReceivedListener() {
             @Override
             public void onDataReceived(ParameterInstance parameterInstance) {
-                if (parameterInstance == null ||
-                    false == PDU_CHANNEL_PARAM_NAME.equals(parameterInstance.getName().getValue())) {
+                if (parameterInstance == null || false == PDU_CHANNEL_PARAM_NAME.equals(parameterInstance.getName()
+                    .getValue())) {
                     return;
                 }
                 synchronized (this) {
@@ -223,9 +222,8 @@ public class PowerControlOPSSATAdapter implements PowerControlAdapterInterface {
             powerStates.add(enabled);
             LOGGER.log(Level.INFO, "Switching device {0} to enabled: {1}", new Object[]{device, enabled});
             try {
-                obcServicesConsumer.getPowerNanomindService()
-                                   .getPowerNanomindStub()
-                                   .setPowerState(deviceList, powerStates);
+                obcServicesConsumer.getPowerNanomindService().getPowerNanomindStub().setPowerState(deviceList,
+                    powerStates);
             } catch (final MALInteractionException | MALException ex) {
                 throw new IOException("Cannot switch device through OBC", ex);
             }

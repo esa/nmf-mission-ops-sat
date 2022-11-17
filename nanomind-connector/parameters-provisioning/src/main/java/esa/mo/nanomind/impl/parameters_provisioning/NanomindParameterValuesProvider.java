@@ -138,7 +138,7 @@ public class NanomindParameterValuesProvider extends OBSWParameterValuesProvider
         // Cleaning interval
         String cleaningIntervalProp = "nmf.supervisor.parameter.valuesprovider.nanomind.cleaningInterval";
         AGGREGATION_CLEANING_INTERVAL = ConfigurationHelper.getIntegerProperty(cleaningIntervalProp,
-                                                                               AGGREGATION_CLEANING_INTERVAL);
+            AGGREGATION_CLEANING_INTERVAL);
 
         // OBSW Parameter-write allowed ID range
         String writeableParametersProp = "nmf.supervisor.parameter.valuesprovider.nanomind.writeableParameters";
@@ -231,7 +231,7 @@ public class NanomindParameterValuesProvider extends OBSWParameterValuesProvider
      *         passed is null
      */
     private Attribute retrieveValueAndUpdateCache(AggregationValue aggValue, OBSWAggregation agg,
-                                                  Identifier identifier) {
+        Identifier identifier) {
         // An error occured when fetching the parameter's aggregation value
         if (aggValue == null) {
             return null;

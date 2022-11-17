@@ -73,11 +73,11 @@ public class NanomindServicesConsumer {
     private void init() {
         // Enforce DLR's SPP
         System.setProperty("org.ccsds.moims.mo.mal.transport.protocol.malspp",
-                           "de.dlr.gsoc.mo.malspp.transport.SPPTransportFactory");
+            "de.dlr.gsoc.mo.malspp.transport.SPPTransportFactory");
         System.setProperty("org.ccsds.moims.mo.mal.encoding.protocol.malspp",
-                           "de.dlr.gsoc.mo.malspp.encoding.SPPElementStreamFactory");
+            "de.dlr.gsoc.mo.malspp.encoding.SPPElementStreamFactory");
         System.setProperty("org.ccsds.moims.mo.malspp.test.spp.factory.class",
-                           "org.ccsds.moims.mo.testbed.util.sppimpl.tcp.TCPSPPSocketFactory");
+            "org.ccsds.moims.mo.testbed.util.sppimpl.tcp.TCPSPPSocketFactory");
         //        System.setProperty("helpertools.configurations.ground.Network", "SEPP");
 
         // Disable some flags
@@ -129,8 +129,8 @@ public class NanomindServicesConsumer {
     }
 
     public void setServices(final GPSNanomindConsumerServiceImpl gpsNanomindService,
-                            final PowerNanomindConsumerServiceImpl powerNanomindService,
-                            final ExperimentWDNanomindConsumerServiceImpl experimentWDNanomindService) {
+        final PowerNanomindConsumerServiceImpl powerNanomindService,
+        final ExperimentWDNanomindConsumerServiceImpl experimentWDNanomindService) {
         this.gpsNanomindService = gpsNanomindService;
         this.powerNanomindService = powerNanomindService;
         this.experimentWDNanomindService = experimentWDNanomindService;
@@ -144,7 +144,8 @@ public class NanomindServicesConsumer {
         this.powerNanomindService = powerNanomindService;
     }
 
-    public void setExperimentWDNanomindService(final ExperimentWDNanomindConsumerServiceImpl experimentWDNanomindService) {
+    public void setExperimentWDNanomindService(
+        final ExperimentWDNanomindConsumerServiceImpl experimentWDNanomindService) {
         this.experimentWDNanomindService = experimentWDNanomindService;
     }
 

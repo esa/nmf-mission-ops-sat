@@ -54,7 +54,8 @@ class LimitedNanomindAggregationConsumer {
 
     AggregationNanomindConsumerServiceImpl aggConsumerServiceImpl;
 
-    public LimitedNanomindAggregationConsumer(SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
+    public LimitedNanomindAggregationConsumer(SingleConnectionDetails connectionDetails) throws MALException,
+        MalformedURLException {
         aggConsumerServiceImpl = new AggregationNanomindConsumerServiceImpl(connectionDetails);
         loadProperties();
         initRateLimiter();
@@ -204,10 +205,8 @@ class LimitedNanomindAggregationConsumer {
         private void cleanOlderIntervals(long currentTimestamp) {
             long oldestValidInterval = getInterval(currentTimestamp - this.TIME_WINDOW_MS);
 
-            List<Long> intervalsToDelete = countsPerInterval.keySet()
-                                                            .stream()
-                                                            .filter(interval -> interval < oldestValidInterval)
-                                                            .collect(Collectors.toList());
+            List<Long> intervalsToDelete = countsPerInterval.keySet().stream().filter(interval -> interval <
+                oldestValidInterval).collect(Collectors.toList());
 
             for (long interval : intervalsToDelete) {
                 totalCounts -= this.countsPerInterval.get(interval);

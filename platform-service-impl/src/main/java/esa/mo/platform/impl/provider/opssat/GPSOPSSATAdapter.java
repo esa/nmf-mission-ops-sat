@@ -63,9 +63,8 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
         LOGGER.log(Level.FINE, "run getNMEASentence with \"{0}\"", identifier.trim());
         GPSHandler gpsHandler = new GPSHandler();
         try {
-            obcServicesConsumer.getGPSNanomindService()
-                               .getGPSNanomindStub()
-                               .getGPSData(new Blob(identifier.getBytes()), gpsHandler);
+            obcServicesConsumer.getGPSNanomindService().getGPSNanomindStub().getGPSData(new Blob(identifier.getBytes()),
+                gpsHandler);
         } catch (MALInteractionException | MALException ex) {
             throw new IOException("Error when retrieving GPS NMEA response from Nanomind", ex);
         }
@@ -125,8 +124,7 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
                 break;
             default:
                 LOGGER.log(Level.SEVERE, "TLE is empty or wrongly formated. TLE:{0}{1}", new Object[]{System
-                                                                                                            .lineSeparator(),
-                                                                                                      Arrays.toString(lines)});
+                    .lineSeparator(), Arrays.toString(lines)});
                 return null;
         }
 
@@ -139,8 +137,7 @@ public class GPSOPSSATAdapter extends GPSNMEAonlyAdapter {
 
         @Override
         public void getGPSDataResponseReceived(org.ccsds.moims.mo.mal.transport.MALMessageHeader msgHeader,
-                                               org.ccsds.moims.mo.mal.structures.Blob data,
-                                               java.util.Map qosProperties) {
+            org.ccsds.moims.mo.mal.structures.Blob data, java.util.Map qosProperties) {
             try {
                 response = new String(data.getValue());
                 LOGGER.log(Level.FINE, "getNMEASentence answered with \"{0}\"", response);

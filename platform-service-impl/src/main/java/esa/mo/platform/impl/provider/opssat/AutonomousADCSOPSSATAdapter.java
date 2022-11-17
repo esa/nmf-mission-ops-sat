@@ -149,7 +149,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
 
         String powercycleFailedStopThresholdProp = "opssat.adcs.powercycleFailedStopThreshold";
         powercycleFailedStopThreshold = getIntegerProperty(powercycleFailedStopThresholdProp,
-                                                           powercycleFailedStopThreshold);
+            powercycleFailedStopThreshold);
 
         String powerdownWaitTimeMSProp = "opssat.adcs.powerdownWaitTimeMS";
         powerdownWaitTimeMS = getIntegerProperty(powerdownWaitTimeMSProp, powerdownWaitTimeMS);
@@ -172,12 +172,12 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
                 return Integer.parseInt(propertyValue);
             } catch (NumberFormatException e) {
                 LOGGER.log(Level.WARNING, String.format("Error parsing properties %s to Integer, defaulting to %d",
-                                                        propertyKey, defaultValue), e);
+                    propertyKey, defaultValue), e);
                 return defaultValue;
             }
         }
         LOGGER.log(Level.WARNING, String.format("Properties %s not found, defaulting to %d", propertyKey,
-                                                defaultValue));
+            defaultValue));
         return defaultValue;
     }
 
@@ -227,11 +227,11 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
                             initFailedCount++;
                             if (initFailedCount >= initFailedStopThreshold) {
                                 LOGGER.log(Level.WARNING,
-                                           "iADCS init failed {0} times. Will not retry until it gets powercycled.",
-                                           initFailedCount);
+                                    "iADCS init failed {0} times. Will not retry until it gets powercycled.",
+                                    initFailedCount);
                                 if (powercycleCount < powercycleFailedStopThreshold) {
                                     LOGGER.log(Level.INFO, "iADCS init failed {0} times - attempting powercycle.",
-                                               initFailedCount);
+                                        initFailedCount);
                                     iADCSPowercycle();
                                     powercycleCount++;
                                     initFailedCount = 0;
@@ -239,7 +239,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
                                 continue;
                             }
                             LOGGER.log(Level.WARNING, "Sleeping for an extra {0} ms before checking again.",
-                                       iadcsInitBackoffMS);
+                                iadcsInitBackoffMS);
                             Thread.sleep(iadcsInitBackoffMS);
                         }
                     } else if (!isAvailable && unitInitialized) {
@@ -301,49 +301,54 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
                     synchronized (this) {
                         // get current attitude telemetry
                         final SEPP_IADCS_API_QUATERNION_FLOAT telemetry = adcsApi.Get_Attitude_Telemetry()
-                                                                                 .getATTITUDE_QUATERNION_BF();
+                            .getATTITUDE_QUATERNION_BF();
                         final Rotation currentRotation = new Rotation(telemetry.getQ(), telemetry.getQ_I(), telemetry
-                                                                                                                     .getQ_J(),
-                                                                      telemetry.getQ_K(), true);
+                            .getQ_J(), telemetry.getQ_K(), true);
 
                         /* calculate rotation angles
                           by creating a rotation from the camera vector (in spacecraft frame)
                           to the target vector
                           (which has to be transformed into spacecraft frame from ICRF, hence the applyInverse)*/
                         final Vector3D diff = new Vector3D(new Rotation(new Vector3D(0, 0, -1), currentRotation
-                                                                                                               .applyInverseTo(targetVec)).getAngles(RotationOrder.XYZ,
-                                                                                                                                                     RotationConvention.VECTOR_OPERATOR));
+                            .applyInverseTo(targetVec)).getAngles(RotationOrder.XYZ,
+                                RotationConvention.VECTOR_OPERATOR));
 
                         // rotate around each axis in spacecraft frame. (first x than y than z)
                         if (isX) {
                             //rotate diff.getX() around x
-                            adcsApi.Start_SingleAxis_AngleStep_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X,
-                                                                          (float) diff.getX());
+                            adcsApi.Start_SingleAxis_AngleStep_Controller(
+                                SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X,
+                                (float) diff.getX());
                         } else if (isY) {
                             //rotate diff.getY() around y
-                            adcsApi.Start_SingleAxis_AngleStep_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y,
-                                                                          (float) diff.getY());
+                            adcsApi.Start_SingleAxis_AngleStep_Controller(
+                                SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y,
+                                (float) diff.getY());
                         } else if (isZ) {
                             //rotate diff.getZ() around z
-                            adcsApi.Start_SingleAxis_AngleStep_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z,
-                                                                          (float) diff.getZ());
+                            adcsApi.Start_SingleAxis_AngleStep_Controller(
+                                SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z,
+                                (float) diff.getZ());
                         } else {
                             // in case of drift, restart alignment
                             if (Math.abs(FastMath.toDegrees(diff.getX())) > this.margin) {
 
-                                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X);
-                                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
-                                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z);
+                                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                                    SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X);
+                                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                                    SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
+                                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                                    SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z);
 
                                 isX = true;
                             } else {
                                 // if attitude is good, hold attitude
-                                adcsApi.Start_SingleAxis_AngularVelocity_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X,
-                                                                                    0);
-                                adcsApi.Start_SingleAxis_AngularVelocity_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y,
-                                                                                    0);
-                                adcsApi.Start_SingleAxis_AngularVelocity_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z,
-                                                                                    0);
+                                adcsApi.Start_SingleAxis_AngularVelocity_Controller(
+                                    SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X, 0);
+                                adcsApi.Start_SingleAxis_AngularVelocity_Controller(
+                                    SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y, 0);
+                                adcsApi.Start_SingleAxis_AngularVelocity_Controller(
+                                    SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z, 0);
                             }
                         }
 
@@ -351,20 +356,23 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
                         if (isX && Math.abs(FastMath.toDegrees(diff.getX())) <= this.margin) {
                             isX = false;
                             isY = true;
-                            adcsApi.Stop_SingleAxis_AngularVelocity_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X);
+                            adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                                SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X);
                         }
 
                         // if y target is reached swap to z axis
                         if (isY && Math.abs(FastMath.toDegrees(diff.getY())) <= this.margin + 0.01) {
                             isY = false;
                             isZ = true;
-                            adcsApi.Stop_SingleAxis_AngularVelocity_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
+                            adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                                SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
                         }
 
                         // if z target is reached, stop rotation
                         if (isZ && Math.abs(FastMath.toDegrees(diff.getZ())) <= this.margin + 0.01) {
                             isZ = false;
-                            adcsApi.Stop_SingleAxis_AngularVelocity_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z);
+                            adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                                SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z);
                         }
                     }
 
@@ -376,13 +384,19 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
 
             synchronized (this) {
                 // cleanup: stop every mode that is possibly running
-                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X);
-                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
-                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z);
+                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                    SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X);
+                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                    SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
+                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                    SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z);
 
-                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X);
-                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
-                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z);
+                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                    SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X);
+                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                    SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
+                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                    SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z);
             }
 
             isFinished = true;
@@ -404,12 +418,10 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
         final SEPP_IADCS_API_ORBIT_TLE_DATA tle = new SEPP_IADCS_API_ORBIT_TLE_DATA();
         if (lines.get(0).length() != 69) {
             throw new IOException(MessageFormat.format("TLE Line 1 is not 69 characters long ({0}): {1}", lines.get(0)
-                                                                                                               .length(),
-                                                       lines.get(0)));
+                .length(), lines.get(0)));
         } else if (lines.get(1).length() != 69) {
             throw new IOException(MessageFormat.format("TLE Line 2 is not 69 characters long ({0}): {1}", lines.get(1)
-                                                                                                               .length(),
-                                                       lines.get(1)));
+                .length(), lines.get(1)));
         }
         // Convert Java bytes to null terminated strings
         final byte[] l1 = new byte[70];
@@ -451,36 +463,20 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
             stdTM = adcsApi.Get_Standard_Telemetry();
         }
         SEPP_IADCS_API_VECTOR3_XYZ_UINT singleAxisStatus = stdTM.getCONTROL_SINGLE_AXIS_STATUS();
-        Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName())
-              .log(Level.INFO, String.format("Standard TM:\n" +
-                                             "SYSTEM_TIME_MSEC = %d\n" +
-                                             "EPOCH_TIME_MSEC = %d\n" +
-                                             "LIVELYHOOD_REGISTER = %d\n" +
-                                             "SYSTEM_STATUS_REGISTER = %d\n" +
-                                             "SYSTEM_SCHEDULER_REGISTER = %d\n" +
-                                             "SYSTEM_ERROR_REGISTER = %d\n" +
-                                             "SENSORS_ERROR_REGISTER = %d\n" +
-                                             "ACTUATORS_ERROR_REGISTER = %d\n" +
-                                             "CONTROL_MAIN_STATUS = %d\n" +
-                                             "CONTROL_MAIN_ERROR = %d\n" +
-                                             "CONTROL_SINGLE_AXIS_STATUS (X,Y,Z) = (%d,%d,%d)\n" +
-                                             "CONTROL_ALL_AXIS_STATUS = %d\n" +
-                                             "SAT_MAIN_REGISTER = %d\n" +
-                                             "SAT_ERROR_REGISTER = %d\n" +
-                                             "SAT_SCHEDULER_REGISTER = %d\n" +
-                                             "NUMBER_OF_RECEIVED_COMMANDS = %d\n" +
-                                             "NUMBER_OF_FAILED_COMMANDS = %d\n", stdTM.getSYSTEM_TIME_MSEC(), stdTM
-                                                                                                                   .getEPOCH_TIME_MSEC(),
-                                             stdTM.getLIVELYHOOD_REGISTER(), stdTM.getSYSTEM_STATUS_REGISTER(), stdTM
-                                                                                                                     .getSYSTEM_SCHEDULER_REGISTER(),
-                                             stdTM.getSYSTEM_ERROR_REGISTER(), stdTM.getSENSORS_ERROR_REGISTER(), stdTM
-                                                                                                                       .getACTUATORS_ERROR_REGISTER(),
-                                             stdTM.getCONTROL_MAIN_STATUS(), stdTM.getCONTROL_MAIN_ERROR(),
-                                             singleAxisStatus.getX(), singleAxisStatus.getY(), singleAxisStatus.getZ(),
-                                             stdTM.getCONTROL_ALL_AXIS_STATUS(), stdTM.getSAT_MAIN_REGISTER(), stdTM
-                                                                                                                    .getSAT_ERROR_REGISTER(),
-                                             stdTM.getSAT_SCHEDULER_REGISTER(), stdTM.getNUMBER_OF_RECEIVED_COMMANDS(),
-                                             stdTM.getNUMBER_OF_FAILED_COMMANDS()));
+        Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.INFO, String.format("Standard TM:\n" +
+            "SYSTEM_TIME_MSEC = %d\n" + "EPOCH_TIME_MSEC = %d\n" + "LIVELYHOOD_REGISTER = %d\n" +
+            "SYSTEM_STATUS_REGISTER = %d\n" + "SYSTEM_SCHEDULER_REGISTER = %d\n" + "SYSTEM_ERROR_REGISTER = %d\n" +
+            "SENSORS_ERROR_REGISTER = %d\n" + "ACTUATORS_ERROR_REGISTER = %d\n" + "CONTROL_MAIN_STATUS = %d\n" +
+            "CONTROL_MAIN_ERROR = %d\n" + "CONTROL_SINGLE_AXIS_STATUS (X,Y,Z) = (%d,%d,%d)\n" +
+            "CONTROL_ALL_AXIS_STATUS = %d\n" + "SAT_MAIN_REGISTER = %d\n" + "SAT_ERROR_REGISTER = %d\n" +
+            "SAT_SCHEDULER_REGISTER = %d\n" + "NUMBER_OF_RECEIVED_COMMANDS = %d\n" + "NUMBER_OF_FAILED_COMMANDS = %d\n",
+            stdTM.getSYSTEM_TIME_MSEC(), stdTM.getEPOCH_TIME_MSEC(), stdTM.getLIVELYHOOD_REGISTER(), stdTM
+                .getSYSTEM_STATUS_REGISTER(), stdTM.getSYSTEM_SCHEDULER_REGISTER(), stdTM.getSYSTEM_ERROR_REGISTER(),
+            stdTM.getSENSORS_ERROR_REGISTER(), stdTM.getACTUATORS_ERROR_REGISTER(), stdTM.getCONTROL_MAIN_STATUS(),
+            stdTM.getCONTROL_MAIN_ERROR(), singleAxisStatus.getX(), singleAxisStatus.getY(), singleAxisStatus.getZ(),
+            stdTM.getCONTROL_ALL_AXIS_STATUS(), stdTM.getSAT_MAIN_REGISTER(), stdTM.getSAT_ERROR_REGISTER(), stdTM
+                .getSAT_SCHEDULER_REGISTER(), stdTM.getNUMBER_OF_RECEIVED_COMMANDS(), stdTM
+                    .getNUMBER_OF_FAILED_COMMANDS()));
     }
 
     private void dumpInfoTelemetry() {
@@ -492,31 +488,17 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
 
         SEPP_IADCS_API_SW_VERSION swVer = infoTM.getSW_VERSION();
         SEPP_IADCS_API_COMMIT_ID commitId = infoTM.getSW_COMMIT_ID();
-        Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName())
-              .log(Level.INFO, String.format("Info TM:\n" +
-                                             "FRAME_IDENTIFIER = %s\n" +
-                                             "FRAME_VERSION = %d\n" +
-                                             "SW_VERSION = %d.%d.%d\n" +
-                                             "STARTRACKER_TYPE = %d\n" +
-                                             "STARTRACKER_SERIAL_NUMBER = %d\n" +
-                                             "DEVICE_NAME = %s\n" +
-                                             "DEVICE_SERIAL_NUMBER = %d\n" +
-                                             "BUILD_TIMESTAMP = %s\n" +
-                                             "SW_COMMIT_ID = project %d, library %d\n" +
-                                             "DEBUG_LEVEL = %d\n" +
-                                             "COMPILER_NAME = %s\n" +
-                                             "COMPILER_VERSION = %s\n" +
-                                             "LOW_LEVEL_SW_VERSION = %s\n" +
-                                             "LOW_LEVEL_BUILD_TIMESTAMP = %S\n", infoTM.getFRAME_IDENTIFIER(), infoTM
-                                                                                                                     .getFRAME_VERSION(),
-                                             swVer.getMAJOR(), swVer.getMINOR(), swVer.getPATCH(), infoTM
-                                                                                                         .getSTARTRACKER_TYPE(),
-                                             infoTM.getSTARTRACKER_SERIAL_NUMBER(), infoTM.getDEVICE_NAME(), infoTM
-                                                                                                                   .getDEVICE_SERIAL_NUMBER(),
-                                             infoTM.getBUILD_TIMESTAMP(), commitId.getPROJECT(), commitId.getLIBRARY(),
-                                             infoTM.getDEBUG_LEVEL(), infoTM.getCOMPILER_NAME(), infoTM
-                                                                                                       .getCOMPILER_VERSION(),
-                                             infoTM.getLOW_LEVEL_SW_VERSION(), infoTM.getLOW_LEVEL_BUILD_TIMESTAMP()));
+        Logger.getLogger(AutonomousADCSOPSSATAdapter.class.getName()).log(Level.INFO, String.format("Info TM:\n" +
+            "FRAME_IDENTIFIER = %s\n" + "FRAME_VERSION = %d\n" + "SW_VERSION = %d.%d.%d\n" + "STARTRACKER_TYPE = %d\n" +
+            "STARTRACKER_SERIAL_NUMBER = %d\n" + "DEVICE_NAME = %s\n" + "DEVICE_SERIAL_NUMBER = %d\n" +
+            "BUILD_TIMESTAMP = %s\n" + "SW_COMMIT_ID = project %d, library %d\n" + "DEBUG_LEVEL = %d\n" +
+            "COMPILER_NAME = %s\n" + "COMPILER_VERSION = %s\n" + "LOW_LEVEL_SW_VERSION = %s\n" +
+            "LOW_LEVEL_BUILD_TIMESTAMP = %S\n", infoTM.getFRAME_IDENTIFIER(), infoTM.getFRAME_VERSION(), swVer
+                .getMAJOR(), swVer.getMINOR(), swVer.getPATCH(), infoTM.getSTARTRACKER_TYPE(), infoTM
+                    .getSTARTRACKER_SERIAL_NUMBER(), infoTM.getDEVICE_NAME(), infoTM.getDEVICE_SERIAL_NUMBER(), infoTM
+                        .getBUILD_TIMESTAMP(), commitId.getPROJECT(), commitId.getLIBRARY(), infoTM.getDEBUG_LEVEL(),
+            infoTM.getCOMPILER_NAME(), infoTM.getCOMPILER_VERSION(), infoTM.getLOW_LEVEL_SW_VERSION(), infoTM
+                .getLOW_LEVEL_BUILD_TIMESTAMP()));
     }
 
     private void dumpPowerTelemetry() {
@@ -525,31 +507,19 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
         synchronized (this) {
             powerTM = adcsApi.Get_Power_Status_Telemetry();
         }
-        LOGGER.log(Level.INFO, String.format("Power TM:\n" +
-                                             " MAGNETTORQUER_POWER_CONSUMPTION_W = %.3f\n" +
-                                             " MAGNETTORQUER_SUPPLY_VOLTAGE_V = %.3f\n" +
-                                             " MAGNETTORQUER_CURRENT_CONSUMPTION_A = %.3f\n" +
-                                             " STARTRACKER_POWER_CONSUMPTION_W = %.3f\n" +
-                                             " STARTRACKER_SUPPLY_VOLTAGE_V = %.3f\n" +
-                                             " STARTRACKER_CURRENT_CONSUMPTION_A = %.3f\n" +
-                                             " IADCS_POWER_CONSUMPTION_W = %.3f\n" +
-                                             " IADCS_SUPPLY_VOLTAGE_V = %.3f\n" +
-                                             " IADCS_CURRENT_CONSUMPTION_A = %.3f\n" +
-                                             " REACTIONWHEEL_POWER_CONSUMPTION_W = %.3f\n" +
-                                             " REACTIONWHEEL_SUPPLY_VOLTAGE_V = %.3f\n" +
-                                             " REACTIONWHEEL_CURRENT_CONSUMPTION_A = %.3f\n", powerTM
-                                                                                                     .getMAGNETTORQUER_POWER_CONSUMPTION_W(),
-                                             powerTM.getMAGNETTORQUER_SUPPLY_VOLTAGE_V(), powerTM
-                                                                                                 .getMAGNETTORQUER_CURRENT_CONSUMPTION_A(),
-                                             powerTM.getSTARTRACKER_POWER_CONSUMPTION_W(), powerTM
-                                                                                                  .getSTARTRACKER_SUPPLY_VOLTAGE_V(),
-                                             powerTM.getSTARTRACKER_CURRENT_CONSUMPTION_A(), powerTM
-                                                                                                    .getIADCS_POWER_CONSUMPTION_W(),
-                                             powerTM.getIADCS_SUPPLY_VOLTAGE_V(), powerTM
-                                                                                         .getIADCS_CURRENT_CONSUMPTION_A(),
-                                             powerTM.getREACTIONWHEEL_POWER_CONSUMPTION_W(), powerTM
-                                                                                                    .getREACTIONWHEEL_SUPPLY_VOLTAGE_V(),
-                                             powerTM.getREACTIONWHEEL_CURRENT_CONSUMPTION_A()));
+        LOGGER.log(Level.INFO, String.format("Power TM:\n" + " MAGNETTORQUER_POWER_CONSUMPTION_W = %.3f\n" +
+            " MAGNETTORQUER_SUPPLY_VOLTAGE_V = %.3f\n" + " MAGNETTORQUER_CURRENT_CONSUMPTION_A = %.3f\n" +
+            " STARTRACKER_POWER_CONSUMPTION_W = %.3f\n" + " STARTRACKER_SUPPLY_VOLTAGE_V = %.3f\n" +
+            " STARTRACKER_CURRENT_CONSUMPTION_A = %.3f\n" + " IADCS_POWER_CONSUMPTION_W = %.3f\n" +
+            " IADCS_SUPPLY_VOLTAGE_V = %.3f\n" + " IADCS_CURRENT_CONSUMPTION_A = %.3f\n" +
+            " REACTIONWHEEL_POWER_CONSUMPTION_W = %.3f\n" + " REACTIONWHEEL_SUPPLY_VOLTAGE_V = %.3f\n" +
+            " REACTIONWHEEL_CURRENT_CONSUMPTION_A = %.3f\n", powerTM.getMAGNETTORQUER_POWER_CONSUMPTION_W(), powerTM
+                .getMAGNETTORQUER_SUPPLY_VOLTAGE_V(), powerTM.getMAGNETTORQUER_CURRENT_CONSUMPTION_A(), powerTM
+                    .getSTARTRACKER_POWER_CONSUMPTION_W(), powerTM.getSTARTRACKER_SUPPLY_VOLTAGE_V(), powerTM
+                        .getSTARTRACKER_CURRENT_CONSUMPTION_A(), powerTM.getIADCS_POWER_CONSUMPTION_W(), powerTM
+                            .getIADCS_SUPPLY_VOLTAGE_V(), powerTM.getIADCS_CURRENT_CONSUMPTION_A(), powerTM
+                                .getREACTIONWHEEL_POWER_CONSUMPTION_W(), powerTM.getREACTIONWHEEL_SUPPLY_VOLTAGE_V(),
+            powerTM.getREACTIONWHEEL_CURRENT_CONSUMPTION_A()));
     }
 
     @Override
@@ -586,12 +556,13 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
 
     private void gotoVectorPointing(final AttitudeModeVectorPointing a) {
         holder = new PositionHolder(new Vector3D(a.getTarget().getX(), a.getTarget().getY(), a.getTarget().getZ()), a
-                                                                                                                     .getMargin());
+            .getMargin());
         final Thread runner = new Thread(holder, "iADCS Vector pointing holder");
         runner.start();
     }
 
-    private void gotoTargetLinearTracking(final AttitudeModeTargetTrackingLinear targetLinearTracking) throws IOException {
+    private void gotoTargetLinearTracking(final AttitudeModeTargetTrackingLinear targetLinearTracking)
+        throws IOException {
         TargetPointingConfig config = new TargetPointingConfig();
         config.load();
         prepareForPointingMode(config);
@@ -678,7 +649,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
         if (config.getEnableGyroBiasCorrection()) {
             LOGGER.fine("Set Sensor Zero Bias Values - Gyroscope");
             adcsApi.Set_Gyro_Bias_Value(SEPP_IADCS_API_GYROSCOPES.IADCS_EXTERNAL_HIGHPERFORMANCE_GYRO, config
-                                                                                                             .getGyroBiasVector());
+                .getGyroBiasVector());
             adcsApi.Enable_Gyro_Bias_Removement(SEPP_IADCS_API_GYROSCOPES.IADCS_EXTERNAL_HIGHPERFORMANCE_GYRO);
         } else {
             LOGGER.fine("Skip Bias Correction for Gyroscope (use defaults)");
@@ -697,7 +668,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
 
     @Override
     public void setAllReactionWheelSpeeds(final float wheelX, final float wheelY, final float wheelZ,
-                                          final float wheelU, final float wheelV, final float wheelW) {
+        final float wheelU, final float wheelV, final float wheelW) {
         synchronized (this) {
             final SEPP_IADCS_API_REACTIONWHEEL_SPEEDS speeds = new SEPP_IADCS_API_REACTIONWHEEL_SPEEDS();
 
@@ -747,7 +718,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
             } else {
                 if (parameters.getControlMode() != -1) {
                     LOGGER.log(Level.WARNING, "{0} is no valid control mode. control mode has not been changed!",
-                               parameters.getControlMode());
+                        parameters.getControlMode());
                 }
                 params.setCONTROL_MODE(oldParams.getControlMode());
             }
@@ -760,8 +731,8 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
                     params.setMAX_SPEED_RADPS(oldParams.getMaxSpeed());
                 } else {
                     LOGGER.log(Level.WARNING,
-                               "Maximum speed is not allowed to exceed {0}! Max speed will be set to {0}",
-                               MAX_REACTION_WHEEL_SPEED);
+                        "Maximum speed is not allowed to exceed {0}! Max speed will be set to {0}",
+                        MAX_REACTION_WHEEL_SPEED);
                     params.setMAX_SPEED_RADPS(MAX_REACTION_WHEEL_SPEED);
                 }
             }
@@ -774,8 +745,8 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
                     params.setMAX_TORQUE_NM(oldParams.getMaxTorque());
                 } else {
                     LOGGER.log(Level.WARNING,
-                               "Maximum torque is not allowed to exceed {0}! Max torque will be set to {0}",
-                               MAX_REACTION_WHEEL_TORQUE);
+                        "Maximum torque is not allowed to exceed {0}! Max torque will be set to {0}",
+                        MAX_REACTION_WHEEL_TORQUE);
                     params.setMAX_TORQUE_NM(MAX_REACTION_WHEEL_TORQUE);
                 }
             }
@@ -801,8 +772,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
         synchronized (this) {
             final SEPP_IADCS_API_REACTIONWHEEL_ARRAY_PARAMETERS param = adcsApi.Get_ReactionWheel_All_Parameters();
             return new ReactionWheelParameters((int) param.getCONTROL_MODE(), param.getMAX_SPEED_RADPS(), param
-                                                                                                               .getMAX_TORQUE_NM(),
-                                               param.getMOMENT_OF_INERTIA_KGM2(), param.getMOTOR_CONSTANT());
+                .getMAX_TORQUE_NM(), param.getMOMENT_OF_INERTIA_KGM2(), param.getMOTOR_CONSTANT());
         }
     }
 
@@ -814,9 +784,12 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
             } else if (activeAttitudeMode instanceof AttitudeModeNadirPointing) {
                 adcsApi.Stop_Target_Pointing_Nadir_Mode();
             } else if (activeAttitudeMode instanceof AttitudeModeSingleSpinning) {
-                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X);
-                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
-                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z);
+                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                    SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_X);
+                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                    SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Y);
+                adcsApi.Stop_SingleAxis_AngularVelocity_Controller(
+                    SEPP_IADCS_API_SINGLEAXIS_CONTROL_TARGET_AXIS.IADCS_SINGLEAXIS_CONTROL_TARGET_Z);
             } else if (activeAttitudeMode instanceof AttitudeModeSunPointing) {
                 adcsApi.Stop_Operation_Mode_Sun_Pointing();
             } else if (activeAttitudeMode instanceof AttitudeModeTargetTracking) {
@@ -860,7 +833,8 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
             attitudeTm.getATTITUDE_QUATERNION_BF();
             final Quaternion attitude = IADCSTools.convertFromApiQuaternion(attitudeTm.getATTITUDE_QUATERNION_BF());
             final VectorF3D angularVel = IADCSTools.convertFromApiVector(attitudeTm.getANGULAR_VELOCITY_VECTOR_RADPS());
-            final VectorF3D magneticField = IADCSTools.convertFromApiVector(attitudeTm.getMEASURED_MAGNETIC_FIELD_VECTOR_BF_T());
+            final VectorF3D magneticField = IADCSTools.convertFromApiVector(attitudeTm
+                .getMEASURED_MAGNETIC_FIELD_VECTOR_BF_T());
             final VectorF3D sunVector = IADCSTools.convertFromApiVector(attitudeTm.getMEASURED_SUN_VECTOR_BF());
             return new AttitudeTelemetry(attitude, angularVel, sunVector, magneticField, stateTarget);
         }
@@ -870,12 +844,16 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
     public ActuatorsTelemetry getActuatorsTelemetry() throws IOException {
         synchronized (this) {
             final SEPP_IADCS_API_ACTUATOR_TELEMETRY actuatorTm = adcsApi.Get_Actuator_Telemetry();
-            final WheelsSpeed targetSpeed = IADCSTools.convertFromApiWheelSpeed(actuatorTm.getREACTIONWHEEL_TARGET_SPEED_VECTOR_XYZ_RADPS(),
-                                                                                actuatorTm.getREACTIONWHEEL_TARGET_SPEED_VECTOR_UVW_RADPS());
-            final WheelsSpeed currentSpeed = IADCSTools.convertFromApiWheelSpeed(actuatorTm.getREACTIONWHEEL_CURRENT_SPEED_VECTOR_XYZ_RADPS(),
-                                                                                 actuatorTm.getREACTIONWHEEL_CURRENT_SPEED_VECTOR_UVW_RADPS());
-            final VectorF3D mtqDipoleMoment = IADCSTools.convertFromApiMagMoment(actuatorTm.getMAGNETORQUERS_TARGET_DIPOLE_MOMENT_VECTOR_AM2());
-            final MagnetorquersState mtqState = IADCSTools.convertApiMtqState(actuatorTm.getMAGNETORQUERS_CURRENT_STATE());
+            final WheelsSpeed targetSpeed = IADCSTools.convertFromApiWheelSpeed(actuatorTm
+                .getREACTIONWHEEL_TARGET_SPEED_VECTOR_XYZ_RADPS(), actuatorTm
+                    .getREACTIONWHEEL_TARGET_SPEED_VECTOR_UVW_RADPS());
+            final WheelsSpeed currentSpeed = IADCSTools.convertFromApiWheelSpeed(actuatorTm
+                .getREACTIONWHEEL_CURRENT_SPEED_VECTOR_XYZ_RADPS(), actuatorTm
+                    .getREACTIONWHEEL_CURRENT_SPEED_VECTOR_UVW_RADPS());
+            final VectorF3D mtqDipoleMoment = IADCSTools.convertFromApiMagMoment(actuatorTm
+                .getMAGNETORQUERS_TARGET_DIPOLE_MOMENT_VECTOR_AM2());
+            final MagnetorquersState mtqState = IADCSTools.convertApiMtqState(actuatorTm
+                .getMAGNETORQUERS_CURRENT_STATE());
             return new ActuatorsTelemetry(targetSpeed, currentSpeed, mtqDipoleMoment, mtqState);
         }
     }

@@ -110,12 +110,12 @@ class NanomindAggregationsHandler {
         // Parameters per aggregation
         String paramsPerAggregationProp = "nmf.supervisor.parameter.valuesprovider.nanomind.paramsPerAggregation";
         PARAMS_PER_AGGREGATION = ConfigurationHelper.getIntegerProperty(paramsPerAggregationProp,
-                                                                        PARAMS_PER_AGGREGATION);
+            PARAMS_PER_AGGREGATION);
 
         // Max definable aggregations
         String maxDefinableAggregationsProp = "nmf.supervisor.parameter.valuesprovider.nanomind.maxDefinableAggregations";
         MAX_DEFINABLE_AGGREGATION = ConfigurationHelper.getIntegerProperty(maxDefinableAggregationsProp,
-                                                                           MAX_DEFINABLE_AGGREGATION);
+            MAX_DEFINABLE_AGGREGATION);
     }
 
     /**
@@ -222,7 +222,7 @@ class NanomindAggregationsHandler {
         String aggIdentifier = nextAggregationIdentifier();
         if (aggIdentifier == null) {
             LOGGER.log(Level.WARNING,
-                       "Max number of aggregation definitions reached, can't fetch value of new parameter");
+                "Max number of aggregation definitions reached, can't fetch value of new parameter");
             return null;
         }
 
@@ -254,12 +254,12 @@ class NanomindAggregationsHandler {
         try {
             aggServiceCns.getAggregationNanomindStub().updateDefinition(ids, aggList);
             LOGGER.log(Level.FINE, String.format("Agg. definition %s updated in Nanomind", updatedAggregation
-                                                                                                             .getName()));
+                .getName()));
             return true;
         } catch (MALInteractionException | MALException e) {
             // Aggregation couldn't be updated to the Nanomind
             LOGGER.log(Level.SEVERE, "Error while calling updateDefinition operation of Nanomind aggregation service",
-                       e);
+                e);
         } catch (QueryRateExceededException e) {
             LOGGER.log(Level.SEVERE, e.getMessage());
         }
@@ -311,11 +311,8 @@ class NanomindAggregationsHandler {
 
         // Aggregation definition
         AggregationDefinition def = new AggregationDefinition(new Identifier(obswAggregation.getName()), obswAggregation
-                                                                                                                        .getDescription(),
-                                                              AggregationCategory.GENERAL, obswAggregation
-                                                                                                          .isGenerationEnabled(),
-                                                              new Duration(obswAggregation.getUpdateInterval()), false,
-                                                              new Duration(), paramsSetList);
+            .getDescription(), AggregationCategory.GENERAL, obswAggregation.isGenerationEnabled(), new Duration(
+                obswAggregation.getUpdateInterval()), false, new Duration(), paramsSetList);
 
         // Finally the list
         AggregationDefinitionList list = new AggregationDefinitionList();
@@ -384,8 +381,7 @@ class NanomindAggregationsHandler {
     private long aggregationIdentifier2AggregationId(String identifier) {
         if (identifier == null || identifier.length() != 4) {
             LOGGER.log(Level.SEVERE, String.format(
-                                                   "Trying to convert a wrong aggregation identifier: %s, 0 is returned",
-                                                   identifier));
+                "Trying to convert a wrong aggregation identifier: %s, 0 is returned", identifier));
             return 0;
         }
         return new BigInteger(identifier.getBytes()).longValue();

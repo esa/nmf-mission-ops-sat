@@ -26,7 +26,8 @@ import org.ccsds.moims.mo.testbed.util.spp.SpacePacket;
 
 /**
  */
-public class SPPMessageReceiver implements esa.mo.mal.transport.gen.util.GENMessagePoller.GENMessageReceiver<SpacePacket> {
+public class SPPMessageReceiver implements
+    esa.mo.mal.transport.gen.util.GENMessagePoller.GENMessageReceiver<SpacePacket> {
     protected final SPPSocket socket;
 
     /**

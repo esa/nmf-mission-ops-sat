@@ -37,11 +37,10 @@ public class COMObject {
     private final boolean event;
 
     public COMObject(final org.ccsds.moims.mo.mal.structures.UShort area,
-                     final org.ccsds.moims.mo.mal.structures.UShort service,
-                     final org.ccsds.moims.mo.mal.structures.UOctet version,
-                     final org.ccsds.moims.mo.mal.structures.UShort number, final Identifier name,
-                     final Object bodyShortForm, final boolean hasRelated, final ObjectType relatedType,
-                     final boolean hasSource, final ObjectType sourceType, final boolean isEvent) {
+        final org.ccsds.moims.mo.mal.structures.UShort service, final org.ccsds.moims.mo.mal.structures.UOctet version,
+        final org.ccsds.moims.mo.mal.structures.UShort number, final Identifier name, final Object bodyShortForm,
+        final boolean hasRelated, final ObjectType relatedType, final boolean hasSource, final ObjectType sourceType,
+        final boolean isEvent) {
         this.objectType = new ObjectType(area, service, version, number);
         this.objectName = name;
         this.bodyShortForm = bodyShortForm;
@@ -53,8 +52,8 @@ public class COMObject {
     }
 
     public COMObject(final ObjectType objectType, final Identifier name, final Object bodyShortForm,
-                     final boolean hasRelated, final ObjectType relatedType, final boolean hasSource,
-                     final ObjectType sourceType, final boolean isEvent) {
+        final boolean hasRelated, final ObjectType relatedType, final boolean hasSource, final ObjectType sourceType,
+        final boolean isEvent) {
         this.objectType = objectType;
         this.objectName = name;
         this.bodyShortForm = bodyShortForm;

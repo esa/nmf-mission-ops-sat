@@ -105,7 +105,7 @@ public class ClientTCPSPPSocket implements SPPSocket {
 
                     if (previous != -1 && previous != sequenceCount - 1 && previous != 16383 && sequenceCount != 0) { // Exclude also the transition zone
                         LOGGER.log(Level.FINE, "Out-of-order detected! Sequence count: {0} - Last: {1} (For APID:{2})",
-                                   new Object[]{sequenceCount, previous, packetAPID});
+                            new Object[]{sequenceCount, previous, packetAPID});
                     }
 
                     lastSPPsMap.put(packetAPID, sequenceCount);

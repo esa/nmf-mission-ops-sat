@@ -44,11 +44,11 @@ public class SPPTransport extends SPPBaseTransport<SpacePacket> {
      * @param properties The QoS properties.
      * @throws MALException On error.
      */
-    public SPPTransport(final String protocol, final MALTransportFactory factory,
-                        final java.util.Map properties) throws MALException {
+    public SPPTransport(final String protocol, final MALTransportFactory factory, final java.util.Map properties)
+        throws MALException {
         super(new SPPConfiguration(true, 65530, true, true, true, true, true, true, true, true),
-              new SPPURIRepresentationSimple(), new SPPSourceSequenceCounterSimple(), protocol, ":", '/', '@', false,
-              false, factory, properties);
+            new SPPURIRepresentationSimple(), new SPPSourceSequenceCounterSimple(), protocol, ":", '/', '@', false,
+            false, factory, properties);
 
         try {
             sppSocket = SPPSocketFactory.newInstance().createSocket(properties);
@@ -65,8 +65,7 @@ public class SPPTransport extends SPPBaseTransport<SpacePacket> {
         uriBase = "malspp:";
 
         final GENMessagePoller rcvr = new GENMessagePoller<>(this, new SPPMessageSender(sppSocket),
-                                                             new SPPMessageReceiver(sppSocket),
-                                                             new SPPMessageDecoderFactory<>());
+            new SPPMessageReceiver(sppSocket), new SPPMessageDecoderFactory<>());
         rcvr.start();
     }
 
@@ -90,8 +89,8 @@ public class SPPTransport extends SPPBaseTransport<SpacePacket> {
     }
 
     @Override
-    protected GENMessageSender createMessageSender(final GENMessage msg,
-                                                   final String remoteRootURI) throws MALException, MALTransmitErrorException {
+    protected GENMessageSender createMessageSender(final GENMessage msg, final String remoteRootURI)
+        throws MALException, MALTransmitErrorException {
         //create a message sender and receiver for the socket
 
         return new SPPMessageSender(sppSocket);
