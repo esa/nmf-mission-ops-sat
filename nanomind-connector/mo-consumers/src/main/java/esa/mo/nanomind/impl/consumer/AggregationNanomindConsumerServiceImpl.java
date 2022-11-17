@@ -57,7 +57,8 @@ public class AggregationNanomindConsumerServiceImpl extends ConsumerServiceImpl 
         return getAggregationNanomindStub();
     }
 
-    public AggregationNanomindConsumerServiceImpl(final SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
+    public AggregationNanomindConsumerServiceImpl(final SingleConnectionDetails connectionDetails) throws MALException,
+        MalformedURLException {
 
         if (MALContextFactory.lookupArea(MALHelper.MAL_AREA_NAME, MALHelper.MAL_AREA_VERSION) == null) {
             MALHelper.init(MALContextFactory.getElementFactoryRegistry());
@@ -71,8 +72,8 @@ public class AggregationNanomindConsumerServiceImpl extends ConsumerServiceImpl 
             MCHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
 
-        if (MALContextFactory.lookupArea(MCHelper.MC_AREA_NAME, MCHelper.MC_AREA_VERSION)
-                             .getServiceByName(AggregationHelper.AGGREGATION_SERVICE_NAME) == null) {
+        if (MALContextFactory.lookupArea(MCHelper.MC_AREA_NAME, MCHelper.MC_AREA_VERSION).getServiceByName(
+            AggregationHelper.AGGREGATION_SERVICE_NAME) == null) {
             AggregationHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
 
@@ -89,8 +90,7 @@ public class AggregationNanomindConsumerServiceImpl extends ConsumerServiceImpl 
         }
 
         tmConsumer = connection.startService(this.connectionDetails.getProviderURI(), this.connectionDetails
-                                                                                                            .getBrokerURI(),
-                                             this.connectionDetails.getDomain(), AggregationHelper.AGGREGATION_SERVICE);
+            .getBrokerURI(), this.connectionDetails.getDomain(), AggregationHelper.AGGREGATION_SERVICE);
 
         this.aggregationService = new AggregationStub(tmConsumer);
 

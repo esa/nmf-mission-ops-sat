@@ -45,12 +45,12 @@ public class ConfigurationHelper {
                 return Integer.parseInt(propertyValue);
             } catch (NumberFormatException e) {
                 LOGGER.log(Level.WARNING, String.format("Error parsing properties %s to Integer, defaulting to %d",
-                                                        propertyKey, defaultValue), e);
+                    propertyKey, defaultValue), e);
                 return defaultValue;
             }
         }
         LOGGER.log(Level.WARNING, String.format("Properties %s not found, defaulting to %d", propertyKey,
-                                                defaultValue));
+            defaultValue));
         return defaultValue;
     }
 }

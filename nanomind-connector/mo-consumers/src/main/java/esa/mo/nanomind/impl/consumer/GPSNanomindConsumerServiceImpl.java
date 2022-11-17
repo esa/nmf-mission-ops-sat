@@ -57,7 +57,8 @@ public class GPSNanomindConsumerServiceImpl extends ConsumerServiceImpl {
         return getGPSNanomindStub();
     }
 
-    public GPSNanomindConsumerServiceImpl(final SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
+    public GPSNanomindConsumerServiceImpl(final SingleConnectionDetails connectionDetails) throws MALException,
+        MalformedURLException {
 
         if (MALContextFactory.lookupArea(MALHelper.MAL_AREA_NAME, MALHelper.MAL_AREA_VERSION) == null) {
             MALHelper.init(MALContextFactory.getElementFactoryRegistry());
@@ -73,7 +74,7 @@ public class GPSNanomindConsumerServiceImpl extends ConsumerServiceImpl {
         }
 
         if (MALContextFactory.lookupArea(OPSSAT_PFHelper.OPSSAT_PF_AREA_NAME, OPSSAT_PFHelper.OPSSAT_PF_AREA_VERSION)
-                             .getServiceByName(GPSHelper.GPS_SERVICE_NAME) == null) {
+            .getServiceByName(GPSHelper.GPS_SERVICE_NAME) == null) {
             GPSHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
 
@@ -90,8 +91,7 @@ public class GPSNanomindConsumerServiceImpl extends ConsumerServiceImpl {
         }
 
         tmConsumer = connection.startService(this.connectionDetails.getProviderURI(), this.connectionDetails
-                                                                                                            .getBrokerURI(),
-                                             this.connectionDetails.getDomain(), GPSHelper.GPS_SERVICE);
+            .getBrokerURI(), this.connectionDetails.getDomain(), GPSHelper.GPS_SERVICE);
 
         this.gpsNanomindService = new GPSStub(tmConsumer);
     }

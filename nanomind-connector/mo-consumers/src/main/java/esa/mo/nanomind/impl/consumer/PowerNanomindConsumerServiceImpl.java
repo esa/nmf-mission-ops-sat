@@ -57,7 +57,8 @@ public class PowerNanomindConsumerServiceImpl extends ConsumerServiceImpl {
         return getPowerNanomindStub();
     }
 
-    public PowerNanomindConsumerServiceImpl(final SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
+    public PowerNanomindConsumerServiceImpl(final SingleConnectionDetails connectionDetails) throws MALException,
+        MalformedURLException {
 
         if (MALContextFactory.lookupArea(MALHelper.MAL_AREA_NAME, MALHelper.MAL_AREA_VERSION) == null) {
             MALHelper.init(MALContextFactory.getElementFactoryRegistry());
@@ -73,7 +74,7 @@ public class PowerNanomindConsumerServiceImpl extends ConsumerServiceImpl {
         }
 
         if (MALContextFactory.lookupArea(OPSSAT_PFHelper.OPSSAT_PF_AREA_NAME, OPSSAT_PFHelper.OPSSAT_PF_AREA_VERSION)
-                             .getServiceByName(PowerHelper.POWER_SERVICE_NAME) == null) {
+            .getServiceByName(PowerHelper.POWER_SERVICE_NAME) == null) {
             PowerHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
 
@@ -90,8 +91,7 @@ public class PowerNanomindConsumerServiceImpl extends ConsumerServiceImpl {
         }
 
         tmConsumer = connection.startService(this.connectionDetails.getProviderURI(), this.connectionDetails
-                                                                                                            .getBrokerURI(),
-                                             this.connectionDetails.getDomain(), PowerHelper.POWER_SERVICE);
+            .getBrokerURI(), this.connectionDetails.getDomain(), PowerHelper.POWER_SERVICE);
 
         this.powerNanomindService = new PowerStub(tmConsumer);
 

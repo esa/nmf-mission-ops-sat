@@ -52,9 +52,9 @@ public class CameraOPSSATTest {
                     for (int x = 0; x < biA.getWidth(); x++) {
                         Color colorA = new Color(biA.getRGB(x, y));
                         Color colorB = new Color(biB.getRGB(x, y));
-                        if (Math.abs(colorA.getRed() - colorB.getRed()) <= COLOR_SIMILARITY_THRESHOLD &&
-                            Math.abs(colorA.getGreen() - colorB.getGreen()) <= COLOR_SIMILARITY_THRESHOLD &&
-                            Math.abs(colorA.getBlue() - colorB.getBlue()) <= COLOR_SIMILARITY_THRESHOLD) {
+                        if (Math.abs(colorA.getRed() - colorB.getRed()) <= COLOR_SIMILARITY_THRESHOLD && Math.abs(colorA
+                            .getGreen() - colorB.getGreen()) <= COLOR_SIMILARITY_THRESHOLD && Math.abs(colorA
+                                .getBlue() - colorB.getBlue()) <= COLOR_SIMILARITY_THRESHOLD) {
                             count += 1;
                         }
                     }

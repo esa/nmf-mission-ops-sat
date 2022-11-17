@@ -148,12 +148,8 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface {
         synchronized (this) {
             ims100_api.bst_ims100_get_tele_std(stdTM);
         }
-        LOGGER.log(Level.INFO, String.format("Dumping HK Telemetry...\n" +
-                                             "Standard TM:\n" +
-                                             "Version: %s\n" +
-                                             "Temp: %d degC\n" +
-                                             "Status byte: 0x%02X", stdTM.getVersion(), (int) stdTM.getTemp(), stdTM
-                                                                                                                    .getStatus()));
+        LOGGER.log(Level.INFO, String.format("Dumping HK Telemetry...\n" + "Standard TM:\n" + "Version: %s\n" +
+            "Temp: %d degC\n" + "Status byte: 0x%02X", stdTM.getVersion(), (int) stdTM.getTemp(), stdTM.getStatus()));
     }
 
     @Override
@@ -172,9 +168,9 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface {
     @Override
     public synchronized Picture getPicturePreview() throws IOException {
         final PixelResolution resolution = new PixelResolution(new UInteger(nativeImageWidth), new UInteger(
-                                                                                                            nativeImageHeight));
+            nativeImageHeight));
         return takePicture(new CameraSettings(resolution, PictureFormat.RAW, PREVIEW_EXPOSURE_TIME, PREVIEW_GAIN,
-                                              PREVIEW_GAIN, PREVIEW_GAIN));
+            PREVIEW_GAIN, PREVIEW_GAIN));
 
     }
 
@@ -184,13 +180,12 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface {
         final double EV = Math.log(F / PREVIEW_EXPOSURE_TIME.getValue()) / Math.log(2);
 
         final CameraSettings tmpSettings = new CameraSettings(settings.getResolution(), PictureFormat.RAW,
-                                                              PREVIEW_EXPOSURE_TIME, PREVIEW_GAIN, PREVIEW_GAIN,
-                                                              PREVIEW_GAIN);
+            PREVIEW_EXPOSURE_TIME, PREVIEW_GAIN, PREVIEW_GAIN, PREVIEW_GAIN);
         LOGGER.log(Level.INFO, "Taking a sample picture");
         final bst_ims100_img_t image = internalTakePicture(tmpSettings);
         final byte[] rgbData = runNativeDebayering(image);
         BufferedImage bImage = rgbDataToBufferedImage(rgbData, (int) image.getAttr().getWidth(), (int) image.getAttr()
-                                                                                                            .getHeight());
+            .getHeight());
 
         final int w = (int) settings.getResolution().getWidth().getValue();
         final int h = (int) settings.getResolution().getHeight().getValue();
@@ -234,8 +229,8 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface {
         synchronized (this) {
             final bst_ims100_img_t image = new bst_ims100_img_t();
             // Each pixel of raw image is encoded as uint16
-            final int dataN = (int) (settings.getResolution().getHeight().getValue() *
-                                     settings.getResolution().getWidth().getValue());
+            final int dataN = (int) (settings.getResolution().getHeight().getValue() * settings.getResolution()
+                .getWidth().getValue());
             ((Buffer) sharedImageDataBuf).clear();
             image.setData(sharedImageDataBuf);
             image.setData_n(dataN);
@@ -287,12 +282,12 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface {
         }
     }
 
-    public byte[] processRawCameraPicture(final PictureFormat targetFormat,
-                                          final bst_ims100_img_t image) throws IOException {
+    public byte[] processRawCameraPicture(final PictureFormat targetFormat, final bst_ims100_img_t image)
+        throws IOException {
         byte[] rgbData = runNativeDebayering(image);
         LOGGER.log(Level.INFO, String.format("Converting the image from RGB to " + targetFormat.toString()));
         BufferedImage bImage = rgbDataToBufferedImage(rgbData, (int) image.getAttr().getWidth(), (int) image.getAttr()
-                                                                                                            .getHeight());
+            .getHeight());
         return convertImage(bImage, targetFormat);
     }
 
@@ -379,8 +374,8 @@ public class CameraOPSSATAdapter implements CameraAdapterInterface {
                 * and we get all indexes in multiples of 6 (because the array is twice the size)
                 */
                 pixel = (((int) rgbData[(1 * bytesPerColor - 1) + (3 * i * bytesPerColor)]) & 0xFF) << 16 |
-                        (((int) rgbData[(2 * bytesPerColor - 1) + (3 * i * bytesPerColor)]) & 0xFF) << 8 |
-                        (((int) rgbData[(3 * bytesPerColor - 1) + (3 * i * bytesPerColor)]) & 0xFF);
+                    (((int) rgbData[(2 * bytesPerColor - 1) + (3 * i * bytesPerColor)]) & 0xFF) << 8 |
+                    (((int) rgbData[(3 * bytesPerColor - 1) + (3 * i * bytesPerColor)]) & 0xFF);
                 ++i;
                 image.setRGB(x, y, pixel);
             }

@@ -33,7 +33,8 @@ public class ActionNanomindConsumerServiceImpl extends ConsumerServiceImpl {
         return getActionStub();
     }
 
-    public ActionNanomindConsumerServiceImpl(final SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
+    public ActionNanomindConsumerServiceImpl(final SingleConnectionDetails connectionDetails) throws MALException,
+        MalformedURLException {
 
         if (MALContextFactory.lookupArea(MALHelper.MAL_AREA_NAME, MALHelper.MAL_AREA_VERSION) == null) {
             MALHelper.init(MALContextFactory.getElementFactoryRegistry());
@@ -47,8 +48,8 @@ public class ActionNanomindConsumerServiceImpl extends ConsumerServiceImpl {
             MCHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
 
-        if (MALContextFactory.lookupArea(MCHelper.MC_AREA_NAME, MCHelper.MC_AREA_VERSION)
-                             .getServiceByName(ActionHelper.ACTION_SERVICE_NAME) == null) {
+        if (MALContextFactory.lookupArea(MCHelper.MC_AREA_NAME, MCHelper.MC_AREA_VERSION).getServiceByName(
+            ActionHelper.ACTION_SERVICE_NAME) == null) {
             ActionHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
 
@@ -65,8 +66,7 @@ public class ActionNanomindConsumerServiceImpl extends ConsumerServiceImpl {
         }
 
         tmConsumer = connection.startService(this.connectionDetails.getProviderURI(), this.connectionDetails
-                                                                                                            .getBrokerURI(),
-                                             this.connectionDetails.getDomain(), ActionHelper.ACTION_SERVICE);
+            .getBrokerURI(), this.connectionDetails.getDomain(), ActionHelper.ACTION_SERVICE);
 
         this.actionService = new ActionStub(tmConsumer);
 

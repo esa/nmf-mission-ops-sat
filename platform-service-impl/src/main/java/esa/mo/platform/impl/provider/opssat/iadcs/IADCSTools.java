@@ -31,8 +31,7 @@ import at.tugraz.ihf.opssat.iadcs.*;
 public class IADCSTools {
 
     public static SEPP_IADCS_API_MATRIX3_FLOAT convertToApiMatrix(final float M11, final float M12, final float M13,
-                                                                  final float M21, final float M22, final float M23,
-                                                                  final float M31, final float M32, final float M33) {
+        final float M21, final float M22, final float M23, final float M31, final float M32, final float M33) {
         final SEPP_IADCS_API_MATRIX3_FLOAT ret = new SEPP_IADCS_API_MATRIX3_FLOAT();
         ret.setM11(M11);
         ret.setM12(M12);
@@ -47,7 +46,7 @@ public class IADCSTools {
     }
 
     public static WheelsSpeed convertFromApiWheelSpeed(final SEPP_IADCS_API_VECTOR3_XYZ_FLOAT in1,
-                                                       final SEPP_IADCS_API_VECTOR3_UVW_FLOAT in2) {
+        final SEPP_IADCS_API_VECTOR3_UVW_FLOAT in2) {
         final FloatList list = new FloatList(6);
         list.add(in1.getX());
         list.add(in1.getY());
@@ -84,7 +83,7 @@ public class IADCSTools {
     }
 
     public static SEPP_IADCS_API_QUATERNION_FLOAT convertToApiQuaternion(final float q, final float i, final float j,
-                                                                         final float k) {
+        final float k) {
         final SEPP_IADCS_API_QUATERNION_FLOAT ret = new SEPP_IADCS_API_QUATERNION_FLOAT();
         ret.setQ(q);
         ret.setQ_I(i);

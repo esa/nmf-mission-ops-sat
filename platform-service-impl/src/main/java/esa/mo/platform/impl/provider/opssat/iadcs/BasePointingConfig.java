@@ -127,7 +127,8 @@ public abstract class BasePointingConfig {
         // External SC is partially hardcoded
         scConfig = new SEPP_IADCS_API_SLIDING_CONTROLLER_PARAMETERS();
         scConfig.setUPDATE_INTERVAL_MSEC(BigInteger.valueOf(DEFAULT_SLIDING_CONTROLLER_UPDATE_INTERVAL_MSEC));
-        scConfig.setCTRL_ACTUATOR_CMD_IF(SEPP_IADCS_API_CONTROLLER_ACTUATOR_CMD_INTERFACES.IADCS_CTRL_ACTUATOR_CMD_IF_3);
+        scConfig.setCTRL_ACTUATOR_CMD_IF(
+            SEPP_IADCS_API_CONTROLLER_ACTUATOR_CMD_INTERFACES.IADCS_CTRL_ACTUATOR_CMD_IF_3);
     }
 
     protected abstract String getConfigFileName();
@@ -155,15 +156,15 @@ public abstract class BasePointingConfig {
      */
     protected void readFromMap(Map<String, String> map) {
         sensorUpdateIntervalMsec = BigInteger.valueOf(strToLong(map.get("update_interval_msec"),
-                                                                DEFAULT_SENSOR_UPDATE_INTERVAL_MS));
+            DEFAULT_SENSOR_UPDATE_INTERVAL_MS));
         paTolerance.setPREALIGNMENT_ANGLE_TOLERANCE_RAD(strToFloat(map.get("pa_angle_tol_rad"),
-                                                                   DEFAULT_PA_ANGLE_TOL_RAD));
+            DEFAULT_PA_ANGLE_TOL_RAD));
         paTolerance.setPREALIGNMENT_ANGLE_TOLERANCE_PERCENT(strToFloat(map.get("pa_angle_tol_perc"),
-                                                                       DEFAULT_PA_ANGLE_TOL_PERCENT));
+            DEFAULT_PA_ANGLE_TOL_PERCENT));
         paTolerance.setPREALIGNMENT_ANGULAR_VELOCITY_TOLERANCE_RADPS(strToFloat(map.get("pa_angvel_tol_radps"),
-                                                                                DEFAULT_PA_ANGLE_VEL_TOL_RADPS));
+            DEFAULT_PA_ANGLE_VEL_TOL_RADPS));
         paTolerance.setPREALIGNMENT_TARGET_THRESHOLD_RAD(strToFloat(map.get("pa_tgt_thd_rad"),
-                                                                    DEFAULT_PA_TARGET_THRESHOLD_RAD));
+            DEFAULT_PA_TARGET_THRESHOLD_RAD));
 
         paAnglesRad.setX(strToFloat(map.get("pa_angles_x_rad"), DEFAULT_PA_STEP_X_RAD));
         paAnglesRad.setY(strToFloat(map.get("pa_angles_y_rad"), DEFAULT_PA_STEP_Y_RAD));
@@ -171,8 +172,8 @@ public abstract class BasePointingConfig {
 
         paWaitTimeMsec = BigInteger.valueOf(strToLong(map.get("pa_wait_time_msec"), DEFAULT_PA_WAIT_TIME_MS));
 
-        determinationMode = SEPP_IADCS_API_TARGET_POINTING_ATTITUDE_DETERMINATION_MODES.swigToEnum(strToInt(map.get("det_mode"),
-                                                                                                            DEFAULT_DETERMINATION_MODE));
+        determinationMode = SEPP_IADCS_API_TARGET_POINTING_ATTITUDE_DETERMINATION_MODES.swigToEnum(strToInt(map.get(
+            "det_mode"), DEFAULT_DETERMINATION_MODE));
 
         targetVector.setX(strToFloat(map.get("los_vec_x_bf"), 0));
         targetVector.setY(strToFloat(map.get("los_vec_y_bf"), 0));
@@ -192,11 +193,11 @@ public abstract class BasePointingConfig {
 
         kfParams.setATTITUDE_PROCESS_VARIANCE(strToFloat(map.get("bias_proc_variance"), DEFAULT_BIAS_PROCESS_VARIANCE));
         kfParams.setATTITUDE_PROCESS_VARIANCE(strToFloat(map.get("attitude_process_variance"),
-                                                         DEFAULT_ATTITUDE_PROCESS_VARIANCE));
+            DEFAULT_ATTITUDE_PROCESS_VARIANCE));
         kfParams.setSUN_MAG_MEASUREMENT_VARIANCE(strToFloat(map.get("sun_mag_measurement_variance"),
-                                                            DEFAULT_SUN_MAG_MEAS_VARIANCE));
+            DEFAULT_SUN_MAG_MEAS_VARIANCE));
         kfParams.setSTS_MEASUREMENT_VARIANCE(strToFloat(map.get("startracker_measurement_variance"),
-                                                        DEFAULT_STARTRACKER_MEAS_VARIANCE));
+            DEFAULT_STARTRACKER_MEAS_VARIANCE));
 
         // TODO - the below should likely be tied to the determination mode
         externalMagEnable = strToBool(map.get("external_mm_en"), true);

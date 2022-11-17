@@ -48,7 +48,8 @@ import java.util.logging.Level;
 
 public class ServerTCPSPPSocket implements SPPSocket {
 
-    private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(ServerTCPSPPSocket.class.getName());
+    private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(ServerTCPSPPSocket.class
+        .getName());
 
     private static final int MAX_ERROR_COUNT = 10;
 
@@ -145,7 +146,7 @@ public class ServerTCPSPPSocket implements SPPSocket {
                 }
                 try {
                     LOGGER.log(Level.INFO, "Listening for a client connection on {0}", listenerSocket
-                                                                                                     .getLocalSocketAddress());
+                        .getLocalSocketAddress());
                     clientSocket = listenerSocket.accept();
                 } catch (final IOException ex) {
                     LOGGER.log(Level.SEVERE, "Error when accepting the client connection", ex);
@@ -193,7 +194,7 @@ public class ServerTCPSPPSocket implements SPPSocket {
                     }
                 } catch (final IOException ex) {
                     LOGGER.log(Level.WARNING, this.getName() +
-                                              ", error during packet receive. Closing the client connection.", ex);
+                        ", error during packet receive. Closing the client connection.", ex);
 
                 } finally {
                     if (channel != null) {

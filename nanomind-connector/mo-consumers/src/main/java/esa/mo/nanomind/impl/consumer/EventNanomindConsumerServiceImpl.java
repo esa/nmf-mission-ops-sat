@@ -75,7 +75,8 @@ public class EventNanomindConsumerServiceImpl extends ConsumerServiceImpl {
         return eventService;
     }
 
-    public EventNanomindConsumerServiceImpl(final SingleConnectionDetails connectionDetails) throws MALException, MalformedURLException {
+    public EventNanomindConsumerServiceImpl(final SingleConnectionDetails connectionDetails) throws MALException,
+        MalformedURLException {
         if (MALContextFactory.lookupArea(MALHelper.MAL_AREA_NAME, MALHelper.MAL_AREA_VERSION) == null) {
             MALHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
@@ -84,8 +85,8 @@ public class EventNanomindConsumerServiceImpl extends ConsumerServiceImpl {
             COMHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
 
-        if (MALContextFactory.lookupArea(COMHelper.COM_AREA_NAME, COMHelper.COM_AREA_VERSION)
-                             .getServiceByName(EventHelper.EVENT_SERVICE_NAME) == null) {
+        if (MALContextFactory.lookupArea(COMHelper.COM_AREA_NAME, COMHelper.COM_AREA_VERSION).getServiceByName(
+            EventHelper.EVENT_SERVICE_NAME) == null) {
             EventHelper.init(MALContextFactory.getElementFactoryRegistry());
         }
 
@@ -101,8 +102,7 @@ public class EventNanomindConsumerServiceImpl extends ConsumerServiceImpl {
         }
 
         tmConsumer = connection.startService(this.connectionDetails.getProviderURI(), this.connectionDetails
-                                                                                                            .getBrokerURI(),
-                                             this.connectionDetails.getDomain(), EventHelper.EVENT_SERVICE);
+            .getBrokerURI(), this.connectionDetails.getDomain(), EventHelper.EVENT_SERVICE);
 
         this.eventService = new EventStub(tmConsumer);
     }
@@ -114,9 +114,8 @@ public class EventNanomindConsumerServiceImpl extends ConsumerServiceImpl {
 
             @Override
             public void monitorEventNotifyReceived(final MALMessageHeader msgHeader, final Identifier lIdentifier,
-                                                   final UpdateHeaderList lUpdateHeaderList,
-                                                   final ObjectDetailsList objectDetailsList,
-                                                   final ElementList elementList, final Map qosProperties) {
+                final UpdateHeaderList lUpdateHeaderList, final ObjectDetailsList objectDetailsList,
+                final ElementList elementList, final Map qosProperties) {
                 if (objectDetailsList.size() == lUpdateHeaderList.size()) {
                     for (int i = 0; i < lUpdateHeaderList.size(); i++) {
 

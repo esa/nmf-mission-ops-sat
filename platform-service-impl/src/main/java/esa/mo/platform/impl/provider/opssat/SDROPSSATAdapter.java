@@ -196,11 +196,12 @@ public class SDROPSSATAdapter implements SoftwareDefinedRadioAdapterInterface {
     public boolean setConfiguration(final SDRConfiguration configuration) {
         synchronized (this) {
             LOGGER.log(Level.INFO, "Setting SDR configuration: {0}", configuration);
-            final eSDR_RFFE_RX_SAMPLING_FREQ samplingFreq = getSamplingFreqFromFloat(configuration.getRxSamplingFrequency());
+            final eSDR_RFFE_RX_SAMPLING_FREQ samplingFreq = getSamplingFreqFromFloat(configuration
+                .getRxSamplingFrequency());
             final eSDR_RFFE_RX_LPF_BW lpfBw = getLPFFreqFromFloat(configuration.getRxLowPassBW());
             if (samplingFreq == null) {
                 LOGGER.log(Level.WARNING, "Unsupported sampling frequency provided: {0} MHz", configuration
-                                                                                                           .getRxSamplingFrequency());
+                    .getRxSamplingFrequency());
                 return false;
             }
             try {

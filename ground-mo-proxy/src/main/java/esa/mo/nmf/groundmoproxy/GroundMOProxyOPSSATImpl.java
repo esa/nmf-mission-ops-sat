@@ -166,10 +166,9 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
             // ---------------------
             serviceType = ArchiveSyncHelper.ARCHIVESYNC_SERVICE;
             serviceKey = new ServiceKey(serviceType.getArea().getNumber(), serviceType.getNumber(), serviceType
-                                                                                                               .getArea()
-                                                                                                               .getVersion());
+                .getArea().getVersion());
             sf = new ServiceFilter(new Identifier("*"), domain, new Identifier("*"), null, new Identifier("*"),
-                                   serviceKey, new UShortList());
+                serviceKey, new UShortList());
 
             try {
                 final ProviderSummaryList archiveSyncsCD = localDirectoryService.lookupProvider(sf, null);
@@ -181,9 +180,11 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
                     psl.add(archiveSyncsCD.get(i));
 
                     try {
-                        final SingleConnectionDetails connectionDetails = AppsLauncherManager.getSingleConnectionDetailsFromProviderSummaryList(psl);
+                        final SingleConnectionDetails connectionDetails = AppsLauncherManager
+                            .getSingleConnectionDetailsFromProviderSummaryList(psl);
                         try {
-                            final ArchiveSyncConsumerServiceImpl archSync = new ArchiveSyncConsumerServiceImpl(connectionDetails);
+                            final ArchiveSyncConsumerServiceImpl archSync = new ArchiveSyncConsumerServiceImpl(
+                                connectionDetails);
                             archiveSyncs.add(archSync);
                         } catch (final MalformedURLException ex) {
                             LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
@@ -214,7 +215,8 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
         public IdentifierList archiveDomain;
     }
 
-    public final void syncRemoteArchiveWithLocalArchive(final ArrayList<ArchiveSyncConsumerServiceImpl> archiveSyncs) throws MALInteractionException, MALException {
+    public final void syncRemoteArchiveWithLocalArchive(final ArrayList<ArchiveSyncConsumerServiceImpl> archiveSyncs)
+        throws MALInteractionException, MALException {
         // Select Parameter Definitions by default
         final ObjectTypeList objTypes = new ObjectTypeList();
         final UShort shorty = new UShort((short) 0);
@@ -229,12 +231,11 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
             ArchiveProviderServiceImpl archive = localCOMServices.getArchiveService();
 
             ArchiveQuery query = new ArchiveQuery(domain, null, providerUri, 0L, null, null, null, null, null);
-            List<ArchivePersistenceObject> result = archive.getArchiveManager()
-                                                           .query(ArchiveSyncHelper.LASTSYNC_OBJECT_TYPE, query, null);
+            List<ArchivePersistenceObject> result = archive.getArchiveManager().query(
+                ArchiveSyncHelper.LASTSYNC_OBJECT_TYPE, query, null);
             ArchivePersistenceObject lastSyncPersistenceObject = result.isEmpty() ? null : result.get(0);
-            LastSync lastArchiveSync = (LastSync) (lastSyncPersistenceObject == null ?
-                null :
-                lastSyncPersistenceObject.getObject());
+            LastSync lastArchiveSync = (LastSync) (lastSyncPersistenceObject == null ? null : lastSyncPersistenceObject
+                .getObject());
 
             GetTimeResponse lastSyncTime = null;
 
@@ -243,14 +244,14 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
             } catch (final MALInteractionException ex) {
                 if (MALHelper.DELIVERY_TIMEDOUT_ERROR_NUMBER.equals(ex.getStandardError().getErrorNumber())) {
                     LOGGER.log(Level.WARNING, "Timeout when trying to synchronize: {0}. Skipping this provider.",
-                               new Object[]{domain});
+                        new Object[]{domain});
                     continue;
                 }
             }
             if (null == lastSyncTime) {
                 LOGGER.log(Level.WARNING,
-                           "Archive sync completed for domain: {0} ! Can't get last sync time! NULL was returned -> error or no ArchiveSync service!",
-                           new Object[]{domain});
+                    "Archive sync completed for domain: {0} ! Can't get last sync time! NULL was returned -> error or no ArchiveSync service!",
+                    new Object[]{domain});
                 continue;
             }
 
@@ -264,16 +265,15 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
                 lastArchiveSync.setLastSyncTime(new Time(0));
             }
 
-            if (HelperTime.timeToFineTime(lastArchiveSync.getLastSyncTime()).getValue() <=
-                lastSyncTime.getBodyElement0().getValue()) {
+            if (HelperTime.timeToFineTime(lastArchiveSync.getLastSyncTime()).getValue() <= lastSyncTime
+                .getBodyElement0().getValue()) {
                 from = HelperTime.timeToFineTime(new Time(lastArchiveSync.getLastSyncTime().getValue() + 1));
                 until = lastSyncTime.getBodyElement0();
             } else {
                 LOGGER.log(Level.WARNING,
-                           "Archive sync completed for domain: {0}! Sync not performed! Last sync time {1} is greater than provider current time {2}!",
-                           new Object[]{domain, lastArchiveSync.getLastSyncTime().getValue(), lastSyncTime
-                                                                                                          .getBodyElement0()
-                                                                                                          .getValue()});
+                    "Archive sync completed for domain: {0}! Sync not performed! Last sync time {1} is greater than provider current time {2}!",
+                    new Object[]{domain, lastArchiveSync.getLastSyncTime().getValue(), lastSyncTime.getBodyElement0()
+                        .getValue()});
                 continue;
 
             }
@@ -309,9 +309,9 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
             for (Map.Entry<ObjectType, ArchiveObjects> entry : archiveObjectsMap.entrySet()) {
                 ArchiveObjects archiveObjects = entry.getValue();
                 try {
-                    super.localCOMServices.getArchiveService()
-                                          .store(false, entry.getKey(), archiveObjects.archiveDomain,
-                                                 archiveObjects.archiveDetailsList, archiveObjects.elementList, null);
+                    super.localCOMServices.getArchiveService().store(false, entry.getKey(),
+                        archiveObjects.archiveDomain, archiveObjects.archiveDetailsList, archiveObjects.elementList,
+                        null);
                 } catch (final MALInteractionException ex) {
                     if (COMHelper.DUPLICATE_ERROR_NUMBER.equals(ex.getStandardError().getErrorNumber())) {
                         UIntegerList duplicatesList = (UIntegerList) ex.getStandardError().getExtraInformation();
@@ -320,19 +320,21 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
                                 ArchiveDetailsList tempDetailsList = new ArchiveDetailsList();
                                 ElementList tempElementsList = null;
                                 for (UInteger duplicate : duplicatesList) {
-                                    tempDetailsList.add(archiveObjects.archiveDetailsList.get((int) duplicate.getValue()));
+                                    tempDetailsList.add(archiveObjects.archiveDetailsList.get((int) duplicate
+                                        .getValue()));
 
                                     if (archiveObjects.elementList != null) {
                                         if (tempElementsList == null) {
-                                            tempElementsList = HelperMisc.element2elementList(archiveObjects.elementList.get((int) duplicate.getValue()));
+                                            tempElementsList = HelperMisc.element2elementList(archiveObjects.elementList
+                                                .get((int) duplicate.getValue()));
                                         }
-                                        tempElementsList.add(archiveObjects.elementList.get((int) duplicate.getValue()));
+                                        tempElementsList.add(archiveObjects.elementList.get((int) duplicate
+                                            .getValue()));
                                     }
                                 }
 
-                                super.localCOMServices.getArchiveService()
-                                                      .update(entry.getKey(), archiveObjects.archiveDomain,
-                                                              tempDetailsList, tempElementsList, null);
+                                super.localCOMServices.getArchiveService().update(entry.getKey(),
+                                    archiveObjects.archiveDomain, tempDetailsList, tempElementsList, null);
 
                                 for (UInteger duplicate : duplicatesList) {
                                     archiveObjects.archiveDetailsList.set((int) duplicate.getValue(), null);
@@ -345,10 +347,9 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
                                     archiveObjects.elementList.removeIf(Objects::isNull);
                                 }
 
-                                super.localCOMServices.getArchiveService()
-                                                      .store(false, entry.getKey(), archiveObjects.archiveDomain,
-                                                             archiveObjects.archiveDetailsList,
-                                                             archiveObjects.elementList, null);
+                                super.localCOMServices.getArchiveService().store(false, entry.getKey(),
+                                    archiveObjects.archiveDomain, archiveObjects.archiveDetailsList,
+                                    archiveObjects.elementList, null);
                             } catch (Exception ex2) {
                                 LOGGER.log(Level.SEVERE, "Error!", ex2);
                                 success = false;
@@ -375,13 +376,13 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
                 bodies.add(lastArchiveSync);
                 if (lastSyncPersistenceObject == null) {
                     ArchiveDetailsList details = HelperArchive.generateArchiveDetailsList(null, null, providerUri);
-                    archive.getArchiveManager()
-                           .insertEntriesFast(ArchiveSyncHelper.LASTSYNC_OBJECT_TYPE, domain, details, bodies, null);
+                    archive.getArchiveManager().insertEntriesFast(ArchiveSyncHelper.LASTSYNC_OBJECT_TYPE, domain,
+                        details, bodies, null);
                 } else {
                     ArchiveDetailsList details = new ArchiveDetailsList();
                     details.add(lastSyncPersistenceObject.getArchiveDetails());
-                    archive.getArchiveManager()
-                           .updateEntries(ArchiveSyncHelper.LASTSYNC_OBJECT_TYPE, domain, details, bodies, null);
+                    archive.getArchiveManager().updateEntries(ArchiveSyncHelper.LASTSYNC_OBJECT_TYPE, domain, details,
+                        bodies, null);
                 }
                 LOGGER.log(Level.INFO, "Synchronizing provider {0} completed", new Object[]{domain});
             } else {
@@ -409,11 +410,9 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
         // Add the Action service rerouting stuff
         COMService serviceType = ActionHelper.ACTION_SERVICE;
         ServiceKey serviceKey = new ServiceKey(serviceType.getArea().getNumber(), serviceType.getNumber(), serviceType
-                                                                                                                      .getArea()
-                                                                                                                      .getVersion());
+            .getArea().getVersion());
         ServiceFilter sf = new ServiceFilter(new Identifier("*"), domain, new Identifier("*"), null, new Identifier(
-                                                                                                                    "*"),
-                                             serviceKey, new UShortList());
+            "*"), serviceKey, new UShortList());
 
         try {
             final ProviderSummaryList actionsCD = localDirectoryService.lookupProvider(sf, null);
@@ -425,25 +424,25 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
                 // Needs some work!
 
                 try {
-                    final SingleConnectionDetails connectionDetails = AppsLauncherManager.getSingleConnectionDetailsFromProviderSummaryList(psl);
+                    final SingleConnectionDetails connectionDetails = AppsLauncherManager
+                        .getSingleConnectionDetailsFromProviderSummaryList(psl);
                     try {
                         synchronized (actionURIs) {
                             URI localActionURI = actionURIs.get(connectionDetails.getDomain());
 
                             if (localActionURI == null) {
                                 // This only needs to be done in case it still does not exist:
-                                final ActionConsumerServiceImpl actionConsumer = new ActionConsumerServiceImpl(connectionDetails,
-                                                                                                               null);
+                                final ActionConsumerServiceImpl actionConsumer = new ActionConsumerServiceImpl(
+                                    connectionDetails, null);
                                 final ActionProxyServiceImpl actionProxyService = new ActionProxyServiceImpl();
                                 actionProxyService.init(localCOMServices, actionConsumer);
-                                localActionURI = actionProxyService.getConnectionProvider()
-                                                                   .getConnectionDetails()
-                                                                   .getProviderURI();
+                                localActionURI = actionProxyService.getConnectionProvider().getConnectionDetails()
+                                    .getProviderURI();
                                 actionURIs.put(connectionDetails.getDomain(), localActionURI);
                             }
 
                             super.localDirectoryService.rerouteActionServiceURI(connectionDetails.getDomain(),
-                                                                                localActionURI);
+                                localActionURI);
                         }
                     } catch (final MalformedURLException ex) {
                         LOGGER.log(Level.SEVERE, null, ex);
@@ -482,18 +481,18 @@ public class GroundMOProxyOPSSATImpl extends GroundMOProxy {
 
         @Override
         public MALMessage sendUpdate(final ObjectType objType, final IdentifierList domain,
-                                     final ArchiveDetailsList objDetails,
-                                     final ElementList objBodies) throws MALInteractionException, MALException {
+            final ArchiveDetailsList objDetails, final ElementList objBodies) throws MALInteractionException,
+            MALException {
             // Should never reach this because we asked for one single object, the latest!
-            Logger.getLogger(GroundMOProxy.class.getName())
-                  .log(Level.WARNING, "Something is wrong! sendUpdate is not expected to be called!");
+            Logger.getLogger(GroundMOProxy.class.getName()).log(Level.WARNING,
+                "Something is wrong! sendUpdate is not expected to be called!");
             return null;
         }
 
         @Override
         public MALMessage sendResponse(final ObjectType objType, final IdentifierList domain,
-                                       final ArchiveDetailsList objDetails,
-                                       final ElementList objBodies) throws MALInteractionException, MALException {
+            final ArchiveDetailsList objDetails, final ElementList objBodies) throws MALInteractionException,
+            MALException {
             if (objDetails != null && !objDetails.isEmpty()) {
                 arch.setTimestamp(objDetails.get(0).getTimestamp());
             } else {
