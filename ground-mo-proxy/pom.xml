@@ -84,7 +84,7 @@
         </dependency>
 
         <dependency>
-          <groupId>[pom]</groupId>
+          <groupId>int.esa.opssat.transport.dlr</groupId>
           <artifactId>malspp-transport</artifactId>
           <version>1.0.1-FC</version>
         </dependency>
