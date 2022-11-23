@@ -33,7 +33,8 @@ public class SPPNotifyBody extends SPPPublishBody implements MALNotifyBody {
         idx = 1;
     }
 
-    public SPPNotifyBody(final MALEncodedBody encodedBody, final MALElementStreamFactory esf, final MALEncodingContext ctx) {
+    public SPPNotifyBody(final MALEncodedBody encodedBody, final MALElementStreamFactory esf,
+        final MALEncodingContext ctx) {
         super(encodedBody, esf, ctx);
         idx = 1;
     }

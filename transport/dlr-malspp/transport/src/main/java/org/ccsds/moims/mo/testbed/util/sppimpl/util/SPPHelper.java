@@ -39,94 +39,90 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class SPPHelper
-{
+public class SPPHelper {
 
-  /**
-   * Table used to compute the CRC
-   */
-  private static final int[] lookUpTable;
+    /**
+     * Table used to compute the CRC
+     */
+    private static final int[] lookUpTable;
 
-  public static boolean isAPIDqualifierInMessage;
-  public static final int defaultAPIDqualifier = 247;
-  public static final String CRC_FILENAME = "crc_apids.txt";
-  private static final String CRC_ENABLED_PROPERTY = "org.ccsds.moims.mo.malspp.crcenabled";
+    public static boolean isAPIDqualifierInMessage;
+    public static final int defaultAPIDqualifier = 247;
+    public static final String CRC_FILENAME = "crc_apids.txt";
+    private static final String CRC_ENABLED_PROPERTY = "org.ccsds.moims.mo.malspp.crcenabled";
 
-  static {
-    lookUpTable = new int[256];
-    for (int i = 0; i < 256; i++) {
-      int tmp = 0;
-      if ((i & 0x01) != 0) {
-        tmp = tmp ^ 0x1021;
-      }
-      if ((i & 0x02) != 0) {
-        tmp = tmp ^ 0x2042;
-      }
-      if ((i & 0x04) != 0) {
-        tmp = tmp ^ 0x4084;
-      }
-      if ((i & 0x08) != 0) {
-        tmp = tmp ^ 0x8108;
-      }
-      if ((i & 0x10) != 0) {
-        tmp = tmp ^ 0x1231;
-      }
-      if ((i & 0x20) != 0) {
-        tmp = tmp ^ 0x2462;
-      }
-      if ((i & 0x40) != 0) {
-        tmp = tmp ^ 0x48C4;
-      }
-      if ((i & 0x80) != 0) {
-        tmp = tmp ^ 0x9188;
-      }
-      lookUpTable[i] = tmp;
-    }
-  }
-
-  public static boolean getCrcEnabled()
-  {
-    return Boolean.parseBoolean(System.getProperty(CRC_ENABLED_PROPERTY, "true"));
-  }
-
-  public static int computeCRC(final byte[] header, final byte[] data, final int offset, final int length)
-  {
-    int CRC = 0xFFFF;
-    for (int i = 0; i < header.length; i++) {
-      CRC = ((CRC << 8) & 0xFF00) ^ lookUpTable[(((CRC >> 8) ^ header[i]) & 0x00FF)];
-    }
-    for (int i = offset; i < offset + length; i++) {
-      CRC = ((CRC << 8) & 0xFF00) ^ lookUpTable[(((CRC >> 8) ^ data[i]) & 0x00FF)];
-    }
-    return CRC;
-  }
-
-  public static APIDRangeList initWhitelist(final File f)
-  {
-    final APIDRangeList result = new APIDRangeList();
-
-    final BufferedReader br;
-    try {
-      br = new BufferedReader(new FileReader(f));
-      String line = null;
-
-      while ((line = br.readLine()) != null) {
-        final String[] range = line.split("-");
-        if (range.length == 2) {
-          final int first = Integer.parseInt(range[0]);
-          final int second = Integer.parseInt(range[1]);
-          final APIDRange r = new APIDRange(Math.min(first, second), Math.max(first, second));
-          result.add(r);
-        } else if (range.length == 1) {
-          final int val = Integer.parseInt(range[0]);
-          result.add(new APIDRange(val, val));
+    static {
+        lookUpTable = new int[256];
+        for (int i = 0; i < 256; i++) {
+            int tmp = 0;
+            if ((i & 0x01) != 0) {
+                tmp = tmp ^ 0x1021;
+            }
+            if ((i & 0x02) != 0) {
+                tmp = tmp ^ 0x2042;
+            }
+            if ((i & 0x04) != 0) {
+                tmp = tmp ^ 0x4084;
+            }
+            if ((i & 0x08) != 0) {
+                tmp = tmp ^ 0x8108;
+            }
+            if ((i & 0x10) != 0) {
+                tmp = tmp ^ 0x1231;
+            }
+            if ((i & 0x20) != 0) {
+                tmp = tmp ^ 0x2462;
+            }
+            if ((i & 0x40) != 0) {
+                tmp = tmp ^ 0x48C4;
+            }
+            if ((i & 0x80) != 0) {
+                tmp = tmp ^ 0x9188;
+            }
+            lookUpTable[i] = tmp;
         }
-      }
-    } catch (final IOException ex) {
-      Logger.getLogger(SPPReader.class.getName()).log(Level.WARNING, null, ex);
     }
 
-    return result;
-  }
+    public static boolean getCrcEnabled() {
+        return Boolean.parseBoolean(System.getProperty(CRC_ENABLED_PROPERTY, "true"));
+    }
+
+    public static int computeCRC(final byte[] header, final byte[] data, final int offset, final int length) {
+        int CRC = 0xFFFF;
+        for (int i = 0; i < header.length; i++) {
+            CRC = ((CRC << 8) & 0xFF00) ^ lookUpTable[(((CRC >> 8) ^ header[i]) & 0x00FF)];
+        }
+        for (int i = offset; i < offset + length; i++) {
+            CRC = ((CRC << 8) & 0xFF00) ^ lookUpTable[(((CRC >> 8) ^ data[i]) & 0x00FF)];
+        }
+        return CRC;
+    }
+
+    public static APIDRangeList initWhitelist(final File f) {
+        final APIDRangeList result = new APIDRangeList();
+
+        final BufferedReader br;
+        try {
+            br = new BufferedReader(new FileReader(f));
+            String line = null;
+
+            while ((line = br.readLine()) != null) {
+                final String[] range = line.split("-");
+                if (range.length == 2) {
+                    final int first = Integer.parseInt(range[0]);
+                    final int second = Integer.parseInt(range[1]);
+                    final APIDRange r = new APIDRange(Math.min(first, second), Math.max(first, second));
+                    result.add(r);
+                } else if (range.length == 1) {
+                    final int val = Integer.parseInt(range[0]);
+                    result.add(new APIDRange(val, val));
+                }
+            }
+        } catch (final IOException ex) {
+            Logger.getLogger(SPPReader.class.getName()).log(Level.WARNING, null, ex);
+        }
+
+        return result;
+    }
 
 }

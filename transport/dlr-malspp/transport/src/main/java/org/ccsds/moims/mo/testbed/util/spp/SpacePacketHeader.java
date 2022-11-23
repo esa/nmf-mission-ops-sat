@@ -33,131 +33,132 @@
 package org.ccsds.moims.mo.testbed.util.spp;
 
 public class SpacePacketHeader {
-  
-  private int packetVersionNumber;
-  
-  private int packetType;
-  
-  private int secondaryHeaderFlag;
-  
-  private int apid;
-  
-  private int sequenceFlags;
-  
-  private int sequenceCount;
-  
-  public SpacePacketHeader() {}
 
-  public SpacePacketHeader(final int packetVersionNumber, final int packetType,
-                           final int secondaryHeaderFlag, final int apid, final int sequenceFlags, final int sequenceCount) {
-    super();
-    this.packetVersionNumber = packetVersionNumber;
-    this.packetType = packetType;
-    this.secondaryHeaderFlag = secondaryHeaderFlag;
-    this.apid = apid;
-    this.sequenceFlags = sequenceFlags;
-    this.sequenceCount = sequenceCount;
-  }
+    private int packetVersionNumber;
 
-  /**
-   * @return the packetVersionNumber
-   */
-  public int getPacketVersionNumber() {
-    return packetVersionNumber;
-  }
+    private int packetType;
 
-  /**
-   * @param packetVersionNumber the packetVersionNumber to set
-   */
-  public void setPacketVersionNumber(final int packetVersionNumber) {
-    this.packetVersionNumber = packetVersionNumber;
-  }
+    private int secondaryHeaderFlag;
 
-  /**
-   * @return the secondaryHeaderFlag
-   */
-  public int getSecondaryHeaderFlag() {
-    return secondaryHeaderFlag;
-  }
+    private int apid;
 
-  /**
-   * @param secondaryHeaderFlag the secondaryHeaderFlag to set
-   */
-  public void setSecondaryHeaderFlag(final int secondaryHeaderFlag) {
-    this.secondaryHeaderFlag = secondaryHeaderFlag;
-  }
+    private int sequenceFlags;
 
-  /**
-   * @return the apid
-   */
-  public int getApid() {
-    return apid;
-  }
+    private int sequenceCount;
 
-  /**
-   * @param apid the apid to set
-   */
-  public void setApid(final int apid) {
-    this.apid = apid;
-  }
+    public SpacePacketHeader() {
+    }
 
-  /**
-   * @return the spType
-   */
-  public int getPacketType() {
-    return packetType;
-  }
+    public SpacePacketHeader(final int packetVersionNumber, final int packetType, final int secondaryHeaderFlag,
+        final int apid, final int sequenceFlags, final int sequenceCount) {
+        super();
+        this.packetVersionNumber = packetVersionNumber;
+        this.packetType = packetType;
+        this.secondaryHeaderFlag = secondaryHeaderFlag;
+        this.apid = apid;
+        this.sequenceFlags = sequenceFlags;
+        this.sequenceCount = sequenceCount;
+    }
 
-  /**
-   * @param packetType the packetType to set
-   */
-  public void setPacketType(final int packetType) {
-    this.packetType = packetType;
-  }
-  
-  /**
-   * @return the sequenceFlag
-   */
-  public int getSequenceFlags() {
-    return sequenceFlags;
-  }
+    /**
+     * @return the packetVersionNumber
+     */
+    public int getPacketVersionNumber() {
+        return packetVersionNumber;
+    }
 
-  /**
-   * @param sequenceFlags the sequenceFlags to set
-   */
-  public void setSequenceFlags(final int sequenceFlags) {
-    this.sequenceFlags = sequenceFlags;
-  }
+    /**
+     * @param packetVersionNumber the packetVersionNumber to set
+     */
+    public void setPacketVersionNumber(final int packetVersionNumber) {
+        this.packetVersionNumber = packetVersionNumber;
+    }
 
-  /**
-   * @return the sequenceCount
-   */
-  public int getSequenceCount() {
-    return sequenceCount;
-  }
+    /**
+     * @return the secondaryHeaderFlag
+     */
+    public int getSecondaryHeaderFlag() {
+        return secondaryHeaderFlag;
+    }
 
-  /**
-   * @param sequenceCount the sequenceCount to set
-   */
-  public void setSequenceCount(final int sequenceCount) {
-    this.sequenceCount = sequenceCount;
-  }
-  /*
-  public SpacePacketHeader clone() {
-  	return new SpacePacketHeader(packetVersionNumber, packetType,
+    /**
+     * @param secondaryHeaderFlag the secondaryHeaderFlag to set
+     */
+    public void setSecondaryHeaderFlag(final int secondaryHeaderFlag) {
+        this.secondaryHeaderFlag = secondaryHeaderFlag;
+    }
+
+    /**
+     * @return the apid
+     */
+    public int getApid() {
+        return apid;
+    }
+
+    /**
+     * @param apid the apid to set
+     */
+    public void setApid(final int apid) {
+        this.apid = apid;
+    }
+
+    /**
+     * @return the spType
+     */
+    public int getPacketType() {
+        return packetType;
+    }
+
+    /**
+     * @param packetType the packetType to set
+     */
+    public void setPacketType(final int packetType) {
+        this.packetType = packetType;
+    }
+
+    /**
+     * @return the sequenceFlag
+     */
+    public int getSequenceFlags() {
+        return sequenceFlags;
+    }
+
+    /**
+     * @param sequenceFlags the sequenceFlags to set
+     */
+    public void setSequenceFlags(final int sequenceFlags) {
+        this.sequenceFlags = sequenceFlags;
+    }
+
+    /**
+     * @return the sequenceCount
+     */
+    public int getSequenceCount() {
+        return sequenceCount;
+    }
+
+    /**
+     * @param sequenceCount the sequenceCount to set
+     */
+    public void setSequenceCount(final int sequenceCount) {
+        this.sequenceCount = sequenceCount;
+    }
+    /*
+    public SpacePacketHeader clone() {
+    	return new SpacePacketHeader(packetVersionNumber, packetType,
         secondaryHeaderFlag, apid, sequenceFlags, sequenceCount);
-  }*/
- 
-  public String toString() {
-    final StringBuilder buf = new StringBuilder();
-    buf.append(super.toString());
-    buf.append(",packetVersionNumber=").append(packetVersionNumber);
-    buf.append(",packetType=").append(packetType);
-    buf.append(",secondaryHeaderFlag=").append(secondaryHeaderFlag);
-    buf.append(",apid=").append(apid);
-    buf.append(",sequenceFlags=").append(sequenceFlags);
-    buf.append(",sequenceCount=").append(sequenceCount);
-    return buf.toString();
-  }
+    }*/
+
+    public String toString() {
+        final StringBuilder buf = new StringBuilder();
+        buf.append(super.toString());
+        buf.append(",packetVersionNumber=").append(packetVersionNumber);
+        buf.append(",packetType=").append(packetType);
+        buf.append(",secondaryHeaderFlag=").append(secondaryHeaderFlag);
+        buf.append(",apid=").append(apid);
+        buf.append(",sequenceFlags=").append(sequenceFlags);
+        buf.append(",sequenceCount=").append(sequenceCount);
+        return buf.toString();
+    }
 
 }

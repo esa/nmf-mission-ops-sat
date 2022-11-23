@@ -43,7 +43,8 @@ public class SPPURI {
     private Short identifier;
     private static final String SCHEME_NAME = "malspp";
     private static final String INVALID_URI = "Not a valid MAL/SPP URI.";
-    private static final Pattern URI_PATTERN = Pattern.compile("\\A" + SCHEME_NAME + ":(\\d{1,5})/(\\d{1,4})(?:/(\\d{1,3}))?\\z");
+    private static final Pattern URI_PATTERN = Pattern.compile("\\A" + SCHEME_NAME +
+        ":(\\d{1,5})/(\\d{1,4})(?:/(\\d{1,3}))?\\z");
 
     public SPPURI(final int qualifier, final short apid, final Short identifier) {
         init(qualifier, apid, identifier);
@@ -70,13 +71,13 @@ public class SPPURI {
         if (!m.matches()) {
             throw new IllegalArgumentException(INVALID_URI + "URI: " + uri);
         }
-        init(Integer.parseInt(m.group(1)), Short.parseShort(m.group(2)), m.group(3) == null ? null : Short.valueOf(m.group(3)));
+        init(Integer.parseInt(m.group(1)), Short.parseShort(m.group(2)), m.group(3) == null ? null : Short.valueOf(m
+            .group(3)));
     }
 
     private void init(final int qualifier, final short apid, final Short identifier) {
-        if (qualifier < 0 || qualifier > 65535
-                || apid < 0 || apid >= 2047
-                || (identifier != null && (identifier < 0 || identifier > 255))) {
+        if (qualifier < 0 || qualifier > 65535 || apid < 0 || apid >= 2047 || (identifier != null && (identifier < 0 ||
+            identifier > 255))) {
             throw new IllegalArgumentException(INVALID_URI);
         }
         this.qualifier = qualifier;

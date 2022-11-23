@@ -37,7 +37,8 @@ public class SPPErrorBody extends SPPMessageBody implements MALErrorBody {
         shortForms = new Object[]{UInteger.UINTEGER_SHORT_FORM, null};
     }
 
-    public SPPErrorBody(final MALEncodedBody encodedBody, final MALElementStreamFactory esf, final MALEncodingContext ctx) {
+    public SPPErrorBody(final MALEncodedBody encodedBody, final MALElementStreamFactory esf,
+        final MALEncodingContext ctx) {
         super(encodedBody, esf, ctx);
         shortForms = new Object[]{UInteger.UINTEGER_SHORT_FORM, null};
     }

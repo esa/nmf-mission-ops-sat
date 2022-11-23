@@ -28,11 +28,13 @@ import org.ccsds.moims.mo.mal.transport.MALEncodedBody;
 
 public class SPPDeregisterBody extends SPPMessageBody implements MALDeregisterBody {
 
-    public SPPDeregisterBody(final Object[] bodyElements, final MALElementStreamFactory esf, final MALEncodingContext ctx) {
+    public SPPDeregisterBody(final Object[] bodyElements, final MALElementStreamFactory esf,
+        final MALEncodingContext ctx) {
         super(bodyElements, esf, ctx);
     }
 
-    public SPPDeregisterBody(final MALEncodedBody encodedBody, final MALElementStreamFactory esf, final MALEncodingContext ctx) {
+    public SPPDeregisterBody(final MALEncodedBody encodedBody, final MALElementStreamFactory esf,
+        final MALEncodingContext ctx) {
         super(encodedBody, esf, ctx);
     }
 

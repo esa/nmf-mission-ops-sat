@@ -42,6 +42,21 @@
     <Bug pattern="FI_EXPLICIT_INVOCATION"/>
     <Bug pattern="MS_PKGPROTECT"/>
     <Bug pattern="DC_PARTIALLY_CONSTRUCTED"/>
+    <Bug pattern="SF_SWITCH_NO_DEFAULT"/>
+
+    <Match>
+        <Or>
+            <Class name="de.dlr.gsoc.mo.malspp.encoding.SPPElementOutputStream"/>
+        </Or>
+        <Bug pattern="SF_SWITCH_FALLTHROUGH"/>
+    </Match>
+
+    <Match>
+        <Or>
+            <Class name="org.ccsds.moims.mo.testbed.util.sppimpl.util.SPPHelper"/>
+        </Or>
+        <Bug pattern="MS_SHOULD_BE_FINAL, OS_OPEN_STREAM"/>
+    </Match>
 
     <Match>
         <Or>

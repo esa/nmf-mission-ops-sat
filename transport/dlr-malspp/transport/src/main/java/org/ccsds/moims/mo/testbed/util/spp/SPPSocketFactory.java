@@ -35,18 +35,16 @@ package org.ccsds.moims.mo.testbed.util.spp;
 import java.util.Map;
 
 public abstract class SPPSocketFactory {
-  
-  public static final String FACTORY_CLASS =
-    "org.ccsds.moims.mo.malspp.test.spp.factory.class";
-  
-  public static final String DEFAULT_FACTORY_CLASS_NAME =
-    "org.ccsds.moims.mo.testbed.util.sppimpl.tcp.TCPSPPSocketFactory";
-  
-  public static SPPSocketFactory newInstance() throws Exception {
-      final String factoryClassName = System.getProperty(FACTORY_CLASS, DEFAULT_FACTORY_CLASS_NAME);
-      final Class factoryClass = Class.forName(factoryClassName);
-      return (SPPSocketFactory) factoryClass.newInstance();
-  }
-  
-  public abstract SPPSocket createSocket(Map properties) throws Exception;
+
+    public static final String FACTORY_CLASS = "org.ccsds.moims.mo.malspp.test.spp.factory.class";
+
+    public static final String DEFAULT_FACTORY_CLASS_NAME = "org.ccsds.moims.mo.testbed.util.sppimpl.tcp.TCPSPPSocketFactory";
+
+    public static SPPSocketFactory newInstance() throws Exception {
+        final String factoryClassName = System.getProperty(FACTORY_CLASS, DEFAULT_FACTORY_CLASS_NAME);
+        final Class factoryClass = Class.forName(factoryClassName);
+        return (SPPSocketFactory) factoryClass.newInstance();
+    }
+
+    public abstract SPPSocket createSocket(Map properties) throws Exception;
 }

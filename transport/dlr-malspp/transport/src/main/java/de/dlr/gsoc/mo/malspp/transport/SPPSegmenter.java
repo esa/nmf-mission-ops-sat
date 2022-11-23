@@ -84,7 +84,7 @@ public class SPPSegmenter implements Iterator {
         // Returns all
         // packets belonging to a complete sequence, null otherwise.
         if (null != unsegmentedPacketCounter) {
-            final SpacePacket[] ret = new SpacePacket[] { packetStore.remove(unsegmentedPacketCounter) };
+            final SpacePacket[] ret = new SpacePacket[]{packetStore.remove(unsegmentedPacketCounter)};
             unsegmentedPacketCounter = null;
             return ret;
         }
@@ -175,8 +175,8 @@ public class SPPSegmenter implements Iterator {
      * @throws org.ccsds.moims.mo.mal.MALException
      */
     public static SpacePacket[] split(final int packetDataFieldSizeLimit, final int primaryApidQualifier,
-            final SpacePacketHeader primaryHeader, final byte[] secondaryHeaderPart1, final byte[] secondaryHeaderPart2,
-            final byte[] body, final SPPCounter sequenceCounter, final SPPCounter segmentCounter) throws MALException {
+        final SpacePacketHeader primaryHeader, final byte[] secondaryHeaderPart1, final byte[] secondaryHeaderPart2,
+        final byte[] body, final SPPCounter sequenceCounter, final SPPCounter segmentCounter) throws MALException {
         final Queue<SpacePacket> spacePackets = new LinkedList<>();
 
         final int sndHdrLength = secondaryHeaderPart1.length + secondaryHeaderPart2.length;
@@ -210,8 +210,8 @@ public class SPPSegmenter implements Iterator {
         int remaining = body.length;
         final int numberOfPackets = java.lang.Math.max((remaining - 1) / userDataFieldSizeLimit + 1, 1);
         final Iterator<Long> sequenceCounterIter = sequenceCounter.increment(numberOfPackets);
-        final Iterator<Long> segmentCounterIter = (numberOfPackets > 1) ? segmentCounter.increment(numberOfPackets)
-                : null;
+        final Iterator<Long> segmentCounterIter = (numberOfPackets > 1) ? segmentCounter.increment(numberOfPackets) :
+            null;
 
         int offset = 0;
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -243,11 +243,12 @@ public class SPPSegmenter implements Iterator {
 
             // clone template primary header and change relevant values
             final SpacePacketHeader spHeader = new SpacePacketHeader(primaryHeader.getPacketVersionNumber(),
-                    primaryHeader.getPacketType(), primaryHeader.getSecondaryHeaderFlag(), primaryHeader.getApid(),
-                    sequenceFlags, sequenceCounterIter.next().shortValue());
+                primaryHeader.getPacketType(), primaryHeader.getSecondaryHeaderFlag(), primaryHeader.getApid(),
+                sequenceFlags, sequenceCounterIter.next().shortValue());
 
             // create space packet
-            final SpacePacket spacePacket = new SpacePacket(spHeader, primaryApidQualifier, os.toByteArray(), 0, os.size());
+            final SpacePacket spacePacket = new SpacePacket(spHeader, primaryApidQualifier, os.toByteArray(), 0, os
+                .size());
             spacePackets.add(spacePacket);
             os.reset();
         } while (remaining > 0);
