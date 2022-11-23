@@ -33,13 +33,13 @@
 package org.ccsds.moims.mo.testbed.util.spp;
 
 public interface SPPSocket {
-  
-  void send(SpacePacket packet) throws Exception;
-  
-  SpacePacket receive() throws Exception;
-  
-  void close() throws Exception;
-  
-  String getDescription();
+
+    void send(SpacePacket packet) throws Exception;
+
+    SpacePacket receive() throws Exception;
+
+    void close() throws Exception;
+
+    String getDescription();
 
 }

@@ -35,109 +35,108 @@ package org.ccsds.moims.mo.testbed.util.spp;
 import java.util.Map;
 
 public class SpacePacket {
-  
-  private SpacePacketHeader header;
-  
-  private int apidQualifier;
-  
-  private byte[] body;
-  
-  private int offset;
-  
-  private int length;
-  
-  private Map qosProperties;
-  
-  public SpacePacket(final SpacePacketHeader header, final byte[] body, final int offset,
-                     final int length) {
-    this(header, -1, body, offset, length);
-  }
-  
-  public SpacePacket(final SpacePacketHeader header, final int apidQualifier, final byte[] body, final int offset,
-                     final int length) {
-    super();
-    this.header = header;
-    this.apidQualifier = apidQualifier;
-    this.body = body;
-    this.offset = offset;
-    this.length = length;
-  }
 
-  public void setQosProperties(final Map qosProperties) {
-    this.qosProperties = qosProperties;
-  }
+    private SpacePacketHeader header;
 
-  public Map getQosProperties() {
-    return qosProperties;
-  }
+    private int apidQualifier;
 
-  /**
-   * @return the header
-   */
-  public SpacePacketHeader getHeader() {
-    return header;
-  }
+    private byte[] body;
 
-  /**
-   * @param header the header to set
-   */
-  public void setHeader(final SpacePacketHeader header) {
-    this.header = header;
-  }
+    private int offset;
 
-  public int getApidQualifier() {
-    return apidQualifier;
-  }
+    private int length;
 
-  public void setApidQualifier(final int apidQualifier) {
-    this.apidQualifier = apidQualifier;
-  }
+    private Map qosProperties;
 
-  /**
-   * @return the body
-   */
-  public byte[] getBody() {
-    return body;
-  }
+    public SpacePacket(final SpacePacketHeader header, final byte[] body, final int offset, final int length) {
+        this(header, -1, body, offset, length);
+    }
 
-  /**
-   * @param body the body to set
-   */
-  public void setBody(final byte[] body) {
-    this.body = body;
-  }
+    public SpacePacket(final SpacePacketHeader header, final int apidQualifier, final byte[] body, final int offset,
+        final int length) {
+        super();
+        this.header = header;
+        this.apidQualifier = apidQualifier;
+        this.body = body;
+        this.offset = offset;
+        this.length = length;
+    }
 
-  /**
-   * @return the offset
-   */
-  public int getOffset() {
-    return offset;
-  }
+    public void setQosProperties(final Map qosProperties) {
+        this.qosProperties = qosProperties;
+    }
 
-  /**
-   * @param offset the offset to set
-   */
-  public void setOffset(final int offset) {
-    this.offset = offset;
-  }
+    public Map getQosProperties() {
+        return qosProperties;
+    }
 
-  /**
-   * @return the length
-   */
-  public int getLength() {
-    return length;
-  }
+    /**
+     * @return the header
+     */
+    public SpacePacketHeader getHeader() {
+        return header;
+    }
 
-  /**
-   * @param length the length to set
-   */
-  public void setLength(final int length) {
-    this.length = length;
-  }
-  
-  public String toString() {
-    return '(' + super.toString() + ",apidQualifier=" + apidQualifier
-        + ",header=" + header + ",offset=" + offset + ",length=" + length + ')';
-  }
+    /**
+     * @param header the header to set
+     */
+    public void setHeader(final SpacePacketHeader header) {
+        this.header = header;
+    }
+
+    public int getApidQualifier() {
+        return apidQualifier;
+    }
+
+    public void setApidQualifier(final int apidQualifier) {
+        this.apidQualifier = apidQualifier;
+    }
+
+    /**
+     * @return the body
+     */
+    public byte[] getBody() {
+        return body;
+    }
+
+    /**
+     * @param body the body to set
+     */
+    public void setBody(final byte[] body) {
+        this.body = body;
+    }
+
+    /**
+     * @return the offset
+     */
+    public int getOffset() {
+        return offset;
+    }
+
+    /**
+     * @param offset the offset to set
+     */
+    public void setOffset(final int offset) {
+        this.offset = offset;
+    }
+
+    /**
+     * @return the length
+     */
+    public int getLength() {
+        return length;
+    }
+
+    /**
+     * @param length the length to set
+     */
+    public void setLength(final int length) {
+        this.length = length;
+    }
+
+    public String toString() {
+        return '(' + super.toString() + ",apidQualifier=" + apidQualifier + ",header=" + header + ",offset=" + offset +
+            ",length=" + length + ')';
+    }
 
 }

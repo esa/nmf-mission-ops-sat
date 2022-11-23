@@ -39,88 +39,82 @@ import java.io.OutputStream;
 import org.ccsds.moims.mo.testbed.util.spp.SpacePacket;
 import org.ccsds.moims.mo.testbed.util.spp.SpacePacketHeader;
 
-public class SPPWriter
-{
+public class SPPWriter {
 
-  private final byte[] apidQualifierBuffer;
+    private final byte[] apidQualifierBuffer;
 
-  private final byte[] outHeaderBuffer;
+    private final byte[] outHeaderBuffer;
 
-  private final byte[] outCrcBuffer;
-  private final boolean crcEnabled;
-  private final APIDRangeList crcApids;
+    private final byte[] outCrcBuffer;
+    private final boolean crcEnabled;
+    private final APIDRangeList crcApids;
 
-  //private Hashtable sequenceCounters;
-  private final OutputStream os;
+    //private Hashtable sequenceCounters;
+    private final OutputStream os;
 
-  public SPPWriter(final OutputStream os)
-  {
-    this.os = os;
-    apidQualifierBuffer = new byte[2];
-    outHeaderBuffer = new byte[6];
-    outCrcBuffer = new byte[2];
-    crcEnabled = SPPHelper.getCrcEnabled();
-    crcApids = SPPHelper.initWhitelist(new File(SPPHelper.CRC_FILENAME));
-    //sequenceCounters = new Hashtable();
-  }
-
-  public synchronized void send(final SpacePacket packet) throws IOException
-  {
-
-    if (SPPHelper.isAPIDqualifierInMessage) {
-      // 1- Write the APID qualifier
-      final int apidQualifier = packet.getApidQualifier();
-      apidQualifierBuffer[0] = (byte) (apidQualifier >>> 8);
-      apidQualifierBuffer[1] = (byte) (apidQualifier);
-      os.write(apidQualifierBuffer);
+    public SPPWriter(final OutputStream os) {
+        this.os = os;
+        apidQualifierBuffer = new byte[2];
+        outHeaderBuffer = new byte[6];
+        outCrcBuffer = new byte[2];
+        crcEnabled = SPPHelper.getCrcEnabled();
+        crcApids = SPPHelper.initWhitelist(new File(SPPHelper.CRC_FILENAME));
+        //sequenceCounters = new Hashtable();
     }
 
-    // 2- Write the Space Packet
-    final SpacePacketHeader sph = packet.getHeader();
-    final byte[] data = packet.getBody();
-    final int vers_nb = sph.getPacketVersionNumber();
-    final int pkt_type = sph.getPacketType();
-    final int sec_head_flag = sph.getSecondaryHeaderFlag();
-    final int TCPacket_apid = sph.getApid();
-    final int segt_flag = sph.getSequenceFlags();
-    final int pkt_ident = (vers_nb << 13) | (pkt_type << 12) | (sec_head_flag << 11) | (TCPacket_apid);
+    public synchronized void send(final SpacePacket packet) throws IOException {
 
-    /* The sequence counter should be assigned by the upper layer
-    Integer counter = (Integer) sequenceCounters.get(apid);
-    if (counter == null) {
-      counter = new Integer(0);
-      sequenceCounters.put(apid, counter);
-    }*/
-    final int pkt_seq_ctrl = (segt_flag << 14)
-        | (packet.getHeader().getSequenceCount());
-    final boolean processCrc = crcEnabled && crcApids.inRange(TCPacket_apid);
-    // Remove 1 byte as specified by the specification.
-//    int pkt_length_value = packet.getLength() - 1;
-    final int pkt_length_value = (processCrc) ? packet.getLength() - 1 + 2
-        : packet.getLength() - 1;  // + 2 because of the appended CRC
+        if (SPPHelper.isAPIDqualifierInMessage) {
+            // 1- Write the APID qualifier
+            final int apidQualifier = packet.getApidQualifier();
+            apidQualifierBuffer[0] = (byte) (apidQualifier >>> 8);
+            apidQualifierBuffer[1] = (byte) (apidQualifier);
+            os.write(apidQualifierBuffer);
+        }
 
-    outHeaderBuffer[0] = (byte) (pkt_ident >> 8);
-    outHeaderBuffer[1] = (byte) (pkt_ident & 0xFF);
-    outHeaderBuffer[2] = (byte) (pkt_seq_ctrl >> 8);
-    outHeaderBuffer[3] = (byte) (pkt_seq_ctrl & 0xFF);
-    outHeaderBuffer[4] = (byte) (pkt_length_value >> 8);
-    outHeaderBuffer[5] = (byte) (pkt_length_value & 0xFF);
+        // 2- Write the Space Packet
+        final SpacePacketHeader sph = packet.getHeader();
+        final byte[] data = packet.getBody();
+        final int vers_nb = sph.getPacketVersionNumber();
+        final int pkt_type = sph.getPacketType();
+        final int sec_head_flag = sph.getSecondaryHeaderFlag();
+        final int TCPacket_apid = sph.getApid();
+        final int segt_flag = sph.getSequenceFlags();
+        final int pkt_ident = (vers_nb << 13) | (pkt_type << 12) | (sec_head_flag << 11) | (TCPacket_apid);
 
-    os.write(outHeaderBuffer);
-    os.write(data, packet.getOffset(), packet.getLength());
+        /* The sequence counter should be assigned by the upper layer
+        Integer counter = (Integer) sequenceCounters.get(apid);
+        if (counter == null) {
+          counter = new Integer(0);
+          sequenceCounters.put(apid, counter);
+        }*/
+        final int pkt_seq_ctrl = (segt_flag << 14) | (packet.getHeader().getSequenceCount());
+        final boolean processCrc = crcEnabled && crcApids.inRange(TCPacket_apid);
+        // Remove 1 byte as specified by the specification.
+        //    int pkt_length_value = packet.getLength() - 1;
+        final int pkt_length_value = (processCrc) ? packet.getLength() - 1 + 2 : packet.getLength() - 1;  // + 2 because of the appended CRC
 
-    // There is no CRC in the SPP specification
-    if (processCrc) {
-      final int CRC = SPPHelper.computeCRC(outHeaderBuffer, data,
-          packet.getOffset(), packet.getLength());
+        outHeaderBuffer[0] = (byte) (pkt_ident >> 8);
+        outHeaderBuffer[1] = (byte) (pkt_ident & 0xFF);
+        outHeaderBuffer[2] = (byte) (pkt_seq_ctrl >> 8);
+        outHeaderBuffer[3] = (byte) (pkt_seq_ctrl & 0xFF);
+        outHeaderBuffer[4] = (byte) (pkt_length_value >> 8);
+        outHeaderBuffer[5] = (byte) (pkt_length_value & 0xFF);
 
-      outCrcBuffer[0] = (byte) (CRC >> 8);
-      outCrcBuffer[1] = (byte) (CRC & 0xFF);
-      os.write(outCrcBuffer);
+        os.write(outHeaderBuffer);
+        os.write(data, packet.getOffset(), packet.getLength());
+
+        // There is no CRC in the SPP specification
+        if (processCrc) {
+            final int CRC = SPPHelper.computeCRC(outHeaderBuffer, data, packet.getOffset(), packet.getLength());
+
+            outCrcBuffer[0] = (byte) (CRC >> 8);
+            outCrcBuffer[1] = (byte) (CRC & 0xFF);
+            os.write(outCrcBuffer);
+        }
+
+        os.flush();
+
+        //counter = new Integer(counter.intValue() + 1);
     }
-
-    os.flush();
-
-    //counter = new Integer(counter.intValue() + 1);
-  }
 }

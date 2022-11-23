@@ -36,66 +36,70 @@ import org.ccsds.moims.mo.mal.structures.Blob;
 
 public class SPPElementStreamFactory extends MALElementStreamFactory {
 
-	private static final String ILLEGAL_NULL_ARGUMENT = "Argument may not be null.";
-	private Map properties;
+    private static final String ILLEGAL_NULL_ARGUMENT = "Argument may not be null.";
+    private Map properties;
 
-	@Override
-	protected void init(final String protocol, final Map properties) throws IllegalArgumentException, MALException {
-		if (protocol == null) {
-			throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
-		}
-		this.properties = properties;
-	}
+    @Override
+    protected void init(final String protocol, final Map properties) throws IllegalArgumentException, MALException {
+        if (protocol == null) {
+            throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
+        }
+        this.properties = properties;
+    }
 
-	@Override
-	public MALElementInputStream createInputStream(final InputStream is) throws IllegalArgumentException, MALException {
-		if (is == null) {
-			throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
-		}
-		return new SPPElementInputStream(is, properties);
-	}
+    @Override
+    public MALElementInputStream createInputStream(final InputStream is) throws IllegalArgumentException, MALException {
+        if (is == null) {
+            throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
+        }
+        return new SPPElementInputStream(is, properties);
+    }
 
-	@Override
-	public MALElementInputStream createInputStream(final byte[] bytes, final int offset) throws IllegalArgumentException, MALException {
-		if (bytes == null) {
-			throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
-		}
-		return createInputStream(new ByteArrayInputStream(bytes, offset, bytes.length - offset));
-	}
+    @Override
+    public MALElementInputStream createInputStream(final byte[] bytes, final int offset)
+        throws IllegalArgumentException, MALException {
+        if (bytes == null) {
+            throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
+        }
+        return createInputStream(new ByteArrayInputStream(bytes, offset, bytes.length - offset));
+    }
 
-	@Override
-	public MALElementOutputStream createOutputStream(final OutputStream os) throws IllegalArgumentException, MALException {
-		return new SPPElementOutputStream(os, properties);
-	}
+    @Override
+    public MALElementOutputStream createOutputStream(final OutputStream os) throws IllegalArgumentException,
+        MALException {
+        return new SPPElementOutputStream(os, properties);
+    }
 
-	// PENDING: It is unclear, what the elements array is supposed to represent. Here: Ignore the
-	// body element index of the context and set it to the element index for each element in
-	// elements.
-	@Override
-	public Blob encode(final Object[] elements, final MALEncodingContext ctx) throws IllegalArgumentException, MALException{
-            
-		if (elements == null || ctx == null) {
-			throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
-		}
+    // PENDING: It is unclear, what the elements array is supposed to represent. Here: Ignore the
+    // body element index of the context and set it to the element index for each element in
+    // elements.
+    @Override
+    public Blob encode(final Object[] elements, final MALEncodingContext ctx) throws IllegalArgumentException,
+        MALException {
 
-                final ByteArrayOutputStream os = new ByteArrayOutputStream();
-		final MALElementOutputStream eos = createOutputStream(os);
+        if (elements == null || ctx == null) {
+            throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
+        }
 
-		for (int i = 0; i < elements.length; i++) {
-			ctx.setBodyElementIndex(i);
-                    try {
-                        eos.writeElement(elements[i], ctx);
-                    } catch (final IllegalArgumentException | MALException ex) {
-                        Logger.getLogger(SPPElementStreamFactory.class.getName()).log(Level.SEVERE, "The Element is type: " + elements[i].getClass().getName() + " - " + elements[i].toString(), ex);
-                        throw ex;
-                    }
-		}
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        final MALElementOutputStream eos = createOutputStream(os);
 
-		try {
-			os.flush();
-		} catch (final IOException ex) {
-			throw new MALException(ex.getMessage(), ex);
-		}
-		return new Blob(os.toByteArray());
-	}
+        for (int i = 0; i < elements.length; i++) {
+            ctx.setBodyElementIndex(i);
+            try {
+                eos.writeElement(elements[i], ctx);
+            } catch (final IllegalArgumentException | MALException ex) {
+                Logger.getLogger(SPPElementStreamFactory.class.getName()).log(Level.SEVERE, "The Element is type: " +
+                    elements[i].getClass().getName() + " - " + elements[i].toString(), ex);
+                throw ex;
+            }
+        }
+
+        try {
+            os.flush();
+        } catch (final IOException ex) {
+            throw new MALException(ex.getMessage(), ex);
+        }
+        return new Blob(os.toByteArray());
+    }
 }

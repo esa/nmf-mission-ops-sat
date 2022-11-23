@@ -77,7 +77,7 @@ public class SPPEndpoint implements MALEndpoint {
     // private final Thread outgoingThread;
 
     public SPPEndpoint(final String protocol, final SPPTransport transport, final String localName, final URI uri,
-            final Map qosProperties, final SPPSocket sppSocket) throws MALException {
+        final Map qosProperties, final SPPSocket sppSocket) throws MALException {
         this.protocol = protocol;
         this.transport = transport;
         // PENDING: Testbed throws NullpointerExceptions, if an endpoint, that is
@@ -136,88 +136,89 @@ public class SPPEndpoint implements MALEndpoint {
     // createMessage(...) - 4x + 2x">
     @Override
     public MALMessage createMessage(final Blob authenticationId, final URI uriTo, final Time timestamp,
-            final QoSLevel qosLevel, final UInteger priority, final IdentifierList domain, final Identifier networkZone,
-            final SessionType session, final Identifier sessionName, final InteractionType interactionType,
-            final UOctet interactionStage, final Long transactionId, final UShort serviceArea, final UShort service,
-            final UShort operation, final UOctet areaVersion, final Boolean isErrorMessage, final Map qosProperties,
-            final Object... body) throws IllegalArgumentException, MALException {
+        final QoSLevel qosLevel, final UInteger priority, final IdentifierList domain, final Identifier networkZone,
+        final SessionType session, final Identifier sessionName, final InteractionType interactionType,
+        final UOctet interactionStage, final Long transactionId, final UShort serviceArea, final UShort service,
+        final UShort operation, final UOctet areaVersion, final Boolean isErrorMessage, final Map qosProperties,
+        final Object... body) throws IllegalArgumentException, MALException {
         if (isClosed) {
             throw new MALException(ENDPOINT_CLOSED);
         }
-        final SPPMessageHeader msgHeader = new SPPMessageHeader(uri, authenticationId, uriTo, timestamp, qosLevel, priority,
-                domain, networkZone, session, sessionName, interactionType, interactionStage, transactionId,
-                serviceArea, service, operation, areaVersion, isErrorMessage);
+        final SPPMessageHeader msgHeader = new SPPMessageHeader(uri, authenticationId, uriTo, timestamp, qosLevel,
+            priority, domain, networkZone, session, sessionName, interactionType, interactionStage, transactionId,
+            serviceArea, service, operation, areaVersion, isErrorMessage);
         final MALOperation op = MALContextFactory.lookupArea(serviceArea, areaVersion).getServiceByNumber(service)
-                .getOperationByNumber(operation);
+            .getOperationByNumber(operation);
         return createMessage(uri, uriTo, msgHeader, op, body, null, false, qosProperties);
     }
 
     @Override
     public MALMessage createMessage(final Blob authenticationId, final URI uriTo, final Time timestamp,
-            final QoSLevel qosLevel, final UInteger priority, final IdentifierList domain, final Identifier networkZone,
-            final SessionType session, final Identifier sessionName, final InteractionType interactionType,
-            final UOctet interactionStage, final Long transactionId, final UShort serviceArea, final UShort service,
-            final UShort operation, final UOctet areaVersion, final Boolean isErrorMessage, final Map qosProperties,
-            final MALEncodedBody encodedBody) throws IllegalArgumentException, MALException {
+        final QoSLevel qosLevel, final UInteger priority, final IdentifierList domain, final Identifier networkZone,
+        final SessionType session, final Identifier sessionName, final InteractionType interactionType,
+        final UOctet interactionStage, final Long transactionId, final UShort serviceArea, final UShort service,
+        final UShort operation, final UOctet areaVersion, final Boolean isErrorMessage, final Map qosProperties,
+        final MALEncodedBody encodedBody) throws IllegalArgumentException, MALException {
         if (isClosed) {
             throw new MALException(ENDPOINT_CLOSED);
         }
-        final SPPMessageHeader msgHeader = new SPPMessageHeader(uri, authenticationId, uriTo, timestamp, qosLevel, priority,
-                domain, networkZone, session, sessionName, interactionType, interactionStage, transactionId,
-                serviceArea, service, operation, areaVersion, isErrorMessage);
+        final SPPMessageHeader msgHeader = new SPPMessageHeader(uri, authenticationId, uriTo, timestamp, qosLevel,
+            priority, domain, networkZone, session, sessionName, interactionType, interactionStage, transactionId,
+            serviceArea, service, operation, areaVersion, isErrorMessage);
         final MALOperation op = MALContextFactory.lookupArea(serviceArea, areaVersion).getServiceByNumber(service)
-                .getOperationByNumber(operation);
+            .getOperationByNumber(operation);
         return createMessage(uri, uriTo, msgHeader, op, null, encodedBody, true, qosProperties);
     }
 
     @Override
     public MALMessage createMessage(final Blob authenticationId, final URI uriTo, final Time timestamp,
-            final QoSLevel qosLevel, final UInteger priority, final IdentifierList domain, final Identifier networkZone,
-            final SessionType session, final Identifier sessionName, final Long transactionId,
-            final Boolean isErrorMessage, final MALOperation op, final UOctet interactionStage, final Map qosProperties,
-            final Object... body) throws IllegalArgumentException, MALException {
+        final QoSLevel qosLevel, final UInteger priority, final IdentifierList domain, final Identifier networkZone,
+        final SessionType session, final Identifier sessionName, final Long transactionId, final Boolean isErrorMessage,
+        final MALOperation op, final UOctet interactionStage, final Map qosProperties, final Object... body)
+        throws IllegalArgumentException, MALException {
         if (op == null) {
             throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
         }
         if (isClosed) {
             throw new MALException(ENDPOINT_CLOSED);
         }
-        final SPPMessageHeader msgHeader = new SPPMessageHeader(uri, authenticationId, uriTo, timestamp, qosLevel, priority,
-                domain, networkZone, session, sessionName, op.getInteractionType(), interactionStage, transactionId,
-                op.getService().getArea().getNumber(), op.getService().getNumber(), op.getNumber(),
-                op.getService().getArea().getVersion(), isErrorMessage);
+        final SPPMessageHeader msgHeader = new SPPMessageHeader(uri, authenticationId, uriTo, timestamp, qosLevel,
+            priority, domain, networkZone, session, sessionName, op.getInteractionType(), interactionStage,
+            transactionId, op.getService().getArea().getNumber(), op.getService().getNumber(), op.getNumber(), op
+                .getService().getArea().getVersion(), isErrorMessage);
         return createMessage(uri, uriTo, msgHeader, op, body, null, false, qosProperties);
     }
 
     @Override
     public MALMessage createMessage(final Blob authenticationId, final URI uriTo, final Time timestamp,
-            final QoSLevel qosLevel, final UInteger priority, final IdentifierList domain, final Identifier networkZone,
-            final SessionType session, final Identifier sessionName, final Long transactionId,
-            final Boolean isErrorMessage, final MALOperation op, final UOctet interactionStage, final Map qosProperties,
-            final MALEncodedBody encodedBody) throws IllegalArgumentException, MALException {
+        final QoSLevel qosLevel, final UInteger priority, final IdentifierList domain, final Identifier networkZone,
+        final SessionType session, final Identifier sessionName, final Long transactionId, final Boolean isErrorMessage,
+        final MALOperation op, final UOctet interactionStage, final Map qosProperties, final MALEncodedBody encodedBody)
+        throws IllegalArgumentException, MALException {
         if (op == null) {
             throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
         }
         if (isClosed) {
             throw new MALException(ENDPOINT_CLOSED);
         }
-        final SPPMessageHeader msgHeader = new SPPMessageHeader(uri, authenticationId, uriTo, timestamp, qosLevel, priority,
-                domain, networkZone, session, sessionName, op.getInteractionType(), interactionStage, transactionId,
-                op.getService().getArea().getNumber(), op.getService().getNumber(), op.getNumber(),
-                op.getService().getArea().getVersion(), isErrorMessage);
+        final SPPMessageHeader msgHeader = new SPPMessageHeader(uri, authenticationId, uriTo, timestamp, qosLevel,
+            priority, domain, networkZone, session, sessionName, op.getInteractionType(), interactionStage,
+            transactionId, op.getService().getArea().getNumber(), op.getService().getNumber(), op.getNumber(), op
+                .getService().getArea().getVersion(), isErrorMessage);
         return createMessage(uri, uriTo, msgHeader, op, null, encodedBody, true, qosProperties);
     }
 
-    private MALMessage createMessage(final URI uriFrom, final URI uriTo, final SPPMessageHeader msgHeader, final MALOperation op, final Object[] body,
-                                     final MALEncodedBody encBody, final boolean isEncoded, final Map qosProperties)
-            throws IllegalArgumentException, MALException {
+    private MALMessage createMessage(final URI uriFrom, final URI uriTo, final SPPMessageHeader msgHeader,
+        final MALOperation op, final Object[] body, final MALEncodedBody encBody, final boolean isEncoded,
+        final Map qosProperties) throws IllegalArgumentException, MALException {
         // get effective properties, resolving per-application parameters
         final Configuration config = new Configuration(Configuration.mix(this.effectiveQosProperties, qosProperties));
         final SPPURI primarySPPURI = new SPPURI(config.isTCpacket() ? uriTo : uriFrom);
         final Map props = config.getEffectiveProperties(primarySPPURI.getQualifier(), primarySPPURI.getAPID());
         final MALEncodingContext ctx = new MALEncodingContext(msgHeader, op, -1, this.effectiveQosProperties, props);
         final MALElementStreamFactory esf = MALElementStreamFactory.newFactory(protocol, props);
-        final SPPMessageBody msgBody = isEncoded ? createMessageBody(encBody, esf, ctx) : createMessageBody(body, esf, ctx);
+        final SPPMessageBody msgBody = isEncoded ? createMessageBody(encBody, esf, ctx) : createMessageBody(body, esf,
+            ctx);
         return new SPPMessage(msgHeader, msgBody, props, this.qosProperties, esf, transport);
     }
     // </editor-fold>
@@ -242,33 +243,34 @@ public class SPPEndpoint implements MALEndpoint {
      * @throws MALException
      */
     protected MALMessage createErrorMessage(final MALMessage replyToMsg, final MALStandardError error,
-            final URI uriFrom) throws MALException {
+        final URI uriFrom) throws MALException {
         final MALMessageHeader header = replyToMsg.getHeader();
         final int type = header.getInteractionType().getOrdinal();
         final short stage = header.getInteractionStage().getValue();
 
         // Find out if current interaction allows returning an error message.
-        final boolean isErrorAllowed = ((type == InteractionType._SUBMIT_INDEX && stage == MALSubmitOperation._SUBMIT_STAGE)
-                || (type == InteractionType._REQUEST_INDEX && stage == MALRequestOperation._REQUEST_STAGE)
-                || (type == InteractionType._INVOKE_INDEX && stage == MALInvokeOperation._INVOKE_STAGE)
-                || (type == InteractionType._PROGRESS_INDEX && stage == MALProgressOperation._PROGRESS_STAGE)
-                || (type == InteractionType._PUBSUB_INDEX && stage == MALPubSubOperation._REGISTER_STAGE)
-                || (type == InteractionType._PUBSUB_INDEX && stage == MALPubSubOperation._PUBLISH_REGISTER_STAGE)
-                || (type == InteractionType._PUBSUB_INDEX && stage == MALPubSubOperation._PUBLISH_DEREGISTER_STAGE)
-                || (type == InteractionType._PUBSUB_INDEX && stage == MALPubSubOperation._DEREGISTER_STAGE));
+        final boolean isErrorAllowed = ((type == InteractionType._SUBMIT_INDEX && stage ==
+            MALSubmitOperation._SUBMIT_STAGE) || (type == InteractionType._REQUEST_INDEX && stage ==
+                MALRequestOperation._REQUEST_STAGE) || (type == InteractionType._INVOKE_INDEX && stage ==
+                    MALInvokeOperation._INVOKE_STAGE) || (type == InteractionType._PROGRESS_INDEX && stage ==
+                        MALProgressOperation._PROGRESS_STAGE) || (type == InteractionType._PUBSUB_INDEX && stage ==
+                            MALPubSubOperation._REGISTER_STAGE) || (type == InteractionType._PUBSUB_INDEX && stage ==
+                                MALPubSubOperation._PUBLISH_REGISTER_STAGE) || (type == InteractionType._PUBSUB_INDEX &&
+                                    stage == MALPubSubOperation._PUBLISH_DEREGISTER_STAGE) || (type ==
+                                        InteractionType._PUBSUB_INDEX && stage ==
+                                            MALPubSubOperation._DEREGISTER_STAGE));
         if (!isErrorAllowed) {
             return null;
         }
 
         final MALMessage errMsg = createMessage(header.getAuthenticationId(), header.getURIFrom(), // Reply to message sender.
-                new Time(System.currentTimeMillis()), // PENDING: Epoch for Time in MAL Java API unclear. Here: Use Java
-                                                      // epoch.
-                header.getQoSlevel(), header.getPriority(), header.getDomain(), header.getNetworkZone(),
-                header.getSession(), header.getSessionName(), header.getInteractionType(),
-                new UOctet((short) (stage + 1)), // An error always replaces the next stage.
-                header.getTransactionId(), header.getServiceArea(), header.getService(), header.getOperation(),
-                header.getAreaVersion(), Boolean.TRUE, // Yes, this is an error message.
-                replyToMsg.getQoSProperties(), error.getErrorNumber(), error.getExtraInformation());
+            new Time(System.currentTimeMillis()), // PENDING: Epoch for Time in MAL Java API unclear. Here: Use Java
+            // epoch.
+            header.getQoSlevel(), header.getPriority(), header.getDomain(), header.getNetworkZone(), header
+                .getSession(), header.getSessionName(), header.getInteractionType(), new UOctet((short) (stage + 1)), // An error always replaces the next stage.
+            header.getTransactionId(), header.getServiceArea(), header.getService(), header.getOperation(), header
+                .getAreaVersion(), Boolean.TRUE, // Yes, this is an error message.
+            replyToMsg.getQoSProperties(), error.getErrorNumber(), error.getExtraInformation());
         if (uriFrom != null) {
             errMsg.getHeader().setURIFrom(uriFrom);
         }
@@ -279,7 +281,7 @@ public class SPPEndpoint implements MALEndpoint {
      * Creates a specialized message body according to some header information.
      */
     protected static SPPMessageBody createMessageBody(final MALEncodedBody encodedBody,
-            final MALElementStreamFactory esf, final MALEncodingContext ctx) {
+        final MALElementStreamFactory esf, final MALEncodingContext ctx) {
         final MALMessageHeader header = ctx.getHeader();
         if (header.getIsErrorMessage()) {
             return new SPPErrorBody(encodedBody, esf, ctx);
@@ -305,7 +307,7 @@ public class SPPEndpoint implements MALEndpoint {
      * Creates a specialized message body according to some header information.
      */
     protected static SPPMessageBody createMessageBody(final Object[] body, final MALElementStreamFactory esf,
-            final MALEncodingContext ctx) {
+        final MALEncodingContext ctx) {
         final MALMessageHeader header = ctx.getHeader();
         if (header.getIsErrorMessage()) {
             return new SPPErrorBody(body, esf, ctx);
@@ -328,8 +330,8 @@ public class SPPEndpoint implements MALEndpoint {
     }
 
     @Override
-    public void sendMessage(final MALMessage msg)
-            throws IllegalArgumentException, MALTransmitErrorException, MALException {
+    public void sendMessage(final MALMessage msg) throws IllegalArgumentException, MALTransmitErrorException,
+        MALException {
         if (isClosed) {
             throw new MALException(ENDPOINT_CLOSED);
         }
@@ -337,11 +339,10 @@ public class SPPEndpoint implements MALEndpoint {
             throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
         }
         final MALMessageHeader header = msg.getHeader();
-        if (null == header.getURIFrom() || null == header.getURITo() || null == header.getQoSlevel()
-                || null == header.getSession() || null == header.getInteractionType()
-                || null == header.getInteractionStage() || null == header.getTransactionId()
-                || null == header.getServiceArea() || null == header.getService() || null == header.getOperation()
-                || null == header.getAreaVersion() || null == header.getIsErrorMessage()) {
+        if (null == header.getURIFrom() || null == header.getURITo() || null == header.getQoSlevel() || null == header
+            .getSession() || null == header.getInteractionType() || null == header.getInteractionStage() || null ==
+                header.getTransactionId() || null == header.getServiceArea() || null == header.getService() || null ==
+                    header.getOperation() || null == header.getAreaVersion() || null == header.getIsErrorMessage()) {
             final MALStandardError error = new MALStandardError(MALHelper.INTERNAL_ERROR_NUMBER, HEADER_FIELD_IS_NULL);
             throw new MALTransmitErrorException(header, error, msg.getQoSProperties());
         }
@@ -369,8 +370,9 @@ public class SPPEndpoint implements MALEndpoint {
                     return;
                 } catch (final Exception ex) {
                     Logger.getLogger(SPPEndpoint.class.getName()).log(Level.SEVERE,
-                            "Maybe the configuration file is not being read!", ex);
-                    final MALStandardError error = new MALStandardError(MALHelper.INTERNAL_ERROR_NUMBER, ex.getMessage());
+                        "Maybe the configuration file is not being read!", ex);
+                    final MALStandardError error = new MALStandardError(MALHelper.INTERNAL_ERROR_NUMBER, ex
+                        .getMessage());
                     throw new MALTransmitErrorException(msg.getHeader(), error, msg.getQoSProperties());
                 }
             }
@@ -387,8 +389,8 @@ public class SPPEndpoint implements MALEndpoint {
                 final int packetDataFieldSizeLimit = config.packetDataFieldSizeLimit();
 
                 // Line hitting the exception is below!!
-                final SpacePacket[] spacePackets = ((SPPMessage) msg).createSpacePackets(sequenceCounter, segmentCounter,
-                        packetDataFieldSizeLimit);
+                final SpacePacket[] spacePackets = ((SPPMessage) msg).createSpacePackets(sequenceCounter,
+                    segmentCounter, packetDataFieldSizeLimit);
 
                 // this.outgoingQueue.put(spacePackets);
 
@@ -404,8 +406,7 @@ public class SPPEndpoint implements MALEndpoint {
     }
 
     @Override
-    public void sendMessages(final MALMessage[] msgList)
-            throws IllegalArgumentException, MALException {
+    public void sendMessages(final MALMessage[] msgList) throws IllegalArgumentException, MALException {
         if (isClosed) {
             throw new MALException(ENDPOINT_CLOSED);
         }
@@ -422,8 +423,7 @@ public class SPPEndpoint implements MALEndpoint {
             }
         }
         if (!transmitErrors.isEmpty()) {
-            throw new MALTransmitMultipleErrorException(
-                    transmitErrors.toArray(new MALTransmitErrorException[0]));
+            throw new MALTransmitMultipleErrorException(transmitErrors.toArray(new MALTransmitErrorException[0]));
         }
     }
 

@@ -145,9 +145,8 @@ public class SPPTransport implements MALTransport {
         final Configuration config = new Configuration(props);
 
         // PENDING: appendIdToUri property not yet in specification.
-        final Short identifier = config.appendIdToUri()
-                ? claimIdentifier(config.qualifier(), config.apid(), config.numIdentifiers(), config.startIdentifier())
-                : null;
+        final Short identifier = config.appendIdToUri() ? claimIdentifier(config.qualifier(), config.apid(), config
+            .numIdentifiers(), config.startIdentifier()) : null;
 
         SPPURI uri = null;
 
@@ -176,7 +175,7 @@ public class SPPTransport implements MALTransport {
         if (localName != null) {
             oldEndpoint = endpointsByName.put(localName, endpoint);
 
-            if(null != oldEndpoint) {
+            if (null != oldEndpoint) {
                 oldEndpoint.close();
                 oldEndpoint = null;
             }
@@ -184,7 +183,7 @@ public class SPPTransport implements MALTransport {
 
         oldEndpoint = endpointsByURI.put(endpoint.getURI(), endpoint);
 
-        if(null != oldEndpoint) {
+        if (null != oldEndpoint) {
             oldEndpoint.close();
             oldEndpoint = null;
         }
@@ -256,8 +255,8 @@ public class SPPTransport implements MALTransport {
 
     @Override
     public MALBrokerBinding createBroker(final String localName, final Blob authenticationId,
-            final QoSLevel[] expectedQos, final UInteger priorityLevelNumber, final Map defaultQosProperties)
-            throws IllegalArgumentException, MALException {
+        final QoSLevel[] expectedQos, final UInteger priorityLevelNumber, final Map defaultQosProperties)
+        throws IllegalArgumentException, MALException {
         if (isClosed) {
             throw new MALException(TRANSPORT_CLOSED);
         }
@@ -267,8 +266,8 @@ public class SPPTransport implements MALTransport {
 
     @Override
     public MALBrokerBinding createBroker(final MALEndpoint endpoint, final Blob authenticationId,
-            final QoSLevel[] expectedQos, final UInteger priorityLevelNumber, final Map defaultQosProperties)
-            throws IllegalArgumentException, MALException {
+        final QoSLevel[] expectedQos, final UInteger priorityLevelNumber, final Map defaultQosProperties)
+        throws IllegalArgumentException, MALException {
         if (isClosed) {
             throw new MALException(TRANSPORT_CLOSED);
         }
@@ -340,7 +339,7 @@ public class SPPTransport implements MALTransport {
      * @throws org.ccsds.moims.mo.mal.MALException
      */
     private short claimIdentifier(final int qualifier, final short apid, final short numIdentifiers,
-            final short startIdentifier) throws MALException {
+        final short startIdentifier) throws MALException {
         return claimIdentifier(qualifier, apid, null, numIdentifiers, startIdentifier);
     }
 
@@ -377,7 +376,7 @@ public class SPPTransport implements MALTransport {
      * @throws MALException
      */
     private short claimIdentifier(final int qualifier, final short apid, final Short id, final short numIdentifiers,
-            final short startIdentifier) throws MALException {
+        final short startIdentifier) throws MALException {
         final SequenceCounterId counterId = new SequenceCounterId(qualifier, apid);
         Queue<Short> ids = identifiers.get(counterId);
         if (null == ids) {
@@ -430,7 +429,7 @@ public class SPPTransport implements MALTransport {
      *                      executed.
      */
     private MALMessage receive(final SPPSocket sppSocket, final Map qosProperties,
-            final Map<SegmentCounterId, SPPSegmenter> segmenters, final Thread currentThread) {
+        final Map<SegmentCounterId, SPPSegmenter> segmenters, final Thread currentThread) {
         // TODO: Queue received messages for stopped delivery and QoS level QUEUED.
 
         try {
@@ -464,7 +463,7 @@ public class SPPTransport implements MALTransport {
             short apid;
 
             final Map effectiveProperties = config.getEffectiveProperties(spacePacket.getApidQualifier(),
-                    (short) spacePacket.getHeader().getApid());
+                (short) spacePacket.getHeader().getApid());
             // Selection of correct segment counter needs MAL header information.
             final MALElementStreamFactory esf = MALElementStreamFactory.newFactory(protocol, effectiveProperties);
             final SPPMessageHeader messageHeader = new SPPMessageHeader(spacePacket, esf, effectiveProperties);
@@ -546,7 +545,8 @@ public class SPPTransport implements MALTransport {
                 if (!possibleEPs.isEmpty()) {
                     // TODO: EP could be closed. Should we choose a different one?
                     final SPPEndpoint alternativeEndpoint = possibleEPs.iterator().next();
-                    final MALStandardError error = new MALStandardError(MALHelper.DESTINATION_UNKNOWN_ERROR_NUMBER, null);
+                    final MALStandardError error = new MALStandardError(MALHelper.DESTINATION_UNKNOWN_ERROR_NUMBER,
+                        null);
                     sendErrorMessage(alternativeEndpoint, msg, error, uriTo);
                 } else {
                     // No endpoint exists, thus error cannot be returned. Just log it instead.
@@ -623,13 +623,13 @@ public class SPPTransport implements MALTransport {
      * @throws MALTransmitErrorException
      */
     private void sendErrorMessage(final SPPEndpoint targetEndpoint, final MALMessage replyToMsg,
-            final MALStandardError error, final URI uriFrom) throws MALException, MALTransmitErrorException {
+        final MALStandardError error, final URI uriFrom) throws MALException, MALTransmitErrorException {
         final MALMessage errMsg = targetEndpoint.createErrorMessage(replyToMsg, error, uriFrom);
         if (errMsg != null) {
             targetEndpoint.sendMessage(errMsg);
         } else {
-            LOGGER.log(Level.WARNING, "Error: {0} could not answer to {1}",
-                    new Object[] { error.toString(), replyToMsg.getHeader() });
+            LOGGER.log(Level.WARNING, "Error: {0} could not answer to {1}", new Object[]{error.toString(), replyToMsg
+                .getHeader()});
         }
     }
 

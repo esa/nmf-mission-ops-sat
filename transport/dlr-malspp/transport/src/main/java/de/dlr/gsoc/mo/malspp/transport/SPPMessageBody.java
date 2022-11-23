@@ -46,7 +46,8 @@ public class SPPMessageBody implements MALMessageBody {
     private final MALElementStreamFactory esf;
     protected Object[] shortForms;
 
-    public SPPMessageBody(final Object[] bodyElements, final MALElementStreamFactory esf, final MALEncodingContext ctx) {
+    public SPPMessageBody(final Object[] bodyElements, final MALElementStreamFactory esf,
+        final MALEncodingContext ctx) {
         if (bodyElements == null) {
             this.bodyElements = null;
         } else if (bodyElements.length == 1 && bodyElements[0] instanceof MALStandardError) {
@@ -57,20 +58,19 @@ public class SPPMessageBody implements MALMessageBody {
         }
         this.ctx = ctx;
         this.esf = esf;
-        this.shortForms = ctx.getOperation()
-                .getOperationStage(ctx.getHeader().getInteractionStage())
-                .getElementShortForms();
+        this.shortForms = ctx.getOperation().getOperationStage(ctx.getHeader().getInteractionStage())
+            .getElementShortForms();
         this.isEncoded = false;
         this.isDecoded = true;
     }
 
-    public SPPMessageBody(final MALEncodedBody encodedBody, final MALElementStreamFactory esf, final MALEncodingContext ctx) {
+    public SPPMessageBody(final MALEncodedBody encodedBody, final MALElementStreamFactory esf,
+        final MALEncodingContext ctx) {
         this.encodedBody = encodedBody;
         this.ctx = ctx;
         this.esf = esf;
-        this.shortForms = ctx.getOperation()
-                .getOperationStage(ctx.getHeader().getInteractionStage())
-                .getElementShortForms();
+        this.shortForms = ctx.getOperation().getOperationStage(ctx.getHeader().getInteractionStage())
+            .getElementShortForms();
         this.isEncoded = true;
         this.isDecoded = false;
     }
@@ -90,9 +90,8 @@ public class SPPMessageBody implements MALMessageBody {
             if (getElementCount() != 0) {
                 bodyElements = new ArrayList<>(getElementCount());
                 final MALElementFactoryRegistry elementFactoryRegistry = MALContextFactory.getElementFactoryRegistry();
-                final MALElementInputStream is = esf.createInputStream(
-                        encodedBody.getEncodedBody().getValue(),
-                        encodedBody.getEncodedBody().getOffset());
+                final MALElementInputStream is = esf.createInputStream(encodedBody.getEncodedBody().getValue(),
+                    encodedBody.getEncodedBody().getOffset());
                 for (int i = 0; i < shortForms.length; i++) {
                     final Object shortForm = shortForms[i];
                     Object e = null;
@@ -100,12 +99,12 @@ public class SPPMessageBody implements MALMessageBody {
                         e = elementFactoryRegistry.lookupElementFactory(shortForm).createElement();
                     }
                     ctx.setBodyElementIndex(i);
-                                        try{
-                            bodyElements.add(is.readElement(e, ctx));
-                                        }catch(final org.ccsds.moims.mo.mal.MALException ex){
-//                                                Logger.getLogger(SPPMessageBody.class.getName()).log(Level.INFO, "Unable to decode element with index: " + i, ex);
-                                                throw new MALException("Unable to decode element with index: " + i, ex);
-                                        }
+                    try {
+                        bodyElements.add(is.readElement(e, ctx));
+                    } catch (final org.ccsds.moims.mo.mal.MALException ex) {
+                        //                                                Logger.getLogger(SPPMessageBody.class.getName()).log(Level.INFO, "Unable to decode element with index: " + i, ex);
+                        throw new MALException("Unable to decode element with index: " + i, ex);
+                    }
                 }
             }
             isDecoded = true;
@@ -127,7 +126,7 @@ public class SPPMessageBody implements MALMessageBody {
             if (getElementCount() == 0) {
                 encodedBody = null;
             } else {
-                                final Blob encodedStuff = esf.encode(bodyElements.toArray(), ctx);
+                final Blob encodedStuff = esf.encode(bodyElements.toArray(), ctx);
                 encodedBody = new MALEncodedBody(encodedStuff);
             }
             isEncoded = true;

@@ -28,11 +28,13 @@ import org.ccsds.moims.mo.mal.transport.MALRegisterBody;
 
 public class SPPRegisterBody extends SPPMessageBody implements MALRegisterBody {
 
-    public SPPRegisterBody(final Object[] bodyElements, final MALElementStreamFactory esf, final MALEncodingContext ctx) {
+    public SPPRegisterBody(final Object[] bodyElements, final MALElementStreamFactory esf,
+        final MALEncodingContext ctx) {
         super(bodyElements, esf, ctx);
     }
 
-    public SPPRegisterBody(final MALEncodedBody encodedBody, final MALElementStreamFactory esf, final MALEncodingContext ctx) {
+    public SPPRegisterBody(final MALEncodedBody encodedBody, final MALElementStreamFactory esf,
+        final MALEncodingContext ctx) {
         super(encodedBody, esf, ctx);
     }
 

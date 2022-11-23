@@ -51,7 +51,7 @@ public class Configuration {
     private static final String PROPERTY_PACKET_DATA_FIELD_SIZE_LIMIT = "de.dlr.gsoc.mo.malspp.PACKET_DATA_FIELD_SIZE_LIMIT";
     private static final String PROPERTY_SESSION_NAME = "de.dlr.gsoc.mo.malspp.SESSION_NAME";
     // Default mapping configuration parameter and timestamp values where applicable
-    private static final Blob DEFAULT_AUTHENTICATION_ID = new Blob(new byte[] {});
+    private static final Blob DEFAULT_AUTHENTICATION_ID = new Blob(new byte[]{});
     private static final IdentifierList DEFAULT_DOMAIN = new IdentifierList(0);
     private static final Identifier DEFAULT_NETWORK_ZONE = new Identifier("");
     private static final UInteger DEFAULT_PRIORITY = new UInteger(0);
@@ -123,8 +123,8 @@ public class Configuration {
 
     public Blob authenticationId() {
         // Represent the AUTHENTICATION_ID Blob as String of hexadecimal digits
-        return properties.get(PROPERTY_AUTHENTICATION_ID) == null ? DEFAULT_AUTHENTICATION_ID
-                : new Blob(hexToByte((String) properties.get(PROPERTY_AUTHENTICATION_ID)));
+        return properties.get(PROPERTY_AUTHENTICATION_ID) == null ? DEFAULT_AUTHENTICATION_ID : new Blob(hexToByte(
+            (String) properties.get(PROPERTY_AUTHENTICATION_ID)));
     }
 
     public IdentifierList domain() {
@@ -141,39 +141,39 @@ public class Configuration {
     }
 
     public Identifier networkZone() {
-        return properties.get(PROPERTY_NETWORK_ZONE) == null ? DEFAULT_NETWORK_ZONE
-                : new Identifier((String) properties.get(PROPERTY_NETWORK_ZONE));
+        return properties.get(PROPERTY_NETWORK_ZONE) == null ? DEFAULT_NETWORK_ZONE : new Identifier((String) properties
+            .get(PROPERTY_NETWORK_ZONE));
     }
 
     public int packetDataFieldSizeLimit() {
-        final int sizeLimitFromConfig = (new UShort(
-                Integer.parseInt((String) properties.get(PROPERTY_PACKET_DATA_FIELD_SIZE_LIMIT)))).getValue();
+        final int sizeLimitFromConfig = (new UShort(Integer.parseInt((String) properties.get(
+            PROPERTY_PACKET_DATA_FIELD_SIZE_LIMIT)))).getValue();
         return sizeLimitFromConfig == 0 ? MAX_SPACE_PACKET_SIZE : sizeLimitFromConfig;
     }
 
     public UInteger priority() {
-        return properties.get(PROPERTY_PRIORITY) == null ? DEFAULT_PRIORITY
-                : new UInteger(Long.parseLong((String) properties.get(PROPERTY_PRIORITY)));
+        return properties.get(PROPERTY_PRIORITY) == null ? DEFAULT_PRIORITY : new UInteger(Long.parseLong(
+            (String) properties.get(PROPERTY_PRIORITY)));
     }
 
     public Identifier sessionName() {
-        return properties.get(PROPERTY_SESSION_NAME) == null ? DEFAULT_SESSION_NAME
-                : new Identifier((String) properties.get(PROPERTY_SESSION_NAME));
+        return properties.get(PROPERTY_SESSION_NAME) == null ? DEFAULT_SESSION_NAME : new Identifier((String) properties
+            .get(PROPERTY_SESSION_NAME));
     }
 
     protected long timeout() {
-        return properties.get(PROPERTY_TIMEOUT) == null ? DEFAULT_TIMEOUT
-                : Long.parseLong((String) properties.get(PROPERTY_TIMEOUT));
+        return properties.get(PROPERTY_TIMEOUT) == null ? DEFAULT_TIMEOUT : Long.parseLong((String) properties.get(
+            PROPERTY_TIMEOUT));
     }
 
     protected short numIdentifiers() {
-        return properties.get(PROPERTY_NUM_IDENTIFIERS) == null ? DEFAULT_NUM_IDENTIFIERS
-                : Short.parseShort((String) properties.get(PROPERTY_NUM_IDENTIFIERS));
+        return properties.get(PROPERTY_NUM_IDENTIFIERS) == null ? DEFAULT_NUM_IDENTIFIERS : Short.parseShort(
+            (String) properties.get(PROPERTY_NUM_IDENTIFIERS));
     }
 
     protected short startIdentifier() {
-        return properties.get(PROPERTY_START_IDENTIFIER) == null ? DEFAULT_START_IDENTIFIER
-                : Short.parseShort((String) properties.get(PROPERTY_START_IDENTIFIER));
+        return properties.get(PROPERTY_START_IDENTIFIER) == null ? DEFAULT_START_IDENTIFIER : Short.parseShort(
+            (String) properties.get(PROPERTY_START_IDENTIFIER));
     }
 
     public boolean appendIdToUri() {
@@ -233,8 +233,8 @@ public class Configuration {
      */
     private boolean getBooleanProperty(final String flagProperty) {
         final Object propertyObject = properties == null ? null : properties.get(flagProperty);
-        return (null == propertyObject) || (propertyObject instanceof Boolean ? (Boolean) propertyObject
-                : Boolean.valueOf((String) propertyObject));
+        return (null == propertyObject) || (propertyObject instanceof Boolean ? (Boolean) propertyObject : Boolean
+            .valueOf((String) propertyObject));
     }
 
     /**
@@ -250,7 +250,7 @@ public class Configuration {
      * @return A map containing the effective configuration.
      */
     protected synchronized Map getEffectiveProperties(final int primaryQualifier, final short primaryApid)
-            throws MALException {
+        throws MALException {
         // Read config file only once. If different configurations are needed for
         // multiple
         // transports, they can be told apart by the different config filename.
@@ -279,8 +279,8 @@ public class Configuration {
         return mix(mappingConfs.get(appId), properties);
     }
 
-    private static Map<AppId, Map> loadMappingConf(final String filename)
-            throws XMLStreamException, FileNotFoundException {
+    private static Map<AppId, Map> loadMappingConf(final String filename) throws XMLStreamException,
+        FileNotFoundException {
         final XMLInputFactory xif = XMLInputFactory.newInstance();
         final XMLEventReader xer = xif.createXMLEventReader(new FileInputStream(filename));
         final LinkedList<Scope> scope = new LinkedList<>();
@@ -300,10 +300,10 @@ public class Configuration {
                         scope.add(Scope.CONFIG);
                     } else if (Scope.CONFIG == s && Scope.APP.getName().equals(name)) {
                         try {
-                            final int qualifier = Integer.parseInt(e.asStartElement()
-                                    .getAttributeByName(QName.valueOf(XML_ATTR_APID_QUALIFIER)).getValue());
-                            final short apid = Short.parseShort(
-                                    e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_APID)).getValue());
+                            final int qualifier = Integer.parseInt(e.asStartElement().getAttributeByName(QName.valueOf(
+                                XML_ATTR_APID_QUALIFIER)).getValue());
+                            final short apid = Short.parseShort(e.asStartElement().getAttributeByName(QName.valueOf(
+                                XML_ATTR_APID)).getValue());
                             appConfig = new HashMap<>();
                             config.put(new AppId(qualifier, apid), appConfig);
                             scope.add(Scope.APP);
@@ -335,31 +335,31 @@ public class Configuration {
                     } else if (Scope.TIME == s) {
                         if (Scope.FORMAT.getName().equals(name)) {
                             final String v = e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_TIME_UNIT))
-                                    .getValue();
+                                .getValue();
                             appConfig.put(PROPERTY_TIME_UNIT, v);
                             scope.add(Scope.FORMAT);
                         } else if (Scope.EPOCH.getName().equals(name)) {
                             final String v = e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_TIME_SCALE))
-                                    .getValue();
+                                .getValue();
                             appConfig.put(PROPERTY_TIME_EPOCH_TIMESCALE, v);
                             scope.add(Scope.EPOCH);
                         }
                     } else if (Scope.FINETIME == s) {
                         if (Scope.FORMAT.getName().equals(name)) {
                             final String v = e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_TIME_UNIT))
-                                    .getValue();
+                                .getValue();
                             appConfig.put(PROPERTY_FINE_TIME_UNIT, v);
                             scope.add(Scope.FORMAT);
                         } else if (Scope.EPOCH.getName().equals(name)) {
                             final String v = e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_TIME_SCALE))
-                                    .getValue();
+                                .getValue();
                             appConfig.put(PROPERTY_FINE_TIME_EPOCH_TIMESCALE, v);
                             scope.add(Scope.EPOCH);
                         }
                     } else if (Scope.DURATION == s) {
                         if (Scope.FORMAT.getName().equals(name)) {
                             final String v = e.asStartElement().getAttributeByName(QName.valueOf(XML_ATTR_TIME_UNIT))
-                                    .getValue();
+                                .getValue();
                             appConfig.put(PROPERTY_DURATION_UNIT, v);
                             scope.add(Scope.FORMAT);
                         }
@@ -486,10 +486,10 @@ public class Configuration {
 
     private enum Scope {
 
-        START(""), CONFIG("config"), APP("app"), TIME("time"), FINETIME("fineTime"), DURATION("duration"),
-        FORMAT("format"), EPOCH("epoch"), AUTHENTICATION_ID("authenticationId"), DOMAIN("domain"),
-        NETWORK_ZONE("networkZone"), PRIORITY("priority"), SESSION_NAME("sessionName"),
-        PACKET_DATA_FIELD_SIZE_LIMIT("packetDataFieldSizeLimit"), VARINT_SUPPORTED("varintSupported");
+        START(""), CONFIG("config"), APP("app"), TIME("time"), FINETIME("fineTime"), DURATION("duration"), FORMAT(
+            "format"), EPOCH("epoch"), AUTHENTICATION_ID("authenticationId"), DOMAIN("domain"), NETWORK_ZONE(
+                "networkZone"), PRIORITY("priority"), SESSION_NAME("sessionName"), PACKET_DATA_FIELD_SIZE_LIMIT(
+                    "packetDataFieldSizeLimit"), VARINT_SUPPORTED("varintSupported");
 
         private final String elementName;
 

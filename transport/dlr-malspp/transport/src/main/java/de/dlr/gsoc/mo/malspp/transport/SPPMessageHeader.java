@@ -69,28 +69,28 @@ public class SPPMessageHeader implements MALMessageHeader {
     private UOctet areaVersion;
     private Boolean isErrorMessage;
     private final Integer offset; // only used when constructing header from Space Packet; denotes body data
-                                  // offset
+                                 // offset
 
     private SPPURI sppURIFrom;
     private SPPURI sppURITo;
 
     public SPPMessageHeader(final URI uriFrom, final Blob authenticationId, final URI uriTo, final Time timestamp,
-            final QoSLevel qosLevel, final UInteger priority, final IdentifierList domain, final Identifier networkZone,
-            final SessionType session, final Identifier sessionName, final InteractionType interactionType,
-            final UOctet interactionStage, final Long transactionId, final UShort serviceArea, final UShort service,
-            final UShort operation, final UOctet areaVersion, final Boolean isErrorMessage)
-            throws IllegalArgumentException {
-        if (uriFrom == null || authenticationId == null || uriTo == null || timestamp == null || qosLevel == null
-                || priority == null || domain == null || networkZone == null || session == null || sessionName == null
-                || interactionType == null
-                // PENDING: Testbed expects no exception if interactionStage == null, although
-                // this
-                // is demanded by 5.2.4.4.4 MAL Java API. Here: If interactionStage == null set
-                // it
-                // to UOcctet(0).
-                // || interactionStage == null
-                || serviceArea == null || service == null || operation == null || areaVersion == null
-                || isErrorMessage == null) {
+        final QoSLevel qosLevel, final UInteger priority, final IdentifierList domain, final Identifier networkZone,
+        final SessionType session, final Identifier sessionName, final InteractionType interactionType,
+        final UOctet interactionStage, final Long transactionId, final UShort serviceArea, final UShort service,
+        final UShort operation, final UOctet areaVersion, final Boolean isErrorMessage)
+        throws IllegalArgumentException {
+        if (uriFrom == null || authenticationId == null || uriTo == null || timestamp == null || qosLevel == null ||
+            priority == null || domain == null || networkZone == null || session == null || sessionName == null ||
+            interactionType == null
+            // PENDING: Testbed expects no exception if interactionStage == null, although
+            // this
+            // is demanded by 5.2.4.4.4 MAL Java API. Here: If interactionStage == null set
+            // it
+            // to UOcctet(0).
+            // || interactionStage == null
+            || serviceArea == null || service == null || operation == null || areaVersion == null || isErrorMessage ==
+                null) {
             throw new IllegalArgumentException(ILLEGAL_NULL_ARGUMENT);
         }
         this.uriFrom = uriFrom;
@@ -120,7 +120,7 @@ public class SPPMessageHeader implements MALMessageHeader {
     }
 
     public SPPMessageHeader(final SpacePacket spacePacket, final MALElementStreamFactory esf,
-            final Map msgQosProperties) throws MALException {
+        final Map msgQosProperties) throws MALException {
         final SpacePacketHeader sppHeader = spacePacket.getHeader();
         if (sppHeader.getPacketVersionNumber() != SPPTransport.SPP_VERSION || sppHeader.getSecondaryHeaderFlag() != 1) {
             throw new MALException(MALFORMED_SPACE_PACKET);
@@ -131,12 +131,12 @@ public class SPPMessageHeader implements MALMessageHeader {
 
         final ByteArrayInputStream is = new ByteArrayInputStream(spacePacket.getBody());
         offset = initMessageHeader(is, isTCpacket, sppHeader.getSequenceFlags(), primaryApid, primaryApidQualifier, esf,
-                msgQosProperties);
+            msgQosProperties);
     }
 
     private int initMessageHeader(final ByteArrayInputStream is, final boolean isTCpacket, final int sequenceFlag,
-            final short primaryApid, final int primaryApidQualifier, final MALElementStreamFactory esf,
-            final Map msgQosProperties) throws MALException {
+        final short primaryApid, final int primaryApidQualifier, final MALElementStreamFactory esf,
+        final Map msgQosProperties) throws MALException {
         final int size = is.available();
         final MALElementInputStream eis = esf.createInputStream(is);
 
@@ -165,12 +165,13 @@ public class SPPMessageHeader implements MALMessageHeader {
         setTransactionId(readLong(eis));
 
         final byte flags = (byte) ((UOctet) eis.readElement(new UOctet(), null)).getValue();
-        final BitSet bs = BitSet.valueOf(new byte[] { flags });
+        final BitSet bs = BitSet.valueOf(new byte[]{flags});
 
         // Bits in BitSet are numbered right to left.
         final Short sourceIdentifier = bs.get(7) ? ((UOctet) eis.readElement(new UOctet(), null)).getValue() : null;
 
-        final Short destinationIdentifier = bs.get(6) ? ((UOctet) eis.readElement(new UOctet(), null)).getValue() : null;
+        final Short destinationIdentifier = bs.get(6) ? ((UOctet) eis.readElement(new UOctet(), null)).getValue() :
+            null;
 
         if (isTCpacket) {
             sppURIFrom = new SPPURI(secondaryApidQualifier, secondaryApid, sourceIdentifier);
@@ -200,16 +201,16 @@ public class SPPMessageHeader implements MALMessageHeader {
         final Time timestamp = bs.get(4) ? (Time) eis.readElement(new Time(), null) : Configuration.DEFAULT_TIMESTAMP;
         setTimestamp(timestamp);
 
-        final Identifier networkZone = bs.get(3) ? (Identifier) eis.readElement(new Identifier(), null)
-                : config.networkZone();
+        final Identifier networkZone = bs.get(3) ? (Identifier) eis.readElement(new Identifier(), null) : config
+            .networkZone();
         setNetworkZone(networkZone);
 
-        final Identifier sessionName = bs.get(2) ? (Identifier) eis.readElement(new Identifier(), null)
-                : config.sessionName();
+        final Identifier sessionName = bs.get(2) ? (Identifier) eis.readElement(new Identifier(), null) : config
+            .sessionName();
         setSessionName(sessionName);
 
-        final IdentifierList domain = bs.get(1) ? (IdentifierList) eis.readElement(new IdentifierList(), null)
-                : config.domain();
+        final IdentifierList domain = bs.get(1) ? (IdentifierList) eis.readElement(new IdentifierList(), null) : config
+            .domain();
         setDomain(domain);
 
         final Blob authenticationId = bs.get(0) ? (Blob) eis.readElement(new Blob(), null) : config.authenticationId();
@@ -254,18 +255,29 @@ public class SPPMessageHeader implements MALMessageHeader {
     }
 
     // Array for mapping SDU type to interaction stages.
-    private static final UOctet[] SDU_STAGES = new UOctet[] { new UOctet((short) 0), // interaction stage for SEND not
-                                                                                     // specified, set to 0
-            MALSubmitOperation.SUBMIT_STAGE, MALSubmitOperation.SUBMIT_ACK_STAGE, MALRequestOperation.REQUEST_STAGE,
-            MALRequestOperation.REQUEST_RESPONSE_STAGE, MALInvokeOperation.INVOKE_STAGE,
-            MALInvokeOperation.INVOKE_ACK_STAGE, MALInvokeOperation.INVOKE_RESPONSE_STAGE,
-            MALProgressOperation.PROGRESS_STAGE, MALProgressOperation.PROGRESS_ACK_STAGE,
-            MALProgressOperation.PROGRESS_UPDATE_STAGE, MALProgressOperation.PROGRESS_RESPONSE_STAGE,
-            MALPubSubOperation.REGISTER_STAGE, MALPubSubOperation.REGISTER_ACK_STAGE,
-            MALPubSubOperation.PUBLISH_REGISTER_STAGE, MALPubSubOperation.PUBLISH_REGISTER_ACK_STAGE,
-            MALPubSubOperation.PUBLISH_STAGE, MALPubSubOperation.NOTIFY_STAGE, MALPubSubOperation.DEREGISTER_STAGE,
-            MALPubSubOperation.DEREGISTER_ACK_STAGE, MALPubSubOperation.PUBLISH_DEREGISTER_STAGE,
-            MALPubSubOperation.PUBLISH_DEREGISTER_ACK_STAGE };
+    private static final UOctet[] SDU_STAGES = new UOctet[]{new UOctet((short) 0), // interaction stage for SEND not
+                                                            // specified, set to 0
+                                                            MALSubmitOperation.SUBMIT_STAGE,
+                                                            MALSubmitOperation.SUBMIT_ACK_STAGE,
+                                                            MALRequestOperation.REQUEST_STAGE,
+                                                            MALRequestOperation.REQUEST_RESPONSE_STAGE,
+                                                            MALInvokeOperation.INVOKE_STAGE,
+                                                            MALInvokeOperation.INVOKE_ACK_STAGE,
+                                                            MALInvokeOperation.INVOKE_RESPONSE_STAGE,
+                                                            MALProgressOperation.PROGRESS_STAGE,
+                                                            MALProgressOperation.PROGRESS_ACK_STAGE,
+                                                            MALProgressOperation.PROGRESS_UPDATE_STAGE,
+                                                            MALProgressOperation.PROGRESS_RESPONSE_STAGE,
+                                                            MALPubSubOperation.REGISTER_STAGE,
+                                                            MALPubSubOperation.REGISTER_ACK_STAGE,
+                                                            MALPubSubOperation.PUBLISH_REGISTER_STAGE,
+                                                            MALPubSubOperation.PUBLISH_REGISTER_ACK_STAGE,
+                                                            MALPubSubOperation.PUBLISH_STAGE,
+                                                            MALPubSubOperation.NOTIFY_STAGE,
+                                                            MALPubSubOperation.DEREGISTER_STAGE,
+                                                            MALPubSubOperation.DEREGISTER_ACK_STAGE,
+                                                            MALPubSubOperation.PUBLISH_DEREGISTER_STAGE,
+                                                            MALPubSubOperation.PUBLISH_DEREGISTER_ACK_STAGE};
 
     /**
      * Sets the interactionType and interactionStage according to the SDU Type.

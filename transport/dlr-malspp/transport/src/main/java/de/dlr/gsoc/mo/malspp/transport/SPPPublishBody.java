@@ -34,12 +34,14 @@ public class SPPPublishBody extends SPPMessageBody implements MALPublishBody {
 
     protected int idx;
 
-    public SPPPublishBody(final Object[] bodyElements, final MALElementStreamFactory esf, final MALEncodingContext ctx) {
+    public SPPPublishBody(final Object[] bodyElements, final MALElementStreamFactory esf,
+        final MALEncodingContext ctx) {
         super(bodyElements, esf, ctx);
         idx = 0;
     }
 
-    public SPPPublishBody(final MALEncodedBody encodedBody, final MALElementStreamFactory esf, final MALEncodingContext ctx) {
+    public SPPPublishBody(final MALEncodedBody encodedBody, final MALElementStreamFactory esf,
+        final MALEncodingContext ctx) {
         super(encodedBody, esf, ctx);
         idx = 0;
     }
@@ -81,9 +83,8 @@ public class SPPPublishBody extends SPPMessageBody implements MALPublishBody {
 
     @Override
     public MALEncodedElement getEncodedUpdate(final int listIndex, final int updateIndex) throws MALException {
-        if (ctx != null
-                && ctx.getHeader().getInteractionType().equals(InteractionType.PUBSUB)
-                && ctx.getHeader().getInteractionStage().equals(MALPubSubOperation.PUBLISH_STAGE)) {
+        if (ctx != null && ctx.getHeader().getInteractionType().equals(InteractionType.PUBSUB) && ctx.getHeader()
+            .getInteractionStage().equals(MALPubSubOperation.PUBLISH_STAGE)) {
             return (MALEncodedElement) getUpdate(listIndex, updateIndex);
         }
         throw new MALException(NOT_SUPPORTED);
