@@ -25,7 +25,7 @@
   <groupId>int.esa.nmf.mission.opssat</groupId>
   <artifactId>experiment</artifactId>
   <name>ESA NMF Mission OPS-SAT - Experiment Preparation Assembly</name>
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
 
   <properties>
     <!-- Change the following 4 properties to match the information of your app -->
