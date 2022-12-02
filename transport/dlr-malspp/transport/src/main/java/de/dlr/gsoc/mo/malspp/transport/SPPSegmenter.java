@@ -115,7 +115,7 @@ public class SPPSegmenter implements Iterator {
             counter = getSegmentCounter(spacePacket);
         }
         packetStore.put(counter, spacePacket);
-        timeouts.put(System.currentTimeMillis(), counter);
+        timeouts.put(System.nanoTime()/1000000, counter); //TODO ok here ?
         switch (seq) {
             case 0b11:
                 unsegmentedPacketCounter = counter;
@@ -130,7 +130,7 @@ public class SPPSegmenter implements Iterator {
     }
 
     private void deleteTimedOutPackets() {
-        final long now = System.currentTimeMillis();
+        final long now = System.nanoTime()/1000000; //@TODO ok here ?
         final SortedMap<Long, Long> timedOut = timeouts.headMap(now - timeout);
         final Collection<Long> timedOutCounters = timedOut.values();
         for (final long counter : timedOutCounters) {

@@ -82,7 +82,7 @@ class CacheHandler extends OBSWParameterValuesProvider {
             return true;
         }
 
-        long now = System.currentTimeMillis();
+        long now = System.nanoTime()/1000000; //@TODO ok here ?
 
         // This parameter value is outdated
         return now - cache.get(identifier).getLastUpdateTime().getTime() > cachingTime;

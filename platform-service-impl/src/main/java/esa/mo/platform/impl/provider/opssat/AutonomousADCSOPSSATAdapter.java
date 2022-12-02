@@ -636,7 +636,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
 
     private void gotoBDot(final AttitudeModeBDot a) {
         final SEPP_IADCS_API_DETUMBLING_MODE_PARAMETERS params = new SEPP_IADCS_API_DETUMBLING_MODE_PARAMETERS();
-        adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
+        adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.nanoTime()/1000000)); //@TODO ok here ?
         params.setSTART_EPOCH_TIME_MSEC(BigInteger.valueOf(0));
         params.setSTOP_EPOCH_TIME_MSEC(BigInteger.valueOf(Long.MAX_VALUE));
         adcsApi.Start_Operation_Mode_Detumbling(params);
@@ -645,7 +645,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
 
     private void prepareForPointingMode(BasePointingConfig config) throws IOException {
         LOGGER.fine("Set Epoch Time");
-        adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
+        adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.nanoTime()/1000000)); //@TODO ok here ?
         if (config.getEnableGyroBiasCorrection()) {
             LOGGER.fine("Set Sensor Zero Bias Values - Gyroscope");
             adcsApi.Set_Gyro_Bias_Value(SEPP_IADCS_API_GYROSCOPES.IADCS_EXTERNAL_HIGHPERFORMANCE_GYRO, config
@@ -800,7 +800,7 @@ public class AutonomousADCSOPSSATAdapter implements AutonomousADCSAdapterInterfa
                 holder.stop();
             }
             activeAttitudeMode = null;
-            adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.currentTimeMillis()));
+            adcsApi.Set_Epoch_Time(BigInteger.valueOf(System.nanoTime()/1000000)); //@TODO ok here?
             adcsApi.Set_Operation_Mode_Measurement();
             adcsApi.Init_Orbit_Module(readTLEFile(null));
             enableOrbitPropagator();

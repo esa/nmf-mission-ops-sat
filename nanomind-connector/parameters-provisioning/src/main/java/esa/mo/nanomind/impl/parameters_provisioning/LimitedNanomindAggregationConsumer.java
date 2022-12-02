@@ -171,7 +171,7 @@ class LimitedNanomindAggregationConsumer {
          *         over the limit
          */
         public synchronized boolean allowQuery() {
-            long currentTimestamp = System.currentTimeMillis();
+            long currentTimestamp = System.nanoTime()/1000000; //@TODO ok here?
 
             // update current interval queries count
             long currentInterval = getInterval(currentTimestamp);

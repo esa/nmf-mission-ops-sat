@@ -457,7 +457,7 @@ class NanomindAggregationsHandler {
     public void cleanParametersFromAggregations(CacheHandler cache, int timeout) {
         LOGGER.log(Level.FINE, "Cleaning unused parameters from aggregations");
 
-        long now = System.currentTimeMillis();
+        long now = System.nanoTime()/1000000; //@TODO ok here ?
         List<OBSWAggregation> newNanomindDefinitions = new ArrayList<>();
 
         try {
