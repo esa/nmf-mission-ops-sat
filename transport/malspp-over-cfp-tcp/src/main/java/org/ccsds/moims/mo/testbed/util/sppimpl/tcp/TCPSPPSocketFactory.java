@@ -42,17 +42,23 @@ import org.ccsds.moims.mo.testbed.util.spp.SPPSocketFactory;
 public class TCPSPPSocketFactory extends SPPSocketFactory {
 
     public static final String IS_SERVER = "org.ccsds.moims.mo.malspp.test.sppimpl.tcp.isServer";
+    public static final String APID_FILTER_PROPERTY = "org.ccsds.moims.mo.malspp.apidFilterPath";
+    public static final String APID_FILTER_DEFAULT = "processed_apids.txt";
 
     @Override
     public SPPSocket createSocket(final Map properties) throws Exception {
+        String apidFilterFile = (String) properties.get(APID_FILTER_PROPERTY);
+        if (apidFilterFile == null) {
+            apidFilterFile = APID_FILTER_DEFAULT;
+        }
         final String isServerS = (String) properties.get(IS_SERVER);
         final boolean isServer = Boolean.parseBoolean(isServerS);
         if (isServer) {
-            final ServerTCPSPPSocket socket = new ServerTCPSPPSocket();
+            final ServerTCPSPPSocket socket = new ServerTCPSPPSocket(apidFilterFile);
             socket.init(properties);
             return socket;
         } else {
-            final ClientTCPSPPSocket socket = new ClientTCPSPPSocket();
+            final ClientTCPSPPSocket socket = new ClientTCPSPPSocket(apidFilterFile);
             socket.init(properties);
             return socket;
         }

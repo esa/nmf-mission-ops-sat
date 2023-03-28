@@ -34,6 +34,7 @@
  */
 package org.ccsds.moims.mo.testbed.util.sppimpl.tcp;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
@@ -42,6 +43,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ccsds.moims.mo.testbed.util.spp.SPPSocket;
 import org.ccsds.moims.mo.testbed.util.spp.SpacePacket;
+import org.ccsds.moims.mo.testbed.util.sppimpl.util.APIDRangeList;
+import org.ccsds.moims.mo.testbed.util.sppimpl.util.SPPHelper;
 
 public class ClientTCPSPPSocket implements SPPSocket {
 
@@ -56,11 +59,13 @@ public class ClientTCPSPPSocket implements SPPSocket {
     private int retryTime;
     private SPPChannel channel;
     private boolean exiting;
+    private final APIDRangeList processedApids;
 
     private final HashMap<Integer, Integer> lastSPPsMap = new HashMap<>();
 
-    public ClientTCPSPPSocket() {
+    public ClientTCPSPPSocket(String apidFilterFile) {
         super();
+        processedApids = SPPHelper.initWhitelist(new File(apidFilterFile));
     }
 
     public void init(final Map properties) throws Exception {
@@ -79,7 +84,7 @@ public class ClientTCPSPPSocket implements SPPSocket {
     public void connect(final String host, final int port) throws IOException {
         LOGGER.log(Level.FINE, "ClientTCPSPPSocket.connect({0},{1})", new Object[]{host, port});
         final Socket socket = new Socket(host, port);
-        channel = new SPPChannel(socket);
+        channel = new SPPChannel(socket, processedApids);
     }
 
     @Override

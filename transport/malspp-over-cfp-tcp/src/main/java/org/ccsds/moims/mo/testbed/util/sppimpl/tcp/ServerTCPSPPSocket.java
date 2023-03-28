@@ -32,6 +32,7 @@
  ****************************************************************************** */
 package org.ccsds.moims.mo.testbed.util.sppimpl.tcp;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -40,6 +41,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.ccsds.moims.mo.testbed.util.spp.SPPSocket;
 import org.ccsds.moims.mo.testbed.util.spp.SpacePacket;
+import org.ccsds.moims.mo.testbed.util.sppimpl.util.APIDRangeList;
+import org.ccsds.moims.mo.testbed.util.sppimpl.util.SPPHelper;
 
 import fr.dyade.aaa.common.Daemon;
 import java.util.ArrayList;
@@ -59,11 +62,13 @@ public class ServerTCPSPPSocket implements SPPSocket {
     private boolean tcpNoDelay;
     private final List<SPPChannel> channels = new ArrayList<>();
     private AcceptorDaemon readerDaemon;
+    private final APIDRangeList processedApids;
 
     private final LinkedBlockingQueue<SpacePacket> input = new LinkedBlockingQueue<>();
 
-    public ServerTCPSPPSocket() {
+    public ServerTCPSPPSocket(String apidFilterFile) {
         super();
+        processedApids = SPPHelper.initWhitelist(new File(apidFilterFile));
     }
 
     public void init(final Map properties) throws Exception {
@@ -157,7 +162,7 @@ public class ServerTCPSPPSocket implements SPPSocket {
                 try {
                     clientSocket.setTcpNoDelay(tcpNoDelay);
                     clientSocket.setSoLinger(true, 1000);
-                    newChannel = new SPPChannel(clientSocket);
+                    newChannel = new SPPChannel(clientSocket, processedApids);
                 } catch (final IOException ex) {
                     LOGGER.log(Level.SEVERE, "Error when configuring the client connection", ex);
                     errorCount++;

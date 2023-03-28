@@ -43,7 +43,6 @@ import org.ccsds.moims.mo.testbed.util.spp.SpacePacketHeader;
 public class SPPReader {
     private static final Logger LOGGER = Logger.getLogger(SPPReader.class.getName());
     final protected static char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
-    private final String PROCESSED_FILENAME = "processed_apids.txt";
 
     private final byte[] apidQualifierBuffer;
 
@@ -57,7 +56,7 @@ public class SPPReader {
     private SpacePacket packet;
     private int errorCount;
 
-    public SPPReader(final InputStream is) {
+    public SPPReader(final InputStream is, final APIDRangeList processedApids) {
         errorCount = 0;
         this.is = is;
         apidQualifierBuffer = new byte[2];
@@ -65,7 +64,7 @@ public class SPPReader {
         inCrcBuffer = new byte[2];
         crcEnabled = SPPHelper.getCrcEnabled();
         crcApids = SPPHelper.initWhitelist(new File(SPPHelper.CRC_FILENAME));
-        processedApids = SPPHelper.initWhitelist(new File(PROCESSED_FILENAME));
+        this.processedApids = processedApids;
     }
 
     private int read(final byte[] b, final int initialOffset, final int totalLength) throws IOException {

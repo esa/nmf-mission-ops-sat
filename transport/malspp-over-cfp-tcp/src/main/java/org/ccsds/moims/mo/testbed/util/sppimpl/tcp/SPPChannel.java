@@ -40,6 +40,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 import org.ccsds.moims.mo.testbed.util.spp.SpacePacket;
+import org.ccsds.moims.mo.testbed.util.sppimpl.util.APIDRangeList;
 import org.ccsds.moims.mo.testbed.util.sppimpl.util.SPPReader;
 import org.ccsds.moims.mo.testbed.util.sppimpl.util.SPPWriter;
 
@@ -55,11 +56,11 @@ public class SPPChannel {
 
     private final SPPWriter writer;
 
-    public SPPChannel(final Socket socket) throws IOException {
+    public SPPChannel(final Socket socket, final APIDRangeList processedApids) throws IOException {
         this.socket = socket;
         is = new BufferedInputStream(socket.getInputStream());
         os = new BufferedOutputStream(socket.getOutputStream());
-        reader = new SPPReader(is);
+        reader = new SPPReader(is, processedApids);
         writer = new SPPWriter(os);
     }
 
