@@ -38,20 +38,19 @@
   <licenses>
     <license>
       <name>European Space Agency Public License (ESA-PL) Weak Copyleft – v2.4</name>
-      <url>https://raw.github.com/esa/CCSDS_MO_TRANS/master/LICENCE.md</url>
+      <url>https://raw.github.com/esa/nanosat-mo-framework/master/LICENCE.md</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
 
   <scm>
-    <connection>scm:git:git@github.com:esa/CCSDS_MO_TRANS.git</connection>
-    <developerConnection>scm:git:git@github.com:esa/CCSDS_MO_TRANS.git</developerConnection>
+    <connection>scm:git:https://github.com/esa/nmf-mission-ops-sat.git</connection>
     <url>https://github.com/esa/CCSDS_MO_TRANS</url>
   </scm>
 
   <issueManagement>
-    <system>GitHub</system>
-    <url>https://github.com/esa/CCSDS_MO_TRANS/issues</url>
+    <system>Gitlab</system>
+    <url>https://gitlab.com/esa/NMF/nmf-issues/-/issues</url>
   </issueManagement>
 
   <developers>

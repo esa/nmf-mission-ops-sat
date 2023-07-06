@@ -12,7 +12,8 @@
     See the License for the specific language governing permissions and limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -42,14 +43,13 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git@github.com:esa/CCSDS_MO_APPS.git</connection>
-        <developerConnection>scm:git:git@github.com:esa/CCSDS_MO_APPS.git</developerConnection>
+        <connection>scm:git:https://github.com/esa/nmf-mission-ops-sat.git</connection>
         <url>https://github.com/esa/CCSDS_MO_APPS</url>
     </scm>
 
     <issueManagement>
-        <system>GitHub</system>
-        <url>https://github.com/CesarCoelho/BUG_REPORTS_NANOSAT_MO_FRAMEWORK/issues</url>
+        <system>Gitlab</system>
+        <url>https://gitlab.com/esa/NMF/nmf-issues/-/issues</url>
     </issueManagement>
 
     <developers>

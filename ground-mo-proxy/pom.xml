@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-  <!--
+<!--
     Licensed under European Space Agency Public License (ESA-PL) Weak Copyleft – v2.4
     You may not use this file except in compliance with the License.
 
@@ -12,24 +12,25 @@
     See the License for the specific language governing permissions and limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-  
+
     <parent>
         <groupId>int.esa.nmf.mission.opssat</groupId>
         <artifactId>parent</artifactId>
         <version>2.1.0-SNAPSHOT</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
-  
+
     <artifactId>ground-mo-proxy</artifactId>
     <packaging>jar</packaging>
 
     <name>ESA NMF Mission OPS-SAT - Ground MO Proxy</name>
     <description>Ground MO Proxy for OPS-SAT</description>
     <url>http://www.esa.int</url>
-  
+
     <organization>
         <name>ESA</name>
         <url>http://www.esa.int</url>
@@ -44,20 +45,19 @@
             <name>European Space Agency Public License (ESA-PL) Weak Copyleft – v2.4</name>
             <url>https://raw.github.com/esa/nanosat-mo-framework/master/LICENCE.md</url>
             <distribution>repo</distribution>
-          </license>
+        </license>
     </licenses>
-  
+
     <scm>
-        <connection>scm:git:git@github.com:esa/CCSDS_APPS.git</connection>
-        <developerConnection>scm:git:git@github.com:esa/CCSDS_APPS.git</developerConnection>
+        <connection>scm:git:https://github.com/esa/nmf-mission-ops-sat.git</connection>
         <url>https://github.com/esa/CCSDS_APPS</url>
     </scm>
-  
+
     <issueManagement>
-        <system>GitHub</system>
-        <url>https://github.com/CesarCoelho/BUG_REPORTS_NANOSAT_MO_FRAMEWORK/issues</url>
+        <system>Gitlab</system>
+        <url>https://gitlab.com/esa/NMF/nmf-issues/-/issues</url>
     </issueManagement>
-  
+
     <developers>
         <developer>
             <id>CesarCoelho</id>
@@ -84,15 +84,15 @@
         </dependency>
 
         <dependency>
-          <groupId>int.esa.opssat.transport.dlr</groupId>
-          <artifactId>malspp-transport</artifactId>
-          <version>1.0.1-FC</version>
+            <groupId>int.esa.opssat.transport.dlr</groupId>
+            <artifactId>malspp-transport</artifactId>
+            <version>1.0.1-FC</version>
         </dependency>
 
         <dependency>
-          <groupId>int.esa.opssat.transport.dlr</groupId>
-          <artifactId>malspp-encoding-opssat</artifactId>
-          <version>1.0.1-FC</version>
+            <groupId>int.esa.opssat.transport.dlr</groupId>
+            <artifactId>malspp-encoding-opssat</artifactId>
+            <version>1.0.1-FC</version>
         </dependency>
     </dependencies>
     <build>

@@ -42,20 +42,19 @@
   <licenses>
     <license>
       <name>European Space Agency Public License (ESA-PL) Weak Copyleft – v2.4</name>
-      <url>https://raw.github.com/esa/CCSDS_APPS/master/LICENCE.md</url>
+      <url>https://raw.github.com/esa/nanosat-mo-framework/master/LICENCE.md</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
 
   <scm>
-    <connection>scm:git:git@github.com:esa/CCSDS_APPS.git</connection>
-    <developerConnection>scm:git:git@github.com:esa/CCSDS_APPS.git</developerConnection>
+    <connection>scm:git:https://github.com/esa/nmf-mission-ops-sat.git</connection>
     <url>https://github.com/esa/CCSDS_APPS</url>
   </scm>
 
   <issueManagement>
-    <system>GitHub</system>
-    <url>https://github.com/CesarCoelho/BUG_REPORTS_NANOSAT_MO_FRAMEWORK/issues</url>
+    <system>Gitlab</system>
+    <url>https://gitlab.com/esa/NMF/nmf-issues/-/issues</url>
   </issueManagement>
 
   <developers>

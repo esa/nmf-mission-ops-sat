@@ -12,7 +12,8 @@
     See the License for the specific language governing permissions and limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -39,20 +40,19 @@
     <licenses>
         <license>
             <name>European Space Agency Public License (ESA-PL) Weak Copyleft – v2.4</name>
-            <url>https://raw.github.com/esa/CCSDS_MO_XML/master/LICENCE.md</url>
+            <url>https://raw.github.com/esa/nanosat-mo-framework/master/LICENCE.md</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
 
     <scm>
-        <connection>scm:git:git@github.com:esa/NMF_MISSION_OPS-SAT.git</connection>
-        <developerConnection>scm:git:git@github.com:esa/NMF_MISSION_OPS-SAT.git</developerConnection>
-        <url>https://github.com/esa/NMF_MISSION_OPS-SAT</url>
+        <connection>scm:git:https://github.com/esa/nmf-mission-ops-sat.git</connection>
+        <url>https://github.com/esa/nmf-mission-ops-sat</url>
     </scm>
 
     <issueManagement>
-        <system>GitHub</system>
-        <url>https://github.com/esa/NMF_MISSION_OPS-SAT/issues</url>
+        <system>Gitlab</system>
+        <url>https://gitlab.com/esa/NMF/nmf-issues/-/issues</url>
     </issueManagement>
 
     <developers>
