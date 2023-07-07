@@ -1,5 +1,6 @@
 #!/bin/sh
 chmod u+x $PKG_ROOT/home/nmf/supervisor/supervisor.sh
+chmod u+x $PKG_ROOT/home/nmf/cli-tool/cli-tool.sh
 chmod u+x $PKG_ROOT/home/exp480/start_exp480.sh
 
 systemctl enable nmf_supervisor.service

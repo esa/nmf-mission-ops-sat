@@ -18,6 +18,22 @@
         <globmapper from="*" to="*"/>
       </firstmatchmapper>
     </copy>
+    <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/home/nmf/cli-tool">
+      <fileset dir="${basedir}/../src/main/resources/space-common"/>
+      <fileset dir="${basedir}/../src/main/resources/space-app-root"/>
+      <filterset>
+        <filter token="MAIN_CLASS_NAME" value="esa.mo.nmf.clitool.CLITool"/>
+        <filter token="APID" value="1550"/> <!-- dummy APID -->
+        <filter token="NMF_HOME" value="`cd .. > /dev/null; pwd`"/>
+        <filter token="NMF_LIB" value="`cd ../lib > /dev/null; pwd`"/>
+        <filter token="USER" value="root"/>
+        <filter token="MAX_HEAP" value="64m"/>
+      </filterset>
+      <firstmatchmapper>
+        <globmapper from="startscript.sh" to="cli-tool.sh"/>
+        <globmapper from="*" to="*"/>
+      </firstmatchmapper>
+    </copy>
     <copy todir="${esa.nmf.mission.opssat.assembly.outputdir}/home/exp480">
       <fileset dir="${basedir}/../src/main/resources/space-common"/>
       <fileset dir="${basedir}/../src/main/resources/space-app-root"/>

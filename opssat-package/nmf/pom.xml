@@ -167,6 +167,11 @@
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
+    <dependency>
+      <groupId>int.esa.nmf.sdk</groupId>
+      <artifactId>cli-tool</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
