@@ -60,6 +60,8 @@
 
   <properties>
     <esa.nmf.mission.opssat.assembly.outputdir>${project.build.directory}/nmf-ops-sat-${esa.nmf.version}</esa.nmf.mission.opssat.assembly.outputdir>
+    <!-- Do not error out on JAR packaging without an actual JAR produced - this packaging is needed to let git commit id fire -->
+    <allowIncompleteProjects>true</allowIncompleteProjects>
   </properties>
   <profiles>
     <profile>
