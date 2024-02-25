@@ -29,12 +29,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ccsds.moims.mo.mal.MALException;
 import org.ccsds.moims.mo.mal.MALInteractionException;
-import org.ccsds.moims.mo.mal.structures.Attribute;
-import org.ccsds.moims.mo.mal.structures.Identifier;
-import org.ccsds.moims.mo.mal.structures.IdentifierList;
-import org.ccsds.moims.mo.mal.structures.UInteger;
-import org.ccsds.moims.mo.mal.structures.URI;
-
 import esa.mo.helpertools.connections.SingleConnectionDetails;
 import esa.mo.helpertools.helpers.HelperAttributes;
 import esa.mo.nanomind.impl.consumer.ActionNanomindConsumerServiceImpl;
@@ -45,6 +39,19 @@ import esa.opssat.nanomind.mc.aggregation.structures.AggregationValue;
 import esa.opssat.nanomind.mc.action.structures.ActionInstanceDetails;
 import esa.opssat.nanomind.mc.structures.AttributeValue;
 import esa.opssat.nanomind.mc.structures.AttributeValueList;
+import org.ccsds.moims.mo.mal.structures.Attribute;
+import org.ccsds.moims.mo.mal.structures.Blob;
+import org.ccsds.moims.mo.mal.structures.Duration;
+import org.ccsds.moims.mo.mal.structures.FineTime;
+import org.ccsds.moims.mo.mal.structures.Identifier;
+import org.ccsds.moims.mo.mal.structures.IdentifierList;
+import org.ccsds.moims.mo.mal.structures.Time;
+import org.ccsds.moims.mo.mal.structures.UInteger;
+import org.ccsds.moims.mo.mal.structures.ULong;
+import org.ccsds.moims.mo.mal.structures.UOctet;
+import org.ccsds.moims.mo.mal.structures.URI;
+import org.ccsds.moims.mo.mal.structures.UShort;
+import org.ccsds.moims.mo.mal.structures.Union;
 
 /**
  * Provides OBSW parameter values by consuming the Nanomind aggregation service. Fetched values are
@@ -124,6 +131,76 @@ public class NanomindParameterValuesProvider extends OBSWParameterValuesProvider
             initActionService();
         } catch (MALException | MalformedURLException ex) {
             LOGGER.log(Level.SEVERE, "Couldn't initialize the nanomind action handler", ex);
+        }
+    }
+
+    /**
+     * Converts most MAL Attribute data types to their Long bits representation.
+     * This method is designed to preserve the bit pattern of the original value where applicable,
+     * facilitating conversions between different numerical and data types.
+     *
+     * @param in The MAL Attribute data type to be converted.
+     * @return The converted Long bits representation.
+     * @throws IllegalArgumentException If the input is an unsupported MAL Attribute type,
+     *         indicating that the conversion cannot be performed. Unsupported types might include
+     *         complex objects or specific numerical ranges that cannot be accurately represented in a Long.
+     */
+    private Long attributeToLongBits(Attribute in) throws IllegalArgumentException {
+        if (in == null) {
+            throw new IllegalArgumentException("The given value is null");
+        }
+
+        // Handle Union types with various forms
+        if (in instanceof Union) {
+            Union union = (Union) in;
+            if (union.getTypeShortForm().equals(Union.BOOLEAN_TYPE_SHORT_FORM)) {
+                return (long) (union.getBooleanValue() ? 1 : 0);
+            } else if (union.getTypeShortForm().equals(Union.FLOAT_TYPE_SHORT_FORM)) {
+                // Preserve the bit pattern, including the sign, of the float value
+                return (long) (Float.floatToIntBits(union.getFloatValue()) & 0xFFFFFFFFL);
+            } else if (union.getTypeShortForm().equals(Union.INTEGER_TYPE_SHORT_FORM)) {
+                return (long) union.getIntegerValue();
+            } else if (union.getTypeShortForm().equals(Union.SHORT_TYPE_SHORT_FORM)) {
+                return (long) union.getShortValue();
+            } else if (union.getTypeShortForm().equals(Union.LONG_TYPE_SHORT_FORM)) {
+                return union.getLongValue();
+            } else if (union.getTypeShortForm().equals(Union.OCTET_TYPE_SHORT_FORM)) {
+                return (long) union.getOctetValue();
+            } else if (union.getTypeShortForm().equals(Union.DOUBLE_TYPE_SHORT_FORM)) {
+                return Double.doubleToLongBits(union.getDoubleValue());
+            } else if (union.getTypeShortForm().equals(Union.STRING_TYPE_SHORT_FORM)) {
+                throw new IllegalArgumentException("String values cannot be converted to a Long bit representation");
+            } else {
+                throw new IllegalArgumentException("The given value cannot be converted to a Long bit representation");
+            }
+        }
+        // Other specified types handling
+        else if (in instanceof Duration) {
+            return Double.doubleToLongBits(((Duration) in).getValue());
+        } else if (in instanceof Time) {
+            return ((Time) in).getValue();
+        } else if (in instanceof FineTime) {
+            return ((FineTime) in).getValue();
+        } else if (in instanceof UOctet) {
+            return (long) ((UOctet) in).getValue();
+        } else if (in instanceof UShort) {
+            return (long) ((UShort) in).getValue();
+        } else if (in instanceof UInteger) {
+            return ((UInteger) in).getValue();
+        } else if (in instanceof ULong) {
+            try {
+                return ((ULong) in).getValue().longValueExact();
+            } catch (ArithmeticException e) {
+                throw new IllegalArgumentException("The ULong value cannot fit in a Long representation", e);
+            }
+        } else if (in instanceof Blob) {
+            throw new IllegalArgumentException("The Blob value cannot fit in a Long representation");
+        } else if (in instanceof Identifier) {
+            throw new IllegalArgumentException("The Identifier value cannot fit in a Long representation");
+        } else if (in instanceof URI) {
+            throw new IllegalArgumentException("The URI value cannot fit in a Long representation");
+        } else {
+            throw new IllegalArgumentException("The given value could not be processed");
         }
     }
 
@@ -292,26 +369,43 @@ public class NanomindParameterValuesProvider extends OBSWParameterValuesProvider
             return value;
         } finally {
             lock.unlock();
-            LOGGER.log(Level.FINE, "getValue(" + identifier + ") finished");
+            LOGGER.log(Level.FINE, "getValue({0}) finished", identifier);
         }
     }
 
     @Override
     public Boolean setValue(Attribute rawValue, Identifier identifier) {
 
-        Long longParameterID = parameterMap.get(identifier).getId();
+        Long longValue = null;
+        Long longParameterID = null;
 
-        if (acceptParameterID(longParameterID)) {
+        try {
+            longValue = this.attributeToLongBits(rawValue);
+            longParameterID = parameterMap.get(identifier).getId();
+            LOGGER.log(Level.INFO, "Prepare to set parameter with id {0} to value {1}", new Object[]{longParameterID,
+                                                                                                     longValue});
+        } catch (IllegalArgumentException e) {
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            return false;
+        }
+
+        if (!acceptParameterID(longParameterID)) {
+            return false;
+        } else {
+            // Prepare the attributes for the setValue action
             UInteger idUInt = new UInteger(longParameterID);
             Attribute id = (Attribute) HelperAttributes.javaType2Attribute(idUInt);
-
             AttributeValue parameterID = new AttributeValue(id);
-            AttributeValue parameterValue = new AttributeValue(rawValue);
+
+            UInteger valueUInt = new UInteger(longValue);
+            Attribute val = (Attribute) HelperAttributes.javaType2Attribute(valueUInt);
+            AttributeValue parameterValue = new AttributeValue(val);
 
             AttributeValueList argList = new AttributeValueList();
             argList.add(parameterID);
             argList.add(parameterValue);
 
+            // Invoke the setValue action
             actionInstDetails = new ActionInstanceDetails(ACTION_SET_VALUE_ID, false, false, true, argList, null, null);
 
             try {
@@ -319,10 +413,10 @@ public class NanomindParameterValuesProvider extends OBSWParameterValuesProvider
                 LOGGER.log(Level.INFO, "Set parameter value action submitted");
                 return true;
             } catch (MALException | MALInteractionException e) {
-                LOGGER.log(Level.SEVERE, e.getMessage());
+                LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                return false;
             }
         }
-        return false;
     }
 
     public ParameterIDRange[] getParameterIDRanges() {
@@ -342,11 +436,14 @@ public class NanomindParameterValuesProvider extends OBSWParameterValuesProvider
 
     public boolean acceptParameterID(Long parameterID) {
         for (ParameterIDRange i : parameterIDs) {
-            if (i.acceptParameterID(parameterID))//found a match
-            {
+            LOGGER.log(Level.INFO, "Checking if parameter id {0} is within range {1}", new Object[]{parameterID, i
+                .toString()});
+            if (i.acceptParameterID(parameterID)) {
+                // Found a match
                 return true;
             }
         }
+        LOGGER.log(Level.INFO, "The parameter id {0} is not within range of writable parameters", parameterID);
         return false;
     }
 
@@ -362,9 +459,9 @@ public class NanomindParameterValuesProvider extends OBSWParameterValuesProvider
             }
 
             if (vals.length == 2) {
-                int min = Integer.parseInt(vals[0]);
-                int max = Integer.parseInt(vals[1]);
-                init(min, max);
+                int minimum = Integer.parseInt(vals[0]);
+                int maximum = Integer.parseInt(vals[1]);
+                init(minimum, maximum);
             } else {//vals.length  = 1
                 int minmax = Integer.parseInt(vals[0]);
                 init(minmax, minmax);
@@ -385,6 +482,11 @@ public class NanomindParameterValuesProvider extends OBSWParameterValuesProvider
 
         public boolean acceptParameterID(Long parameterID) {
             return parameterID >= this.min && parameterID <= this.max;
+        }
+
+        @Override
+        public String toString() {
+            return this.min + "-" + this.max;
         }
     }
 }
